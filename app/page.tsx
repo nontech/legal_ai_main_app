@@ -6,6 +6,7 @@ import ProgressStepper from "./components/ProgressStepper";
 import JurisdictionSection from "./components/JurisdictionSection";
 import CaseTypeSelector from "./components/CaseTypeSelector";
 import RoleSelector from "./components/RoleSelector";
+import ChargesSection from "./components/ChargesSection";
 import NavigationFooter from "./components/NavigationFooter";
 
 export default function Home() {
@@ -36,16 +37,7 @@ export default function Home() {
       case 1:
         return <RoleSelector />;
       case 2:
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Charges
-            </h2>
-            <p className="text-gray-600">
-              Content for Charges step coming soon...
-            </p>
-          </div>
-        );
+        return <ChargesSection />;
       case 3:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
