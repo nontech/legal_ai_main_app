@@ -1,16 +1,20 @@
 "use client";
 
-import { useState } from "react";
-
 interface Step {
   id: string;
   label: string;
   icon: React.ReactNode;
 }
 
-export default function ProgressStepper() {
-  const [currentStep, setCurrentStep] = useState(0);
+interface ProgressStepperProps {
+  currentStep: number;
+  onStepChange: (step: number) => void;
+}
 
+export default function ProgressStepper({
+  currentStep,
+  onStepChange,
+}: ProgressStepperProps) {
   const steps: Step[] = [
     {
       id: "jurisdiction",
@@ -211,15 +215,18 @@ export default function ProgressStepper() {
           {steps.map((step, index) => (
             <div key={step.id} className="flex items-center">
               {/* Step Item */}
-              <div className="flex flex-col items-center min-w-[100px]">
+              <button
+                onClick={() => onStepChange(index)}
+                className="flex flex-col items-center min-w-[100px] cursor-pointer group"
+              >
                 {/* Icon Circle */}
                 <div
                   className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
                     index === currentStep
                       ? "bg-gray-900 border-gray-900 text-white"
                       : index < currentStep
-                      ? "bg-gray-200 border-gray-300 text-gray-600"
-                      : "bg-white border-gray-300 text-gray-400"
+                      ? "bg-gray-200 border-gray-300 text-gray-600 group-hover:bg-gray-300"
+                      : "bg-white border-gray-300 text-gray-400 group-hover:border-gray-400"
                   }`}
                 >
                   {step.icon}
@@ -231,13 +238,13 @@ export default function ProgressStepper() {
                     index === currentStep
                       ? "text-gray-900"
                       : index < currentStep
-                      ? "text-gray-600"
-                      : "text-gray-400"
+                      ? "text-gray-600 group-hover:text-gray-900"
+                      : "text-gray-400 group-hover:text-gray-600"
                   }`}
                 >
                   {step.label}
                 </span>
-              </div>
+              </button>
 
               {/* Arrow Connector */}
               {index < steps.length - 1 && (
