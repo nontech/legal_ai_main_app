@@ -7,10 +7,12 @@ import JurisdictionSection from "./components/JurisdictionSection";
 import CaseTypeSelector from "./components/CaseTypeSelector";
 import RoleSelector from "./components/RoleSelector";
 import ChargesSection from "./components/ChargesSection";
+import CaseDetailsSection from "./components/CaseDetailsSection";
 import NavigationFooter from "./components/NavigationFooter";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const totalSteps = 10; // Total number of steps
 
   const handleNext = () => {
@@ -39,16 +41,7 @@ export default function Home() {
       case 2:
         return <ChargesSection />;
       case 3:
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Case Details
-            </h2>
-            <p className="text-gray-600">
-              Content for Case Details step coming soon...
-            </p>
-          </div>
-        );
+        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
       case 4:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -138,13 +131,15 @@ export default function Home() {
         {renderStepContent()}
       </main>
 
-      {/* Navigation Footer */}
-      <NavigationFooter
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        onNext={handleNext}
-        onPrevious={handlePrevious}
-      />
+      {/* Navigation Footer - Hidden when modal is open */}
+      {!isModalOpen && (
+        <NavigationFooter
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+        />
+      )}
     </div>
   );
 }
