@@ -9,6 +9,7 @@ import RoleSelector from "./components/RoleSelector";
 import ChargesSection from "./components/ChargesSection";
 import CaseDetailsSection from "./components/CaseDetailsSection";
 import JudgeSelection from "./components/JudgeSelection";
+import PretrialProcess from "./components/PretrialProcess";
 import NavigationFooter from "./components/NavigationFooter";
 
 export default function Home() {
@@ -46,16 +47,7 @@ export default function Home() {
       case 4:
         return <JudgeSelection />;
       case 5:
-        return (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Pretrial Process
-            </h2>
-            <p className="text-gray-600">
-              Content for Pretrial Process step coming soon...
-            </p>
-          </div>
-        );
+        return <PretrialProcess />;
       case 6:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
