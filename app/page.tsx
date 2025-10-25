@@ -16,7 +16,7 @@ import NavigationFooter from "./components/NavigationFooter";
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const totalSteps = 10; // Total number of steps
+  const totalSteps = 11; // Total number of steps
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -33,25 +33,22 @@ export default function Home() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return (
-          <>
-            <JurisdictionSection />
-            <CaseTypeSelector />
-          </>
-        );
+        return <JurisdictionSection />;
       case 1:
-        return <RoleSelector />;
+        return <CaseTypeSelector />;
       case 2:
-        return <ChargesSection />;
+        return <RoleSelector />;
       case 3:
-        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
+        return <ChargesSection />;
       case 4:
-        return <JudgeSelection />;
+        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
       case 5:
-        return <PretrialProcess />;
+        return <JudgeSelection />;
       case 6:
-        return <JuryComposition />;
+        return <PretrialProcess />;
       case 7:
+        return <JuryComposition />;
+      case 8:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -62,7 +59,7 @@ export default function Home() {
             </p>
           </div>
         );
-      case 8:
+      case 9:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -73,7 +70,7 @@ export default function Home() {
             </p>
           </div>
         );
-      case 9:
+      case 10:
         return (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
@@ -85,12 +82,7 @@ export default function Home() {
           </div>
         );
       default:
-        return (
-          <>
-            <JurisdictionSection />
-            <CaseTypeSelector />
-          </>
-        );
+        return <JurisdictionSection />;
     }
   };
 
