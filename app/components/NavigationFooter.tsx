@@ -17,8 +17,8 @@ export default function NavigationFooter({
   const isLastStep = currentStep === totalSteps - 1;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="fixed bottom-0 left-0 right-72 bg-white border-t border-gray-200 shadow-lg z-50">
+      <div className="px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Previous Button - Hidden on first step */}
           {!isFirstStep ? (

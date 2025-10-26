@@ -131,25 +131,6 @@ export default function ProgressStepper({
       ),
     },
     {
-      id: "pretrial",
-      label: "Pretrial Process",
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-          />
-        </svg>
-      ),
-    },
-    {
       id: "jury",
       label: "Jury",
       icon: (
@@ -187,100 +168,100 @@ export default function ProgressStepper({
         </svg>
       ),
     },
-    {
-      id: "game-plan",
-      label: "Game Plan",
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-          />
-        </svg>
-      ),
-    },
-    {
-      id: "verdict",
-      label: "Verdict",
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
-      ),
-    },
   ];
 
   return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between overflow-x-auto">
+    <div className="fixed right-0 top-16 bottom-20 w-72 bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-y-auto z-30 shadow-sm">
+      <div className="px-5 py-8">
+        {/* Header */}
+        <div className="mb-8 px-3">
+          <h2 className="text-lg font-bold text-gray-900 mb-1">
+            Case Progress
+          </h2>
+          <p className="text-xs text-gray-500">
+            Complete each step to proceed
+          </p>
+        </div>
+
+        {/* Steps */}
+        <div className="flex flex-col space-y-1">
           {steps.map((step, index) => (
-            <div key={step.id} className="flex items-center">
+            <div key={step.id}>
               {/* Step Item */}
               <button
                 onClick={() => onStepChange(index)}
-                className="flex flex-col items-center min-w-[100px] cursor-pointer group"
+                className={`w-full flex items-center p-3 rounded-xl cursor-pointer group transition-all duration-200 ${
+                  index === currentStep
+                    ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
+                    : index < currentStep
+                    ? "bg-white hover:bg-gray-50 border-2 border-transparent"
+                    : "bg-white hover:bg-gray-50 border-2 border-transparent"
+                }`}
               >
-                {/* Icon Circle */}
-                <div
-                  className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
-                    index === currentStep
-                      ? "bg-gray-900 border-gray-900 text-white"
-                      : index < currentStep
-                      ? "bg-gray-200 border-gray-300 text-gray-600 group-hover:bg-gray-300"
-                      : "bg-white border-gray-300 text-gray-400 group-hover:border-gray-400"
-                  }`}
-                >
-                  {step.icon}
+                {/* Step Number and Icon */}
+                <div className="relative flex-shrink-0">
+                  <div
+                    className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 ${
+                      index === currentStep
+                        ? "bg-blue-600 border-2 border-blue-600 text-white shadow-md"
+                        : index < currentStep
+                        ? "bg-green-500 border-2 border-green-500 text-white"
+                        : "bg-white border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                    }`}
+                  >
+                    {index < currentStep ? (
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={3}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    ) : (
+                      step.icon
+                    )}
+                  </div>
                 </div>
 
-                {/* Step Label */}
-                <span
-                  className={`mt-2 text-sm font-medium text-center ${
-                    index === currentStep
-                      ? "text-gray-900"
-                      : index < currentStep
-                      ? "text-gray-600 group-hover:text-gray-900"
-                      : "text-gray-400 group-hover:text-gray-600"
-                  }`}
-                >
-                  {step.label}
-                </span>
+                {/* Step Label and Description */}
+                <div className="ml-4 flex-1 text-left">
+                  <div
+                    className={`text-sm font-semibold transition-colors ${
+                      index === currentStep
+                        ? "text-blue-700"
+                        : index < currentStep
+                        ? "text-gray-700"
+                        : "text-gray-500 group-hover:text-gray-700"
+                    }`}
+                  >
+                    {step.label}
+                  </div>
+                </div>
+
+                {/* Current Step Indicator */}
+                {index === currentStep && (
+                  <div className="flex-shrink-0">
+                    <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                  </div>
+                )}
               </button>
 
-              {/* Arrow Connector */}
+              {/* Vertical Connector Line */}
               {index < steps.length - 1 && (
-                <div className="flex items-center mx-2 mb-6">
-                  <svg
-                    className="w-6 h-6 text-gray-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <div className="flex justify-start ml-8 my-0.5">
+                  <div
+                    className={`w-0.5 h-5 transition-colors ${
+                      index < currentStep
+                        ? "bg-green-400"
+                        : "bg-gray-300"
+                    }`}
+                  ></div>
                 </div>
               )}
             </div>

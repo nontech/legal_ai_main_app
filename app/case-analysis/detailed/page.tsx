@@ -1,34 +1,77 @@
 "use client";
 
 import { useState } from "react";
-import Navbar from "./components/Navbar";
-import HeroSection from "./components/dashboard/HeroSection";
-import StatsCards from "./components/dashboard/StatsCards";
-import CasePortfolio from "./components/dashboard/CasePortfolio";
-import Footer from "./components/Footer";
-import PretrialProcess from "./components/PretrialProcess";
+import { useSearchParams } from "next/navigation";
+import Navbar from "../../components/Navbar";
+import ProgressStepper from "../../components/ProgressStepper";
+import JurisdictionSection from "../../components/JurisdictionSection";
+import CaseTypeSelector from "../../components/CaseTypeSelector";
+import RoleSelector from "../../components/RoleSelector";
+import ChargesSection from "../../components/ChargesSection";
+import CaseDetailsSection from "../../components/CaseDetailsSection";
+import JudgeSelection from "../../components/JudgeSelection";
+import PretrialProcess from "../../components/PretrialProcess";
+import JuryComposition from "../../components/JuryComposition";
+import NavigationFooter from "../../components/NavigationFooter";
+import ResultsStep from "../../components/ResultsStep";
 
-export default function Dashboard() {
+export default function DetailedCaseAnalysis() {
+  const searchParams = useSearchParams();
+  const initialStep = searchParams.get("step");
+  const [currentStep, setCurrentStep] = useState(
+    initialStep ? parseInt(initialStep) : 0
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
+  const totalSteps = 8; // Total number of steps
+
+  const handleNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return <JurisdictionSection />;
+      case 1:
+        return <CaseTypeSelector />;
+      case 2:
+        return <RoleSelector />;
+      case 3:
+        return <ChargesSection />;
+      case 4:
+        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
+      case 5:
+        return <JudgeSelection />;
+      case 6:
+        return <JuryComposition />;
+      case 7:
+        return <ResultsStep />;
+      default:
+        return <JurisdictionSection />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar onPretrialClick={() => setIsPretrialOpen(true)} />
+      <ProgressStepper
+        currentStep={currentStep}
+        onStepChange={setCurrentStep}
+      />
 
-      {/* Hero Section */}
-      <HeroSection />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
-        {/* Stats Cards */}
-        <StatsCards />
-
-        {/* Case Portfolio */}
-        <CasePortfolio />
+      {/* Main content area with right margin for sidebar */}
+      <main className="mr-72 mt-16 px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6">
+        <div className="max-w-6xl mx-auto">{renderStepContent()}</div>
       </main>
-
-      {/* Footer */}
-      <Footer />
 
       {/* Pretrial Process Modal */}
       {isPretrialOpen && (
@@ -97,6 +140,16 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Navigation Footer - Hidden when modal is open */}
+      {!isModalOpen && !isPretrialOpen && (
+        <NavigationFooter
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onNext={handleNext}
+          onPrevious={handlePrevious}
+        />
       )}
     </div>
   );
