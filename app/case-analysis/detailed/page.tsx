@@ -25,6 +25,21 @@ export default function DetailedCaseAnalysis() {
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const totalSteps = 8; // Total number of steps
 
+  // Track completion data for each step (percentage)
+  // This should be calculated based on actual form data, not navigation
+  const [completionData, setCompletionData] = useState<{
+    [key: number]: number;
+  }>({
+    0: 100, // Jurisdiction - has default values (country, state, city, court)
+    1: 100, // Case Type - has default value (Civil Law)
+    2: 100, // Role - has default value (Plaintiff)
+    3: 0, // Charges - set to 100 when form data exists
+    4: 67, // Case Details - 4 out of 6 sub-sections completed (Basic Info, Evidence, Legal Precedents, Police Report)
+    5: 100, // Judge - Judge Patricia Anderson is selected
+    6: 100, // Jury - Demographics (1) and Psychological (2) selections made
+    7: 0, // Results
+  });
+
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
       setCurrentStep(currentStep + 1);
@@ -66,11 +81,14 @@ export default function DetailedCaseAnalysis() {
       <ProgressStepper
         currentStep={currentStep}
         onStepChange={setCurrentStep}
+        completionData={completionData}
       />
 
-      {/* Main content area with right margin for sidebar and vertical centering */}
-      <main className="mr-64 mt-16 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-160px)] flex items-center justify-center">
-        <div className="max-w-4xl w-full">{renderStepContent()}</div>
+      {/* Main content area with right margin for sidebar */}
+      <main className="mr-64 pt-32 pb-32 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto w-full">
+          {renderStepContent()}
+        </div>
       </main>
 
       {/* Pretrial Process Modal */}

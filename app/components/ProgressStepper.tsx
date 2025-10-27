@@ -4,21 +4,25 @@ interface Step {
   id: string;
   label: string;
   icon: React.ReactNode;
+  subSections: number; // Number of sub-sections for percentage calculation
 }
 
 interface ProgressStepperProps {
   currentStep: number;
   onStepChange: (step: number) => void;
+  completionData?: { [key: number]: number }; // Track completion for each step (0-100%)
 }
 
 export default function ProgressStepper({
   currentStep,
   onStepChange,
+  completionData = {},
 }: ProgressStepperProps) {
   const steps: Step[] = [
     {
       id: "jurisdiction",
       label: "Jurisdiction",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -38,6 +42,7 @@ export default function ProgressStepper({
     {
       id: "case-type",
       label: "Case Type",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -57,6 +62,7 @@ export default function ProgressStepper({
     {
       id: "role",
       label: "Role",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -76,6 +82,7 @@ export default function ProgressStepper({
     {
       id: "charges",
       label: "Charges",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -95,6 +102,7 @@ export default function ProgressStepper({
     {
       id: "case-details",
       label: "Case Details",
+      subSections: 6,
       icon: (
         <svg
           className="w-5 h-5"
@@ -114,6 +122,7 @@ export default function ProgressStepper({
     {
       id: "judge",
       label: "Judge",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -133,6 +142,7 @@ export default function ProgressStepper({
     {
       id: "jury",
       label: "Jury",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -152,6 +162,7 @@ export default function ProgressStepper({
     {
       id: "results",
       label: "Results",
+      subSections: 1,
       icon: (
         <svg
           className="w-5 h-5"
@@ -170,6 +181,11 @@ export default function ProgressStepper({
     },
   ];
 
+  // Calculate completion percentage for each step based on actual data
+  const getCompletion = (index: number) => {
+    return completionData[index] || 0;
+  };
+
   return (
     <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 overflow-y-auto z-30 shadow-lg">
       <div className="px-5 py-6 pt-10">
@@ -185,85 +201,114 @@ export default function ProgressStepper({
 
         {/* Steps */}
         <div className="flex flex-col">
-          {steps.map((step, index) => (
-            <div key={step.id} className="relative">
-              {/* Step Item */}
-              <button
-                onClick={() => onStepChange(index)}
-                className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${
-                  index === currentStep
-                    ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
-                    : "hover:bg-gray-50 border-2 border-transparent"
-                }`}
-              >
-                {/* Step Icon */}
-                <div className="relative flex-shrink-0">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
-                      index === currentStep
-                        ? "bg-blue-600 text-white shadow-md scale-110"
-                        : index < currentStep
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
-                    }`}
-                  >
-                    {index < currentStep ? (
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
+          {steps.map((step, index) => {
+            const completion = getCompletion(index);
+            const isComplete = completion === 100;
+
+            return (
+              <div key={step.id} className="relative">
+                {/* Step Item */}
+                <button
+                  onClick={() => onStepChange(index)}
+                  className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${
+                    index === currentStep
+                      ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
+                      : "hover:bg-gray-50 border-2 border-transparent"
+                  }`}
+                >
+                  {/* Step Icon - Always show original icon */}
+                  <div className="relative flex-shrink-0">
+                    <div
+                      className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        index === currentStep
+                          ? "bg-blue-600 text-white shadow-md scale-110"
+                          : isComplete
+                          ? "bg-gray-100 border-2 border-gray-300 text-gray-500"
+                          : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                      }`}
+                    >
+                      {step.icon}
+                    </div>
+                  </div>
+
+                  {/* Step Label */}
+                  <div className="ml-3 flex-1 text-left">
+                    <div
+                      className={`text-sm font-semibold transition-colors ${
+                        index === currentStep
+                          ? "text-blue-700"
+                          : isComplete
+                          ? "text-gray-700"
+                          : "text-gray-500 group-hover:text-gray-700"
+                      }`}
+                    >
+                      {step.label}
+                    </div>
+                  </div>
+
+                  {/* Completion Circle */}
+                  <div className="flex-shrink-0">
+                    <div className="relative w-8 h-8">
+                      {/* Background circle */}
+                      <svg className="w-8 h-8 transform -rotate-90">
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="14"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          fill="none"
+                          className="text-gray-200"
+                        />
+                        {/* Progress circle */}
+                        <circle
+                          cx="16"
+                          cy="16"
+                          r="14"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 14}`}
+                          strokeDashoffset={`${
+                            2 * Math.PI * 14 * (1 - completion / 100)
+                          }`}
+                          className={`transition-all duration-300 ${
+                            completion === 100
+                              ? "text-green-500"
+                              : completion > 0
+                              ? "text-blue-500"
+                              : "text-gray-200"
+                          }`}
                           strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={3}
-                          d="M5 13l4 4L19 7"
                         />
                       </svg>
-                    ) : (
-                      step.icon
-                    )}
+                      {/* Percentage Display */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span
+                          className={`text-[10px] font-bold ${
+                            completion === 100
+                              ? "text-green-600"
+                              : completion > 0
+                              ? "text-blue-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {completion > 0 ? completion : ""}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </button>
 
-                {/* Step Label */}
-                <div className="ml-3 flex-1 text-left">
-                  <div
-                    className={`text-sm font-semibold transition-colors ${
-                      index === currentStep
-                        ? "text-blue-700"
-                        : index < currentStep
-                        ? "text-gray-700"
-                        : "text-gray-500 group-hover:text-gray-700"
-                    }`}
-                  >
-                    {step.label}
-                  </div>
-                </div>
-
-                {/* Current Step Indicator */}
-                {index === currentStep && (
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></div>
+                {/* Vertical Connector Line */}
+                {index < steps.length - 1 && (
+                  <div className="flex justify-start ml-8 py-1">
+                    <div className="w-0.5 h-4 bg-gray-300"></div>
                   </div>
                 )}
-              </button>
-
-              {/* Vertical Connector Line */}
-              {index < steps.length - 1 && (
-                <div className="flex justify-start ml-8 py-1">
-                  <div
-                    className={`w-0.5 h-4 transition-colors ${
-                      index < currentStep
-                        ? "bg-green-400"
-                        : "bg-gray-300"
-                    }`}
-                  ></div>
-                </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
