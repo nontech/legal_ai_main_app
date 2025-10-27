@@ -246,58 +246,63 @@ export default function ProgressStepper({
                     </div>
                   </div>
 
-                  {/* Completion Circle */}
-                  <div className="flex-shrink-0">
-                    <div className="relative w-8 h-8">
-                      {/* Background circle */}
-                      <svg className="w-8 h-8 transform -rotate-90">
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="14"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          fill="none"
-                          className="text-gray-200"
-                        />
-                        {/* Progress circle */}
-                        <circle
-                          cx="16"
-                          cy="16"
-                          r="14"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          fill="none"
-                          strokeDasharray={`${2 * Math.PI * 14}`}
-                          strokeDashoffset={`${
-                            2 * Math.PI * 14 * (1 - completion / 100)
-                          }`}
-                          className={`transition-all duration-300 ${
-                            completion === 100
-                              ? "text-green-500"
-                              : completion > 0
-                              ? "text-blue-500"
-                              : "text-gray-200"
-                          }`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      {/* Percentage Display */}
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span
-                          className={`text-[10px] font-bold ${
-                            completion === 100
-                              ? "text-green-600"
-                              : completion > 0
-                              ? "text-blue-600"
-                              : "text-gray-400"
-                          }`}
-                        >
-                          {completion > 0 ? completion : ""}
-                        </span>
+                  {/* Completion Circle - Hidden for Results step */}
+                  {step.id !== "results" && (
+                    <div className="flex-shrink-0">
+                      <div className="relative w-8 h-8">
+                        {/* Background circle */}
+                        <svg className="w-8 h-8 transform -rotate-90">
+                          <circle
+                            cx="16"
+                            cy="16"
+                            r="14"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            fill="none"
+                            className="text-gray-200"
+                          />
+                          {/* Progress circle */}
+                          <circle
+                            cx="16"
+                            cy="16"
+                            r="14"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            fill="none"
+                            strokeDasharray={`${2 * Math.PI * 14}`}
+                            strokeDashoffset={`${
+                              2 *
+                              Math.PI *
+                              14 *
+                              (1 - completion / 100)
+                            }`}
+                            className={`transition-all duration-300 ${
+                              completion === 100
+                                ? "text-green-500"
+                                : completion > 0
+                                ? "text-blue-500"
+                                : "text-gray-200"
+                            }`}
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        {/* Percentage Display */}
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span
+                            className={`text-[10px] font-bold ${
+                              completion === 100
+                                ? "text-green-600"
+                                : completion > 0
+                                ? "text-blue-600"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {completion > 0 ? completion : ""}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </button>
 
                 {/* Vertical Connector Line */}
