@@ -249,81 +249,95 @@ export default function CaseTypeSelector() {
 
   return (
     <>
-      {/* Selected Case Type Display */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-full mr-3">
-              <svg
-                className="w-6 h-6 text-amber-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Select Case Type
+            </h2>
+            <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+              Choose the fundamental nature of your legal case to
+              ensure accurate analysis and applicable legal standards.
+            </p>
+          </div>
+        </div>
+
+        {/* Confirmation Card */}
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                Case Type
-              </h3>
-              <p className="text-sm text-gray-600">
-                {selectedCaseType.subtitle}
+              <h4 className="font-bold text-gray-900 mb-2">
+                Case Type Selection Confirmed
+              </h4>
+              <p className="text-gray-700 text-sm">
+                You have selected{" "}
+                <span className="font-semibold">
+                  {selectedCaseType.title}
+                </span>{" "}
+                - The analysis will apply the appropriate legal
+                standards and burden of proof specific to this case
+                type.
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm"
-          >
-            Change Case Type
-          </button>
         </div>
 
-        {/* Selected Case Type Card */}
-        <div className="border border-gray-200 rounded-lg p-4 bg-gradient-to-br from-amber-50 to-white">
-          <div className="flex items-start">
-            <div className="text-4xl mr-4">
-              {selectedCaseType.icon}
+        {/* Selected Case Type Display */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+                <svg
+                  className="w-7 h-7 text-amber-700"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Case Type
+                </h3>
+                <p className="text-sm text-gray-600">
+                  {selectedCaseType.subtitle}
+                </p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h4 className="text-xl font-bold text-gray-900 mb-1">
+
+            {/* Centered Case Type Name */}
+            <div className="flex-1 flex justify-center">
+              <span className="text-lg font-semibold text-gray-900">
                 {selectedCaseType.title}
-              </h4>
-              <p className="text-sm text-gray-600 mb-3">
-                {selectedCaseType.subtitle}
-              </p>
-
-              <div className="mb-3">
-                <p className="text-xs font-semibold text-gray-700 mb-2">
-                  Typical Cases Include:
-                </p>
-                <ul className="text-xs text-gray-600 space-y-1">
-                  {selectedCaseType.typicalCases.map(
-                    (case_, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="text-amber-500 mr-2">•</span>
-                        {case_}
-                      </li>
-                    )
-                  )}
-                </ul>
-              </div>
-
-              <div className="pt-3 border-t border-gray-200">
-                <p className="text-xs text-gray-600">
-                  <span className="font-semibold">
-                    Standard of Proof:
-                  </span>{" "}
-                  {selectedCaseType.standardOfProof}
-                </p>
-              </div>
+              </span>
             </div>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+            >
+              Change Case Type
+            </button>
           </div>
         </div>
       </div>
