@@ -68,9 +68,9 @@ export default function DetailedCaseAnalysis() {
         onStepChange={setCurrentStep}
       />
 
-      {/* Main content area with right margin for sidebar */}
-      <main className="mr-72 mt-16 px-4 sm:px-6 lg:px-8 py-8 pb-24 space-y-6">
-        <div className="max-w-6xl mx-auto">{renderStepContent()}</div>
+      {/* Main content area with right margin for sidebar and vertical centering */}
+      <main className="mr-64 mt-16 px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-160px)] flex items-center justify-center">
+        <div className="max-w-4xl w-full">{renderStepContent()}</div>
       </main>
 
       {/* Pretrial Process Modal */}

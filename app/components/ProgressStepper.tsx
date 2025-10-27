@@ -21,7 +21,7 @@ export default function ProgressStepper({
       label: "Jurisdiction",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -40,7 +40,7 @@ export default function ProgressStepper({
       label: "Case Type",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -59,7 +59,7 @@ export default function ProgressStepper({
       label: "Role",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -78,7 +78,7 @@ export default function ProgressStepper({
       label: "Charges",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -97,7 +97,7 @@ export default function ProgressStepper({
       label: "Case Details",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -116,7 +116,7 @@ export default function ProgressStepper({
       label: "Judge",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -135,7 +135,7 @@ export default function ProgressStepper({
       label: "Jury",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -154,7 +154,7 @@ export default function ProgressStepper({
       label: "Results",
       icon: (
         <svg
-          className="w-6 h-6"
+          className="w-5 h-5"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -171,10 +171,10 @@ export default function ProgressStepper({
   ];
 
   return (
-    <div className="fixed right-0 top-16 bottom-20 w-72 bg-gradient-to-b from-gray-50 to-white border-l border-gray-200 overflow-y-auto z-30 shadow-sm">
-      <div className="px-5 py-8">
+    <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 overflow-y-auto z-30 shadow-lg">
+      <div className="px-5 py-6 pt-10">
         {/* Header */}
-        <div className="mb-8 px-3">
+        <div className="mb-6 pb-4 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900 mb-1">
             Case Progress
           </h2>
@@ -184,34 +184,32 @@ export default function ProgressStepper({
         </div>
 
         {/* Steps */}
-        <div className="flex flex-col space-y-1">
+        <div className="flex flex-col">
           {steps.map((step, index) => (
-            <div key={step.id}>
+            <div key={step.id} className="relative">
               {/* Step Item */}
               <button
                 onClick={() => onStepChange(index)}
-                className={`w-full flex items-center p-3 rounded-xl cursor-pointer group transition-all duration-200 ${
+                className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${
                   index === currentStep
                     ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
-                    : index < currentStep
-                    ? "bg-white hover:bg-gray-50 border-2 border-transparent"
-                    : "bg-white hover:bg-gray-50 border-2 border-transparent"
+                    : "hover:bg-gray-50 border-2 border-transparent"
                 }`}
               >
-                {/* Step Number and Icon */}
+                {/* Step Icon */}
                 <div className="relative flex-shrink-0">
                   <div
-                    className={`flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 ${
+                    className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
                       index === currentStep
-                        ? "bg-blue-600 border-2 border-blue-600 text-white shadow-md"
+                        ? "bg-blue-600 text-white shadow-md scale-110"
                         : index < currentStep
-                        ? "bg-green-500 border-2 border-green-500 text-white"
-                        : "bg-white border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
                     }`}
                   >
                     {index < currentStep ? (
                       <svg
-                        className="w-6 h-6"
+                        className="w-5 h-5"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -229,8 +227,8 @@ export default function ProgressStepper({
                   </div>
                 </div>
 
-                {/* Step Label and Description */}
-                <div className="ml-4 flex-1 text-left">
+                {/* Step Label */}
+                <div className="ml-3 flex-1 text-left">
                   <div
                     className={`text-sm font-semibold transition-colors ${
                       index === currentStep
@@ -254,9 +252,9 @@ export default function ProgressStepper({
 
               {/* Vertical Connector Line */}
               {index < steps.length - 1 && (
-                <div className="flex justify-start ml-8 my-0.5">
+                <div className="flex justify-start ml-8 py-1">
                   <div
-                    className={`w-0.5 h-5 transition-colors ${
+                    className={`w-0.5 h-4 transition-colors ${
                       index < currentStep
                         ? "bg-green-400"
                         : "bg-gray-300"
