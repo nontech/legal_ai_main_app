@@ -17,7 +17,7 @@ interface UploadedFile {
 
 interface SectionData {
   files: UploadedFile[];
-  markedComplete: boolean;
+  summaryGenerated: boolean;
 }
 
 export default function CaseDetailsSection({
@@ -39,7 +39,7 @@ export default function CaseDetailsSection({
           Date.now() - Math.random() * 10000000000
         ),
       })),
-      markedComplete: true,
+      summaryGenerated: true,
     },
     evidence: {
       files: Array.from({ length: 5 }, (_, i) => ({
@@ -51,7 +51,7 @@ export default function CaseDetailsSection({
           Date.now() - Math.random() * 10000000000
         ),
       })),
-      markedComplete: true,
+      summaryGenerated: true,
     },
     witnesses: {
       files: Array.from({ length: 3 }, (_, i) => ({
@@ -63,7 +63,7 @@ export default function CaseDetailsSection({
           Date.now() - Math.random() * 10000000000
         ),
       })),
-      markedComplete: false,
+      summaryGenerated: false,
     },
     precedents: {
       files: Array.from({ length: 7 }, (_, i) => ({
@@ -75,7 +75,7 @@ export default function CaseDetailsSection({
           Date.now() - Math.random() * 10000000000
         ),
       })),
-      markedComplete: true,
+      summaryGenerated: true,
     },
     police: {
       files: Array.from({ length: 1 }, (_, i) => ({
@@ -87,11 +87,11 @@ export default function CaseDetailsSection({
           Date.now() - Math.random() * 10000000000
         ),
       })),
-      markedComplete: true,
+      summaryGenerated: true,
     },
     challenges: {
       files: [],
-      markedComplete: false,
+      summaryGenerated: false,
     },
   });
 
@@ -102,19 +102,19 @@ export default function CaseDetailsSection({
     }
   }, [openModal, onModalChange]);
 
-  // Calculate status based on files and markedComplete
+  // Calculate status based on files and summaryGenerated
   const getSectionStatus = (
     sectionId: string
   ): "complete" | "in_progress" | "empty" => {
     const data = sectionData[sectionId];
     if (!data) return "empty";
 
-    if (data.markedComplete) {
-      return "complete";
-    }
-
     if (data.files.length === 0) {
       return "empty";
+    }
+
+    if (data.summaryGenerated) {
+      return "complete";
     }
 
     return "in_progress";
@@ -178,12 +178,12 @@ export default function CaseDetailsSection({
     }));
   };
 
-  const handleToggleComplete = (sectionId: string) => {
+  const handleSummaryGenerated = (sectionId: string) => {
     setSectionData((prev) => ({
       ...prev,
       [sectionId]: {
         ...prev[sectionId],
-        markedComplete: !prev[sectionId].markedComplete,
+        summaryGenerated: true,
       },
     }));
   };
@@ -391,13 +391,13 @@ export default function CaseDetailsSection({
           description={getModalContent(openModal).description}
           icon={getModalContent(openModal).icon}
           initialFiles={sectionData[openModal]?.files || []}
-          isMarkedComplete={
-            sectionData[openModal]?.markedComplete || false
+          summaryGenerated={
+            sectionData[openModal]?.summaryGenerated || false
           }
           onFilesUpdate={(files) =>
             handleFilesUpdate(openModal, files)
           }
-          onToggleComplete={() => handleToggleComplete(openModal)}
+          onSummaryGenerated={() => handleSummaryGenerated(openModal)}
         />
       )}
     </div>
