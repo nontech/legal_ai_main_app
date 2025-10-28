@@ -241,7 +241,7 @@ export default function ProgressStepper({
               </svg>
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">
-              Sign in to save
+              Sign in to get detailed analysis
             </h3>
             <p className="text-sm text-gray-600 mb-6">
               Create an account to access all features, save your cases, and get full analysis
