@@ -138,7 +138,7 @@ export default function Navbar({ onPretrialClick }: NavbarProps) {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-gray-100"
+                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-gray-100 cursor-pointer"
                 >
                   <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
                     <svg
@@ -184,7 +184,7 @@ export default function Navbar({ onPretrialClick }: NavbarProps) {
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors border-t border-gray-200"
+                      className="w-full text-left px-4 py-2 text-sm text-red-600 cursor-pointer hover:bg-red-50 transition-colors border-t border-gray-200"
                     >
                       Sign Out
                     </button>
