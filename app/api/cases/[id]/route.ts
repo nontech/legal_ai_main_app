@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
-    const caseId = params.id;
+    const { id: caseId } = await params;
 
     if (!caseId) {
       return NextResponse.json(
@@ -16,7 +17,7 @@ export async function GET(
     }
 
     const supabase = await getSupabaseServerClient();
-    
+
     // Fetch the case - allows viewing case data for populating forms
     const { data, error } = await supabase
       .from("cases")

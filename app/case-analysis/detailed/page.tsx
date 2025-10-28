@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Navbar from "../../components/Navbar";
 import ProgressStepper from "../../components/ProgressStepper";
 import JurisdictionSection from "../../components/JurisdictionSection";
@@ -15,7 +16,7 @@ import PretrialProcess from "../../components/PretrialProcess";
 import JuryComposition from "../../components/JuryComposition";
 import ResultsStep from "../../components/ResultsStep";
 
-export default function DetailedCaseAnalysis() {
+function DetailedCaseAnalysisContent() {
   const searchParams = useSearchParams();
   const initialStep = searchParams.get("step");
   const caseIdParam = searchParams.get("caseId");
@@ -243,5 +244,13 @@ export default function DetailedCaseAnalysis() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function DetailedCaseAnalysis() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DetailedCaseAnalysisContent />
+    </Suspense>
   );
 }
