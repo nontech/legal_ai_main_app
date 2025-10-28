@@ -48,9 +48,8 @@ export default function NavigationFooter({
           {/* Continue Button */}
           <button
             onClick={onNext}
-            className={`flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors ${
-              isFirstStep ? "ml-auto" : ""
-            }`}
+            className={`flex items-center px-6 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-colors ${isFirstStep ? "ml-auto" : ""
+              }`}
           >
             {isLastStep ? "Finish" : "Continue"}
             <svg

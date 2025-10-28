@@ -12,13 +12,13 @@ import CaseDetailsSection from "../../components/CaseDetailsSection";
 import JudgeSelection from "../../components/JudgeSelection";
 import PretrialProcess from "../../components/PretrialProcess";
 import JuryComposition from "../../components/JuryComposition";
-import NavigationFooter from "../../components/NavigationFooter";
 import ResultsStep from "../../components/ResultsStep";
 
 export default function DetailedCaseAnalysis() {
   const searchParams = useSearchParams();
   const initialStep = searchParams.get("step");
-  const caseId = searchParams.get("caseId");
+  const caseIdParam = searchParams.get("caseId");
+  const caseId = caseIdParam || undefined;
   const [currentStep, setCurrentStep] = useState(
     initialStep ? parseInt(initialStep) : 0
   );
@@ -53,26 +53,40 @@ export default function DetailedCaseAnalysis() {
     }
   };
 
+  const handleChargesCompletion = (isComplete: boolean) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      3: isComplete ? 100 : 0,
+    }));
+  };
+
+  const handleCaseDetailsCompletion = (percentage: number) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      4: percentage,
+    }));
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection />;
+        return <JurisdictionSection caseId={caseId} />;
       case 1:
-        return <CaseTypeSelector />;
+        return <CaseTypeSelector caseId={caseId} />;
       case 2:
-        return <RoleSelector />;
+        return <RoleSelector caseId={caseId} />;
       case 3:
-        return <ChargesSection />;
+        return <ChargesSection caseId={caseId} onCompletionChange={handleChargesCompletion} />;
       case 4:
-        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
+        return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection />;
+        return <JudgeSelection caseId={caseId} />;
       case 6:
-        return <JuryComposition />;
+        return <JuryComposition caseId={caseId} />;
       case 7:
         return <ResultsStep />;
       default:
-        return <JurisdictionSection />;
+        return <JurisdictionSection caseId={caseId} />;
     }
   };
 
@@ -160,16 +174,6 @@ export default function DetailedCaseAnalysis() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Navigation Footer - Hidden when modal is open */}
-      {!isModalOpen && !isPretrialOpen && (
-        <NavigationFooter
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-        />
       )}
     </div>
   );

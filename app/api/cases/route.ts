@@ -67,7 +67,15 @@ export async function POST(request: Request) {
         const { data, error } = await client
             .from("cases")
             .insert({
-                case_details: { caseName, caseDescription },
+                case_details: {
+                    "basic-info": {
+                        caseName,
+                        caseDescription,
+                        files: [],
+                        summary: "",
+                        summaryGenerated: false,
+                    }
+                },
                 jurisdiction,
                 case_type,
                 role,
@@ -85,6 +93,47 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
+    } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : "Unknown error";
+        return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const caseId = searchParams.get("id");
+
+        if (!caseId) {
+            return NextResponse.json(
+                { ok: false, error: "Case ID is required" },
+                { status: 400 }
+            );
+        }
+
+        const supabase = await getSupabaseServerClient();
+        const { data: userRes, error: userErr } = await supabase.auth.getUser();
+
+        if (userErr && userErr.message !== "Auth session missing!") {
+            return NextResponse.json({ ok: false, error: userErr.message }, { status: 500 });
+        }
+
+        if (!userRes?.user) {
+            return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+        }
+
+        // Delete case (only if user owns it or use admin for verification)
+        const { error } = await supabase
+            .from("cases")
+            .delete()
+            .eq("id", caseId)
+            .eq("owner_id", userRes.user.id);
+
+        if (error) {
+            return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({ ok: true, message: "Case deleted successfully" }, { status: 200 });
     } catch (e: unknown) {
         const message = e instanceof Error ? e.message : "Unknown error";
         return NextResponse.json({ ok: false, error: message }, { status: 500 });

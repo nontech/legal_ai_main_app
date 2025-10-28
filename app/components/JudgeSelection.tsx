@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SaveCaseButton from "./SaveCaseButton";
 
 interface Judge {
   id: string;
@@ -104,7 +105,7 @@ const judges: Judge[] = [
   },
 ];
 
-export default function JudgeSelection() {
+export default function JudgeSelection({ caseId }: { caseId?: string }) {
   const [selectedJudge, setSelectedJudge] = useState<string | null>(
     "2"
   );
@@ -288,11 +289,10 @@ export default function JudgeSelection() {
                 <div
                   key={judge.id}
                   onClick={() => handleJudgeSelect(judge.id)}
-                  className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${
-                    selectedJudge === judge.id
+                  className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${selectedJudge === judge.id
                       ? "border-amber-500 ring-2 ring-amber-200"
                       : "border-gray-200 hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <div className="p-6">
                     {/* Judge Header */}
@@ -426,6 +426,11 @@ export default function JudgeSelection() {
           </div>
         </div>
       )}
+      <SaveCaseButton
+        caseId={caseId}
+        field="judge"
+        value={selectedJudge}
+      />
     </>
   );
 }

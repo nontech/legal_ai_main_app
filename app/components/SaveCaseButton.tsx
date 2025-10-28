@@ -1,0 +1,93 @@
+"use client";
+
+import { useState } from "react";
+
+interface SaveCaseButtonProps {
+    caseId?: string;
+    field: string;
+    value: any;
+    onSave?: () => void;
+    children?: React.ReactNode;
+    [key: string]: any; // Allow additional props for convenience
+}
+
+export default function SaveCaseButton({
+    caseId,
+    field,
+    value,
+    onSave,
+    children = "Save Changes",
+    ...rest
+}: SaveCaseButtonProps) {
+    const [isSaving, setIsSaving] = useState(false);
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+    const handleSave = async () => {
+        if (!caseId) {
+            setMessage({ type: "error", text: "Case ID is required" });
+            return;
+        }
+
+        setIsSaving(true);
+        setMessage(null);
+
+        try {
+            const res = await fetch("/api/cases/update", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ caseId, field, value }),
+            });
+
+            const json = await res.json();
+
+            if (!res.ok || !json?.ok) {
+                throw new Error(json?.error || "Failed to save");
+            }
+
+            setMessage({ type: "success", text: "Saved successfully" });
+            if (onSave) onSave();
+
+            // Clear success message after 2 seconds
+            setTimeout(() => setMessage(null), 2000);
+        } catch (e) {
+            setMessage({
+                type: "error",
+                text: e instanceof Error ? e.message : "Failed to save",
+            });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-gray-200">
+            <button
+                onClick={handleSave}
+                disabled={isSaving || !caseId}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+                {isSaving ? (
+                    <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Saving...
+                    </>
+                ) : (
+                    <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {children}
+                    </>
+                )}
+            </button>
+
+            {message && (
+                <span className={`text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                    {message.text}
+                </span>
+            )}
+        </div>
+    );
+}

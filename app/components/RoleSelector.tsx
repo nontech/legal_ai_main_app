@@ -1,13 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import SaveCaseButton from "./SaveCaseButton";
 
 type RoleType = "defendant" | "plaintiff";
 
-export default function RoleSelector() {
-  const [selectedRole, setSelectedRole] =
-    useState<RoleType>("plaintiff");
+interface RoleSelectorProps {
+  caseId?: string;
+}
+
+export default function RoleSelector({ caseId }: RoleSelectorProps) {
+  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!caseId);
+
+  useEffect(() => {
+    if (caseId) {
+      const fetchRoleData = async () => {
+        try {
+          const res = await fetch(`/api/cases/${caseId}`);
+          const json = await res.json();
+
+          if (json.ok && json.data?.role) {
+            setSelectedRole(json.data.role as RoleType);
+          } else {
+            setSelectedRole("plaintiff"); // Default
+          }
+        } catch (error) {
+          console.error("Failed to fetch role data:", error);
+          setSelectedRole("plaintiff"); // Default on error
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchRoleData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [caseId]);
 
   const handleRoleSelect = (role: RoleType) => {
     setSelectedRole(role);
@@ -71,7 +102,7 @@ export default function RoleSelector() {
     },
   };
 
-  const selectedRoleData = roles[selectedRole];
+  const selectedRoleData = roles[selectedRole || "plaintiff"];
 
   return (
     <>
@@ -213,19 +244,17 @@ export default function RoleSelector() {
                 {/* Defendant Card */}
                 <button
                   onClick={() => handleRoleSelect("defendant")}
-                  className={`text-left p-6 rounded-lg border-2 transition-all ${
-                    selectedRole === "defendant"
-                      ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
+                  className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
+                    ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${
-                        selectedRole === "defendant"
-                          ? "bg-amber-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "defendant"
+                        ? "bg-amber-600 text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {roles.defendant.icon}
                     </div>
@@ -273,19 +302,17 @@ export default function RoleSelector() {
                 {/* Plaintiff Card */}
                 <button
                   onClick={() => handleRoleSelect("plaintiff")}
-                  className={`text-left p-6 rounded-lg border-2 transition-all ${
-                    selectedRole === "plaintiff"
-                      ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
+                  className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
+                    ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${
-                        selectedRole === "plaintiff"
-                          ? "bg-amber-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
+                        ? "bg-amber-600 text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {roles.plaintiff.icon}
                     </div>
@@ -346,6 +373,11 @@ export default function RoleSelector() {
           </div>
         </div>
       )}
+      <SaveCaseButton
+        caseId={caseId}
+        field="role"
+        value={selectedRole || "plaintiff"}
+      />
     </>
   );
 }

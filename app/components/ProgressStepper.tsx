@@ -289,18 +289,18 @@ export default function ProgressStepper({
                 <button
                   onClick={() => onStepChange(index)}
                   className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${index === currentStep
-                      ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
-                      : "hover:bg-gray-50 border-2 border-transparent"
+                    ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
+                    : "hover:bg-gray-50 border-2 border-transparent"
                     }`}
                 >
                   {/* Step Icon - Always show original icon */}
                   <div className="relative flex-shrink-0">
                     <div
                       className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${index === currentStep
-                          ? "bg-blue-600 text-white shadow-md scale-110"
-                          : isComplete
-                            ? "bg-gray-100 border-2 border-gray-300 text-gray-500"
-                            : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                        ? "bg-blue-600 text-white shadow-md scale-110"
+                        : isComplete
+                          ? "bg-gray-100 border-2 border-gray-300 text-gray-500"
+                          : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
                         }`}
                     >
                       {step.icon}
@@ -311,68 +311,94 @@ export default function ProgressStepper({
                   <div className="ml-3 flex-1 text-left">
                     <div
                       className={`text-sm font-semibold transition-colors ${index === currentStep
-                          ? "text-blue-700"
-                          : isComplete
-                            ? "text-gray-700"
-                            : "text-gray-500 group-hover:text-gray-700"
+                        ? "text-blue-700"
+                        : isComplete
+                          ? "text-gray-700"
+                          : "text-gray-500 group-hover:text-gray-700"
                         }`}
                     >
                       {step.label}
                     </div>
+                    {!isComplete && completion < 100 && step.id !== "results" && step.id !== "case-details" && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-xs text-amber-600 font-medium">Incomplete</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Completion Circle - Hidden for Results step */}
                   {step.id !== "results" && (
                     <div className="flex-shrink-0">
-                      <div className="relative w-8 h-8">
-                        {/* Background circle */}
-                        <svg className="w-8 h-8 transform -rotate-90">
-                          <circle
-                            cx="16"
-                            cy="16"
-                            r="14"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            fill="none"
-                            className="text-gray-200"
-                          />
-                          {/* Progress circle */}
-                          <circle
-                            cx="16"
-                            cy="16"
-                            r="14"
-                            stroke="currentColor"
-                            strokeWidth="3"
-                            fill="none"
-                            strokeDasharray={`${2 * Math.PI * 14}`}
-                            strokeDashoffset={`${2 *
-                              Math.PI *
-                              14 *
-                              (1 - completion / 100)
-                              }`}
-                            className={`transition-all duration-300 ${completion === 100
+                      {step.id === "case-details" ? (
+                        /* For Case Details: Show percentage circle */
+                        <div className="relative w-8 h-8">
+                          {/* Background circle */}
+                          <svg className="w-8 h-8 transform -rotate-90">
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="14"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              fill="none"
+                              className="text-gray-200"
+                            />
+                            {/* Progress circle */}
+                            <circle
+                              cx="16"
+                              cy="16"
+                              r="14"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              fill="none"
+                              strokeDasharray={`${2 * Math.PI * 14}`}
+                              strokeDashoffset={`${2 *
+                                Math.PI *
+                                14 *
+                                (1 - completion / 100)
+                                }`}
+                              className={`transition-all duration-300 ${completion === 100
                                 ? "text-green-500"
                                 : completion > 0
                                   ? "text-blue-500"
                                   : "text-gray-200"
-                              }`}
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                        {/* Percentage Display */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span
-                            className={`text-[10px] font-bold ${completion === 100
+                                }`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          {/* Percentage Display */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span
+                              className={`text-[10px] font-bold ${completion === 100
                                 ? "text-green-600"
                                 : completion > 0
                                   ? "text-blue-600"
                                   : "text-gray-400"
-                              }`}
-                          >
-                            {completion > 0 ? completion : ""}
-                          </span>
+                                }`}
+                            >
+                              {completion > 0 ? completion + "%" : ""}
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        /* For other steps: Show checkbox or incomplete symbol */
+                        <div className="flex items-center justify-center w-8 h-8">
+                          {isComplete ? (
+                            /* Checkmark for complete */
+                            <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            /* Incomplete circle for incomplete */
+                            <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <circle cx="12" cy="12" r="10" strokeWidth="2" />
+                            </svg>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </button>

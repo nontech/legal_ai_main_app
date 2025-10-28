@@ -29,7 +29,7 @@ interface Case {
 // Map DB case to UI case
 function mapDBCaseToUI(dbCase: DBCase): Case {
   const details = dbCase.case_details || {};
-  const title = details.caseName || `Case ${dbCase.id}`;
+  const title = details["basic-info"]?.caseName || `Case ${dbCase.id}`;
   const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
 
   // Calculate lastUpdated as relative time
@@ -66,6 +66,7 @@ export default function CasePortfolio() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCases = async () => {
@@ -107,6 +108,28 @@ export default function CasePortfolio() {
       typeFilter === "All Types" || case_.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   });
+
+  const handleDelete = async (caseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this case?")) return;
+
+    try {
+      const res = await fetch(`/api/cases?id=${caseId}`, {
+        method: "DELETE",
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "Failed to delete case");
+      }
+
+      // Remove from local state
+      setCases(cases.filter((c) => c.id !== caseId));
+      setDeletingId(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to delete case");
+    }
+  };
 
   return (
     <div className={`bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden ${!isAuthenticated ? "relative" : ""}`}>
@@ -242,6 +265,9 @@ export default function CasePortfolio() {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Last Updated
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -249,6 +275,7 @@ export default function CasePortfolio() {
                 <tr
                   key={case_.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/case-analysis/detailed?step=7&caseId=${case_.id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {case_.id.substring(0, 8)}
@@ -276,6 +303,14 @@ export default function CasePortfolio() {
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     {case_.lastUpdated}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    <button
+                      onClick={(e) => handleDelete(case_.id, e)}
+                      className="text-red-600 hover:text-red-900 cursor-pointer"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
