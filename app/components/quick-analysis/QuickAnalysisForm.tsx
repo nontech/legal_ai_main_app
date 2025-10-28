@@ -20,6 +20,16 @@ export default function QuickAnalysisForm({
   const [caseDescription, setCaseDescription] = useState("");
   const [uploadedFiles, setUploadedFiles] =
     useState<File[]>(initialDocuments);
+  // Initialize with the same defaults used inside the compact components
+  const [jurisdiction, setJurisdiction] = useState<any>({
+    country: "United States of America",
+    state: "Alabama",
+    city: "Mobile",
+    court: "Southern District of Alabama",
+  });
+  // Store the case type as its string id that API expects
+  const [caseTypeId, setCaseTypeId] = useState<string>("civil");
+  const [role, setRole] = useState<string>("plaintiff");
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -46,7 +56,7 @@ export default function QuickAnalysisForm({
     );
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Collect all form data
     const formData = {
       caseName,
@@ -55,14 +65,48 @@ export default function QuickAnalysisForm({
       timestamp: new Date(),
     };
 
-    // Store data in sessionStorage for the detailed flow to access
-    sessionStorage.setItem(
-      "quickAnalysisData",
-      JSON.stringify(formData)
-    );
+    try {
+      const res = await fetch("/api/cases", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseName,
+          caseDescription,
+          jurisdiction,
+          case_type: caseTypeId,
+          role,
+          result: null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "Failed to create case result");
+      }
+      const createdId = json.id as string | number | undefined;
 
-    // Redirect to detailed flow at Results step
-    router.push("/case-analysis/detailed?step=7");
+      // Store data in sessionStorage for the detailed flow to access
+      sessionStorage.setItem(
+        "quickAnalysisData",
+        JSON.stringify({
+          ...formData,
+          caseResultId: createdId,
+          jurisdiction,
+          case_type: caseTypeId,
+          role,
+          result: null,
+        })
+      );
+
+      // Navigate directly to results page with case ID
+      router.push(`/case-analysis/detailed?step=7&caseId=${createdId}`);
+    } catch (e) {
+      // Fallback: still store form data so user doesn't lose progress
+      sessionStorage.setItem(
+        "quickAnalysisData",
+        JSON.stringify(formData)
+      );
+      alert("Error creating case. Please try again.");
+    }
   };
 
   return (
@@ -85,13 +129,13 @@ export default function QuickAnalysisForm({
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
-          <CompactJurisdiction />
+          <CompactJurisdiction onUpdate={setJurisdiction} />
 
           {/* Case Type */}
-          <CompactCaseType />
+          <CompactCaseType onUpdate={(ct: any) => setCaseTypeId(ct?.id)} />
 
           {/* Role */}
-          <CompactRole />
+          <CompactRole onUpdate={(r: any) => setRole(r)} />
 
           {/* Basic Case Information */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">

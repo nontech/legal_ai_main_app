@@ -18,6 +18,7 @@ import ResultsStep from "../../components/ResultsStep";
 export default function DetailedCaseAnalysis() {
   const searchParams = useSearchParams();
   const initialStep = searchParams.get("step");
+  const caseId = searchParams.get("caseId");
   const [currentStep, setCurrentStep] = useState(
     initialStep ? parseInt(initialStep) : 0
   );
@@ -82,6 +83,7 @@ export default function DetailedCaseAnalysis() {
         currentStep={currentStep}
         onStepChange={setCurrentStep}
         completionData={completionData}
+        caseId={caseId || undefined}
       />
 
       {/* Main content area with right margin for sidebar */}
