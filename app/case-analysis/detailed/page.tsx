@@ -160,7 +160,7 @@ function DetailedCaseAnalysisContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onPretrialClick={() => setIsPretrialOpen(true)} />
+      <Navbar onPretrialClick={() => setIsPretrialOpen(true)} showPretrialButton={true} />
       <ProgressStepper
         currentStep={currentStep}
         onStepChange={setCurrentStep}

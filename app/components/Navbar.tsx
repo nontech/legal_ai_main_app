@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 
 interface NavbarProps {
   onPretrialClick?: () => void;
+  showPretrialButton?: boolean;
 }
 
-export default function Navbar({ onPretrialClick }: NavbarProps) {
+export default function Navbar({ onPretrialClick, showPretrialButton = false }: NavbarProps) {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -97,7 +98,7 @@ export default function Navbar({ onPretrialClick }: NavbarProps) {
 
           {/* Navigation Links */}
           <div className="flex items-center space-x-1">
-            {isAuthenticated && (
+            {isAuthenticated && showPretrialButton && (
               <button
                 onClick={onPretrialClick}
                 className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg hover:scale-105"
