@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import ProgressStepper from "../../components/ProgressStepper";
@@ -27,19 +28,85 @@ export default function DetailedCaseAnalysis() {
   const totalSteps = 8; // Total number of steps
 
   // Track completion data for each step (percentage)
-  // This should be calculated based on actual form data, not navigation
   const [completionData, setCompletionData] = useState<{
     [key: number]: number;
   }>({
-    0: 100, // Jurisdiction - has default values (country, state, city, court)
-    1: 100, // Case Type - has default value (Civil Law)
-    2: 100, // Role - has default value (Plaintiff)
-    3: 0, // Charges - set to 100 when form data exists
-    4: 67, // Case Details - 4 out of 6 sub-sections completed (Basic Info, Evidence, Legal Precedents, Police Report)
-    5: 100, // Judge - Judge Patricia Anderson is selected
-    6: 100, // Jury - Demographics (1) and Psychological (2) selections made
+    0: 0, // Jurisdiction
+    1: 0, // Case Type
+    2: 0, // Role
+    3: 0, // Charges
+    4: 0, // Case Details
+    5: 0, // Judge
+    6: 0, // Jury
     7: 0, // Results
   });
+
+  // Fetch case data and calculate completion percentages
+  const fetchCaseCompletion = async () => {
+    if (!caseId) return;
+
+    try {
+      const res = await fetch(`/api/cases/${caseId}`);
+      const json = await res.json();
+
+      if (json.ok && json.data) {
+        const data = json.data;
+        const newCompletionData: { [key: number]: number } = {
+          0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0,
+          7: 0,
+        };
+
+        // Check jurisdiction (step 0)
+        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.state && data.jurisdiction.city && data.jurisdiction.court) {
+          newCompletionData[0] = 100;
+        }
+
+        // Check case type (step 1)
+        if (data.case_type) {
+          newCompletionData[1] = 100;
+        }
+
+        // Check role (step 2)
+        if (data.role) {
+          newCompletionData[2] = 100;
+        }
+
+        // Check charges (step 3)
+        if (data.charges && Array.isArray(data.charges) && data.charges.length > 0) {
+          newCompletionData[3] = 100;
+        }
+
+        // Check case details (step 4) - Use saved completion status from database
+        if (data.case_details?._completion_status !== undefined) {
+          newCompletionData[4] = data.case_details._completion_status;
+        }
+
+        // Check judge (step 5)
+        if (data.judge) {
+          newCompletionData[5] = 100;
+        }
+
+        // Check jury (step 6)
+        if (data.jury && data.jury.demographics && data.jury.demographics.length > 0 && data.jury.psychological && data.jury.psychological.length > 0) {
+          newCompletionData[6] = 100;
+        }
+
+        setCompletionData(newCompletionData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch case completion data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCaseCompletion();
+  }, [caseId]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -80,9 +147,9 @@ export default function DetailedCaseAnalysis() {
       case 4:
         return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection caseId={caseId} />;
+        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
       case 6:
-        return <JuryComposition caseId={caseId} />;
+        return <JuryComposition caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
       case 7:
         return <ResultsStep />;
       default:

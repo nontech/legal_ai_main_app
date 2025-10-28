@@ -64,6 +64,10 @@ export async function POST(request: Request) {
 
         const client = isAuthed ? supabase : getSupabaseAdminClient();
         const ownerId = userRes?.user?.id ?? null;
+
+        // Calculate completion status: basic-info complete = 1/6 sections = ~16.67%
+        const completionPercentage = Math.round((1 / 6) * 100);
+
         const { data, error } = await client
             .from("cases")
             .insert({
@@ -74,7 +78,8 @@ export async function POST(request: Request) {
                         files: [],
                         summary: "",
                         summaryGenerated: false,
-                    }
+                    },
+                    _completion_status: completionPercentage,
                 },
                 jurisdiction,
                 case_type,

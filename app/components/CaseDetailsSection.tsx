@@ -313,6 +313,11 @@ export default function CaseDetailsSection({
 
     setIsSavingHeader(true);
     try {
+      const completedCount = sections.filter(
+        (section) => getSectionStatus(section.id) === "complete"
+      ).length;
+      const completionPercentage = Math.round((completedCount / sections.length) * 100);
+
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -326,6 +331,7 @@ export default function CaseDetailsSection({
               caseName: newTitle,
               caseDescription: newDescription,
             },
+            _completion_status: completionPercentage,
           },
         }),
       });
@@ -359,6 +365,46 @@ export default function CaseDetailsSection({
     if (!caseId) return;
 
     try {
+      // Update local state first to calculate percentage based on updated data
+      const updatedSectionData = {
+        ...sectionData,
+        "basic-info": {
+          ...sectionData["basic-info"],
+          caseName: caseTitle,
+          caseDescription: caseDescription,
+        },
+        [sectionId]: {
+          files: data.files,
+          summaryGenerated: data.summary ? true : false,
+          summary: data.summary,
+        },
+      };
+
+      // Calculate completion percentage based on updated state
+      const completedCount = sections.filter((section) => {
+        const sectionData = updatedSectionData[section.id] as any;
+        if (!sectionData) return false;
+
+        // Special handling for basic-info
+        if (section.id === "basic-info") {
+          return sectionData.caseName && sectionData.caseName.trim() && sectionData.caseDescription && sectionData.caseDescription.trim();
+        }
+
+        // If there's a summary text, it's complete
+        if (sectionData.summary && sectionData.summary.trim()) {
+          return true;
+        }
+
+        // If there are files and summary was generated, it's complete
+        if (sectionData.files && sectionData.files.length > 0 && sectionData.summaryGenerated) {
+          return true;
+        }
+
+        return false;
+      }).length;
+
+      const completionPercentage = Math.round((completedCount / sections.length) * 100);
+
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -366,17 +412,8 @@ export default function CaseDetailsSection({
           caseId,
           field: "case_details",
           value: {
-            ...sectionData,
-            "basic-info": {
-              ...sectionData["basic-info"],
-              caseName: caseTitle,
-              caseDescription: caseDescription,
-            },
-            [sectionId]: {
-              files: data.files,
-              summaryGenerated: data.summary ? true : false,
-              summary: data.summary,
-            },
+            ...updatedSectionData,
+            _completion_status: completionPercentage,
           },
         }),
       });

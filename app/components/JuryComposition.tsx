@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import SaveCaseButton from "./SaveCaseButton";
 
 interface JuryCharacteristic {
@@ -9,13 +10,35 @@ interface JuryCharacteristic {
   description: string;
 }
 
-export default function JuryComposition({ caseId }: { caseId?: string }) {
+export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
   const [selectedDemographics, setSelectedDemographics] = useState<
     string[]
   >([]);
   const [selectedPsychological, setSelectedPsychological] = useState<
     string[]
   >([]);
+
+  useEffect(() => {
+    const loadSavedJury = async () => {
+      if (caseId) {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+          if (json.ok && json.data?.jury) {
+            setSelectedDemographics(json.data.jury.demographics || []);
+            setSelectedPsychological(json.data.jury.psychological || []);
+          }
+        } catch (error) {
+          console.error("Failed to load saved jury data:", error);
+        }
+      }
+    };
+
+    loadSavedJury();
+  }, [caseId]);
 
   const demographics: JuryCharacteristic[] = [
     {
@@ -230,8 +253,8 @@ export default function JuryComposition({ caseId }: { caseId?: string }) {
               <label
                 key={item.id}
                 className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedDemographics.includes(item.id)
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }`}
               >
                 <input
@@ -281,8 +304,8 @@ export default function JuryComposition({ caseId }: { caseId?: string }) {
               <label
                 key={item.id}
                 className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedPsychological.includes(item.id)
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                   }`}
               >
                 <input
@@ -365,6 +388,7 @@ export default function JuryComposition({ caseId }: { caseId?: string }) {
           demographics: selectedDemographics,
           psychological: selectedPsychological
         }}
+        onSave={onSaveSuccess}
       />
     </div>
   );

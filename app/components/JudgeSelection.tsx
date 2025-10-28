@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import SaveCaseButton from "./SaveCaseButton";
+import { useEffect } from "react";
 
 interface Judge {
   id: string;
@@ -105,11 +106,32 @@ const judges: Judge[] = [
   },
 ];
 
-export default function JudgeSelection({ caseId }: { caseId?: string }) {
+export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
   const [selectedJudge, setSelectedJudge] = useState<string | null>(
     "2"
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const loadSavedJudge = async () => {
+      if (caseId) {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+          if (json.ok && json.data?.judge) {
+            setSelectedJudge(json.data.judge);
+          }
+        } catch (error) {
+          console.error("Failed to load saved judge:", error);
+        }
+      }
+    };
+
+    loadSavedJudge();
+  }, [caseId]);
 
   const getLeaningStyles = (color: "yellow" | "green" | "red") => {
     switch (color) {
@@ -290,8 +312,8 @@ export default function JudgeSelection({ caseId }: { caseId?: string }) {
                   key={judge.id}
                   onClick={() => handleJudgeSelect(judge.id)}
                   className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${selectedJudge === judge.id
-                      ? "border-amber-500 ring-2 ring-amber-200"
-                      : "border-gray-200 hover:border-gray-300"
+                    ? "border-amber-500 ring-2 ring-amber-200"
+                    : "border-gray-200 hover:border-gray-300"
                     }`}
                 >
                   <div className="p-6">
@@ -430,6 +452,7 @@ export default function JudgeSelection({ caseId }: { caseId?: string }) {
         caseId={caseId}
         field="judge"
         value={selectedJudge}
+        onSave={onSaveSuccess}
       />
     </>
   );
