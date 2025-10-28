@@ -265,20 +265,14 @@ export default function ProgressStepper({
   }
 
   return (
-    <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 overflow-y-auto z-30 shadow-lg">
-      <div className="px-5 py-6 pt-10">
-        {/* Header */}
-        <div className="mb-6 pb-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold text-gray-900 mb-1">
-            Case Progress
-          </h2>
-          <p className="text-xs text-gray-500">
-            Complete each step to proceed
-          </p>
-        </div>
+    <div className="fixed right-0 top-16 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 overflow-y-auto z-30 shadow-lg flex flex-col">
+      <div className="px-5 py-6 pt-10 flex flex-col flex-1">
+        <h2 className="text-lg font-bold text-gray-900 mb-3">
+          Overview
+        </h2>
 
         {/* Steps */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1">
           {steps.map((step, index) => {
             const completion = getCompletion(index);
             const isComplete = completion === 100;
