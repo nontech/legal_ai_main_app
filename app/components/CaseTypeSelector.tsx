@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import SaveCaseButton from "./SaveCaseButton";
 
 interface CaseType {
   id: string;
@@ -11,23 +12,16 @@ interface CaseType {
   standardOfProof: string;
 }
 
-export default function CaseTypeSelector() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCaseType, setSelectedCaseType] = useState<CaseType>({
-    id: "civil",
-    title: "Civil Law",
-    subtitle: "Legal disputes between parties",
-    icon: "⚖️",
-    typicalCases: [
-      "Personal Injury & Negligence Claims",
-      "Contract Disputes & Breach of Agreement",
-      "Property Disputes & Real Estate Issues",
-      "Employment Law & Discrimination",
-      "Tort Claims & Damages",
-    ],
-    standardOfProof: "Preponderance of evidence (51% likelihood)",
-  });
+interface CaseTypeSelectorProps {
+  caseId?: string;
+}
 
+export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCaseType, setSelectedCaseType] = useState<CaseType | null>(null);
+  const [isLoading, setIsLoading] = useState(!!caseId);
+
+  // Define caseTypes array first so it can be used in useEffect
   const caseTypes: CaseType[] = [
     {
       id: "tax",
@@ -242,6 +236,39 @@ export default function CaseTypeSelector() {
     },
   ];
 
+  useEffect(() => {
+    if (caseId) {
+      const fetchCaseTypeData = async () => {
+        try {
+          const res = await fetch(`/api/cases/${caseId}`);
+          const json = await res.json();
+
+          if (json.ok && json.data?.case_type) {
+            const caseTypeId = json.data.case_type;
+            const foundCaseType = caseTypes.find(ct => ct.id === caseTypeId);
+            if (foundCaseType) {
+              setSelectedCaseType(foundCaseType);
+            } else {
+              setSelectedCaseType(caseTypes[1]); // Civil Law default
+            }
+          } else {
+            setSelectedCaseType(caseTypes[1]); // Civil Law default
+          }
+        } catch (error) {
+          console.error("Failed to fetch case type data:", error);
+          setSelectedCaseType(caseTypes[1]); // Civil Law default on error
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchCaseTypeData();
+    } else {
+      setSelectedCaseType(caseTypes[1]); // Civil Law default
+      setIsLoading(false);
+    }
+  }, [caseId]);
+
   const handleSelectCaseType = (caseType: CaseType) => {
     setSelectedCaseType(caseType);
     setIsModalOpen(false);
@@ -286,7 +313,7 @@ export default function CaseTypeSelector() {
               <p className="text-gray-700 text-sm">
                 You have selected{" "}
                 <span className="font-semibold">
-                  {selectedCaseType.title}
+                  {selectedCaseType?.title || "N/A"}
                 </span>{" "}
                 - The analysis will apply the appropriate legal
                 standards and burden of proof specific to this case
@@ -320,7 +347,7 @@ export default function CaseTypeSelector() {
                   Case Type
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {selectedCaseType.subtitle}
+                  {selectedCaseType?.subtitle || "N/A"}
                 </p>
               </div>
             </div>
@@ -328,7 +355,7 @@ export default function CaseTypeSelector() {
             {/* Centered Case Type Name */}
             <div className="flex-1 flex justify-center">
               <span className="text-lg font-semibold text-gray-900">
-                {selectedCaseType.title}
+                {selectedCaseType?.title || "N/A"}
               </span>
             </div>
 
@@ -393,11 +420,10 @@ export default function CaseTypeSelector() {
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                        selectedCaseType.id === caseType.id
-                          ? "border-amber-500 bg-amber-50"
-                          : "border-gray-200 hover:border-amber-300"
-                      }`}
+                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
+                        ? "border-amber-500 bg-amber-50"
+                        : "border-gray-200 hover:border-amber-300"
+                        }`}
                     >
                       <div className="flex items-start mb-2">
                         <div className="text-3xl mr-3">
@@ -411,7 +437,7 @@ export default function CaseTypeSelector() {
                             {caseType.subtitle}
                           </p>
                         </div>
-                        {selectedCaseType.id === caseType.id && (
+                        {selectedCaseType?.id === caseType.id && (
                           <div className="flex-shrink-0">
                             <svg
                               className="w-5 h-5 text-amber-500"
@@ -468,6 +494,11 @@ export default function CaseTypeSelector() {
           </div>
         </div>
       )}
+      <SaveCaseButton
+        caseId={caseId}
+        field="case_type"
+        value={selectedCaseType?.id || "civil"}
+      />
     </>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import SaveCaseButton from "./SaveCaseButton";
+import { useEffect } from "react";
 
 interface Judge {
   id: string;
@@ -104,11 +106,33 @@ const judges: Judge[] = [
   },
 ];
 
-export default function JudgeSelection() {
-  const [selectedJudge, setSelectedJudge] = useState<string | null>(
-    "2"
-  );
+export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
+  const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const loadSavedJudge = async () => {
+      if (caseId) {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+          if (json.ok && json.data?.judge) {
+            setSelectedJudge(json.data.judge);
+          } else {
+            setSelectedJudge(null);
+          }
+        } catch (error) {
+          console.error("Failed to load saved judge:", error);
+          setSelectedJudge(null);
+        }
+      }
+    };
+
+    loadSavedJudge();
+  }, [caseId]);
 
   const getLeaningStyles = (color: "yellow" | "green" | "red") => {
     switch (color) {
@@ -196,11 +220,12 @@ export default function JudgeSelection() {
 
         {/* Compact Display with Button */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+          {!selectedJudgeData ? (
+            /* Empty State */
+            <div className="text-center py-8">
+              <div className="flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mx-auto mb-4">
                 <svg
-                  className="w-7 h-7 text-amber-700"
+                  className="w-8 h-8 text-amber-700"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -213,21 +238,50 @@ export default function JudgeSelection() {
                   />
                 </svg>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">
-                  Presiding Judge
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {selectedJudgeData
-                    ? selectedJudgeData.name
-                    : "Select a judge for your case"}
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                No Judge Selected
+              </h3>
+              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                Select a judge to analyze their judicial history, temperament, and ruling patterns for your case.
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+              >
+                Select a Judge
+              </button>
             </div>
+          ) : (
+            /* Selected Judge Display */
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+                  <svg
+                    className="w-7 h-7 text-amber-700"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Presiding Judge
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {selectedJudgeData.name}
+                  </p>
+                </div>
+              </div>
 
-            {/* Centered Judge Name or Button */}
-            <div className="flex-1 flex justify-center">
-              {selectedJudgeData && (
+              {/* Centered Judge Name */}
+              <div className="flex-1 flex justify-center">
                 <div className="text-center">
                   <p className="text-lg font-semibold text-gray-900">
                     {selectedJudgeData.name}
@@ -236,16 +290,16 @@ export default function JudgeSelection() {
                     {selectedJudgeData.experience} years experience
                   </p>
                 </div>
-              )}
-            </div>
+              </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
-            >
-              {selectedJudge ? "Change Judge" : "Select Judge"}
-            </button>
-          </div>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+              >
+                Change Judge
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -288,11 +342,10 @@ export default function JudgeSelection() {
                 <div
                   key={judge.id}
                   onClick={() => handleJudgeSelect(judge.id)}
-                  className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${
-                    selectedJudge === judge.id
-                      ? "border-amber-500 ring-2 ring-amber-200"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
+                  className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${selectedJudge === judge.id
+                    ? "border-amber-500 ring-2 ring-amber-200"
+                    : "border-gray-200 hover:border-gray-300"
+                    }`}
                 >
                   <div className="p-6">
                     {/* Judge Header */}
@@ -426,6 +479,12 @@ export default function JudgeSelection() {
           </div>
         </div>
       )}
+      <SaveCaseButton
+        caseId={caseId}
+        field="judge"
+        value={selectedJudge}
+        onSave={onSaveSuccess}
+      />
     </>
   );
 }

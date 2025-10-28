@@ -1,6 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+interface DBCase {
+  id: string;
+  case_details?: any;
+  case_type?: string | null;
+  role?: string | null;
+  jurisdiction?: any;
+  created_at: string;
+  owner_id?: string | null;
+}
 
 interface Case {
   id: string;
@@ -15,63 +26,78 @@ interface Case {
   lastUpdated: string;
 }
 
-const mockCases: Case[] = [
-  {
-    id: "CASE-001",
-    title: "State v. Johnson - Assault Charges",
-    type: "Criminal",
+// Map DB case to UI case
+function mapDBCaseToUI(dbCase: DBCase): Case {
+  const details = dbCase.case_details || {};
+  const title = details["basic-info"]?.caseName || `Case ${dbCase.id}`;
+  const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
+
+  // Calculate lastUpdated as relative time
+  const createdAt = new Date(dbCase.created_at);
+  const now = new Date();
+  const diffMs = now.getTime() - createdAt.getTime();
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffHours / 24);
+
+  let lastUpdated = "just now";
+  if (diffHours > 0) lastUpdated = `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+  if (diffDays > 0) lastUpdated = `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+
+  return {
+    id: dbCase.id,
+    title,
+    type: caseType as "Criminal" | "Civil",
     status: "Active",
-    currentStep: "Jury Selection",
-    yourRole: "Prosecutor",
-    permissions: "Admin",
-    priority: "High",
-    documents: 23,
-    lastUpdated: "2 hours ago",
-  },
-  {
-    id: "CASE-002",
-    title: "Smith Corp v. Anderson LLC - Contract Dispute",
-    type: "Civil",
-    status: "Under Review",
-    currentStep: "Case Details",
-    yourRole: "Plaintiff's Attorney",
-    permissions: "Edit",
-    priority: "Medium",
-    documents: 8,
-    lastUpdated: "1 day ago",
-  },
-  {
-    id: "CASE-003",
-    title: "People v. Williams - DUI",
-    type: "Criminal",
-    status: "Active",
-    currentStep: "Trial Strategy",
-    yourRole: "Defense Attorney",
+    currentStep: "Analysis",
+    yourRole: dbCase.role || "Plaintiff",
     permissions: "Admin",
     priority: "Medium",
-    documents: 15,
-    lastUpdated: "3 hours ago",
-  },
-  {
-    id: "CASE-004",
-    title: "Davis v. Metro Insurance - Personal Injury",
-    type: "Civil",
-    status: "Completed",
-    currentStep: "Verdict",
-    yourRole: "Plaintiff's Attorney",
-    permissions: "View Only",
-    priority: "Low",
-    documents: 42,
-    lastUpdated: "5 days ago",
-  },
-];
+    documents: 0,
+    lastUpdated,
+  };
+}
 
 export default function CasePortfolio() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [typeFilter, setTypeFilter] = useState("All Types");
+  const [cases, setCases] = useState<Case[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const filteredCases = mockCases.filter((case_) => {
+  useEffect(() => {
+    const fetchCases = async () => {
+      try {
+        const res = await fetch("/api/cases");
+        const json = await res.json();
+
+        if (res.status === 401) {
+          setIsAuthenticated(false);
+          setCases([]);
+        } else if (!res.ok || !json?.ok) {
+          setError(json?.error || "Failed to fetch cases");
+          setCases([]);
+        } else {
+          setIsAuthenticated(true);
+          const dbCases: DBCase[] = json.cases || [];
+          const uiCases = dbCases.map(mapDBCaseToUI);
+          setCases(uiCases);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Unknown error");
+        setCases([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCases();
+  }, []);
+
+  const filteredCases = cases.filter((case_) => {
     const matchesSearch =
       case_.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       case_.id.toLowerCase().includes(searchQuery.toLowerCase());
@@ -83,8 +109,46 @@ export default function CasePortfolio() {
     return matchesSearch && matchesStatus && matchesType;
   });
 
+  const handleDelete = async (caseId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this case?")) return;
+
+    try {
+      const res = await fetch(`/api/cases?id=${caseId}`, {
+        method: "DELETE",
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "Failed to delete case");
+      }
+
+      // Remove from local state
+      setCases(cases.filter((c) => c.id !== caseId));
+      setDeletingId(null);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to delete case");
+    }
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden ${!isAuthenticated ? "relative" : ""}`}>
+      {/* Blur overlay for unauthenticated users */}
+      {!isAuthenticated && (
+        <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="text-center">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Sign in to view your cases</h3>
+            <p className="text-sm text-gray-600 mb-4">Please sign in to access your case portfolio</p>
+            <button
+              onClick={() => router.push("/auth/signin")}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
@@ -97,9 +161,12 @@ export default function CasePortfolio() {
               insights
             </p>
           </div>
-          <button className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto">
+          <button
+            onClick={() => router.push("/case-analysis")}
+            className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
+          >
             <svg
-              className="w-5 h-5 flex-shrink-0"
+              className="w-5 h-5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -111,162 +178,146 @@ export default function CasePortfolio() {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            <span>+ New Case Analysis</span>
+            New Case
           </button>
         </div>
 
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-3">
-          <div className="flex-1 relative">
-            <svg
-              className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+          <div className="flex-1">
             <input
               type="text"
-              placeholder="Search cases..."
+              placeholder="Search by case title or ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
             />
           </div>
-          <div className="flex gap-3">
-            <div className="relative">
-              <svg
-                className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-sm appearance-none cursor-pointer"
-              >
-                <option>All Statuses</option>
-                <option>Active</option>
-                <option>Under Review</option>
-                <option>Completed</option>
-              </select>
-            </div>
-            <div className="relative">
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                className="pl-4 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-sm appearance-none cursor-pointer"
-              >
-                <option>All Types</option>
-                <option>Criminal</option>
-                <option>Civil</option>
-              </select>
-            </div>
-          </div>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
+          >
+            <option>All Statuses</option>
+            <option>Active</option>
+            <option>Under Review</option>
+            <option>Completed</option>
+          </select>
+
+          {/* Type Filter */}
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
+          >
+            <option>All Types</option>
+            <option>Criminal</option>
+            <option>Civil</option>
+          </select>
         </div>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="p-8 text-center">
+          <div className="animate-spin h-8 w-8 border-b-2 border-amber-500 rounded-full mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading your cases...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="p-8 text-center">
+          <p className="text-red-600">Error: {error}</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && !error && filteredCases.length === 0 && isAuthenticated && (
+        <div className="p-8 text-center">
+          <p className="text-gray-600">No cases found. Create a new case to get started.</p>
+        </div>
+      )}
+
       {/* Table */}
-      <div>
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Case ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Title
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Your Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Documents
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Last Updated
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredCases.map((case_) => (
-              <tr
-                key={case_.id}
-                className="hover:bg-gray-50 transition-colors cursor-pointer"
-              >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                  {case_.id}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-900">
-                  {case_.title}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {case_.type}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                      case_.status === "Active"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : case_.status === "Completed"
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
-                  >
-                    {case_.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                  {case_.yourRole}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold">
-                      {case_.documents}
-                    </span>
-                    <svg
-                      className="w-4 h-4 text-gray-400 flex-shrink-0"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {case_.lastUpdated}
-                </td>
+      {!isLoading && !error && filteredCases.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Case ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Case Title
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Your Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Last Updated
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredCases.map((case_) => (
+                <tr
+                  key={case_.id}
+                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/case-analysis/detailed?step=7&caseId=${case_.id}`)}
+                >
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                    {case_.id.substring(0, 8)}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-900">
+                    {case_.title}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    {case_.type}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${case_.status === "Active"
+                        ? "bg-green-100 text-green-800"
+                        : case_.status === "Completed"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                        }`}
+                    >
+                      {case_.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {case_.yourRole}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {case_.lastUpdated}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    <button
+                      onClick={(e) => handleDelete(case_.id, e)}
+                      className="text-red-600 hover:text-red-900 cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

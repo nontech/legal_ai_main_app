@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Navbar from "../../components/Navbar";
 import ProgressStepper from "../../components/ProgressStepper";
 import JurisdictionSection from "../../components/JurisdictionSection";
@@ -12,12 +14,13 @@ import CaseDetailsSection from "../../components/CaseDetailsSection";
 import JudgeSelection from "../../components/JudgeSelection";
 import PretrialProcess from "../../components/PretrialProcess";
 import JuryComposition from "../../components/JuryComposition";
-import NavigationFooter from "../../components/NavigationFooter";
 import ResultsStep from "../../components/ResultsStep";
 
-export default function DetailedCaseAnalysis() {
+function DetailedCaseAnalysisContent() {
   const searchParams = useSearchParams();
   const initialStep = searchParams.get("step");
+  const caseIdParam = searchParams.get("caseId");
+  const caseId = caseIdParam || undefined;
   const [currentStep, setCurrentStep] = useState(
     initialStep ? parseInt(initialStep) : 0
   );
@@ -26,19 +29,85 @@ export default function DetailedCaseAnalysis() {
   const totalSteps = 8; // Total number of steps
 
   // Track completion data for each step (percentage)
-  // This should be calculated based on actual form data, not navigation
   const [completionData, setCompletionData] = useState<{
     [key: number]: number;
   }>({
-    0: 100, // Jurisdiction - has default values (country, state, city, court)
-    1: 100, // Case Type - has default value (Civil Law)
-    2: 100, // Role - has default value (Plaintiff)
-    3: 0, // Charges - set to 100 when form data exists
-    4: 67, // Case Details - 4 out of 6 sub-sections completed (Basic Info, Evidence, Legal Precedents, Police Report)
-    5: 100, // Judge - Judge Patricia Anderson is selected
-    6: 100, // Jury - Demographics (1) and Psychological (2) selections made
+    0: 0, // Jurisdiction
+    1: 0, // Case Type
+    2: 0, // Role
+    3: 0, // Charges
+    4: 0, // Case Details
+    5: 0, // Judge
+    6: 0, // Jury
     7: 0, // Results
   });
+
+  // Fetch case data and calculate completion percentages
+  const fetchCaseCompletion = async () => {
+    if (!caseId) return;
+
+    try {
+      const res = await fetch(`/api/cases/${caseId}`);
+      const json = await res.json();
+
+      if (json.ok && json.data) {
+        const data = json.data;
+        const newCompletionData: { [key: number]: number } = {
+          0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0,
+          7: 0,
+        };
+
+        // Check jurisdiction (step 0)
+        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.state && data.jurisdiction.city && data.jurisdiction.court) {
+          newCompletionData[0] = 100;
+        }
+
+        // Check case type (step 1)
+        if (data.case_type) {
+          newCompletionData[1] = 100;
+        }
+
+        // Check role (step 2)
+        if (data.role) {
+          newCompletionData[2] = 100;
+        }
+
+        // Check charges (step 3)
+        if (data.charges && Array.isArray(data.charges) && data.charges.length > 0) {
+          newCompletionData[3] = 100;
+        }
+
+        // Check case details (step 4) - Use saved completion status from database
+        if (data.case_details?._completion_status !== undefined) {
+          newCompletionData[4] = data.case_details._completion_status;
+        }
+
+        // Check judge (step 5)
+        if (data.judge) {
+          newCompletionData[5] = 100;
+        }
+
+        // Check jury (step 6)
+        if (data.jury && data.jury.demographics && data.jury.demographics.length > 0 && data.jury.psychological && data.jury.psychological.length > 0) {
+          newCompletionData[6] = 100;
+        }
+
+        setCompletionData(newCompletionData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch case completion data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCaseCompletion();
+  }, [caseId]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -52,36 +121,51 @@ export default function DetailedCaseAnalysis() {
     }
   };
 
+  const handleChargesCompletion = (isComplete: boolean) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      3: isComplete ? 100 : 0,
+    }));
+  };
+
+  const handleCaseDetailsCompletion = (percentage: number) => {
+    setCompletionData((prev) => ({
+      ...prev,
+      4: percentage,
+    }));
+  };
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection />;
+        return <JurisdictionSection caseId={caseId} />;
       case 1:
-        return <CaseTypeSelector />;
+        return <CaseTypeSelector caseId={caseId} />;
       case 2:
-        return <RoleSelector />;
+        return <RoleSelector caseId={caseId} />;
       case 3:
-        return <ChargesSection />;
+        return <ChargesSection caseId={caseId} onCompletionChange={handleChargesCompletion} />;
       case 4:
-        return <CaseDetailsSection onModalChange={setIsModalOpen} />;
+        return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection />;
+        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
       case 6:
-        return <JuryComposition />;
+        return <JuryComposition caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
       case 7:
         return <ResultsStep />;
       default:
-        return <JurisdictionSection />;
+        return <JurisdictionSection caseId={caseId} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onPretrialClick={() => setIsPretrialOpen(true)} />
+      <Navbar onPretrialClick={() => setIsPretrialOpen(true)} showPretrialButton={true} />
       <ProgressStepper
         currentStep={currentStep}
         onStepChange={setCurrentStep}
         completionData={completionData}
+        caseId={caseId || undefined}
       />
 
       {/* Main content area with right margin for sidebar */}
@@ -159,16 +243,14 @@ export default function DetailedCaseAnalysis() {
           </div>
         </div>
       )}
-
-      {/* Navigation Footer - Hidden when modal is open */}
-      {!isModalOpen && !isPretrialOpen && (
-        <NavigationFooter
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          onNext={handleNext}
-          onPrevious={handlePrevious}
-        />
-      )}
     </div>
+  );
+}
+
+export default function DetailedCaseAnalysis() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DetailedCaseAnalysisContent />
+    </Suspense>
   );
 }

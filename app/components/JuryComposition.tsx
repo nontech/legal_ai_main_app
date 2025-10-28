@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useEffect } from "react";
+import SaveCaseButton from "./SaveCaseButton";
 
 interface JuryCharacteristic {
   id: string;
@@ -8,13 +10,35 @@ interface JuryCharacteristic {
   description: string;
 }
 
-export default function JuryComposition() {
+export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
   const [selectedDemographics, setSelectedDemographics] = useState<
     string[]
   >([]);
   const [selectedPsychological, setSelectedPsychological] = useState<
     string[]
   >([]);
+
+  useEffect(() => {
+    const loadSavedJury = async () => {
+      if (caseId) {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+          if (json.ok && json.data?.jury) {
+            setSelectedDemographics(json.data.jury.demographics || []);
+            setSelectedPsychological(json.data.jury.psychological || []);
+          }
+        } catch (error) {
+          console.error("Failed to load saved jury data:", error);
+        }
+      }
+    };
+
+    loadSavedJury();
+  }, [caseId]);
 
   const demographics: JuryCharacteristic[] = [
     {
@@ -186,16 +210,16 @@ export default function JuryComposition() {
           </div>
           {(selectedDemographics.length > 0 ||
             selectedPsychological.length > 0) && (
-            <button
-              onClick={() => {
-                setSelectedDemographics([]);
-                setSelectedPsychological([]);
-              }}
-              className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors"
-            >
-              Clear All
-            </button>
-          )}
+              <button
+                onClick={() => {
+                  setSelectedDemographics([]);
+                  setSelectedPsychological([]);
+                }}
+                className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors"
+              >
+                Clear All
+              </button>
+            )}
         </div>
       </div>
 
@@ -228,11 +252,10 @@ export default function JuryComposition() {
             {demographics.map((item) => (
               <label
                 key={item.id}
-                className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedDemographics.includes(item.id)
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedDemographics.includes(item.id)
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 <input
                   type="checkbox"
@@ -280,11 +303,10 @@ export default function JuryComposition() {
             {psychological.map((item) => (
               <label
                 key={item.id}
-                className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                  selectedPsychological.includes(item.id)
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                }`}
+                className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedPsychological.includes(item.id)
+                  ? "border-purple-500 bg-purple-50"
+                  : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
               >
                 <input
                   type="checkbox"
@@ -309,56 +331,65 @@ export default function JuryComposition() {
       {/* AI Insights (Conditional) */}
       {(selectedDemographics.length > 0 ||
         selectedPsychological.length > 0) && (
-        <div className="bg-white rounded-lg shadow-sm border-2 border-blue-300 p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
+          <div className="bg-white rounded-lg shadow-sm border-2 border-blue-300 p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full">
+                  <svg
+                    className="w-6 h-6 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-gray-900 mb-2">
+                  AI-Powered Jury Analysis
+                </h4>
+                <p className="text-gray-700 mb-4">
+                  Based on your selections, our AI will analyze how
+                  these jury characteristics might influence your case
+                  strategy, identify potential challenges, and recommend
+                  tailored approaches for voir dire and trial
+                  presentation.
+                </p>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                    />
+                  </svg>
+                  Generate Jury Profile Analysis
+                </button>
               </div>
             </div>
-            <div className="flex-1">
-              <h4 className="text-lg font-bold text-gray-900 mb-2">
-                AI-Powered Jury Analysis
-              </h4>
-              <p className="text-gray-700 mb-4">
-                Based on your selections, our AI will analyze how
-                these jury characteristics might influence your case
-                strategy, identify potential challenges, and recommend
-                tailored approaches for voir dire and trial
-                presentation.
-              </p>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                  />
-                </svg>
-                Generate Jury Profile Analysis
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      <SaveCaseButton
+        caseId={caseId}
+        field="jury"
+        value={{
+          demographics: selectedDemographics,
+          psychological: selectedPsychological
+        }}
+        onSave={onSaveSuccess}
+      />
     </div>
   );
 }
