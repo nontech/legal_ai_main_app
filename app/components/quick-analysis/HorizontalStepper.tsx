@@ -15,7 +15,7 @@ export default function HorizontalStepper({
   ];
 
   return (
-    <div className="flex items-center justify-center gap-8">
+    <div className="flex items-center justify-center gap-6">
       {steps.map((step, index) => (
         <div key={step.number} className="flex items-center">
           {/* Step Circle and Label */}
@@ -25,7 +25,7 @@ export default function HorizontalStepper({
             disabled={!onStepClick}
           >
             <div
-              className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all ${
+              className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all ${
                 currentStep >= step.number
                   ? "bg-blue-600 border-blue-600 text-white group-hover:bg-blue-700"
                   : "bg-white border-gray-300 text-gray-400 group-hover:border-gray-400"
@@ -33,7 +33,7 @@ export default function HorizontalStepper({
             >
               {currentStep > step.number ? (
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -46,7 +46,7 @@ export default function HorizontalStepper({
                   />
                 </svg>
               ) : (
-                <span className="text-lg font-bold">
+                <span className="text-base font-semibold">
                   {step.number}
                 </span>
               )}
@@ -58,13 +58,13 @@ export default function HorizontalStepper({
                   : "text-gray-500 group-hover:text-gray-600"
               }`}
             >
-              {step.label}
-            </span>
+                {step.label}
+              </span>
           </button>
 
           {/* Connecting Line */}
           {index < steps.length - 1 && (
-            <div className="w-32 h-0.5 mx-4 mb-6">
+            <div className="w-20 h-0.5 mx-3 mb-4">
               <div
                 className={`h-full transition-all ${
                   currentStep > step.number

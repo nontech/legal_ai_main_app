@@ -385,21 +385,7 @@ export default function QuickAnalysisForm({
 
   return (
     <div className="relative">
-      {/* Sticky Header */}
-      <div className="sticky top-20 z-20 bg-gray-50 pb-8">
-        <div className="text-center pt-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Quick Case Analysis
-          </h1>
-          <p className="text-gray-600">
-            Fill in the basic information below to get your
-            preliminary analysis
-          </p>
-        </div>
-      </div>
-
-      {/* Scrollable Content Area - with padding bottom for fixed button */}
-      <div className="max-w-6xl mx-auto px-4 pb-32 h-[calc(100vh-360px)] overflow-y-auto">
+      <div className="max-w-6xl mx-auto px-4 pb-32 space-y-6">
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
