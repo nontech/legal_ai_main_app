@@ -34,6 +34,46 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const type = searchParams.get("type");
+
+        // If type is "quick-analysis", create an empty case
+        if (type === "quick-analysis") {
+            const supabase = await getSupabaseServerClient();
+            const { data: userRes, error: userErr } = await supabase.auth.getUser();
+
+            if (userErr && userErr.message !== "Auth session missing!") {
+                return NextResponse.json({ ok: false, error: userErr.message }, { status: 500 });
+            }
+
+            const isAuthed = Boolean(userRes?.user);
+            const client = isAuthed ? supabase : getSupabaseAdminClient();
+            const ownerId = userRes?.user?.id ?? null;
+
+            const { data, error } = await client
+                .from("cases")
+                .insert({
+                    case_details: null,
+                    jurisdiction: null,
+                    case_type: null,
+                    role: null,
+                    charges: null,
+                    judge: null,
+                    jury: null,
+                    result: null,
+                    owner_id: ownerId,
+                })
+                .select("id")
+                .single();
+
+            if (error) {
+                return NextResponse.json({ ok: false, error: error.message, code: error.code }, { status: 500 });
+            }
+
+            return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
+        }
+
+        // Original POST logic for detailed case creation
         const {
             caseName,
             caseDescription,
@@ -72,7 +112,7 @@ export async function POST(request: Request) {
             .from("cases")
             .insert({
                 case_details: {
-                    "basic-info": {
+                    "case_information": {
                         caseName,
                         caseDescription,
                         files: [],

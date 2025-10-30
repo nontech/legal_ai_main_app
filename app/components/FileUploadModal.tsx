@@ -31,6 +31,19 @@ interface FileUploadModalProps {
 
 type ViewType = "upload" | "summary";
 
+type DocumentCategory =
+  | "case_information"
+  | "evidence_and_supporting_materials"
+  | "relevant_legal_precedents"
+  | "key_witness_and_testimony"
+  | "police_report"
+  | "potential_challenges_and_weaknesses";
+
+interface ClassifiedUploadedFile extends UploadedFile {
+  category?: DocumentCategory;
+  isClassifying?: boolean;
+}
+
 export default function FileUploadModal({
   isOpen,
   onClose,
@@ -103,17 +116,62 @@ export default function FileUploadModal({
   };
 
   const handleFiles = (files: File[]) => {
-    const newFiles: UploadedFile[] = files.map((file) => ({
+    const newFiles: ClassifiedUploadedFile[] = files.map((file) => ({
       id: Date.now().toString() + Math.random().toString(36),
       name: file.name,
       size: file.size,
       type: file.type,
       uploadedAt: new Date(),
+      category: undefined,
+      isClassifying: true,
     }));
-    const updatedFiles = [...uploadedFiles, ...newFiles];
+    const updatedFiles = [...uploadedFiles, ...newFiles] as ClassifiedUploadedFile[];
     setUploadedFiles(updatedFiles);
     if (onFilesUpdate) {
       onFilesUpdate(updatedFiles);
+    }
+
+    // Classify each file
+    newFiles.forEach((fileObj) => {
+      classifyFile(fileObj.id, files.find(f => f.name === fileObj.name)!);
+    });
+  };
+
+  const classifyFile = async (fileId: string, file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/documents/classify", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Classification failed");
+      }
+
+      const result = await response.json();
+      const category = (result.category || "case_information") as DocumentCategory;
+
+      // Update file with classification
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileId
+            ? { ...(f as ClassifiedUploadedFile), category, isClassifying: false }
+            : f
+        ) as ClassifiedUploadedFile[]
+      );
+    } catch (error) {
+      console.error("Failed to classify file:", error);
+      // Default to case_information
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileId
+            ? { ...(f as ClassifiedUploadedFile), category: "case_information", isClassifying: false }
+            : f
+        ) as ClassifiedUploadedFile[]
+      );
     }
   };
 

@@ -9,15 +9,22 @@ interface CompactJurisdictionProps {
     city: string;
     court: string;
   }) => void;
+  initialValues?: {
+    country?: string;
+    state?: string;
+    city?: string;
+    court?: string;
+  };
 }
 
 export default function CompactJurisdiction({
   onUpdate,
+  initialValues = {},
 }: CompactJurisdictionProps) {
-  const [country, setCountry] = useState("United States of America");
-  const [state, setState] = useState("Alabama");
-  const [city, setCity] = useState("Mobile");
-  const [court, setCourt] = useState("Southern District of Alabama");
+  const [country, setCountry] = useState(initialValues.country || "");
+  const [state, setState] = useState(initialValues.state || "");
+  const [city, setCity] = useState(initialValues.city || "");
+  const [court, setCourt] = useState(initialValues.court || "");
 
   const handleChange = (field: string, value: string) => {
     const updates = { country, state, city, court };
@@ -32,6 +39,35 @@ export default function CompactJurisdiction({
       onUpdate(updates);
     }
   };
+
+  const countryOptions = [
+    "United States of America",
+    "Canada",
+    "United Kingdom",
+  ];
+
+  const stateOptions = [
+    "Alabama",
+    "Alaska",
+    "Arizona",
+    "California",
+    "Florida",
+    "New York",
+    "Texas",
+  ];
+
+  const cityOptions = [
+    "Mobile",
+    "Birmingham",
+    "Montgomery",
+    "Huntsville",
+  ];
+
+  const courtOptions = [
+    "Southern District of Alabama",
+    "Northern District of Alabama",
+    "Middle District of Alabama",
+  ];
 
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -77,18 +113,20 @@ export default function CompactJurisdiction({
           >
             Country
           </label>
-          <select
+          <input
             id="country"
+            type="text"
+            list="countryList"
             value={country}
             onChange={(e) => handleChange("country", e.target.value)}
+            placeholder="Enter country"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          >
-            <option value="United States of America">
-              United States of America
-            </option>
-            <option value="Canada">Canada</option>
-            <option value="United Kingdom">United Kingdom</option>
-          </select>
+          />
+          <datalist id="countryList">
+            {countryOptions.map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
         </div>
 
         {/* State/Province */}
@@ -99,20 +137,20 @@ export default function CompactJurisdiction({
           >
             State/Province
           </label>
-          <select
+          <input
             id="state"
+            type="text"
+            list="stateList"
             value={state}
             onChange={(e) => handleChange("state", e.target.value)}
+            placeholder="Enter state"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          >
-            <option value="Alabama">Alabama</option>
-            <option value="Alaska">Alaska</option>
-            <option value="Arizona">Arizona</option>
-            <option value="California">California</option>
-            <option value="Florida">Florida</option>
-            <option value="New York">New York</option>
-            <option value="Texas">Texas</option>
-          </select>
+          />
+          <datalist id="stateList">
+            {stateOptions.map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
         </div>
 
         {/* City */}
@@ -123,17 +161,20 @@ export default function CompactJurisdiction({
           >
             City
           </label>
-          <select
+          <input
             id="city"
+            type="text"
+            list="cityList"
             value={city}
             onChange={(e) => handleChange("city", e.target.value)}
+            placeholder="Enter city"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          >
-            <option value="Mobile">Mobile</option>
-            <option value="Birmingham">Birmingham</option>
-            <option value="Montgomery">Montgomery</option>
-            <option value="Huntsville">Huntsville</option>
-          </select>
+          />
+          <datalist id="cityList">
+            {cityOptions.map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
         </div>
 
         {/* Court */}
@@ -144,22 +185,20 @@ export default function CompactJurisdiction({
           >
             Court
           </label>
-          <select
+          <input
             id="court"
+            type="text"
+            list="courtList"
             value={court}
             onChange={(e) => handleChange("court", e.target.value)}
+            placeholder="Enter court"
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          >
-            <option value="Southern District of Alabama">
-              Southern District of Alabama
-            </option>
-            <option value="Northern District of Alabama">
-              Northern District of Alabama
-            </option>
-            <option value="Middle District of Alabama">
-              Middle District of Alabama
-            </option>
-          </select>
+          />
+          <datalist id="courtList">
+            {courtOptions.map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
         </div>
       </div>
     </div>

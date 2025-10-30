@@ -31,6 +31,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
 
             // Load charges if they exist
             if (caseData.charges && Array.isArray(caseData.charges)) {
+              console.log("Case data charges:", caseData.charges);
               setCharges(caseData.charges);
               if (caseData.charges.length > 0) {
                 // Notify parent that charges are complete

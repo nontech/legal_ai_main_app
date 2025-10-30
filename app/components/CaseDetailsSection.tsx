@@ -67,21 +67,23 @@ export default function CaseDetailsSection({
 
   // Fetch case details from database if caseId is provided
   useEffect(() => {
+    console.log("caseId", caseId);
     if (caseId) {
       const fetchCaseDetails = async () => {
         try {
           const res = await fetch(`/api/cases/${caseId}`);
           const json = await res.json();
-
+          console.log("json", json);
           if (json.ok && json.data) {
             // Load case title and description from basic-info
-            if (json.data.case_details?.["basic-info"]?.caseName) {
-              setCaseTitle(json.data.case_details["basic-info"].caseName);
-              setEditedTitle(json.data.case_details["basic-info"].caseName);
+            if (json.data.case_details?.["case_information"]?.caseName) {
+              console.log("caseName", json.data.case_details["case_information"].caseName);
+              setCaseTitle(json.data.case_details["case_information"].caseName);
+              setEditedTitle(json.data.case_details["case_information"].caseName);
             }
-            if (json.data.case_details?.["basic-info"]?.caseDescription) {
-              setCaseDescription(json.data.case_details["basic-info"].caseDescription);
-              setEditedDescription(json.data.case_details["basic-info"].caseDescription);
+            if (json.data.case_details?.["case_information"]?.caseDescription) {
+              setCaseDescription(json.data.case_details["case_information"].caseDescription);
+              setEditedDescription(json.data.case_details["case_information"].caseDescription);
             }
 
             // Load section details

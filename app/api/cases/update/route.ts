@@ -3,11 +3,11 @@ import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function PATCH(request: Request) {
     try {
-        const { caseId, field, value } = await request.json();
+        const { caseId, field, value, case_type, role, jurisdiction } = await request.json();
 
-        if (!caseId || !field) {
+        if (!caseId) {
             return NextResponse.json(
-                { ok: false, error: "caseId and field are required" },
+                { ok: false, error: "caseId is required" },
                 { status: 400 }
             );
         }
@@ -25,7 +25,34 @@ export async function PATCH(request: Request) {
 
         // Build update object dynamically
         const updateData: Record<string, any> = {};
-        updateData[field] = value;
+
+        // Add field and value if provided
+        if (field && value !== undefined) {
+            updateData[field] = value;
+        }
+
+        // Add case_type if provided
+        if (case_type !== undefined) {
+            updateData.case_type = case_type;
+        }
+
+        // Add role if provided
+        if (role !== undefined) {
+            updateData.role = role;
+        }
+
+        // Add jurisdiction if provided
+        if (jurisdiction !== undefined) {
+            updateData.jurisdiction = jurisdiction;
+        }
+
+        // If no fields to update, return error
+        if (Object.keys(updateData).length === 0) {
+            return NextResponse.json(
+                { ok: false, error: "No fields to update" },
+                { status: 400 }
+            );
+        }
 
         const { data, error } = await supabase
             .from("cases")

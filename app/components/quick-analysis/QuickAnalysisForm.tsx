@@ -5,43 +5,139 @@ import { useRouter } from "next/navigation";
 import CompactJurisdiction from "./CompactJurisdiction";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
+import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, Users } from "lucide-react";
+
+type DocumentCategory =
+  | "case_information"
+  | "evidence_and_supporting_materials"
+  | "relevant_legal_precedents"
+  | "key_witness_and_testimony"
+  | "police_report"
+  | "potential_challenges_and_weaknesses";
+
+interface ClassifiedFile {
+  file: File;
+  category: DocumentCategory;
+  isClassifying: boolean;
+}
 
 interface QuickAnalysisFormProps {
   initialDocuments?: File[];
   onCalculateResults?: (data: any) => void;
+  uploadedMetadata?: any;
+  caseInformationFiles?: File[];
+  caseId?: string | null;
 }
 
 export default function QuickAnalysisForm({
   initialDocuments = [],
   onCalculateResults,
+  uploadedMetadata = {},
+  caseInformationFiles = [],
+  caseId,
 }: QuickAnalysisFormProps) {
   const router = useRouter();
-  const [caseName, setCaseName] = useState("");
-  const [caseDescription, setCaseDescription] = useState("");
-  const [uploadedFiles, setUploadedFiles] =
-    useState<File[]>(initialDocuments);
-  // Initialize with the same defaults used inside the compact components
-  const [jurisdiction, setJurisdiction] = useState<any>({
-    country: "United States of America",
-    state: "Alabama",
-    city: "Mobile",
-    court: "Southern District of Alabama",
-  });
+  const [caseName, setCaseName] = useState(uploadedMetadata?.caseName || "");
+  const [caseDescription, setCaseDescription] = useState(uploadedMetadata?.caseDescription || "");
+  const [classifiedFiles, setClassifiedFiles] = useState<ClassifiedFile[]>(
+    initialDocuments.map(file => ({
+      file,
+      category: "case_information" as DocumentCategory,
+      isClassifying: false,
+    }))
+  );
+  // Initialize with metadata from documents or empty
+  const [jurisdiction, setJurisdiction] = useState<any>(
+    uploadedMetadata?.jurisdiction || {
+      country: "",
+      state: "",
+      city: "",
+      court: "",
+    }
+  );
   // Store the case type as its string id that API expects
-  const [caseTypeId, setCaseTypeId] = useState<string>("civil");
-  const [role, setRole] = useState<string>("plaintiff");
+  const [caseTypeId, setCaseTypeId] = useState<string>(uploadedMetadata?.caseType || "");
+  const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
+
+  const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
+    case_information: { label: "Case Information", color: "blue", icon: "📋" },
+    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "purple", icon: "🔍" },
+    relevant_legal_precedents: { label: "Legal Precedents", color: "green", icon: "⚖️" },
+    key_witness_and_testimony: { label: "Witness & Testimony", color: "orange", icon: "👤" },
+    police_report: { label: "Police Report", color: "red", icon: "🚔" },
+    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "yellow", icon: "⚠️" },
+  };
+
+  const getCategoryColor = (color: string) => {
+    const colorMap: Record<string, string> = {
+      blue: "bg-blue-100 text-blue-700 border-blue-300",
+      purple: "bg-purple-100 text-purple-700 border-purple-300",
+      green: "bg-green-100 text-green-700 border-green-300",
+      orange: "bg-orange-100 text-orange-700 border-orange-300",
+      red: "bg-red-100 text-red-700 border-red-300",
+      yellow: "bg-yellow-100 text-yellow-700 border-yellow-300",
+    };
+    return colorMap[color] || colorMap.blue;
+  };
+
+  const classifyFile = async (file: File, index: number) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/documents/classify", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Classification failed");
+      }
+
+      const result = await response.json();
+      const category = (result.category || "case_information") as DocumentCategory;
+
+      setClassifiedFiles((prev) =>
+        prev.map((cf, i) =>
+          i === index
+            ? { ...cf, category, isClassifying: false }
+            : cf
+        )
+      );
+    } catch (error) {
+      console.error("Failed to classify file:", error);
+      setClassifiedFiles((prev) =>
+        prev.map((cf, i) =>
+          i === index
+            ? { ...cf, category: "case_information", isClassifying: false }
+            : cf
+        )
+      );
+    }
+  };
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setUploadedFiles([...uploadedFiles, ...newFiles]);
+      const newClassifiedFiles = newFiles.map(file => ({
+        file,
+        category: "case_information" as DocumentCategory,
+        isClassifying: true,
+      }));
+
+      setClassifiedFiles(prev => [...prev, ...newClassifiedFiles]);
+
+      // Classify each new file
+      newClassifiedFiles.forEach((cf, idx) => {
+        classifyFile(cf.file, classifiedFiles.length + idx);
+      });
     }
   };
 
   const handleRemoveFile = (index: number) => {
-    setUploadedFiles(uploadedFiles.filter((_, i) => i !== index));
+    setClassifiedFiles(classifiedFiles.filter((_, i) => i !== index));
   };
 
   const formatFileSize = (bytes: number) => {
@@ -56,40 +152,169 @@ export default function QuickAnalysisForm({
     );
   };
 
+  const getCaseTypeById = (id: string) => {
+    const caseTypes: Record<string, any> = {
+      tax: {
+        id: "tax",
+        title: "Tax Law",
+        subtitle: "Federal and state tax disputes",
+        icon: Coins,
+        typicalCases: [
+          "IRS Audits & Appeals",
+          "Tax Evasion & Fraud Cases",
+          "Business Tax Deductions",
+          "Estate & Gift Tax Disputes",
+          "Tax Court Proceedings",
+        ],
+        standardOfProof: "Clear and convincing evidence",
+      },
+      civil: {
+        id: "civil",
+        title: "Civil Law",
+        subtitle: "Legal disputes between parties",
+        icon: Scale,
+        typicalCases: [
+          "Personal Injury & Negligence Claims",
+          "Contract Disputes & Breach of Agreement",
+          "Property Disputes & Real Estate Issues",
+          "Employment Law & Discrimination",
+          "Tort Claims & Damages",
+        ],
+        standardOfProof: "Preponderance of evidence (51% likelihood)",
+      },
+      criminal: {
+        id: "criminal",
+        title: "Criminal Law",
+        subtitle: "State/federal prosecution of crimes",
+        icon: Gavel,
+        typicalCases: [
+          "Felonies (Murder, Rape, Robbery)",
+          "Misdemeanors (Theft, Assault, DUI)",
+          "White Collar Crimes (Fraud, Embezzlement)",
+          "Drug Offenses & Trafficking",
+          "Domestic Violence & Sexual Assault",
+        ],
+        standardOfProof: "Beyond reasonable doubt (95%+ certainty)",
+      },
+      labor: {
+        id: "labor",
+        title: "Labor Law",
+        subtitle: "Workplace rights and employment disputes",
+        icon: Briefcase,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      family: {
+        id: "family",
+        title: "Family Law",
+        subtitle: "Domestic relations and family matters",
+        icon: Heart,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      maritime: {
+        id: "maritime",
+        title: "Maritime Law",
+        subtitle: "Nautical and maritime legal matters",
+        icon: Anchor,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      property: {
+        id: "property",
+        title: "Property Law",
+        subtitle: "Real estate and property rights",
+        icon: Home,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      corporate: {
+        id: "corporate",
+        title: "Corporate Law",
+        subtitle: "Business operations and commercial disputes",
+        icon: Building2,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      immigration: {
+        id: "immigration",
+        title: "Immigration Law",
+        subtitle: "Immigration and naturalization matters",
+        icon: Globe,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+      "human-rights": {
+        id: "human-rights",
+        title: "Human Rights Law",
+        subtitle: "Fundamental human rights and freedoms",
+        icon: Users,
+        typicalCases: [],
+        standardOfProof: "",
+      },
+    };
+    return caseTypes[id] || null;
+  };
+
   const handleSubmit = async () => {
     // Collect all form data
     const formData = {
       caseName,
       caseDescription,
-      documents: uploadedFiles,
+      documents: classifiedFiles.map(cf => ({
+        file: cf.file,
+        category: cf.category,
+      })),
       timestamp: new Date(),
     };
 
     try {
-      const res = await fetch("/api/cases", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          caseName,
-          caseDescription,
-          jurisdiction,
-          case_type: caseTypeId,
-          role,
-          result: null,
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok || !json?.ok) {
-        throw new Error(json?.error || "Failed to create case result");
+      let targetCaseId = caseId;
+
+      // If we have an existing caseId, update it; otherwise create a new case
+      if (caseId) {
+        // Update existing case
+        const res = await fetch(`/api/cases/update`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId,
+            jurisdiction,
+            case_type: caseTypeId,
+            role,
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json?.ok) {
+          throw new Error(json?.error || "Failed to update case");
+        }
+      } else {
+        // Create new case
+        const res = await fetch("/api/cases", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseName,
+            caseDescription,
+            jurisdiction,
+            case_type: caseTypeId,
+            role,
+            result: null,
+          }),
+        });
+        const json = await res.json();
+        if (!res.ok || !json?.ok) {
+          throw new Error(json?.error || "Failed to create case result");
+        }
+        targetCaseId = json.id as string;
       }
-      const createdId = json.id as string | number | undefined;
 
       // Store data in sessionStorage for the detailed flow to access
       sessionStorage.setItem(
         "quickAnalysisData",
         JSON.stringify({
           ...formData,
-          caseResultId: createdId,
+          caseResultId: targetCaseId,
           jurisdiction,
           case_type: caseTypeId,
           role,
@@ -97,15 +322,15 @@ export default function QuickAnalysisForm({
         })
       );
 
-      // Navigate directly to results page with case ID
-      router.push(`/case-analysis/detailed?step=7&caseId=${createdId}`);
+      // Navigate to results page with case ID
+      router.push(`/case-analysis/detailed?step=7&caseId=${targetCaseId}`);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
       sessionStorage.setItem(
         "quickAnalysisData",
         JSON.stringify(formData)
       );
-      alert("Error creating case. Please try again.");
+      alert(e instanceof Error ? e.message : "Error creating case. Please try again.");
     }
   };
 
@@ -129,13 +354,13 @@ export default function QuickAnalysisForm({
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
-          <CompactJurisdiction onUpdate={setJurisdiction} />
+          <CompactJurisdiction onUpdate={setJurisdiction} initialValues={jurisdiction} />
 
           {/* Case Type */}
           <CompactCaseType onUpdate={(ct: any) => setCaseTypeId(ct?.id)} />
 
           {/* Role */}
-          <CompactRole onUpdate={(r: any) => setRole(r)} />
+          <CompactRole onUpdate={(r: any) => setRole(r)} initialValue={role as any} />
 
           {/* Basic Case Information */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -166,121 +391,6 @@ export default function QuickAnalysisForm({
             </div>
 
             <div className="space-y-4">
-              {/* Document Upload - MOVED TO TOP */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Case Documents (Optional)
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
-                  <input
-                    type="file"
-                    id="fileUpload"
-                    multiple
-                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="fileUpload"
-                    className="cursor-pointer flex flex-col items-center"
-                  >
-                    <svg
-                      className="w-12 h-12 text-gray-400 mb-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Drop files here or click to upload
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF •
-                      Max 10 MB
-                    </p>
-                  </label>
-                </div>
-
-                {/* Uploaded Files List */}
-                {uploadedFiles.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm font-semibold text-gray-700">
-                      Uploaded Files ({uploadedFiles.length})
-                    </p>
-                    {uploadedFiles.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                      >
-                        <div className="flex items-center flex-1 min-w-0">
-                          <svg
-                            className="w-5 h-5 text-blue-600 mr-3 flex-shrink-0"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {file.name}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {formatFileSize(file.size)}
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleRemoveFile(index)}
-                          className="ml-3 text-red-600 hover:text-red-800 flex-shrink-0"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Auto-fills label */}
-                <div className="mt-3 text-center">
-                  <span className="text-xs text-blue-600 font-medium">
-                    📄 Auto-fills fields below
-                  </span>
-                </div>
-              </div>
-
-              {/* OR Divider */}
-              <div className="relative flex items-center py-4">
-                <div className="flex-grow border-t border-gray-300"></div>
-                <span className="flex-shrink mx-4 text-gray-500 font-semibold text-sm">
-                  OR
-                </span>
-                <div className="flex-grow border-t border-gray-300"></div>
-              </div>
-
               {/* Case Title/Name */}
               <div>
                 <label

@@ -57,6 +57,12 @@ function mapDBCaseToUI(dbCase: DBCase): Case {
   };
 }
 
+// Filter out untitled cases (cases with no caseName)
+function isValidCase(dbCase: DBCase): boolean {
+  const caseName = dbCase.case_details?.["case_information"]?.caseName;
+  return caseName && caseName !== "Untitled Case";
+}
+
 export default function CasePortfolio() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,7 +89,10 @@ export default function CasePortfolio() {
         } else {
           setIsAuthenticated(true);
           const dbCases: DBCase[] = json.cases || [];
-          const uiCases = dbCases.map(mapDBCaseToUI);
+          // Filter out untitled cases and map to UI cases
+          const uiCases = dbCases
+            .filter(isValidCase)
+            .map(mapDBCaseToUI);
           setCases(uiCases);
         }
       } catch (e) {

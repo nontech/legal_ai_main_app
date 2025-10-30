@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "../components/Navbar";
 import HorizontalStepper from "../components/quick-analysis/HorizontalStepper";
 import DocumentUploadStep from "../components/quick-analysis/DocumentUploadStep";
@@ -8,15 +9,39 @@ import QuickAnalysisForm from "../components/quick-analysis/QuickAnalysisForm";
 
 type Step = "upload" | "form";
 
-export default function CaseAnalysis() {
+function CaseAnalysisContent() {
+  const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>("upload");
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>(
     []
   );
+  const [uploadedMetadata, setUploadedMetadata] = useState<any>({});
+  const [caseInformationFiles, setCaseInformationFiles] = useState<File[]>([]);
   const [hasVisitedForm, setHasVisitedForm] = useState(false);
+  const [caseId, setCaseId] = useState<string | null>(null);
 
-  const handleDocumentsUploaded = (files: File[]) => {
+  // Initialize state from query parameters
+  useEffect(() => {
+    const paramCaseId = searchParams.get("caseId");
+    const paramStep = searchParams.get("step");
+    
+    if (paramCaseId) {
+      setCaseId(paramCaseId);
+    }
+    
+    if (paramStep === "form" && paramCaseId) {
+      setCurrentStep("form");
+      setHasVisitedForm(true);
+    }
+  }, [searchParams]);
+
+  const handleDocumentsUploaded = (files: File[], metadata?: any, caseInfoFiles?: File[], newCaseId?: string) => {
     setUploadedDocuments(files);
+    setUploadedMetadata(metadata || {});
+    setCaseInformationFiles(caseInfoFiles || []);
+    if (newCaseId) {
+      setCaseId(newCaseId);
+    }
     setCurrentStep("form");
     setHasVisitedForm(true);
   };
@@ -136,17 +161,41 @@ export default function CaseAnalysis() {
             {/* Right Content Area - Full Width */}
             <div className="flex-1 min-w-0">
               {currentStep === "upload" && (
-                <DocumentUploadStep onContinue={handleDocumentsUploaded} />
+                <DocumentUploadStep onContinue={handleDocumentsUploaded} caseId={caseId} />
               )}
 
               {currentStep === "form" && (
-                <QuickAnalysisForm initialDocuments={uploadedDocuments} />
+                <QuickAnalysisForm 
+                  initialDocuments={uploadedDocuments}
+                  uploadedMetadata={uploadedMetadata}
+                  caseInformationFiles={caseInformationFiles}
+                  caseId={caseId}
+                />
               )}
             </div>
           </div>
         </div>
       </main>
     </div>
+  );
+}
+
+function SuspenseFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="animate-spin h-12 w-12 border-4 border-blue-300 border-t-blue-600 rounded-full"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function CaseAnalysis() {
+  return (
+    <Suspense fallback={<SuspenseFallback />}>
+      <CaseAnalysisContent />
+    </Suspense>
   );
 }
 

@@ -304,11 +304,10 @@ export default function CompactCaseType({
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                        selectedCaseType.id === caseType.id
+                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType.id === caseType.id
                           ? "border-amber-500 bg-amber-50"
                           : "border-gray-200 hover:border-amber-300"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start mb-2">
                         <div className="text-3xl mr-3">
