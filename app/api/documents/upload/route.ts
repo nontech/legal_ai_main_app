@@ -122,10 +122,10 @@ export async function POST(request: Request) {
             ...existingCaseDetails as any,
             case_information: {
               caseName: metadata.case_name,
-              caseDescription: metadata.case_description,
+              caseDescription: result.case_description,
               summary: result.summary || "",
-              files_names: result.file_names,
-              files_addresses: result.file_addresses,
+              file_names: result.file_names,
+              file_addresses: result.file_addresses,
             },
           };
         }
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
           metadata: {
             jurisdiction: extractJurisdiction(metadata),
             caseName: metadata.case_name || "",
-            caseDescription: metadata.case_description || "",
+            caseDescription: result.case_description || "",
             caseType: metadata.case_type || "",
             charges: metadata.charges ? processCharges(metadata.charges) : [],
           },

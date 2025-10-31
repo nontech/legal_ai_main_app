@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import CompactJurisdiction from "./CompactJurisdiction";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
+import MarkdownRenderer from "../MarkdownRenderer";
 import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, Users } from "lucide-react";
 
 type DocumentCategory =
@@ -58,6 +59,8 @@ export default function QuickAnalysisForm({
   // Store the case type as its string id that API expects
   const [caseTypeId, setCaseTypeId] = useState<string>(uploadedMetadata?.caseType || "");
   const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
+
+  const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "blue", icon: "📋" },
@@ -256,6 +259,30 @@ export default function QuickAnalysisForm({
     return caseTypes[id] || null;
   };
 
+  const validateForm = () => {
+    if (!caseName?.trim()) {
+      alert("Case Title/Name is required.");
+      return false;
+    }
+    if (!caseDescription?.trim()) {
+      alert("Comprehensive Case Description is required.");
+      return false;
+    }
+    if (!jurisdiction?.country?.trim() || !jurisdiction?.state?.trim() || !jurisdiction?.city?.trim() || !jurisdiction?.court?.trim()) {
+      alert("All jurisdiction fields (Country, State, City, Court) are required.");
+      return false;
+    }
+    if (!caseTypeId?.trim()) {
+      alert("Case Type is required.");
+      return false;
+    }
+    if (!role?.trim()) {
+      alert("Role is required.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async () => {
     // Collect all form data
     const formData = {
@@ -267,6 +294,10 @@ export default function QuickAnalysisForm({
       })),
       timestamp: new Date(),
     };
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       let targetCaseId = caseId;
@@ -412,24 +443,47 @@ export default function QuickAnalysisForm({
 
               {/* Case Description */}
               <div>
-                <label
-                  htmlFor="caseDescription"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Comprehensive Case Description{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id="caseDescription"
-                  value={caseDescription}
-                  onChange={(e) => setCaseDescription(e.target.value)}
-                  placeholder="Provide a detailed description of the case, including key facts, timeline of events, parties involved, and the nature of the dispute or charges. Be as specific as possible."
-                  rows={6}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label
+                    htmlFor="caseDescription"
+                    className="block text-sm font-semibold text-gray-700"
+                  >
+                    Comprehensive Case Description{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  {caseDescription && (
+                    <button
+                      type="button"
+                      onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${isMarkdownPreview
+                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                    >
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                      {isMarkdownPreview ? "Edit" : "Preview"}
+                    </button>
+                  )}
+                </div>
+                {isMarkdownPreview && caseDescription ? (
+                  <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 min-h-40 max-h-80 overflow-y-auto markdown-preview">
+                    <MarkdownRenderer content={caseDescription} />
+                  </div>
+                ) : (
+                  <textarea
+                    id="caseDescription"
+                    value={caseDescription}
+                    onChange={(e) => setCaseDescription(e.target.value)}
+                    placeholder="Provide a detailed description of the case, including key facts, timeline of events, parties involved, and the nature of the dispute or charges. Be as specific as possible."
+                    rows={6}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
+                  />
+                )}
                 <p className="text-xs text-gray-500 mt-2">
-                  Include dates, locations, key events, and
-                  circumstances
+                  Include dates, locations, key events, and circumstances. Markdown formatting is supported.
                 </p>
               </div>
             </div>
@@ -443,7 +497,16 @@ export default function QuickAnalysisForm({
           <div className="flex flex-col items-center">
             <button
               onClick={handleSubmit}
-              disabled={!caseName || !caseDescription}
+              disabled={
+                !caseName?.trim() ||
+                !caseDescription?.trim() ||
+                !jurisdiction?.country?.trim() ||
+                !jurisdiction?.state?.trim() ||
+                !jurisdiction?.city?.trim() ||
+                !jurisdiction?.court?.trim() ||
+                !caseTypeId?.trim() ||
+                !role?.trim()
+              }
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-3"
             >
               <svg
@@ -461,11 +524,20 @@ export default function QuickAnalysisForm({
               </svg>
               <span>Calculate Results</span>
             </button>
-            {(!caseName || !caseDescription) && (
-              <p className="text-center text-sm text-gray-500 mt-2">
-                Please fill in required fields to continue
-              </p>
-            )}
+            {(
+              !caseName?.trim() ||
+              !caseDescription?.trim() ||
+              !jurisdiction?.country?.trim() ||
+              !jurisdiction?.state?.trim() ||
+              !jurisdiction?.city?.trim() ||
+              !jurisdiction?.court?.trim() ||
+              !caseTypeId?.trim() ||
+              !role?.trim()
+            ) && (
+                <p className="text-center text-sm text-gray-500 mt-2">
+                  Please fill in all required fields to continue
+                </p>
+              )}
           </div>
         </div>
       </div>

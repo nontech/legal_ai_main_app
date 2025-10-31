@@ -29,7 +29,7 @@ interface Case {
 // Map DB case to UI case
 function mapDBCaseToUI(dbCase: DBCase): Case {
   const details = dbCase.case_details || {};
-  const title = details["basic-info"]?.caseName || `Case ${dbCase.id}`;
+  const title = details["case_information"]?.caseName || `Case ${dbCase.id}`;
   const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
 
   // Calculate lastUpdated as relative time
