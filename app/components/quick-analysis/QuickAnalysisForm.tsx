@@ -61,6 +61,7 @@ export default function QuickAnalysisForm({
   const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "blue", icon: "📋" },
@@ -299,6 +300,8 @@ export default function QuickAnalysisForm({
       return;
     }
 
+    setIsLoading(true);
+
     try {
       let targetCaseId = caseId;
 
@@ -340,7 +343,20 @@ export default function QuickAnalysisForm({
         targetCaseId = json.id as string;
       }
 
-      // Store data in sessionStorage for the detailed flow to access
+      // Call the case analysis API
+      const analysisRes = await fetch("/api/cases/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ caseId: targetCaseId }),
+      });
+
+      const analysisJson = await analysisRes.json();
+
+      if (!analysisRes.ok || !analysisJson?.ok) {
+        throw new Error(analysisJson?.error || "Failed to analyze case");
+      }
+
+      // Store data in sessionStorage for the results screen to access
       sessionStorage.setItem(
         "quickAnalysisData",
         JSON.stringify({
@@ -349,11 +365,11 @@ export default function QuickAnalysisForm({
           jurisdiction,
           case_type: caseTypeId,
           role,
-          result: null,
+          result: analysisJson.data.result,
         })
       );
 
-      // Navigate to results page with case ID
+      // Navigate to results page with case ID and analysis data
       router.push(`/case-analysis/detailed?step=7&caseId=${targetCaseId}`);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
@@ -361,7 +377,9 @@ export default function QuickAnalysisForm({
         "quickAnalysisData",
         JSON.stringify(formData)
       );
-      alert(e instanceof Error ? e.message : "Error creating case. Please try again.");
+      alert(e instanceof Error ? e.message : "Error analyzing case. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -497,34 +515,43 @@ export default function QuickAnalysisForm({
           <div className="flex flex-col items-center">
             <button
               onClick={handleSubmit}
-              disabled={
-                !caseName?.trim() ||
+              disabled={isLoading || !caseName?.trim() ||
                 !caseDescription?.trim() ||
                 !jurisdiction?.country?.trim() ||
                 !jurisdiction?.state?.trim() ||
                 !jurisdiction?.city?.trim() ||
                 !jurisdiction?.court?.trim() ||
                 !caseTypeId?.trim() ||
-                !role?.trim()
-              }
+                !role?.trim()}
               className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-3"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-              <span>Calculate Results</span>
+              {isLoading ? (
+                <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              )}
+              <span>{isLoading ? "Calculating..." : "Calculate Results"}</span>
             </button>
-            {(
+            {isLoading ? (
+              <p className="text-center text-sm text-blue-600 mt-2 font-medium">
+                🔄 Analyzing your case and fetching results...
+              </p>
+            ) : (
               !caseName?.trim() ||
               !caseDescription?.trim() ||
               !jurisdiction?.country?.trim() ||
