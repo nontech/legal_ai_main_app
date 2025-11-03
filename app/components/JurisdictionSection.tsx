@@ -109,25 +109,20 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   Country
                 </label>
-                <select
+                <input
                   id="country"
+                  type="text"
+                  list="countryList"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                    paddingRight: "2.5rem",
-                  }}
-                >
-                  <option value="United States of America">
-                    United States of America
-                  </option>
-                  <option value="Canada">Canada</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                </select>
+                  placeholder="Enter or select country"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
+                />
+                <datalist id="countryList">
+                  <option value="United States of America" />
+                  <option value="Canada" />
+                  <option value="United Kingdom" />
+                </datalist>
               </div>
 
               {/* State/Province Field */}
@@ -138,27 +133,24 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   State/Province
                 </label>
-                <select
+                <input
                   id="state"
+                  type="text"
+                  list="stateList"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                    paddingRight: "2.5rem",
-                  }}
-                >
-                  <option value="Alabama">Alabama</option>
-                  <option value="Alaska">Alaska</option>
-                  <option value="Arizona">Arizona</option>
-                  <option value="California">California</option>
-                  <option value="Florida">Florida</option>
-                  <option value="New York">New York</option>
-                  <option value="Texas">Texas</option>
-                </select>
+                  placeholder="Enter or select state"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
+                />
+                <datalist id="stateList">
+                  <option value="Alabama" />
+                  <option value="Alaska" />
+                  <option value="Arizona" />
+                  <option value="California" />
+                  <option value="Florida" />
+                  <option value="New York" />
+                  <option value="Texas" />
+                </datalist>
               </div>
             </div>
 
@@ -172,24 +164,21 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   City
                 </label>
-                <select
+                <input
                   id="city"
+                  type="text"
+                  list="cityList"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                    paddingRight: "2.5rem",
-                  }}
-                >
-                  <option value="Mobile">Mobile</option>
-                  <option value="Birmingham">Birmingham</option>
-                  <option value="Montgomery">Montgomery</option>
-                  <option value="Huntsville">Huntsville</option>
-                </select>
+                  placeholder="Enter or select city"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
+                />
+                <datalist id="cityList">
+                  <option value="Mobile" />
+                  <option value="Birmingham" />
+                  <option value="Montgomery" />
+                  <option value="Huntsville" />
+                </datalist>
               </div>
 
               {/* Court Field */}
@@ -200,29 +189,20 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   Court
                 </label>
-                <select
+                <input
                   id="court"
+                  type="text"
+                  list="courtList"
                   value={court}
                   onChange={(e) => setCourt(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    backgroundPosition: "right 0.5rem center",
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "1.5em 1.5em",
-                    paddingRight: "2.5rem",
-                  }}
-                >
-                  <option value="Southern District of Alabama">
-                    Southern District of Alabama
-                  </option>
-                  <option value="Northern District of Alabama">
-                    Northern District of Alabama
-                  </option>
-                  <option value="Middle District of Alabama">
-                    Middle District of Alabama
-                  </option>
-                </select>
+                  placeholder="Enter or select court"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
+                />
+                <datalist id="courtList">
+                  <option value="Southern District of Alabama" />
+                  <option value="Northern District of Alabama" />
+                  <option value="Middle District of Alabama" />
+                </datalist>
               </div>
             </div>
           </div>

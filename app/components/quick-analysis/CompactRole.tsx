@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { Briefcase, Shield, HelpCircle } from "lucide-react";
 
 type RoleType = "defendant" | "plaintiff";
 
 interface CompactRoleProps {
   onUpdate?: (role: RoleType) => void;
+  initialValue?: RoleType | null;
 }
 
-export default function CompactRole({ onUpdate }: CompactRoleProps) {
+export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps) {
   const [selectedRole, setSelectedRole] =
-    useState<RoleType>("plaintiff");
+    useState<RoleType | null>(initialValue || null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleRoleChange = (role: RoleType) => {
@@ -26,19 +28,7 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
       title: "Defendant/Respondent",
       subtitle: "Party defending against legal action",
       icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-          />
-        </svg>
+        <Shield className="w-8 h-8" />
       ),
       responsibilities: [
         "Respond to claims",
@@ -53,19 +43,7 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
       title: "Plaintiff/Petitioner",
       subtitle: "Party initiating the legal action",
       icon: (
-        <svg
-          className="w-8 h-8"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-          />
-        </svg>
+        <Briefcase className="w-8 h-8" />
       ),
       responsibilities: [
         "Initiate legal proceedings",
@@ -78,27 +56,26 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
     },
   };
 
-  const selectedRoleData = roles[selectedRole];
+  const selectedRoleData = selectedRole ? roles[selectedRole] : null;
 
   return (
     <>
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <div className="flex items-center justify-center w-10 h-10 bg-amber-100 rounded-lg mr-3">
-              <svg
-                className="w-5 h-5 text-amber-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                />
-              </svg>
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg mr-3" style={{
+              backgroundColor: selectedRole ? '#FEF3C7' : '#F3F4F6',
+              color: selectedRole ? '#B45309' : '#6B7280',
+            }}>
+              {selectedRole && selectedRoleData ? (
+                <span className="text-lg">{selectedRoleData.icon ? (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {selectedRoleData.icon}
+                  </span>
+                ) : null}</span>
+              ) : (
+                <HelpCircle className="w-5 h-5" />
+              )}
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
@@ -114,7 +91,7 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
           {/* Centered Role Name */}
           <div className="flex-1 flex justify-center">
             <span className="text-lg font-semibold text-gray-900">
-              {selectedRoleData.title}
+              {selectedRoleData?.title}
             </span>
           </div>
 
@@ -122,7 +99,7 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
           >
-            Change Role
+            {selectedRole ? "Change Role" : "Select Role"}
           </button>
         </div>
       </div>
@@ -166,19 +143,17 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
                 {/* Defendant Card */}
                 <button
                   onClick={() => handleRoleChange("defendant")}
-                  className={`text-left p-6 rounded-lg border-2 transition-all ${
-                    selectedRole === "defendant"
-                      ? "border-amber-500 bg-amber-50"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
+                  className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${
-                        selectedRole === "defendant"
-                          ? "bg-amber-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "defendant"
+                        ? "bg-amber-600 text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {roles.defendant.icon}
                     </div>
@@ -226,19 +201,17 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
                 {/* Plaintiff Card */}
                 <button
                   onClick={() => handleRoleChange("plaintiff")}
-                  className={`text-left p-6 rounded-lg border-2 transition-all ${
-                    selectedRole === "plaintiff"
-                      ? "border-amber-500 bg-amber-50"
-                      : "border-gray-200 bg-white hover:border-gray-300"
-                  }`}
+                  className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
+                    ? "border-amber-500 bg-amber-50"
+                    : "border-gray-200 bg-white hover:border-gray-300"
+                    }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${
-                        selectedRole === "plaintiff"
-                          ? "bg-amber-600 text-white"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
+                      className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
+                        ? "bg-amber-600 text-white"
+                        : "bg-gray-100 text-gray-600"
+                        }`}
                     >
                       {roles.plaintiff.icon}
                     </div>
@@ -285,16 +258,18 @@ export default function CompactRole({ onUpdate }: CompactRoleProps) {
               </div>
 
               {/* Selected Role Summary */}
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
-                <p className="text-sm text-gray-800">
-                  <span className="font-semibold">
-                    Selected Role:
-                  </span>{" "}
-                  {selectedRoleData.title} - The analysis will be
-                  tailored to your strategic position and legal burden
-                  in this case.
-                </p>
-              </div>
+              {selectedRoleData && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
+                  <p className="text-sm text-gray-800">
+                    <span className="font-semibold">
+                      Selected Role:
+                    </span>{" "}
+                    {selectedRoleData.title} - The analysis will be
+                    tailored to your strategic position and legal burden
+                    in this case.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

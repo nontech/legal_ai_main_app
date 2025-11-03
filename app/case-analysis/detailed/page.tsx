@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -43,7 +43,7 @@ function DetailedCaseAnalysisContent() {
   });
 
   // Fetch case data and calculate completion percentages
-  const fetchCaseCompletion = async () => {
+  const fetchCaseCompletion = useCallback(async () => {
     if (!caseId) return;
 
     try {
@@ -103,11 +103,11 @@ function DetailedCaseAnalysisContent() {
     } catch (error) {
       console.error("Failed to fetch case completion data:", error);
     }
-  };
+  }, [caseId]);
 
   useEffect(() => {
     fetchCaseCompletion();
-  }, [caseId]);
+  }, [caseId, fetchCaseCompletion]);
 
   const handleNext = () => {
     if (currentStep < totalSteps - 1) {
@@ -121,19 +121,19 @@ function DetailedCaseAnalysisContent() {
     }
   };
 
-  const handleChargesCompletion = (isComplete: boolean) => {
+  const handleChargesCompletion = useCallback((isComplete: boolean) => {
     setCompletionData((prev) => ({
       ...prev,
       3: isComplete ? 100 : 0,
     }));
-  };
+  }, []);
 
-  const handleCaseDetailsCompletion = (percentage: number) => {
+  const handleCaseDetailsCompletion = useCallback((percentage: number) => {
     setCompletionData((prev) => ({
       ...prev,
       4: percentage,
     }));
-  };
+  }, []);
 
   const renderStepContent = () => {
     switch (currentStep) {

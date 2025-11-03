@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import FileUploadModal from "./FileUploadModal";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -12,15 +13,81 @@ interface CaseDetailsSectionProps {
 interface UploadedFile {
   id: string;
   name: string;
-  size: number;
-  type: string;
-  uploadedAt: Date;
+  size?: number;
+  type?: string;
+  uploadedAt?: Date | string;
+  address?: string;
 }
 
 interface SectionData {
-  files: UploadedFile[];
-  summaryGenerated: boolean;
+  caseName?: string;
+  caseDescription?: string;
+  files?: UploadedFile[];
+  file_names?: string[];
+  file_addresses?: string[];
+  summary?: string;
+  summaryGenerated?: boolean;
+  [key: string]: any;
 }
+
+// Map database keys to UI section IDs
+const DB_TO_UI_MAP: Record<string, string> = {
+  "case_information": "case-info",
+  "evidence_and_supporting_materials": "evidence",
+  "key_witnesses_and_testimony": "witnesses",
+  "relevant_legal_precedents": "precedents",
+  "police_report": "police",
+  "potential_challenges_and_weaknesses": "challenges",
+};
+
+const UI_TO_DB_MAP: Record<string, string> = Object.fromEntries(
+  Object.entries(DB_TO_UI_MAP).map(([db, ui]) => [ui, db])
+);
+
+const SECTION_CONFIG = [
+  {
+    uiId: "case-info",
+    dbKey: "case_information",
+    title: "Case Information",
+    itemLabel: "documents",
+    icon: "📋",
+  },
+  {
+    uiId: "evidence",
+    dbKey: "evidence_and_supporting_materials",
+    title: "Evidence & Supporting Materials",
+    itemLabel: "documents",
+    icon: "📎",
+  },
+  {
+    uiId: "witnesses",
+    dbKey: "key_witnesses_and_testimony",
+    title: "Key Witnesses & Testimony",
+    itemLabel: "documents",
+    icon: "👥",
+  },
+  {
+    uiId: "precedents",
+    dbKey: "relevant_legal_precedents",
+    title: "Relevant Legal Precedents",
+    itemLabel: "documents",
+    icon: "⚖️",
+  },
+  {
+    uiId: "police",
+    dbKey: "police_report",
+    title: "Police Report",
+    itemLabel: "documents",
+    icon: "🚔",
+  },
+  {
+    uiId: "challenges",
+    dbKey: "potential_challenges_and_weaknesses",
+    title: "Potential Challenges & Weaknesses",
+    itemLabel: "documents",
+    icon: "⚠️",
+  },
+];
 
 export default function CaseDetailsSection({
   onModalChange,
@@ -30,75 +97,60 @@ export default function CaseDetailsSection({
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [caseDescription, setCaseDescription] = useState<string>("");
+  const [caseFilesNames, setCaseFilesNames] = useState<string[]>([]);
+  const [caseFilesAddresses, setCaseFilesAddresses] = useState<string[]>([]);
   const [isEditingHeader, setIsEditingHeader] = useState(false);
   const [editedTitle, setEditedTitle] = useState<string>("");
   const [editedDescription, setEditedDescription] = useState<string>("");
   const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isMarkdownPreviewTitle, setIsMarkdownPreviewTitle] = useState(false);
+  const [isMarkdownPreviewDescription, setIsMarkdownPreviewDescription] = useState(false);
 
-  // Initialize section data with empty files
-  const [sectionData, setSectionData] = useState<
-    Record<string, SectionData>
-  >({
-    "basic-info": {
-      files: [],
-      summaryGenerated: false,
-    },
-    evidence: {
-      files: [],
-      summaryGenerated: false,
-    },
-    witnesses: {
-      files: [],
-      summaryGenerated: false,
-    },
-    precedents: {
-      files: [],
-      summaryGenerated: false,
-    },
-    police: {
-      files: [],
-      summaryGenerated: false,
-    },
-    challenges: {
-      files: [],
-      summaryGenerated: false,
-    },
-  });
+  // Store all case details keyed by database keys
+  const [caseDetails, setCaseDetails] = useState<Record<string, SectionData>>({});
 
   // Fetch case details from database if caseId is provided
   useEffect(() => {
-    if (caseId) {
-      const fetchCaseDetails = async () => {
-        try {
-          const res = await fetch(`/api/cases/${caseId}`);
-          const json = await res.json();
-
-          if (json.ok && json.data) {
-            // Load case title and description from basic-info
-            if (json.data.case_details?.["basic-info"]?.caseName) {
-              setCaseTitle(json.data.case_details["basic-info"].caseName);
-              setEditedTitle(json.data.case_details["basic-info"].caseName);
-            }
-            if (json.data.case_details?.["basic-info"]?.caseDescription) {
-              setCaseDescription(json.data.case_details["basic-info"].caseDescription);
-              setEditedDescription(json.data.case_details["basic-info"].caseDescription);
-            }
-
-            // Load section details
-            if (json.data.case_details && typeof json.data.case_details === "object" && !Array.isArray(json.data.case_details)) {
-              setSectionData(prevData => ({
-                ...prevData,
-                ...json.data.case_details
-              }));
-            }
-          }
-        } catch (error) {
-          console.error("Failed to fetch case details:", error);
-        }
-      };
-
-      fetchCaseDetails();
+    if (!caseId) {
+      setIsLoading(false);
+      return;
     }
+
+    const fetchCaseDetails = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(`/api/cases/${caseId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data?.case_details) {
+          const details = json.data.case_details;
+          setCaseDetails(details);
+
+          // Extract case title and description from case_information
+          if (details.case_information?.caseName) {
+            setCaseTitle(details.case_information.caseName);
+            setEditedTitle(details.case_information.caseName);
+          }
+          if (details.case_information?.caseDescription) {
+            setCaseDescription(details.case_information.caseDescription);
+            setEditedDescription(details.case_information.caseDescription);
+          }
+          if (details.case_information?.files_names) {
+            setCaseFilesNames(details.case_information.files_names);
+          }
+          if (details.case_information?.files_addresses) {
+            setCaseFilesAddresses(details.case_information.files_addresses);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch case details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCaseDetails();
   }, [caseId]);
 
   // Notify parent when modal state changes
@@ -108,195 +160,125 @@ export default function CaseDetailsSection({
     }
   }, [openModal, onModalChange]);
 
-  // Calculate status based on files and summaryGenerated
+  // Get section data by database key
+  const getSectionData = (dbKey: string): SectionData => {
+    return caseDetails[dbKey] || {};
+  };
+
+  // Calculate section status
   const getSectionStatus = (
-    sectionId: string
-  ): "complete" | "in_progress" | "empty" => {
-    const data = sectionData[sectionId] as any;
-    if (!data) return "empty";
+    dbKey: string
+  ): "complete" | "empty" => {
+    const data = getSectionData(dbKey);
 
-    // Special handling for basic-info: complete if it has caseName and caseDescription
-    if (sectionId === "basic-info") {
-      if (data.caseName && data.caseName.trim() && data.caseDescription && data.caseDescription.trim()) {
-        return "complete";
-      }
-      return "empty";
-    }
-
-    // If there's a summary text, it's complete
-    if (data.summary && data.summary.trim()) {
+    // Check if there's a summary
+    if (data.summary?.trim() || data.caseDescription?.trim()) {
       return "complete";
-    }
-
-    // If there are files and summary was generated, it's complete
-    if (data.files && data.files.length > 0 && data.summaryGenerated) {
-      return "complete";
-    }
-
-    // If there are files but no summary, it's in progress
-    if (data.files && data.files.length > 0) {
-      return "in_progress";
     }
 
     return "empty";
   };
 
-  const sections = [
-    {
-      id: "basic-info",
-      title: "Basic Case Information",
-      itemLabel: "fields completed",
-      icon: "📋",
-    },
-    {
-      id: "evidence",
-      title: "Evidence & Supporting Materials",
-      itemLabel: "documents",
-      icon: "📎",
-    },
-    {
-      id: "witnesses",
-      title: "Key Witnesses & Testimony",
-      itemLabel: "witnesses",
-      icon: "👥",
-    },
-    {
-      id: "precedents",
-      title: "Relevant Legal Precedents",
-      itemLabel: "cases",
-      icon: "⚖️",
-    },
-    {
-      id: "police",
-      title: "Police Report",
-      itemLabel: "document",
-      icon: "🚔",
-    },
-    {
-      id: "challenges",
-      title: "Potential Challenges & Weaknesses",
-      itemLabel: "items",
-      icon: "⚠️",
-    },
-  ];
+  // Get item count for display
+  const getItemCount = (dbKey: string): number => {
+    const data = getSectionData(dbKey);
+    return (data.file_addresses?.length ?? 0) || (data.file_names?.length ?? 0) || 0;
+  };
+
+  const getInitialFilesForSection = (dbKey: string): UploadedFile[] => {
+    const data = getSectionData(dbKey);
+    const names = Array.isArray(data.file_names) ? data.file_names : [];
+    const addresses = Array.isArray(data.file_addresses) ? data.file_addresses : [];
+    const existingFiles = Array.isArray(data.files) ? data.files : [];
+
+    const results: UploadedFile[] = [];
+
+    names.forEach((rawName, index) => {
+      if (typeof rawName !== "string") {
+        return;
+      }
+
+      const name = rawName.trim();
+      if (!name) {
+        return;
+      }
+
+      const existing = existingFiles[index];
+
+      const id =
+        typeof existing === "object" && existing !== null && "id" in existing
+          ? String((existing as { id: unknown }).id)
+          : `${dbKey}-${index}-${name}`;
+
+      const sizeValue =
+        typeof existing === "object" && existing !== null && "size" in existing
+          ? Number((existing as { size: unknown }).size)
+          : undefined;
+
+      const resolvedSize =
+        typeof sizeValue === "number" && Number.isFinite(sizeValue) ? sizeValue : undefined;
+
+      const typeValue =
+        typeof existing === "object" && existing !== null && "type" in existing
+          ? String((existing as { type: unknown }).type)
+          : undefined;
+
+      const uploadedAtValue =
+        typeof existing === "object" && existing !== null && "uploadedAt" in existing
+          ? (existing as { uploadedAt: unknown }).uploadedAt
+          : undefined;
+
+      const uploadedAt =
+        uploadedAtValue instanceof Date
+          ? uploadedAtValue
+          : typeof uploadedAtValue === "string"
+            ? new Date(uploadedAtValue)
+            : undefined;
+
+      results.push({
+        id,
+        name,
+        size: resolvedSize,
+        type: typeValue,
+        uploadedAt,
+        address: addresses[index],
+      });
+    });
+
+    return results;
+  };
 
   const getCompletedSectionsCount = () => {
-    return sections.filter(
-      (section) => getSectionStatus(section.id) === "complete"
+    return SECTION_CONFIG.filter(
+      (section) => getSectionStatus(section.dbKey) === "complete"
     ).length;
   };
 
-  // Notify parent of completion percentage whenever section data changes
+  // Notify parent of completion percentage
   useEffect(() => {
     if (onCompletionChange) {
       const completedCount = getCompletedSectionsCount();
-      const percentage = Math.round((completedCount / sections.length) * 100);
+      const percentage = Math.round((completedCount / SECTION_CONFIG.length) * 100);
       onCompletionChange(percentage);
     }
-  }, [sectionData]);
+  }, [caseDetails, onCompletionChange]);
 
-  const handleFilesUpdate = (
-    sectionId: string,
-    files: UploadedFile[]
-  ) => {
-    setSectionData((prev) => ({
-      ...prev,
-      [sectionId]: {
-        ...prev[sectionId],
-        files,
-      },
-    }));
-  };
+  const getModalContent = (dbKey: string) => {
+    const config = SECTION_CONFIG.find((s) => s.dbKey === dbKey);
+    const descriptions: Record<string, string> = {
+      case_information: "Add or edit the case title and comprehensive description",
+      evidence_and_supporting_materials: "Upload photos, forensic reports, expert reports, contracts, and supporting documents",
+      key_witnesses_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
+      relevant_legal_precedents: "Upload case law PDFs, legal research documents, and precedent analysis",
+      police_report: "Upload official police reports, incident photos, body cam transcripts, and related documentation",
+      potential_challenges_and_weaknesses: "Upload opposing counsel briefs, unfavorable evidence, and weakness analysis documents",
+    };
 
-  const handleSummaryGenerated = (sectionId: string) => {
-    setSectionData((prev) => ({
-      ...prev,
-      [sectionId]: {
-        ...prev[sectionId],
-        summaryGenerated: true,
-      },
-    }));
-  };
-
-  const getStatusBadge = (
-    status: "complete" | "in_progress" | "empty"
-  ) => {
-    switch (status) {
-      case "complete":
-        return {
-          icon: "✓",
-          bg: "bg-green-100",
-          text: "text-green-700",
-          label: "Complete",
-        };
-      case "in_progress":
-        return {
-          icon: "◐",
-          bg: "bg-blue-100",
-          text: "text-blue-700",
-          label: "In Progress",
-        };
-      case "empty":
-        return {
-          icon: "○",
-          bg: "bg-gray-100",
-          text: "text-gray-500",
-          label: "Empty",
-        };
-    }
-  };
-
-  const getModalContent = (sectionId: string) => {
-    switch (sectionId) {
-      case "basic-info":
-        return {
-          title: "Case Documents",
-          description:
-            "Upload case briefs, complaints, legal memos, and related documents",
-          icon: "📋",
-        };
-      case "evidence":
-        return {
-          title: "Evidence Files",
-          description:
-            "Upload photos, forensic reports, expert reports, contracts, and supporting documents",
-          icon: "📎",
-        };
-      case "witnesses":
-        return {
-          title: "Witness Documents",
-          description:
-            "Upload witness statements, depositions, expert reports, and testimony transcripts",
-          icon: "👥",
-        };
-      case "precedents":
-        return {
-          title: "Legal Precedent Documents",
-          description:
-            "Upload case law PDFs, legal research documents, and precedent analysis",
-          icon: "⚖️",
-        };
-      case "police":
-        return {
-          title: "Police Report Files",
-          description:
-            "Upload official police reports, incident photos, body cam transcripts, and related documentation",
-          icon: "🚔",
-        };
-      case "challenges":
-        return {
-          title: "Challenge Analysis Documents",
-          description:
-            "Upload opposing counsel briefs, unfavorable evidence, and weakness analysis documents",
-          icon: "⚠️",
-        };
-      default:
-        return {
-          title: "Upload Documents",
-          description: "Upload relevant documents for this section",
-          icon: "📄",
-        };
-    }
+    return {
+      title: config?.title || "Upload Documents",
+      description: descriptions[dbKey] || "Upload relevant documents for this section",
+      icon: config?.icon || "📄",
+    };
   };
 
   const handleEditHeader = () => {
@@ -313,10 +295,14 @@ export default function CaseDetailsSection({
 
     setIsSavingHeader(true);
     try {
-      const completedCount = sections.filter(
-        (section) => getSectionStatus(section.id) === "complete"
-      ).length;
-      const completionPercentage = Math.round((completedCount / sections.length) * 100);
+      const updateData = {
+        ...caseDetails,
+        case_information: {
+          ...caseDetails.case_information,
+          caseName: newTitle,
+          caseDescription: newDescription,
+        },
+      };
 
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -324,15 +310,7 @@ export default function CaseDetailsSection({
         body: JSON.stringify({
           caseId,
           field: "case_details",
-          value: {
-            ...sectionData,
-            "basic-info": {
-              ...sectionData["basic-info"],
-              caseName: newTitle,
-              caseDescription: newDescription,
-            },
-            _completion_status: completionPercentage,
-          },
+          value: updateData,
         }),
       });
 
@@ -344,10 +322,10 @@ export default function CaseDetailsSection({
 
       setCaseTitle(newTitle);
       setCaseDescription(newDescription);
+      setCaseDetails(updateData);
       setIsEditingHeader(false);
     } catch (error) {
       console.error("Failed to save header:", error);
-      // Revert changes
       setEditedTitle(caseTitle);
       setEditedDescription(caseDescription);
     } finally {
@@ -361,49 +339,27 @@ export default function CaseDetailsSection({
     setIsEditingHeader(false);
   };
 
-  const handleSaveSectionData = async (sectionId: string, data: { files: any[]; summary: string }) => {
+  const handleSaveSectionData = async (sectionUiId: string, data: { files?: any[]; summary: string }) => {
     if (!caseId) return;
 
+    const dbKey = UI_TO_DB_MAP[sectionUiId];
+    if (!dbKey) return;
+
     try {
-      // Update local state first to calculate percentage based on updated data
-      const updatedSectionData = {
-        ...sectionData,
-        "basic-info": {
-          ...sectionData["basic-info"],
-          caseName: caseTitle,
-          caseDescription: caseDescription,
-        },
-        [sectionId]: {
-          files: data.files,
-          summaryGenerated: data.summary ? true : false,
-          summary: data.summary,
+      // Files are now uploaded individually through FileUploadModal
+      // Just handle summary update here
+      const updateData = {
+        ...caseDetails,
+        [dbKey]: {
+          ...caseDetails[dbKey],
         },
       };
 
-      // Calculate completion percentage based on updated state
-      const completedCount = sections.filter((section) => {
-        const sectionData = updatedSectionData[section.id] as any;
-        if (!sectionData) return false;
-
-        // Special handling for basic-info
-        if (section.id === "basic-info") {
-          return sectionData.caseName && sectionData.caseName.trim() && sectionData.caseDescription && sectionData.caseDescription.trim();
-        }
-
-        // If there's a summary text, it's complete
-        if (sectionData.summary && sectionData.summary.trim()) {
-          return true;
-        }
-
-        // If there are files and summary was generated, it's complete
-        if (sectionData.files && sectionData.files.length > 0 && sectionData.summaryGenerated) {
-          return true;
-        }
-
-        return false;
-      }).length;
-
-      const completionPercentage = Math.round((completedCount / sections.length) * 100);
+      // Only update if there's a summary
+      if (data.summary) {
+        updateData[dbKey].summary = data.summary;
+        updateData[dbKey].summaryGenerated = Boolean(data.summary);
+      }
 
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -411,127 +367,68 @@ export default function CaseDetailsSection({
         body: JSON.stringify({
           caseId,
           field: "case_details",
-          value: {
-            ...updatedSectionData,
-            _completion_status: completionPercentage,
-          },
+          value: updateData,
         }),
       });
 
       const json = await res.json();
 
       if (!res.ok || !json?.ok) {
-        throw new Error(json?.error || "Failed to save section");
+        throw new Error(json?.error || "Failed to update summary");
       }
 
-      // Update local state
-      setSectionData((prev) => ({
-        ...prev,
-        [sectionId]: {
-          files: data.files,
-          summaryGenerated: data.summary ? true : false,
-          summary: data.summary,
-        },
-      }));
+      setCaseDetails(updateData);
     } catch (error) {
       console.error("Failed to save section data:", error);
       throw error;
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex items-center justify-center h-32">
+          <div className="flex flex-col items-center gap-2">
+            <svg className="w-8 h-8 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <p className="text-gray-600 font-medium">Loading case details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        {isEditingHeader ? (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Case Title
-              </label>
-              <input
-                type="text"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                placeholder="Enter case title"
+        <div className="flex items-start">
+          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full flex-shrink-0 mr-3">
+            <svg
+              className="w-6 h-6 text-blue-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Case Description
-              </label>
-              <textarea
-                value={editedDescription}
-                onChange={(e) => setEditedDescription(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                rows={4}
-                placeholder="Enter case description"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => handleSaveHeader()}
-                disabled={isSavingHeader}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSavingHeader ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Save
-                  </>
-                )}
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                disabled={isSavingHeader}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-            </div>
+            </svg>
           </div>
-        ) : (
-          <div className="flex items-start justify-between">
-            <div className="flex items-start">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full mr-3 flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-blue-700"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Case Details
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  Manage and organize all case information and supporting documents
-                </p>
-              </div>
-            </div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-gray-900">Case Details</h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Manage and organize all case information and supporting documents
+            </p>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Overall Progress Content */}
+      {/* Progress Overview */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="space-y-6">
           {/* Overall Progress */}
@@ -541,67 +438,112 @@ export default function CaseDetailsSection({
                 <span className="text-5xl font-bold text-blue-600">
                   {getCompletedSectionsCount()}
                 </span>
-                <span className="text-3xl font-bold text-gray-400">
-                  /
-                </span>
+                <span className="text-3xl font-bold text-gray-400">/</span>
                 <span className="text-5xl font-bold text-gray-400">
-                  {sections.length}
+                  {SECTION_CONFIG.length}
                 </span>
               </div>
-              <p className="text-gray-700 font-medium">
-                Sections Completed
-              </p>
+              <p className="text-gray-700 font-medium">Sections Completed</p>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
               <div
                 className="bg-blue-600 h-3 rounded-full transition-all duration-500"
                 style={{
-                  width: `${(getCompletedSectionsCount() / sections.length) *
-                    100
-                    }%`,
+                  width: `${(getCompletedSectionsCount() / SECTION_CONFIG.length) * 100}%`,
                 }}
-              ></div>
+              />
             </div>
           </div>
 
-          {/* Section Progress Cards */}
+          {/* Section Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {sections.map((section) => {
-              const status = getSectionStatus(section.id);
-              const badge = getStatusBadge(status);
-              const itemCount =
-                sectionData[section.id]?.files.length || 0;
+            {/* Case Information Card - Opens Modal */}
+            <button
+              onClick={() => setOpenModal("case-info")}
+              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center flex-1">
+                  <span className="text-2xl mr-2">📋</span>
+                  <h3 className="font-semibold text-gray-900 text-sm">
+                    Case Information
+                  </h3>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                Add the case title and comprehensive description with supporting documents
+              </p>
+
+              <div className="flex items-end justify-between pt-2">
+                {caseTitle && caseDescription && (
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center justify-center w-5 h-5 bg-green-100 rounded-full">
+                      <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-semibold text-green-600">Complete</span>
+                  </div>
+                )}
+                <div className="text-right ml-auto">
+                  <p className="text-xs text-gray-600">
+                    {getItemCount("case_information")} {getItemCount("case_information") === 1 ? "document" : "documents"}
+                  </p>
+                </div>
+              </div>
+            </button>
+
+            {/* Document Upload Sections */}
+            {SECTION_CONFIG.map((section) => {
+              const status = getSectionStatus(section.dbKey);
+              const itemCount = getItemCount(section.dbKey);
+              if (section.dbKey === "case_information") {
+                return null;
+              }
+
+              // Get section-specific description
+              const sectionDescriptions: Record<string, string> = {
+                "evidence_and_supporting_materials": "Upload photos, forensic reports, expert reports, and supporting documents",
+                "key_witnesses_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
+                "relevant_legal_precedents": "Upload case law PDFs and legal research documents",
+                "police_report": "Upload official police reports and incident documentation",
+                "potential_challenges_and_weaknesses": "Upload opposing counsel briefs and weakness analysis",
+              };
+
               return (
                 <button
-                  key={section.id}
-                  onClick={() => setOpenModal(section.id)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer"
+                  key={section.dbKey}
+                  onClick={() => setOpenModal(section.uiId)}
+                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center flex-1">
-                      <span className="text-2xl mr-2">
-                        {section.icon}
-                      </span>
+                      <span className="text-2xl mr-2">{section.icon}</span>
                       <h3 className="font-semibold text-gray-900 text-sm">
                         {section.title}
                       </h3>
                     </div>
                   </div>
-                  <div className="flex items-end justify-between pt-8">
+
+                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                    {sectionDescriptions[section.dbKey] || "Upload documents for this section"}
+                  </p>
+
+                  <div className="flex items-end justify-between pt-2">
                     {status === "complete" && (
                       <div className="flex items-center gap-1.5">
-                        <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
-                          <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="flex items-center justify-center w-5 h-5 bg-green-100 rounded-full">
+                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                         </div>
-                        <span className="text-xs font-semibold text-green-600">Completed</span>
+                        <span className="text-xs font-semibold text-green-600">Complete</span>
                       </div>
                     )}
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-gray-900">
-                        {itemCount > 0 ? itemCount : "0"}{" "}
-                        {itemCount === 1 ? "document" : "documents"}
+                    <div className="text-right ml-auto">
+                      <p className="text-xs text-gray-600">
+                        {itemCount} {itemCount === 1 ? "document" : "documents"}
                       </p>
                     </div>
                   </div>
@@ -613,36 +555,32 @@ export default function CaseDetailsSection({
       </div>
 
       {/* Modals */}
-      {openModal && (
+      {openModal ? (
         <FileUploadModal
           isOpen={true}
           onClose={() => setOpenModal(null)}
-          title={getModalContent(openModal).title}
-          description={getModalContent(openModal).description}
-          icon={getModalContent(openModal).icon}
-          initialFiles={sectionData[openModal]?.files || []}
-          summaryGenerated={
-            sectionData[openModal]?.summaryGenerated || false
-          }
-          summaryText={
-            (sectionData[openModal] as any)?.summary || ""
-          }
-          onFilesUpdate={(files) =>
-            handleFilesUpdate(openModal, files)
-          }
-          onSummaryGenerated={() => handleSummaryGenerated(openModal)}
+          title={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").title}
+          description={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").description}
+          icon={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").icon}
+          summaryText={getSectionData(UI_TO_DB_MAP[openModal] || "case_information")?.summary || ""}
+          initialFiles={getInitialFilesForSection(UI_TO_DB_MAP[openModal] || "case_information")}
+          summaryGenerated={Boolean(getSectionData(UI_TO_DB_MAP[openModal] || "case_information")?.summaryGenerated)}
+          onFilesUpdate={() => { }}
+          onSummaryGenerated={() => { }}
           caseId={caseId}
-          sectionId={openModal}
+          sectionName={UI_TO_DB_MAP[openModal] || "case_information"}
           onSave={async (data) => {
             await handleSaveSectionData(openModal, data);
+            setOpenModal(null);
           }}
           caseTitle={caseTitle}
           caseDescription={caseDescription}
           onCaseDetailsUpdate={async (title, description) => {
             await handleSaveHeader(title, description);
           }}
+          isCaseInformation={openModal === "case-info"}
         />
-      )}
+      ) : null}
     </div>
   );
 }

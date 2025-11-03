@@ -65,11 +65,17 @@ export default function StatsCards() {
           setIsAuthenticated(true);
           const cases = json.cases || [];
 
-          // Calculate stats from cases
-          const totalCases = cases.length;
-          const activeCases = cases.filter((c: any) => c.status === "Active" || !c.status).length;
-          const underReview = cases.filter((c: any) => c.status === "Under Review").length;
-          const completed = cases.filter((c: any) => c.status === "Completed").length;
+          // Filter out untitled cases for stats calculation
+          const validCases = cases.filter((c: any) => {
+            const caseName = c.case_details?.["case_information"]?.caseName;
+            return caseName && caseName !== "Untitled Case";
+          });
+
+          // Calculate stats from valid cases only
+          const totalCases = validCases.length;
+          const activeCases = validCases.filter((c: any) => c.status === "Active" || !c.status).length;
+          const underReview = validCases.filter((c: any) => c.status === "Under Review").length;
+          const completed = validCases.filter((c: any) => c.status === "Completed").length;
 
           setStats([
             {

@@ -29,7 +29,7 @@ interface Case {
 // Map DB case to UI case
 function mapDBCaseToUI(dbCase: DBCase): Case {
   const details = dbCase.case_details || {};
-  const title = details["basic-info"]?.caseName || `Case ${dbCase.id}`;
+  const title = details["case_information"]?.caseName || `Case ${dbCase.id}`;
   const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
 
   // Calculate lastUpdated as relative time
@@ -55,6 +55,12 @@ function mapDBCaseToUI(dbCase: DBCase): Case {
     documents: 0,
     lastUpdated,
   };
+}
+
+// Filter out untitled cases (cases with no caseName)
+function isValidCase(dbCase: DBCase): boolean {
+  const caseName = dbCase.case_details?.["case_information"]?.caseName;
+  return caseName && caseName !== "Untitled Case";
 }
 
 export default function CasePortfolio() {
@@ -83,7 +89,10 @@ export default function CasePortfolio() {
         } else {
           setIsAuthenticated(true);
           const dbCases: DBCase[] = json.cases || [];
-          const uiCases = dbCases.map(mapDBCaseToUI);
+          // Filter out untitled cases and map to UI cases
+          const uiCases = dbCases
+            .filter(isValidCase)
+            .map(mapDBCaseToUI);
           setCases(uiCases);
         }
       } catch (e) {
