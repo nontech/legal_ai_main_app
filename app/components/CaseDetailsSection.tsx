@@ -346,43 +346,20 @@ export default function CaseDetailsSection({
     if (!dbKey) return;
 
     try {
-      const filesArray = Array.isArray(data.files) ? data.files : [];
-      const existingAddresses = Array.isArray(caseDetails[dbKey]?.file_addresses)
-        ? (caseDetails[dbKey]?.file_addresses as Array<string | undefined>)
-        : [];
-      const serializedFiles = filesArray
-        .map((f: any, index: number) => {
-          if (f && typeof f === "object") {
-            return {
-              id: "id" in f && f.id ? String(f.id) : `${dbKey}-${index}-${f.name || "file"}`,
-              name: f.name || "",
-              size: typeof f.size === "number" ? f.size : undefined,
-              type: typeof f.type === "string" ? f.type : undefined,
-              uploadedAt: f.uploadedAt || undefined,
-              address: f.address || undefined,
-            };
-          }
-
-          const fallbackName = typeof f === "string" ? f : `${dbKey}-${index}`;
-          return {
-            id: `${dbKey}-${index}-${fallbackName}`,
-            name: fallbackName,
-            address: existingAddresses[index],
-          };
-        })
-        .filter((file) => typeof file.name === "string" && file.name.trim().length > 0);
-
+      // Files are now uploaded individually through FileUploadModal
+      // Just handle summary update here
       const updateData = {
         ...caseDetails,
         [dbKey]: {
           ...caseDetails[dbKey],
-          file_names: filesArray.map((f: any) => f?.name || f),
-          file_addresses: filesArray.map((f: any) => f?.address || f),
-          summary: data.summary,
-          summaryGenerated: Boolean(data.summary),
-          files: serializedFiles,
         },
       };
+
+      // Only update if there's a summary
+      if (data.summary) {
+        updateData[dbKey].summary = data.summary;
+        updateData[dbKey].summaryGenerated = Boolean(data.summary);
+      }
 
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -397,7 +374,7 @@ export default function CaseDetailsSection({
       const json = await res.json();
 
       if (!res.ok || !json?.ok) {
-        throw new Error(json?.error || "Failed to save section");
+        throw new Error(json?.error || "Failed to update summary");
       }
 
       setCaseDetails(updateData);
@@ -591,7 +568,7 @@ export default function CaseDetailsSection({
           onFilesUpdate={() => { }}
           onSummaryGenerated={() => { }}
           caseId={caseId}
-          sectionId={UI_TO_DB_MAP[openModal] || "case_information"}
+          sectionName={UI_TO_DB_MAP[openModal] || "case_information"}
           onSave={async (data) => {
             await handleSaveSectionData(openModal, data);
             setOpenModal(null);

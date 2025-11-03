@@ -24,7 +24,7 @@ interface FileUploadModalProps {
   onFilesUpdate?: (files: UploadedFile[]) => void;
   onSummaryGenerated?: () => void;
   caseId?: string;
-  sectionId?: string;
+  sectionName?: string;
   onSave?: (data: { files: UploadedFile[]; summary: string }) => Promise<void>;
   caseTitle?: string;
   caseDescription?: string;
@@ -59,7 +59,7 @@ export default function FileUploadModal({
   onFilesUpdate,
   onSummaryGenerated,
   caseId,
-  sectionId,
+  sectionName,
   onSave,
   caseTitle,
   caseDescription,
@@ -85,10 +85,15 @@ export default function FileUploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLTextAreaElement>(null);
 
+  const [uploadingFileIds, setUploadingFileIds] = useState<Set<string>>(new Set());
+  const [uploadedFileIds, setUploadedFileIds] = useState<Set<string>>(new Set());
+  const fileObjectsMap = useRef<Map<string, File>>(new Map());
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+
   // Update local state when initialFiles or summaryText changes
   useEffect(() => {
     const normalizedFiles: ClassifiedUploadedFile[] = (initialFiles ?? []).map((file, index) => {
-      const fallbackId = `${sectionId ?? "section"}-file-${index}`;
+      const fallbackId = `${sectionName ?? "section"}-file-${index}`;
       const uploadedAtValue = file.uploadedAt;
       const uploadedAt =
         uploadedAtValue instanceof Date
@@ -113,7 +118,7 @@ export default function FileUploadModal({
     if (summaryText) {
       setAiSummary(summaryText);
     }
-  }, [initialFiles, sectionId, summaryText]);
+  }, [initialFiles, sectionName, summaryText]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -157,9 +162,11 @@ export default function FileUploadModal({
       onFilesUpdate(updatedFiles);
     }
 
-    // Classify each file
-    newFiles.forEach((fileObj) => {
-      classifyFile(fileObj.id, files.find(f => f.name === fileObj.name)!);
+    // Store actual File objects and classify each file
+    newFiles.forEach((fileObj, index) => {
+      const actualFile = files[index];
+      fileObjectsMap.current.set(fileObj.id, actualFile);
+      classifyFile(fileObj.id, actualFile);
     });
   };
 
@@ -209,6 +216,8 @@ export default function FileUploadModal({
     if (onFilesUpdate) {
       onFilesUpdate(updatedFiles);
     }
+    // Clean up the file object from the map
+    fileObjectsMap.current.delete(id);
   };
 
   const formatUploadedDate = (value?: Date | string) => {
@@ -258,7 +267,7 @@ export default function FileUploadModal({
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    if (sectionId === "case_information") {
+    if (sectionName === "case_information") {
       // Generate case description from documents
       const description = generateMockSummary(title, uploadedFiles);
       setEditedDescription(description);
@@ -328,7 +337,7 @@ export default function FileUploadModal({
   };
 
   const handleSaveChanges = async () => {
-    if (!caseId || !sectionId || !onSave) return;
+    if (!caseId || !sectionName || !onSave) return;
 
     setIsSaving(true);
     try {
@@ -361,6 +370,50 @@ export default function FileUploadModal({
       console.error("Failed to save case details:", error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleUploadFile = async (file: ClassifiedUploadedFile) => {
+    if (!caseId || !sectionName) {
+      console.error("Case ID or section ID is missing");
+      return;
+    }
+
+    setUploadingFileIds((prev) => new Set(prev).add(file.id));
+
+    try {
+      // Get the actual File object from the map
+      const actualFile = fileObjectsMap.current.get(file.id);
+      if (!actualFile) {
+        throw new Error("File not found in file objects map");
+      }
+
+      // Create FormData with actual file
+      const formData = new FormData();
+      formData.append("section", sectionName);
+      formData.append("case_id", caseId);
+      formData.append("files", actualFile);
+
+      const response = await fetch("/api/documents/upload-section", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      setUploadedFileIds((prev) => new Set(prev).add(file.id));
+    } catch (error) {
+      console.error("Failed to upload file:", error);
+      alert(error instanceof Error ? error.message : "Failed to upload file");
+    } finally {
+      setUploadingFileIds((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
     }
   };
 
@@ -543,7 +596,13 @@ export default function FileUploadModal({
                         uploadedFiles.map((file) => (
                           <div
                             key={file.id}
-                            className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                            onClick={() => setSelectedFileId(file.id)}
+                            className={`bg-white border-2 rounded-lg p-3 cursor-pointer transition-all ${selectedFileId === file.id
+                              ? "border-blue-500 bg-blue-50 shadow-md"
+                              : uploadedFileIds.has(file.id)
+                                ? "border-green-300 border-green-200"
+                                : "border-gray-200 hover:shadow-sm"
+                              }`}
                           >
                             <div className="flex items-start gap-2">
                               <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded flex items-center justify-center mt-0.5">
@@ -861,7 +920,7 @@ export default function FileUploadModal({
 
                     {/* Summary Content */}
                     <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
-                      {(sectionId === "case_information") && (
+                      {(sectionName === "case_information") && (
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -884,11 +943,10 @@ export default function FileUploadModal({
                                 <button
                                   type="button"
                                   onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                                  className={`px-3 py-1 text-sm font-medium rounded transition-colors flex items-center gap-2 ${
-                                    isMarkdownPreview
-                                      ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                  }`}
+                                  className={`px-3 py-1 text-sm font-medium rounded transition-colors flex items-center gap-2 ${isMarkdownPreview
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
                                 >
                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -946,7 +1004,7 @@ export default function FileUploadModal({
                           </div>
                         </div>
                       )}
-                      {sectionId !== "case_information" && (
+                      {sectionName !== "case_information" && (
                         <div className="space-y-2">
                           {/* Generate/Regenerate Button - Above Textarea */}
                           {uploadedFiles.length > 0 && (
@@ -984,11 +1042,10 @@ export default function FileUploadModal({
                               {aiSummary && (
                                 <button
                                   onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${
-                                    isMarkdownPreview
-                                      ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                  }`}
+                                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
+                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    }`}
                                 >
                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1102,9 +1159,15 @@ export default function FileUploadModal({
                   {uploadedFiles.map((file) => (
                     <div
                       key={file.id}
-                      className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                      onClick={() => setSelectedFileId(file.id)}
+                      className={`bg-white border-2 rounded-lg p-3 cursor-pointer transition-all ${selectedFileId === file.id
+                        ? "border-blue-500 bg-blue-50 shadow-md"
+                        : uploadedFileIds.has(file.id)
+                          ? "border-green-300 border-green-200"
+                          : "border-gray-200 hover:shadow-sm"
+                        }`}
                     >
-                      <div className="flex items-center flex-1 min-w-0">
+                      <div className="flex items-start gap-2">
                         <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                           <svg
                             className="w-5 h-5 text-blue-600"
@@ -1328,7 +1391,48 @@ export default function FileUploadModal({
 
         {/* Footer */}
         <div className="bg-gray-50 px-6 pt-6 pb-4 md:pt-8 border-t border-gray-200 flex justify-end items-center gap-3">
-          {sectionId === "case_information" && onCaseDetailsUpdate ? (
+          {/* Upload to Section Button */}
+          {selectedFileId && !uploadedFileIds.has(selectedFileId) && caseId && sectionName && (
+            <button
+              onClick={() => {
+                const selectedFile = uploadedFiles.find((f) => f.id === selectedFileId);
+                if (selectedFile) {
+                  handleUploadFile(selectedFile);
+                }
+              }}
+              disabled={uploadingFileIds.has(selectedFileId)}
+              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploadingFileIds.has(selectedFileId) ? (
+                <>
+                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Upload to Section
+                </>
+              )}
+            </button>
+          )}
+
+          {/* Uploaded Status */}
+          {selectedFileId && uploadedFileIds.has(selectedFileId) && (
+            <div className="px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 bg-green-100 text-green-700">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Uploaded
+            </div>
+          )}
+
+          {sectionName === "case_information" && onCaseDetailsUpdate ? (
             <button
               onClick={handleSaveCaseDetails}
               disabled={isSaving}
@@ -1351,7 +1455,7 @@ export default function FileUploadModal({
               )}
             </button>
           ) : (
-            caseId && sectionId && onSave && (
+            caseId && sectionName && onSave && (
               <button
                 onClick={handleSaveChanges}
                 disabled={isSaving}
