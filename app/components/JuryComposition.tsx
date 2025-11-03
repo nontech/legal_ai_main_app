@@ -351,17 +351,17 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-gray-900 mb-2">
+                <h4 className="text-lg font-bold text-ink-900 mb-2">
                   AI-Powered Jury Analysis
                 </h4>
-                <p className="text-gray-700 mb-4">
+                <p className="text-ink-600 mb-4">
                   Based on your selections, our AI will analyze how
                   these jury characteristics might influence your case
                   strategy, identify potential challenges, and recommend
                   tailored approaches for voir dire and trial
                   presentation.
                 </p>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
+                <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium flex items-center gap-2 shadow-sm">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -393,4 +393,3 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
     </div>
   );
 }
-

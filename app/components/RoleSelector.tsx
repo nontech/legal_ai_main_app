@@ -108,12 +108,12 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-ink-900 mb-4">
               Select Your Role
             </h2>
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+            <p className="text-lg text-ink-600 max-w-4xl mx-auto">
               Your role determines the legal strategy, burden of
               proof, and analysis perspective for this tax case.
             </p>
@@ -121,10 +121,10 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
         </div>
 
         {/* Confirmation Card */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+        <div className="bg-highlight-200 border border-transparent rounded-lg p-6">
           <div className="flex items-start gap-3">
             <svg
-              className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1"
+              className="w-6 h-6 text-highlight-600 flex-shrink-0 mt-1"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -137,10 +137,10 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
               />
             </svg>
             <div>
-              <h4 className="font-bold text-gray-900 mb-2">
+              <h4 className="font-bold text-ink-900 mb-2">
                 Role Selection Confirmed
               </h4>
-              <p className="text-gray-700 text-sm">
+              <p className="text-ink-600 text-sm">
                 You have selected{" "}
                 <span className="font-semibold">
                   {selectedRoleData.title}
@@ -153,12 +153,12 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
         </div>
 
         {/* Compact Display with Button */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg">
                 <svg
-                  className="w-7 h-7 text-amber-700"
+                  className="w-7 h-7 text-primary-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -172,10 +172,10 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-xl font-bold text-ink-900">
                   Your Role
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-600">
                   {selectedRoleData.subtitle}
                 </p>
               </div>
@@ -184,7 +184,7 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
             {/* Centered Role Name */}
             <div className="flex-1 flex justify-center">
               <div className="text-center">
-                <p className="text-lg font-semibold text-gray-900">
+                <p className="text-lg font-semibold text-ink-900">
                   {selectedRoleData.title}
                 </p>
               </div>
@@ -192,7 +192,7 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
             >
               Change Role
             </button>
@@ -202,20 +202,20 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 bg-primary-950/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-surface-050 rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="sticky top-0 bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-4 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
                   Select Your Role
                 </h2>
-                <p className="text-amber-100 text-sm">
+                <p className="text-primary-100 text-sm">
                   Choose your position in this case
                 </p>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-white hover:text-gray-200 transition-colors"
+                className="text-white hover:text-surface-200 transition-colors"
               >
                 <svg
                   className="w-6 h-6"
@@ -235,7 +235,7 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
 
             {/* Role Cards in Modal */}
             <div className="p-6">
-              <p className="text-center text-gray-600 mb-6">
+              <p className="text-center text-ink-600 mb-6">
                 Your role determines the legal strategy, burden of
                 proof, and analysis perspective for this case.
               </p>
@@ -245,31 +245,31 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                 <button
                   onClick={() => handleRoleSelect("defendant")}
                   className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
-                    ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                    : "border-border-200 bg-surface-000 hover:border-primary-300"
                     }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
                       className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "defendant"
-                        ? "bg-amber-600 text-white"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-primary-600 text-white"
+                        : "bg-surface-200 text-ink-500"
                         }`}
                     >
                       {roles.defendant.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      <h3 className="text-xl font-bold text-ink-900 mb-1">
                         {roles.defendant.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-ink-600">
                         {roles.defendant.subtitle}
                       </p>
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
@@ -277,9 +277,9 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                         (resp, index) => (
                           <li
                             key={index}
-                            className="text-sm text-gray-700 flex items-start"
+                            className="text-sm text-ink-600 flex items-start"
                           >
-                            <span className="text-amber-600 mr-2">
+                            <span className="text-primary-600 mr-2">
                               •
                             </span>
                             <span>{resp}</span>
@@ -289,8 +289,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                     </ul>
                   </div>
 
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
+                  <div className="pt-4 border-t border-border-200">
+                    <p className="text-sm text-ink-600">
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
@@ -303,31 +303,31 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                 <button
                   onClick={() => handleRoleSelect("plaintiff")}
                   className={`text-left p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
-                    ? "border-amber-500 bg-amber-50 ring-2 ring-amber-200"
-                    : "border-gray-200 bg-white hover:border-gray-300"
+                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                    : "border-border-200 bg-surface-000 hover:border-primary-300"
                     }`}
                 >
                   <div className="flex items-start mb-4">
                     <div
                       className={`flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
-                        ? "bg-amber-600 text-white"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-primary-600 text-white"
+                        : "bg-surface-200 text-ink-500"
                         }`}
                     >
                       {roles.plaintiff.icon}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      <h3 className="text-xl font-bold text-ink-900 mb-1">
                         {roles.plaintiff.title}
                       </h3>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-ink-600">
                         {roles.plaintiff.subtitle}
                       </p>
                     </div>
                   </div>
 
                   <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
@@ -335,9 +335,9 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                         (resp, index) => (
                           <li
                             key={index}
-                            className="text-sm text-gray-700 flex items-start"
+                            className="text-sm text-ink-600 flex items-start"
                           >
-                            <span className="text-amber-600 mr-2">
+                            <span className="text-primary-600 mr-2">
                               •
                             </span>
                             <span>{resp}</span>
@@ -347,8 +347,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                     </ul>
                   </div>
 
-                  <div className="pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-600">
+                  <div className="pt-4 border-t border-border-200">
+                    <p className="text-sm text-ink-600">
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
@@ -359,8 +359,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
               </div>
 
               {/* Selected Role Summary in Modal */}
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mt-6">
-                <p className="text-sm text-gray-800">
+              <div className="bg-highlight-200 border border-transparent rounded-lg p-4 mt-6">
+                <p className="text-sm text-ink-700">
                   <span className="font-semibold">
                     Selected Role:
                   </span>{" "}

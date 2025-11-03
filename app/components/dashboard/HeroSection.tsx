@@ -4,15 +4,15 @@ import Link from "next/link";
 
 export default function HeroSection() {
   return (
-    <div className="bg-gradient-to-br from-[#1a2332] to-[#2d3e50] text-white pt-20">
+    <div className="bg-gradient-to-br from-primary-950 to-primary-700 text-white pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Column - CTA Card */}
           <div className="relative order-2 lg:order-1">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-200 to-amber-100 rounded-3xl blur-xl opacity-30"></div>
-            <div className="relative backdrop-blur-md bg-gradient-to-br from-white/95 to-amber-50/95 rounded-3xl p-8 shadow-2xl border border-amber-200/50">
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-100 to-surface-000 rounded-3xl blur-xl opacity-30"></div>
+            <div className="relative backdrop-blur-md bg-gradient-to-br from-surface-000/95 to-accent-100/80 rounded-3xl p-8 shadow-2xl border border-border-200/60">
               <div className="flex flex-col items-center text-center">
-                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl shadow-lg mb-6 animate-pulse">
+                <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary-600 to-primary-400 rounded-2xl shadow-lg mb-6 animate-pulse">
                   <svg
                     className="w-8 h-8 text-white"
                     fill="none"
@@ -27,16 +27,16 @@ export default function HeroSection() {
                     />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                <h2 className="text-2xl font-bold text-ink-900 mb-3">
                   Start New Analysis
                 </h2>
-                <p className="text-gray-600 mb-6 text-sm">
+                <p className="text-ink-600 mb-6 text-sm">
                   Launch comprehensive case analysis with AI-powered
                   insights and strategic recommendations
                 </p>
                 <Link
                   href="/case-analysis"
-                  className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-primary-700 to-primary-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2"
                 >
                   <span>+ New Case Analysis</span>
                   <svg
@@ -53,7 +53,7 @@ export default function HeroSection() {
                     />
                   </svg>
                 </Link>
-                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs text-ink-500">
                   <svg
                     className="w-4 h-4 flex-shrink-0"
                     fill="none"
@@ -76,7 +76,7 @@ export default function HeroSection() {
           {/* Right Column - Hero Content */}
           <div className="order-1 lg:order-2">
             <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl shadow-lg">
+              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-accent-500 to-accent-400 rounded-xl shadow-lg">
                 <svg
                   className="w-9 h-9 text-white"
                   fill="none"
@@ -95,13 +95,13 @@ export default function HeroSection() {
                 <h1 className="text-5xl font-bold leading-tight">
                   Legal Analytics
                 </h1>
-                <p className="text-amber-400 text-2xl font-semibold">
+                <p className="text-accent-400 text-2xl font-semibold">
                   Command Center
                 </p>
               </div>
             </div>
 
-            <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+            <p className="text-lg text-surface-200 mb-6 leading-relaxed">
               Empower your legal practice with AI-driven case
               analysis, strategic insights, and comprehensive case
               management tools.
@@ -110,7 +110,7 @@ export default function HeroSection() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-accent-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -128,7 +128,7 @@ export default function HeroSection() {
               </div>
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-accent-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -146,7 +146,7 @@ export default function HeroSection() {
               </div>
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-accent-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -164,7 +164,7 @@ export default function HeroSection() {
               </div>
               <div className="flex items-start gap-3">
                 <svg
-                  className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"
+                  className="w-5 h-5 text-accent-400 flex-shrink-0 mt-0.5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"

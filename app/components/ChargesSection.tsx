@@ -280,7 +280,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
           <button
             onClick={handleSaveCharges}
             disabled={isSaving}
-            className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {isSaving ? (
               <>

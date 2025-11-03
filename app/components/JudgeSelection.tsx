@@ -169,12 +169,12 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-ink-900 mb-4">
               Judge Selection
             </h2>
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+            <p className="text-lg text-ink-600 max-w-4xl mx-auto">
               Select the presiding judge. Their judicial history,
               temperament, and ruling patterns will significantly
               influence the case analysis and outcome predictions.
@@ -184,10 +184,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
         {/* Summary Card */}
         {selectedJudge && (
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-2 border-amber-200 p-6">
+          <div className="bg-highlight-200 rounded-lg border border-transparent p-6">
             <div className="flex items-start gap-3">
               <svg
-                className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1"
+                className="w-6 h-6 text-highlight-600 flex-shrink-0 mt-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -200,10 +200,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                 />
               </svg>
               <div>
-                <h4 className="font-bold text-gray-900 mb-2">
+                <h4 className="font-bold text-ink-900 mb-2">
                   Judge Selection Confirmed
                 </h4>
-                <p className="text-gray-700 text-sm">
+                <p className="text-ink-600 text-sm">
                   You have selected{" "}
                   <span className="font-semibold">
                     {selectedJudgeData?.name}
@@ -223,9 +223,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
           {!selectedJudgeData ? (
             /* Empty State */
             <div className="text-center py-8">
-              <div className="flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mx-auto mb-4">
+              <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4">
                 <svg
-                  className="w-8 h-8 text-amber-700"
+                  className="w-8 h-8 text-primary-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -238,15 +238,15 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-ink-900 mb-2">
                 No Judge Selected
               </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <p className="text-ink-600 mb-6 max-w-md mx-auto">
                 Select a judge to analyze their judicial history, temperament, and ruling patterns for your case.
               </p>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium shadow-sm"
               >
                 Select a Judge
               </button>
@@ -255,9 +255,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
             /* Selected Judge Display */
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+                <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg">
                   <svg
-                    className="w-7 h-7 text-amber-700"
+                    className="w-7 h-7 text-primary-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -271,10 +271,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-ink-900">
                     Presiding Judge
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-ink-600">
                     {selectedJudgeData.name}
                   </p>
                 </div>
@@ -283,10 +283,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
               {/* Centered Judge Name */}
               <div className="flex-1 flex justify-center">
                 <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-ink-900">
                     {selectedJudgeData.name}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-ink-600">
                     {selectedJudgeData.experience} years experience
                   </p>
                 </div>
@@ -294,7 +294,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
               >
                 Change Judge
               </button>
