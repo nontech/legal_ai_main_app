@@ -425,6 +425,50 @@ export default function CaseDetailsSection({
     }
   };
 
+  const handleDeleteFile = async (dbKey: string, fileAddress: string, fileName: string) => {
+    // Ask for confirmation before deleting
+    if (!confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    if (!caseId) return;
+
+    try {
+      const response = await fetch("/api/documents/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileAddress,
+          section: dbKey,
+          caseId,
+        }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok || !json?.ok) {
+        throw new Error(json?.error || "Failed to delete file");
+      }
+
+      // Update local case details with the updated files list
+      const updatedCaseDetails = {
+        ...caseDetails,
+        [dbKey]: {
+          ...(caseDetails[dbKey] || {}),
+          files: json.data.updatedFiles,
+        },
+      };
+
+      setCaseDetails(updatedCaseDetails);
+
+      // Show success message
+      alert("File deleted successfully");
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      alert(error instanceof Error ? error.message : "Failed to delete file");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -621,6 +665,10 @@ export default function CaseDetailsSection({
           }}
           isCaseInformation={openModal === "case-info"}
           onFileUploadSuccess={fetchCaseDetails}
+          onDeleteFile={async (fileAddress, fileName) => {
+            const dbKey = UI_TO_DB_MAP[openModal] || "case_information";
+            await handleDeleteFile(dbKey, fileAddress, fileName);
+          }}
         />
       ) : null}
     </div>
