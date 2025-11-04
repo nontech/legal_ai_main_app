@@ -109,25 +109,26 @@ export async function POST(request: Request) {
         // Get existing case details to preserve other properties
         const existingCaseDetails = await getExistingCaseDetails(supabase, caseId);
 
-        // Preserve existing section data and append to file_names and file_addresses
+        // Preserve existing section data and merge files
         const existingSectionData = existingCaseDetails[section] || {};
-        const existingFileNames = Array.isArray(existingSectionData.file_names)
-            ? existingSectionData.file_names
-            : [];
-        const existingFileAddresses = Array.isArray(existingSectionData.file_addresses)
-            ? existingSectionData.file_addresses
+        const existingFiles = Array.isArray(existingSectionData.files)
+            ? existingSectionData.files
             : [];
 
+        // Transform API response to files array format
+        const newFiles = (result.file_names || []).map((name: string, index: number) => ({
+            name,
+            address: (result.file_addresses || [])[index],
+        }));
+
         // Append new files to existing ones
-        const updatedFileNames = [...existingFileNames, ...(result.file_names || [])];
-        const updatedFileAddresses = [...existingFileAddresses, ...(result.file_addresses || [])];
+        const updatedFiles = [...existingFiles, ...newFiles];
 
         const updatedCaseDetails = {
             ...existingCaseDetails,
             [section]: {
                 ...existingSectionData,
-                file_names: updatedFileNames,
-                file_addresses: updatedFileAddresses,
+                files: updatedFiles,
             },
         };
 
@@ -150,8 +151,7 @@ export async function POST(request: Request) {
         return Response.json({
             ok: true,
             data: {
-                file_names: result.file_names,
-                file_addresses: result.file_addresses,
+                files: newFiles,
                 section,
             },
         });

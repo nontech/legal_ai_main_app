@@ -248,14 +248,25 @@ export default function FileUploadModal({
         throw new Error("Section data not found");
       }
 
-      const fileAddresses = sectionData.file_addresses || [];
-      const fileNames = sectionData.file_names || [];
+      // Support both old format (separate arrays) and new format (files array)
+      let files: Array<{ name: string; address: string }> = [];
 
-      if (fileAddresses.length === 0 || fileNames.length === 0) {
+      if (sectionData.files && Array.isArray(sectionData.files)) {
+        // New format: files array of objects
+        files = sectionData.files;
+      } else if (sectionData.file_names && sectionData.file_addresses) {
+        // Old format: separate arrays (for backwards compatibility)
+        files = (sectionData.file_names as string[]).map((name: string, index: number) => ({
+          name,
+          address: (sectionData.file_addresses as string[])[index],
+        }));
+      }
+
+      if (files.length === 0) {
         throw new Error("No files uploaded in this section");
       }
 
-      console.log("Generating summary for section:", sectionName, { fileAddresses, fileNames });
+      console.log("Generating summary for section:", sectionName, { files });
 
       // Call the backend API route
       const response = await fetch(
@@ -266,8 +277,8 @@ export default function FileUploadModal({
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            file_addresses: fileAddresses,
-            file_names: fileNames,
+            file_addresses: files.map((f) => f.address),
+            file_names: files.map((f) => f.name),
             file_category: sectionName,
           }),
         }

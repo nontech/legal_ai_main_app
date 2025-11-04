@@ -183,11 +183,29 @@ export default function CaseDetailsSection({
   // Get item count for display
   const getItemCount = (dbKey: string): number => {
     const data = getSectionData(dbKey);
+    // Support new format (files array) and old format (separate arrays)
+    if (data.files && Array.isArray(data.files)) {
+      return data.files.length;
+    }
     return (data.file_addresses?.length ?? 0) || (data.file_names?.length ?? 0) || 0;
   };
 
   const getInitialFilesForSection = (dbKey: string): UploadedFile[] => {
     const data = getSectionData(dbKey);
+
+    // Support new format: files array of objects with name and address
+    if (data.files && Array.isArray(data.files)) {
+      return data.files.map((file: any, index: number) => ({
+        id: file.address || `${dbKey}-${index}-${file.name}`,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        uploadedAt: file.uploadedAt,
+        address: file.address,
+      }));
+    }
+
+    // Fallback to old format: separate file_names and file_addresses arrays
     const names = Array.isArray(data.file_names) ? data.file_names : [];
     const addresses = Array.isArray(data.file_addresses) ? data.file_addresses : [];
     const existingFiles = Array.isArray(data.files) ? data.files : [];
@@ -347,12 +365,34 @@ export default function CaseDetailsSection({
     if (!dbKey) return;
 
     try {
-      // Files are now uploaded individually through FileUploadModal
-      // Just handle summary update here
+      // Get existing section data
+      const existingSection = caseDetails[dbKey] || {};
+
+      // Merge files if provided
+      let mergedFiles = data.files || [];
+      if (data.files && data.files.length > 0) {
+        // Convert provided files to new format if needed
+        const newFiles = data.files.map((file: any) => ({
+          name: file.name || file.fileName,
+          address: file.address,
+          size: file.size,
+          type: file.type,
+          uploadedAt: file.uploadedAt,
+        }));
+
+        // Merge with existing files
+        const existingFiles = existingSection.files || [];
+        mergedFiles = [...existingFiles, ...newFiles];
+      } else {
+        // Keep existing files if not updating
+        mergedFiles = existingSection.files || [];
+      }
+
       const updateData = {
         ...caseDetails,
         [dbKey]: {
-          ...caseDetails[dbKey],
+          ...existingSection,
+          files: mergedFiles.length > 0 ? mergedFiles : undefined,
         },
       };
 

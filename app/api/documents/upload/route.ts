@@ -116,16 +116,20 @@ export async function POST(request: Request) {
           updateData.jurisdiction = extractJurisdiction(metadata);
         }
 
-        // Extract case details
+        // Extract case details with files as array of objects
         if (metadata.case_name && metadata.case_description) {
+          const newFiles = (result.file_names || []).map((name: string, index: number) => ({
+            name,
+            address: (result.file_addresses || [])[index],
+          }));
+
           updateData.case_details = {
             ...existingCaseDetails as any,
             case_information: {
               caseName: metadata.case_name,
               caseDescription: result.case_description,
               summary: result.summary || "",
-              file_names: result.file_names,
-              file_addresses: result.file_addresses,
+              files: newFiles,
             },
           };
         }
@@ -158,17 +162,21 @@ export async function POST(request: Request) {
         });
       }
     } else {
-      // Handle other file categories
+      // Handle other file categories with files as array of objects
       try {
         const existingCaseDetails = await getExistingCaseDetails(caseId);
         const updateData: any = {};
 
         if (result?.file_category) {
+          const newFiles = (result.file_names || []).map((name: string, index: number) => ({
+            name,
+            address: (result.file_addresses || [])[index],
+          }));
+
           updateData.case_details = {
             ...existingCaseDetails as any,
             [result.file_category]: {
-              file_names: result.file_names,
-              file_addresses: result.file_addresses,
+              files: newFiles,
               summary: result.summary || "",
             },
           };
