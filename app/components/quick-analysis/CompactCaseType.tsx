@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface CaseType {
   id: string;
@@ -13,28 +13,10 @@ interface CaseType {
 
 interface CompactCaseTypeProps {
   onUpdate?: (caseType: CaseType) => void;
+  initialCaseTypeId?: string;
 }
 
-export default function CompactCaseType({
-  onUpdate,
-}: CompactCaseTypeProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCaseType, setSelectedCaseType] = useState<CaseType>({
-    id: "civil",
-    title: "Civil Law",
-    subtitle: "Legal disputes between parties",
-    icon: "⚖️",
-    typicalCases: [
-      "Personal Injury & Negligence Claims",
-      "Contract Disputes & Breach of Agreement",
-      "Property Disputes & Real Estate Issues",
-      "Employment Law & Discrimination",
-      "Tort Claims & Damages",
-    ],
-    standardOfProof: "Preponderance of evidence (51% likelihood)",
-  });
-
-  const caseTypes: CaseType[] = [
+const CASE_TYPES: CaseType[] = [
     {
       id: "tax",
       title: "Tax Law",
@@ -206,12 +188,41 @@ export default function CompactCaseType({
     },
   ];
 
+const DEFAULT_CASE_TYPE_ID = "civil";
+const DEFAULT_CASE_TYPE =
+  CASE_TYPES.find((caseType) => caseType.id === DEFAULT_CASE_TYPE_ID) ??
+  CASE_TYPES[0]!;
+
+function getCaseTypeById(id?: string | null) {
+  if (!id) return undefined;
+  return CASE_TYPES.find((caseType) => caseType.id === id);
+}
+
+export default function CompactCaseType({
+  onUpdate,
+  initialCaseTypeId,
+}: CompactCaseTypeProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCaseType, setSelectedCaseType] = useState<CaseType>(() => {
+    const initialSelection = getCaseTypeById(initialCaseTypeId);
+    return initialSelection ?? DEFAULT_CASE_TYPE;
+  });
+
+  useEffect(() => {
+    const targetSelection =
+      getCaseTypeById(initialCaseTypeId) ?? DEFAULT_CASE_TYPE;
+    setSelectedCaseType((current) =>
+      current.id === targetSelection.id ? current : targetSelection
+    );
+  }, [initialCaseTypeId]);
+
+  useEffect(() => {
+    onUpdate?.(selectedCaseType);
+  }, [selectedCaseType, onUpdate]);
+
   const handleSelectCaseType = (caseType: CaseType) => {
     setSelectedCaseType(caseType);
     setIsModalOpen(false);
-    if (onUpdate) {
-      onUpdate(caseType);
-    }
   };
 
   return (
@@ -300,7 +311,7 @@ export default function CompactCaseType({
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {caseTypes.map((caseType) => (
+                  {CASE_TYPES.map((caseType) => (
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}

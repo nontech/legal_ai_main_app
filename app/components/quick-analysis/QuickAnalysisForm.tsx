@@ -391,7 +391,10 @@ export default function QuickAnalysisForm({
           <CompactJurisdiction onUpdate={setJurisdiction} initialValues={jurisdiction} />
 
           {/* Case Type */}
-          <CompactCaseType onUpdate={(ct: any) => setCaseTypeId(ct?.id)} />
+          <CompactCaseType
+            initialCaseTypeId={caseTypeId || undefined}
+            onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
+          />
 
           {/* Role */}
           <CompactRole onUpdate={(r: any) => setRole(r)} initialValue={role as any} />

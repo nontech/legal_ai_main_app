@@ -172,7 +172,7 @@ export default function CasePortfolio() {
           </div>
           <button
             onClick={() => router.push("/case-analysis")}
-            className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
+            className="bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
           >
             <svg
               className="w-5 h-5"
