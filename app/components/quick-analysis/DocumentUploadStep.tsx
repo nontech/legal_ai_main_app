@@ -61,12 +61,12 @@ export default function DocumentUploadStep({
   }, [initialCaseId]);
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
-    case_information: { label: "Case Information", color: "blue", icon: "📋" },
-    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "purple", icon: "🔍" },
-    relevant_legal_precedents: { label: "Legal Precedents", color: "green", icon: "⚖️" },
-    key_witness_and_testimony: { label: "Witness & Testimony", color: "orange", icon: "👤" },
-    police_report: { label: "Police Report", color: "red", icon: "🚔" },
-    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "yellow", icon: "⚠️" },
+    case_information: { label: "Case Information", color: "primary", icon: "📋" },
+    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "accent", icon: "🔍" },
+    relevant_legal_precedents: { label: "Legal Precedents", color: "success", icon: "⚖️" },
+    key_witness_and_testimony: { label: "Witness & Testimony", color: "highlight", icon: "👤" },
+    police_report: { label: "Police Report", color: "critical", icon: "🚔" },
+    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
   };
 
   const classifyDocument = async (file: File, fileId: string) => {
@@ -156,14 +156,13 @@ export default function DocumentUploadStep({
 
   const getCategoryColor = (color: string) => {
     const colorMap: Record<string, string> = {
-      blue: "bg-primary-100 text-primary-600 border-primary-200",
-      purple: "bg-accent-100 text-accent-600 border-accent-500",
-      green: "bg-success-100 text-success-600 border-success-500",
-      orange: "bg-highlight-200 text-highlight-600 border-highlight-500",
-      red: "bg-critical-100 text-critical-600 border-critical-500",
-      yellow: "bg-highlight-200 text-highlight-600 border-highlight-500",
+      primary: "bg-primary-100 text-primary-600 border-primary-200",
+      accent: "bg-accent-100 text-accent-600 border-accent-500",
+      success: "bg-success-100 text-success-600 border-success-500",
+      highlight: "bg-highlight-200 text-highlight-600 border-highlight-500",
+      critical: "bg-critical-100 text-critical-600 border-critical-500",
     };
-    return colorMap[color] || colorMap.blue;
+    return colorMap[color] || colorMap.primary;
   };
 
   const handleContinue = async () => {
