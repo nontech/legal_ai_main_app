@@ -31,6 +31,7 @@ interface FileUploadModalProps {
   onCaseDetailsUpdate?: (title: string, description: string) => Promise<void>;
   isCaseInformation?: boolean;
   onFileUploadSuccess?: () => void;
+  onDeleteFile?: (fileAddress: string, fileName: string) => Promise<void>;
 }
 
 type ViewType = "upload" | "summary";
@@ -67,6 +68,7 @@ export default function FileUploadModal({
   onCaseDetailsUpdate,
   isCaseInformation,
   onFileUploadSuccess,
+  onDeleteFile,
 }: FileUploadModalProps) {
   const [uploadedFiles, setUploadedFiles] = useState<ClassifiedUploadedFile[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<ClassifiedUploadedFile[]>([]);
@@ -908,8 +910,20 @@ export default function FileUploadModal({
                                         <hr className="my-1 border-gray-200" />
 
                                         <button
-                                          onClick={() => {
-                                            handleRemoveFile(file.id, false);
+                                          onClick={async () => {
+                                            // If file has an address, it's been uploaded to DB, so use onDeleteFile
+                                            if (file.address && onDeleteFile) {
+                                              try {
+                                                await onDeleteFile(file.address, file.name);
+                                                // Remove from local state after successful deletion
+                                                setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
+                                              } catch (error) {
+                                                console.error("Error deleting file:", error);
+                                              }
+                                            } else {
+                                              // Otherwise just remove it locally
+                                              handleRemoveFile(file.id);
+                                            }
                                             setOpenMenuId(null);
                                           }}
                                           className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
@@ -1467,8 +1481,20 @@ export default function FileUploadModal({
                               <hr className="my-1 border-gray-200" />
 
                               <button
-                                onClick={() => {
-                                  handleRemoveFile(file.id);
+                                onClick={async () => {
+                                  // If file has an address, it's been uploaded to DB, so use onDeleteFile
+                                  if (file.address && onDeleteFile) {
+                                    try {
+                                      await onDeleteFile(file.address, file.name);
+                                      // Remove from local state after successful deletion
+                                      setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
+                                    } catch (error) {
+                                      console.error("Error deleting file:", error);
+                                    }
+                                  } else {
+                                    // Otherwise just remove it locally
+                                    handleRemoveFile(file.id);
+                                  }
                                   setOpenMenuId(null);
                                 }}
                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
