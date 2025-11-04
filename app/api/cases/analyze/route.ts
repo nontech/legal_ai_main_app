@@ -36,14 +36,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             case_information?: Record<string, any>;
             evidence_and_supporting_materials?: Record<string, any>;
             relevant_legal_precedents?: Record<string, any>;
-            key_witnesses_and_testimony?: Record<string, any>;
+            key_witness_and_testimony?: Record<string, any>;
             police_report?: Record<string, any>;
             potential_challenges_and_weaknesses?: Record<string, any>;
         };
         const caseInformation = caseDetails.case_information ?? {};
         const evidenceSummary = caseDetails.evidence_and_supporting_materials?.summary ?? null;
         const legalPrecedentSummary = caseDetails.relevant_legal_precedents?.summary ?? null;
-        const keyWitnessesSummary = caseDetails.key_witnesses_and_testimony?.summary ?? null;
+        const keyWitnessSummary = caseDetails.key_witness_and_testimony?.summary ?? null;
         const policeReportSummary = caseDetails.police_report?.summary || null;
         const weaknessesSummary = caseDetails.potential_challenges_and_weaknesses?.summary || null;
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 charges: caseData.charges || [],
                 evidence_summary: evidenceSummary || null,
                 legal_precedent_summary: legalPrecedentSummary || null,
-                key_witnesses_summary: keyWitnessesSummary || null,
+                key_witnesses_summary: keyWitnessSummary || null,
                 police_report_summary: policeReportSummary || null,
                 weaknesses_summary: weaknessesSummary || null,
             },

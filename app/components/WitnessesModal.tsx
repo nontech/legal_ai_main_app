@@ -80,7 +80,7 @@ export default function WitnessesModal({
               <span className="text-3xl mr-3">👥</span>
               <div>
                 <h2 className="text-2xl font-bold">
-                  Key Witnesses & Testimony
+                  Key Witness & Testimony
                 </h2>
                 <p className="text-blue-100 text-sm">
                   Manage and review witness statements

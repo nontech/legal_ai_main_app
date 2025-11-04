@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import FileUploadModal from "./FileUploadModal";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -34,7 +34,7 @@ interface SectionData {
 const DB_TO_UI_MAP: Record<string, string> = {
   "case_information": "case-info",
   "evidence_and_supporting_materials": "evidence",
-  "key_witnesses_and_testimony": "witnesses",
+  "key_witness_and_testimony": "witnesses",
   "relevant_legal_precedents": "precedents",
   "police_report": "police",
   "potential_challenges_and_weaknesses": "challenges",
@@ -61,8 +61,8 @@ const SECTION_CONFIG = [
   },
   {
     uiId: "witnesses",
-    dbKey: "key_witnesses_and_testimony",
-    title: "Key Witnesses & Testimony",
+    dbKey: "key_witness_and_testimony",
+    title: "Key Witness & Testimony",
     itemLabel: "documents",
     icon: "👥",
   },
@@ -110,48 +110,49 @@ export default function CaseDetailsSection({
   // Store all case details keyed by database keys
   const [caseDetails, setCaseDetails] = useState<Record<string, SectionData>>({});
 
-  // Fetch case details from database if caseId is provided
-  useEffect(() => {
+  // Fetch case details from database
+  const fetchCaseDetails = useCallback(async () => {
     if (!caseId) {
       setIsLoading(false);
       return;
     }
 
-    const fetchCaseDetails = async () => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(`/api/cases/${caseId}`);
-        const json = await res.json();
+    try {
+      setIsLoading(true);
+      const res = await fetch(`/api/cases/${caseId}`);
+      const json = await res.json();
 
-        if (json.ok && json.data?.case_details) {
-          const details = json.data.case_details;
-          setCaseDetails(details);
+      if (json.ok && json.data?.case_details) {
+        const details = json.data.case_details;
+        setCaseDetails(details);
 
-          // Extract case title and description from case_information
-          if (details.case_information?.caseName) {
-            setCaseTitle(details.case_information.caseName);
-            setEditedTitle(details.case_information.caseName);
-          }
-          if (details.case_information?.caseDescription) {
-            setCaseDescription(details.case_information.caseDescription);
-            setEditedDescription(details.case_information.caseDescription);
-          }
-          if (details.case_information?.files_names) {
-            setCaseFilesNames(details.case_information.files_names);
-          }
-          if (details.case_information?.files_addresses) {
-            setCaseFilesAddresses(details.case_information.files_addresses);
-          }
+        // Extract case title and description from case_information
+        if (details.case_information?.caseName) {
+          setCaseTitle(details.case_information.caseName);
+          setEditedTitle(details.case_information.caseName);
         }
-      } catch (error) {
-        console.error("Failed to fetch case details:", error);
-      } finally {
-        setIsLoading(false);
+        if (details.case_information?.caseDescription) {
+          setCaseDescription(details.case_information.caseDescription);
+          setEditedDescription(details.case_information.caseDescription);
+        }
+        if (details.case_information?.files_names) {
+          setCaseFilesNames(details.case_information.files_names);
+        }
+        if (details.case_information?.files_addresses) {
+          setCaseFilesAddresses(details.case_information.files_addresses);
+        }
       }
-    };
-
-    fetchCaseDetails();
+    } catch (error) {
+      console.error("Failed to fetch case details:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, [caseId]);
+
+  // Fetch case details from database if caseId is provided
+  useEffect(() => {
+    fetchCaseDetails();
+  }, [fetchCaseDetails]);
 
   // Notify parent when modal state changes
   useEffect(() => {
@@ -268,7 +269,7 @@ export default function CaseDetailsSection({
     const descriptions: Record<string, string> = {
       case_information: "Add or edit the case title and comprehensive description",
       evidence_and_supporting_materials: "Upload photos, forensic reports, expert reports, contracts, and supporting documents",
-      key_witnesses_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
+      key_witness_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
       relevant_legal_precedents: "Upload case law PDFs, legal research documents, and precedent analysis",
       police_report: "Upload official police reports, incident photos, body cam transcripts, and related documentation",
       potential_challenges_and_weaknesses: "Upload opposing counsel briefs, unfavorable evidence, and weakness analysis documents",
@@ -505,7 +506,7 @@ export default function CaseDetailsSection({
               // Get section-specific description
               const sectionDescriptions: Record<string, string> = {
                 "evidence_and_supporting_materials": "Upload photos, forensic reports, expert reports, and supporting documents",
-                "key_witnesses_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
+                "key_witness_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
                 "relevant_legal_precedents": "Upload case law PDFs and legal research documents",
                 "police_report": "Upload official police reports and incident documentation",
                 "potential_challenges_and_weaknesses": "Upload opposing counsel briefs and weakness analysis",
@@ -579,6 +580,7 @@ export default function CaseDetailsSection({
             await handleSaveHeader(title, description);
           }}
           isCaseInformation={openModal === "case-info"}
+          onFileUploadSuccess={fetchCaseDetails}
         />
       ) : null}
     </div>
