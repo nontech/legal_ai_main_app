@@ -68,12 +68,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
                 weaknesses_summary: weaknessesSummary || null,
             },
         };
+        console.log("Analyze payload:", JSON.stringify(analyzePayload, null, 2));
 
         console.log("Sending to Azure API:", JSON.stringify(analyzePayload, null, 2));
 
         // Call the Azure API
         const azureResponse = await fetch(
-            "http://127.0.0.1:8000/api/v1/prediction/analyze-case",
+            "https://legal-case-api.azurewebsites.net/api/v1/prediction/analyze-case",
             {
                 method: "POST",
                 headers: {
