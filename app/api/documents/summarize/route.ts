@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
         // Call the external summarization API
         const response = await fetch(
-            "http://localhost:8000/api/v1/documents/summarize",
+            "https://legal-case-api.azurewebsites.net/api/v1/documents/summarize",
             {
                 method: "POST",
                 body: externalFormData,
