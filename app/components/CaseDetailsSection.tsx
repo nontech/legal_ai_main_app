@@ -269,7 +269,7 @@ export default function CaseDetailsSection({
     const descriptions: Record<string, string> = {
       case_information: "Add or edit the case title and comprehensive description",
       evidence_and_supporting_materials: "Upload photos, forensic reports, expert reports, contracts, and supporting documents",
-      key_witnesses_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
+      key_witness_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
       relevant_legal_precedents: "Upload case law PDFs, legal research documents, and precedent analysis",
       police_report: "Upload official police reports, incident photos, body cam transcripts, and related documentation",
       potential_challenges_and_weaknesses: "Upload opposing counsel briefs, unfavorable evidence, and weakness analysis documents",
@@ -506,7 +506,7 @@ export default function CaseDetailsSection({
               // Get section-specific description
               const sectionDescriptions: Record<string, string> = {
                 "evidence_and_supporting_materials": "Upload photos, forensic reports, expert reports, and supporting documents",
-                "key_witnesses_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
+                "key_witness_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
                 "relevant_legal_precedents": "Upload case law PDFs and legal research documents",
                 "police_report": "Upload official police reports and incident documentation",
                 "potential_challenges_and_weaknesses": "Upload opposing counsel briefs and weakness analysis",

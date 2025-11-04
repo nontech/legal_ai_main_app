@@ -22,7 +22,7 @@ const SECTION_CONFIG: Record<string, { title: string; icon: string }> = {
   case_information: { title: "Case Information", icon: "📋" },
   evidence_and_supporting_materials: { title: "Evidence & Materials", icon: "🔍" },
   relevant_legal_precedents: { title: "Legal Precedents", icon: "⚖️" },
-  key_witnesses_and_testimony: { title: "Witness & Testimony", icon: "👤" },
+  key_witness_and_testimony: { title: "Witness & Testimony", icon: "👤" },
   police_report: { title: "Police Report", icon: "🚔" },
   potential_challenges_and_weaknesses: { title: "Challenges & Weaknesses", icon: "⚠️" },
 };
