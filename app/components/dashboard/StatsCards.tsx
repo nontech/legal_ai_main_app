@@ -42,6 +42,21 @@ function StatCard({
   );
 }
 
+function resolveCaseStatus(dbCase: any): string {
+  const directStatus = dbCase?.status;
+  if (typeof directStatus === "string" && directStatus.trim()) {
+    return directStatus.trim();
+  }
+  const detailStatus =
+    dbCase?.case_details?.status ||
+    dbCase?.case_details?.case_status ||
+    dbCase?.case_details?.["case_information"]?.status;
+  if (typeof detailStatus === "string" && detailStatus.trim()) {
+    return detailStatus.trim();
+  }
+  return "Active";
+}
+
 export default function StatsCards() {
   const router = useRouter();
   const [stats, setStats] = useState<StatCardProps[]>([]);
@@ -65,17 +80,10 @@ export default function StatsCards() {
           setIsAuthenticated(true);
           const cases = json.cases || [];
 
-          // Filter out untitled cases for stats calculation
-          const validCases = cases.filter((c: any) => {
-            const caseName = c.case_details?.["case_information"]?.caseName;
-            return caseName && caseName !== "Untitled Case";
-          });
-
-          // Calculate stats from valid cases only
-          const totalCases = validCases.length;
-          const activeCases = validCases.filter((c: any) => c.status === "Active" || !c.status).length;
-          const underReview = validCases.filter((c: any) => c.status === "Under Review").length;
-          const completed = validCases.filter((c: any) => c.status === "Completed").length;
+          const totalCases = cases.length;
+          const activeCases = cases.filter((c: any) => resolveCaseStatus(c) === "Active").length;
+          const underReview = cases.filter((c: any) => resolveCaseStatus(c) === "Under Review").length;
+          const completed = cases.filter((c: any) => resolveCaseStatus(c) === "Completed").length;
 
           setStats([
             {
@@ -221,6 +229,4 @@ export default function StatsCards() {
     </div>
   );
 }
-
-
 

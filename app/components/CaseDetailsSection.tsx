@@ -472,12 +472,12 @@ export default function CaseDetailsSection({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex items-center justify-center h-32">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6 flex items-center justify-center h-32">
           <div className="flex flex-col items-center gap-2">
-            <svg className="w-8 h-8 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-8 h-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <p className="text-gray-600 font-medium">Loading case details...</p>
+            <p className="text-ink-600 font-medium">Loading case details...</p>
           </div>
         </div>
       </div>
@@ -487,11 +487,11 @@ export default function CaseDetailsSection({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
         <div className="flex items-start">
-          <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full flex-shrink-0 mr-3">
+          <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-full flex-shrink-0 mr-3">
             <svg
-              className="w-6 h-6 text-blue-700"
+              className="w-6 h-6 text-primary-700"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -505,8 +505,8 @@ export default function CaseDetailsSection({
             </svg>
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900">Case Details</h2>
-            <p className="text-sm text-gray-600 mt-1">
+            <h2 className="text-2xl font-bold text-ink-900">Case Details</h2>
+            <p className="text-sm text-ink-600 mt-1">
               Manage and organize all case information and supporting documents
             </p>
           </div>
@@ -514,25 +514,25 @@ export default function CaseDetailsSection({
       </div>
 
       {/* Progress Overview */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
         <div className="space-y-6">
           {/* Overall Progress */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
             <div className="text-center mb-4">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-5xl font-bold text-blue-600">
+                <span className="text-5xl font-bold text-primary-600">
                   {getCompletedSectionsCount()}
                 </span>
-                <span className="text-3xl font-bold text-gray-400">/</span>
-                <span className="text-5xl font-bold text-gray-400">
+                <span className="text-3xl font-bold text-ink-400">/</span>
+                <span className="text-5xl font-bold text-ink-400">
                   {SECTION_CONFIG.length}
                 </span>
               </div>
-              <p className="text-gray-700 font-medium">Sections Completed</p>
+              <p className="text-ink-700 font-medium">Sections Completed</p>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
+            <div className="w-full bg-surface-200 rounded-full h-3">
               <div
-                className="bg-blue-600 h-3 rounded-full transition-all duration-500"
+                className="bg-primary-500 h-3 rounded-full transition-all duration-500"
                 style={{
                   width: `${(getCompletedSectionsCount() / SECTION_CONFIG.length) * 100}%`,
                 }}
@@ -545,18 +545,18 @@ export default function CaseDetailsSection({
             {/* Case Information Card - Opens Modal */}
             <button
               onClick={() => setOpenModal("case-info")}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
+            className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center flex-1">
                   <span className="text-2xl mr-2">📋</span>
-                  <h3 className="font-semibold text-gray-900 text-sm">
+                  <h3 className="font-semibold text-ink-900 text-sm">
                     Case Information
                   </h3>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+              <p className="text-xs text-ink-600 mb-3 line-clamp-2">
                 Add the case title and comprehensive description with supporting documents
               </p>
 
@@ -572,7 +572,7 @@ export default function CaseDetailsSection({
                   </div>
                 )}
                 <div className="text-right ml-auto">
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-ink-600">
                     {getItemCount("case_information")} {getItemCount("case_information") === 1 ? "document" : "documents"}
                   </p>
                 </div>
@@ -600,18 +600,18 @@ export default function CaseDetailsSection({
                 <button
                   key={section.dbKey}
                   onClick={() => setOpenModal(section.uiId)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
+                  className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center flex-1">
                       <span className="text-2xl mr-2">{section.icon}</span>
-                      <h3 className="font-semibold text-gray-900 text-sm">
+                      <h3 className="font-semibold text-ink-900 text-sm">
                         {section.title}
                       </h3>
                     </div>
                   </div>
 
-                  <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-xs text-ink-600 mb-3 line-clamp-2">
                     {sectionDescriptions[section.dbKey] || "Upload documents for this section"}
                   </p>
 
@@ -627,7 +627,7 @@ export default function CaseDetailsSection({
                       </div>
                     )}
                     <div className="text-right ml-auto">
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-ink-600">
                         {itemCount} {itemCount === 1 ? "document" : "documents"}
                       </p>
                     </div>

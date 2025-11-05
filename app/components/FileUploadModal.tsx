@@ -476,62 +476,68 @@ export default function FileUploadModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{icon}</span>
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {title || "Document Summary Review"}
-                </h2>
-                <p className="text-blue-100 text-sm">
-                  {description || "Upload documents or add text manually to create a comprehensive summary"}
-                </p>
+    <div className="fixed inset-0 z-[9999] overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+        <div
+          className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm transition-opacity"
+          onClick={onClose}
+        ></div>
+        <div className="relative inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-2xl">
+          <div className="flex flex-col max-h-[80vh]">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-5 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl text-white">{icon}</span>
+                  <div>
+                    <h2 className="text-2xl font-bold">
+                      {title || "Document Summary Review"}
+                    </h2>
+                    <p className="text-primary-100 text-sm">
+                      {description || "Upload documents or add text manually to create a comprehensive summary"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="text-white hover:text-surface-200 cursor-pointer rounded-full p-2 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-300 cursor-pointer rounded-full p-2 transition-colors"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          {isSplitView ? (
-            /* Split View Layout */
-            <div className="h-full flex">
-              {/* Left Panel - Documents */}
+            {/* Content */}
+            <div className="flex-1 overflow-hidden bg-surface-000">
+              {isSplitView ? (
+                /* Split View Layout */
+                <div className="h-full flex px-6 py-6 gap-6">
+                  {/* Left Panel - Documents */}
               <div
-                className={`border-r border-gray-200 bg-gray-50 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-2/5"
+                className={`border-r border-border-200 bg-surface-100 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-2/5"
                   }`}
               >
                 {isLeftPanelCollapsed ? (
                   /* Collapsed State */
                   <button
                     onClick={() => setIsLeftPanelCollapsed(false)}
-                    className="p-3 hover:bg-gray-100 transition-colors border-b border-gray-200"
+                  className="p-3 hover:bg-surface-100 transition-colors border-b border-border-200"
                     title="Expand documents panel"
                   >
                     <svg
-                      className="w-6 h-6 text-gray-600"
+                      className="w-6 h-6 text-ink-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -547,14 +553,14 @@ export default function FileUploadModal({
                 ) : (
                   /* Expanded State */
                   <>
-                    <div className="p-4 border-b border-gray-200 bg-white flex items-center justify-between min-h-[56px]">
-                      <h3 className="font-semibold text-gray-900">
+                    <div className="p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[56px]">
+                      <h3 className="font-semibold text-ink-900">
                         Documents
                       </h3>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium whitespace-nowrap"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium whitespace-nowrap"
                           title="Add more documents"
                         >
                           <svg
@@ -582,7 +588,7 @@ export default function FileUploadModal({
                         />
                         <button
                           onClick={() => setIsLeftPanelCollapsed(true)}
-                          className="text-gray-500 hover:text-gray-700 p-1 rounded hover:bg-gray-100"
+                          className="text-ink-500 hover:text-ink-700 p-1 rounded hover:bg-surface-100"
                           title="Collapse panel"
                         >
                           <svg
@@ -606,9 +612,9 @@ export default function FileUploadModal({
                       {/* Empty State - No files at all */}
                       {uploadedFiles.length === 0 && selectedFiles.length === 0 && (
                         <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
-                          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                          <div className="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center mb-4">
                             <svg
-                              className="w-8 h-8 text-gray-400"
+                            className="w-8 h-8 text-ink-400"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -621,15 +627,15 @@ export default function FileUploadModal({
                               />
                             </svg>
                           </div>
-                          <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                          <h4 className="text-lg font-semibold text-ink-900 mb-2">
                             No Documents
                           </h4>
-                          <p className="text-sm text-gray-600 mb-4 max-w-xs">
+                          <p className="text-sm text-ink-600 mb-4 max-w-xs">
                             Select documents to upload and generate an AI summary for case analysis.
                           </p>
                           <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm flex items-center gap-2"
+                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center gap-2"
                           >
                             <svg
                               className="w-5 h-5"
@@ -653,14 +659,14 @@ export default function FileUploadModal({
                       {selectedFiles.length > 0 && (
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                            <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
                               Selected Files ({selectedFiles.length})
                             </h4>
                             {caseId && sectionName && (
                               <button
                                 onClick={handleUploadAllFiles}
                                 disabled={uploadingFileIds.size > 0}
-                                className="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                               >
                                 {uploadingFileIds.size > 0 ? (
                                   <>
@@ -684,12 +690,12 @@ export default function FileUploadModal({
                           {selectedFiles.map((file) => (
                             <div
                               key={file.id}
-                              className="bg-blue-50 border border-blue-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                              className="bg-primary-100 border border-primary-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
                             >
                               <div className="flex items-start gap-2">
-                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded flex items-center justify-center mt-0.5">
+                                <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
                                   <svg
-                                    className="w-4 h-4 text-blue-600"
+                                    className="w-4 h-4 text-primary-600"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -703,10 +709,10 @@ export default function FileUploadModal({
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                  <p className="text-sm font-medium text-ink-900 truncate">
                                     {file.name}
                                   </p>
-                                  <p className="text-xs text-gray-600">
+                                  <p className="text-xs text-ink-600">
                                     Ready to upload
                                   </p>
                                 </div>
@@ -727,12 +733,12 @@ export default function FileUploadModal({
 
                       {/* Uploaded Files Section */}
                       <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                        <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
                           Uploaded Files ({uploadedFiles.length})
                         </h4>
                         {uploadedFiles.length === 0 ? (
-                          <div className="text-center py-8 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                            <p className="text-sm text-gray-500">
+                          <div className="text-center py-8 px-4 bg-surface-100 rounded-lg border border-border-200">
+                            <p className="text-sm text-ink-500">
                               No files uploaded yet
                             </p>
                           </div>
@@ -740,12 +746,12 @@ export default function FileUploadModal({
                           uploadedFiles.map((file) => (
                             <div
                               key={file.id}
-                              className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                              className="bg-surface-000 border border-border-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
                             >
                               <div className="flex items-start gap-2">
-                                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded flex items-center justify-center mt-0.5">
+                                <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
                                   <svg
-                                    className="w-4 h-4 text-blue-600"
+                                    className="w-4 h-4 text-primary-600"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -759,14 +765,14 @@ export default function FileUploadModal({
                                   </svg>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-gray-900 truncate">
+                                  <p className="text-sm font-medium text-ink-900 truncate">
                                     {file.name}
                                   </p>
                                   {(() => {
                                     const uploadedLabel = formatUploadedDate(file.uploadedAt);
                                     if (!uploadedLabel) return null;
                                     return (
-                                      <p className="text-xs text-gray-500">
+                                      <p className="text-xs text-ink-500">
                                         Uploaded {uploadedLabel}
                                       </p>
                                     );
@@ -780,7 +786,7 @@ export default function FileUploadModal({
                                         openMenuId === file.id ? null : file.id
                                       )
                                     }
-                                    className="text-gray-600 hover:bg-gray-100 rounded-lg p-1 transition-colors"
+                                    className="text-ink-600 hover:bg-surface-100 rounded-lg p-1 transition-colors"
                                     title="More actions"
                                   >
                                     <svg
@@ -808,13 +814,13 @@ export default function FileUploadModal({
                                       />
 
                                       {/* Menu */}
-                                      <div className="absolute right-0 top-8 z-20 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                                      <div className="absolute right-0 top-8 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
                                         <button
                                           onClick={() => {
                                             console.log("Print", file.name);
                                             setOpenMenuId(null);
                                           }}
-                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                          className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                         >
                                           <svg
                                             className="w-5 h-5"
@@ -837,7 +843,7 @@ export default function FileUploadModal({
                                             console.log("Download", file.name);
                                             setOpenMenuId(null);
                                           }}
-                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                          className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                         >
                                           <svg
                                             className="w-5 h-5"
@@ -860,7 +866,7 @@ export default function FileUploadModal({
                                             console.log("Send", file.name);
                                             setOpenMenuId(null);
                                           }}
-                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                          className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                         >
                                           <svg
                                             className="w-5 h-5"
@@ -883,7 +889,7 @@ export default function FileUploadModal({
                                             console.log("Preview", file.name);
                                             setOpenMenuId(null);
                                           }}
-                                          className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                          className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                         >
                                           <svg
                                             className="w-5 h-5"
@@ -907,7 +913,7 @@ export default function FileUploadModal({
                                           Preview
                                         </button>
 
-                                        <hr className="my-1 border-gray-200" />
+                                        <hr className="my-1 border-border-200" />
 
                                         <button
                                           onClick={async () => {
@@ -963,23 +969,23 @@ export default function FileUploadModal({
                 {isGenerating ? (
                   <div className="flex flex-col items-center justify-center flex-1 min-h-0">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-lg font-semibold text-gray-900 mb-2">
+                    <p className="text-lg font-semibold text-ink-900 mb-2">
                       Generating AI Summary...
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-ink-600">
                       Analyzing your documents and creating a comprehensive summary
                     </p>
                   </div>
                 ) : (
                   <>
                     {/* Action Toolbar */}
-                    <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
+                    <div className="p-4 border-b border-border-200 bg-surface-000 flex-shrink-0">
                       <div className="flex items-center justify-end gap-2">
                         {/* Download Dropdown */}
                         <div className="relative">
                           <button
                             onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
                           >
                             <svg
                               className="w-4 h-4"
@@ -1003,10 +1009,10 @@ export default function FileUploadModal({
                                 className="fixed inset-0 z-10"
                                 onClick={() => setShowDownloadMenu(false)}
                               />
-                              <div className="absolute right-0 top-10 z-20 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                              <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
                                 <button
                                   onClick={() => handleDownload("pdf")}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                  className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                 >
                                   <svg
                                     className="w-5 h-5"
@@ -1025,7 +1031,7 @@ export default function FileUploadModal({
                                 </button>
                                 <button
                                   onClick={() => handleDownload("txt")}
-                                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                  className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                                 >
                                   <svg
                                     className="w-5 h-5"
@@ -1049,7 +1055,7 @@ export default function FileUploadModal({
 
                         <button
                           onClick={handleCopySummary}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
                         >
                           <svg
                             className="w-4 h-4"
@@ -1074,19 +1080,19 @@ export default function FileUploadModal({
                       {(sectionName === "case_information") && (
                         <div className="space-y-4">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-ink-700 mb-2">
                               Case Title
                             </label>
                             <input
                               type="text"
                               value={editedTitle}
                               onChange={(e) => setEditedTitle(e.target.value)}
-                              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                              className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900"
                               placeholder="Enter case title"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                            <label className="block text-sm font-medium text-ink-700 mb-2">
                               Case Description
                             </label>
                             <div className="flex gap-2 mb-2">
@@ -1095,8 +1101,8 @@ export default function FileUploadModal({
                                   type="button"
                                   onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
                                   className={`px-3 py-1 text-sm font-medium rounded transition-colors flex items-center gap-2 ${isMarkdownPreview
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    ? "bg-success-100 text-success-600 hover:bg-success-100/80"
+                                    : "bg-surface-100 text-ink-700 hover:bg-surface-200"
                                     }`}
                                 >
                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1108,14 +1114,14 @@ export default function FileUploadModal({
                               )}
                             </div>
                             {isMarkdownPreview && editedDescription ? (
-                              <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 min-h-32 max-h-60 overflow-y-auto markdown-preview">
+                              <div className="w-full p-4 border border-border-300 rounded-lg bg-surface-100 min-h-32 max-h-60 overflow-y-auto markdown-preview">
                                 <MarkdownRenderer content={editedDescription} />
                               </div>
                             ) : (
                               <textarea
                                 value={editedDescription}
                                 onChange={(e) => setEditedDescription(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 resize-y"
+                                className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900 resize-y"
                                 rows={4}
                                 placeholder="Enter case description or generate from uploaded documents"
                               />
@@ -1126,7 +1132,7 @@ export default function FileUploadModal({
                               <button
                                 onClick={handleGenerateSummary}
                                 disabled={isGenerating}
-                                className="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                               >
                                 {isGenerating ? (
                                   <>
@@ -1163,7 +1169,7 @@ export default function FileUploadModal({
                               <button
                                 onClick={handleGenerateSummary}
                                 disabled={isGenerating}
-                                className="px-4 py-2 text-sm font-medium bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                               >
                                 {isGenerating ? (
                                   <>
@@ -1195,7 +1201,7 @@ export default function FileUploadModal({
                                   onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
                                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
                                     ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                    : "bg-surface-100 text-ink-700 hover:bg-surface-200"
                                     }`}
                                 >
                                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1208,7 +1214,7 @@ export default function FileUploadModal({
 
                               {/* Word/Character Count - Above Textarea */}
                               {aiSummary && (
-                                <div className="text-sm text-gray-600 ml-auto">
+                                <div className="text-sm text-ink-600 ml-auto">
                                   <div className="flex items-center gap-4">
                                     <span>{getWordCount(aiSummary)} words</span>
                                     <span>•</span>
@@ -1222,7 +1228,7 @@ export default function FileUploadModal({
                             </div>
                           )}
 
-                          <div className="bg-white p-6 rounded-lg border border-gray-200">
+                          <div className="bg-surface-000 p-6 rounded-lg border border-border-200">
                             {isMarkdownPreview && aiSummary ? (
                               <div className="min-h-[400px] markdown-preview">
                                 <MarkdownRenderer content={aiSummary} />
@@ -1232,7 +1238,7 @@ export default function FileUploadModal({
                                 ref={summaryRef}
                                 value={aiSummary}
                                 onChange={handleSummaryChange}
-                                className="w-full min-h-[400px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y font-mono text-sm text-gray-900"
+                                className="w-full min-h-[400px] p-4 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y font-mono text-sm text-ink-900"
                                 placeholder={(uploadedFiles.length === 0 && selectedFiles.length === 0) ? "Click to add summary text or upload documents to generate a summary..." : "AI-generated summary will appear here or edit manually..."}
                               />
                             )}
@@ -1253,13 +1259,13 @@ export default function FileUploadModal({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-300 bg-gray-50"
+                  ? "border-primary-500 bg-primary-100"
+                  : "border-border-300 bg-surface-100"
                   }`}
               >
                 <div className="flex flex-col items-center">
                   <svg
-                    className="w-16 h-16 text-gray-400 mb-4"
+                    className="w-16 h-16 text-ink-400 mb-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -1271,16 +1277,16 @@ export default function FileUploadModal({
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-ink-900 mb-2">
                     Drop files here or click to upload
                   </h3>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="mt-4 px-6 py-3 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    className="mt-4 px-6 py-3 bg-surface-000 border border-border-300 rounded-lg text-ink-700 font-medium hover:bg-surface-100 transition-colors"
                   >
                     Choose Files
                   </button>
-                  <p className="text-sm text-gray-500 mt-4">
+                  <p className="text-sm text-ink-500 mt-4">
                     Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF •
                     Max 10 MB
                   </p>
@@ -1298,24 +1304,24 @@ export default function FileUploadModal({
               {/* Uploaded Files List */}
               {uploadedFiles.length === 0 ? (
                 <div className="text-center py-12">
-                  <p className="text-lg text-gray-500">
+                  <p className="text-lg text-ink-500">
                     No files uploaded yet. Drag and drop or click "Choose Files" to add documents.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900">
+                  <h3 className="font-semibold text-ink-900">
                     Uploaded Files ({uploadedFiles.length})
                   </h3>
                   {uploadedFiles.map((file) => (
                     <div
                       key={file.id}
-                      className="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                      className="bg-surface-000 border border-border-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-shadow"
                     >
                       <div className="flex items-center flex-1 min-w-0">
-                        <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
                           <svg
-                            className="w-5 h-5 text-blue-600"
+                            className="w-5 h-5 text-primary-600"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -1329,13 +1335,13 @@ export default function FileUploadModal({
                           </svg>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">
+                          <p className="text-sm font-medium text-ink-900 truncate">
                             {file.name}
                           </p>
                           {(() => {
                             const dateLabel = formatUploadedDate(file.uploadedAt);
                             return (
-                              <p className="text-xs text-gray-500">
+                              <p className="text-xs text-ink-500">
                                 {dateLabel ? `Uploaded ${dateLabel}` : "Date unavailable"}
                               </p>
                             );
@@ -1351,7 +1357,7 @@ export default function FileUploadModal({
                               openMenuId === file.id ? null : file.id
                             )
                           }
-                          className="text-gray-600 hover:bg-gray-100 rounded-lg p-2 transition-colors"
+                          className="text-ink-600 hover:bg-surface-100 rounded-lg p-2 transition-colors"
                           title="More actions"
                         >
                           <svg
@@ -1379,13 +1385,13 @@ export default function FileUploadModal({
                             />
 
                             {/* Menu */}
-                            <div className="absolute right-0 top-10 z-20 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1">
+                            <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
                               <button
                                 onClick={() => {
                                   console.log("Print", file.name);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                               >
                                 <svg
                                   className="w-5 h-5"
@@ -1408,7 +1414,7 @@ export default function FileUploadModal({
                                   console.log("Download", file.name);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                               >
                                 <svg
                                   className="w-5 h-5"
@@ -1431,7 +1437,7 @@ export default function FileUploadModal({
                                   console.log("Send", file.name);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                               >
                                 <svg
                                   className="w-5 h-5"
@@ -1454,7 +1460,7 @@ export default function FileUploadModal({
                                   console.log("Preview", file.name);
                                   setOpenMenuId(null);
                                 }}
-                                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3"
+                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
                               >
                                 <svg
                                   className="w-5 h-5"
@@ -1478,7 +1484,7 @@ export default function FileUploadModal({
                                 Preview
                               </button>
 
-                              <hr className="my-1 border-gray-200" />
+                              <hr className="my-1 border-border-200" />
 
                               <button
                                 onClick={async () => {
@@ -1528,7 +1534,7 @@ export default function FileUploadModal({
 
         {/* Toast Notification */}
         {showCopiedToast && (
-          <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+          <div className="absolute top-6 right-6 z-30 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
             <svg
               className="w-5 h-5"
               fill="none"
@@ -1547,12 +1553,12 @@ export default function FileUploadModal({
         )}
 
         {/* Footer */}
-        <div className="bg-gray-50 px-6 pt-6 pb-4 md:pt-8 border-t border-gray-200 flex justify-end items-center gap-3">
+        <div className="bg-surface-100 px-6 pt-6 pb-4 md:pt-8 border-t border-border-200 flex justify-end items-center gap-3">
           {sectionName === "case_information" && onCaseDetailsUpdate ? (
             <button
               onClick={handleSaveCaseDetails}
               disabled={isSaving}
-              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
@@ -1575,7 +1581,7 @@ export default function FileUploadModal({
               <button
                 onClick={handleSaveChanges}
                 disabled={isSaving}
-                className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSaving ? (
                   <>
@@ -1598,5 +1604,7 @@ export default function FileUploadModal({
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 }

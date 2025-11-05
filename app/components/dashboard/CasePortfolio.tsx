@@ -27,9 +27,21 @@ interface Case {
 }
 
 // Map DB case to UI case
+function getCaseTitle(dbCase: DBCase): string | null {
+  const rawTitle = dbCase.case_details?.["case_information"]?.caseName;
+  if (!rawTitle) return null;
+  const trimmed = rawTitle.trim();
+  if (!trimmed || trimmed.toLowerCase() === "untitled case") {
+    return null;
+  }
+  return trimmed;
+}
+
 function mapDBCaseToUI(dbCase: DBCase): Case {
   const details = dbCase.case_details || {};
-  const title = details["case_information"]?.caseName || `Case ${dbCase.id}`;
+  const title =
+    getCaseTitle(dbCase) ||
+    `Case ${dbCase.id.slice(0, 8).toUpperCase()}`;
   const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
 
   // Calculate lastUpdated as relative time
@@ -59,8 +71,7 @@ function mapDBCaseToUI(dbCase: DBCase): Case {
 
 // Filter out untitled cases (cases with no caseName)
 function isValidCase(dbCase: DBCase): boolean {
-  const caseName = dbCase.case_details?.["case_information"]?.caseName;
-  return caseName && caseName !== "Untitled Case";
+  return Boolean(dbCase?.id);
 }
 
 export default function CasePortfolio() {

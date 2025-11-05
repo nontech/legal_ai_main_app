@@ -61,7 +61,8 @@ export default function QuickAnalysisForm({
   const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<"idle" | "calculating" | "redirecting">("idle");
+  const isLoading = loadingStage !== "idle";
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "primary", icon: "📋" },
@@ -299,7 +300,7 @@ export default function QuickAnalysisForm({
       return;
     }
 
-    setIsLoading(true);
+    setLoadingStage("calculating");
 
     try {
       let targetCaseId = caseId;
@@ -369,6 +370,7 @@ export default function QuickAnalysisForm({
       );
 
       // Navigate to results page with case ID and analysis data
+      setLoadingStage("redirecting");
       router.push(`/case-analysis/detailed?step=7&caseId=${targetCaseId}`);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
@@ -377,13 +379,55 @@ export default function QuickAnalysisForm({
         JSON.stringify(formData)
       );
       alert(e instanceof Error ? e.message : "Error analyzing case. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setLoadingStage("idle");
     }
   };
 
   return (
     <div className="relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-primary-950/70 backdrop-blur-sm transition-opacity">
+          <div className="bg-surface-000/95 border border-primary-700/30 rounded-3xl px-10 py-12 shadow-[0_30px_80px_-10px_rgba(8,47,73,0.45)] flex flex-col items-center gap-5 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center shadow-inner">
+              {loadingStage === "redirecting" ? (
+                <svg
+                  className="w-8 h-8 text-primary-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8 text-primary-600 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-ink-900 tracking-tight">
+                {loadingStage === "redirecting" ? "Results Ready" : "Calculating Results"}
+              </h3>
+              <p className="text-sm text-ink-600 leading-relaxed">
+                {loadingStage === "redirecting"
+                  ? "Redirecting you to the detailed case analysis dashboard."
+                  : "Analyzing documents, case factors, and legal precedents to build your strategy."}
+              </p>
+            </div>
+            <div className="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-primary-500 transition-all duration-500 ${
+                  loadingStage === "redirecting" ? "w-full" : "w-3/5 animate-pulse"
+                }`}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto px-4 pb-32 space-y-6">
         {/* Form Sections */}
         <div className="space-y-6">
@@ -533,11 +577,19 @@ export default function QuickAnalysisForm({
                   />
                 </svg>
               )}
-              <span>{isLoading ? "Calculating..." : "Calculate Results"}</span>
+              <span>
+                {loadingStage === "redirecting"
+                  ? "Redirecting..."
+                  : isLoading
+                  ? "Calculating..."
+                  : "Calculate Results"}
+              </span>
             </button>
             {isLoading ? (
               <p className="text-center text-sm text-primary-600 mt-2 font-medium">
-                🔄 Analyzing your case and fetching results...
+                {loadingStage === "redirecting"
+                  ? "Analysis complete. Taking you to your results..."
+                  : "🔄 Analyzing your case and fetching results..."}
               </p>
             ) : (
               !caseName?.trim() ||
