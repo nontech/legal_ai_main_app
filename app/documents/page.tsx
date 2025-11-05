@@ -58,14 +58,13 @@ export default function DocumentsLibrary() {
           // Collect all documents from all sections
           Object.entries(SECTION_CONFIG).forEach(([dbKey, config]) => {
             const sectionData = caseDetails[dbKey] || {};
-            const fileNames = sectionData.file_names || [];
-            const fileAddresses = sectionData.file_addresses || [];
+            const files = sectionData.files || [];
 
-            fileNames.forEach((name: string, idx: number) => {
-              if (name && name.trim()) {
+            files.forEach((file: { name: string; address: string }) => {
+              if (file.name) {
                 documents.push({
-                  name,
-                  address: fileAddresses[idx],
+                  name: file.name,
+                  address: file.address || "",
                   category: config.title,
                   categoryIcon: config.icon,
                 });
