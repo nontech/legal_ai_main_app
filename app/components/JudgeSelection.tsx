@@ -169,12 +169,12 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-ink-900 mb-4">
               Judge Selection
             </h2>
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+            <p className="text-lg text-ink-600 max-w-4xl mx-auto">
               Select the presiding judge. Their judicial history,
               temperament, and ruling patterns will significantly
               influence the case analysis and outcome predictions.
@@ -184,10 +184,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
         {/* Summary Card */}
         {selectedJudge && (
-          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border-2 border-amber-200 p-6">
+          <div className="bg-highlight-200 rounded-lg border border-transparent p-6">
             <div className="flex items-start gap-3">
               <svg
-                className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1"
+                className="w-6 h-6 text-highlight-600 flex-shrink-0 mt-1"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -200,10 +200,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                 />
               </svg>
               <div>
-                <h4 className="font-bold text-gray-900 mb-2">
+                <h4 className="font-bold text-ink-900 mb-2">
                   Judge Selection Confirmed
                 </h4>
-                <p className="text-gray-700 text-sm">
+                <p className="text-ink-600 text-sm">
                   You have selected{" "}
                   <span className="font-semibold">
                     {selectedJudgeData?.name}
@@ -219,13 +219,13 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
         )}
 
         {/* Compact Display with Button */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           {!selectedJudgeData ? (
             /* Empty State */
             <div className="text-center py-8">
-              <div className="flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mx-auto mb-4">
+              <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mx-auto mb-4">
                 <svg
-                  className="w-8 h-8 text-amber-700"
+                  className="w-8 h-8 text-primary-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -238,15 +238,15 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-ink-900 mb-2">
                 No Judge Selected
               </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              <p className="text-ink-600 mb-6 max-w-md mx-auto">
                 Select a judge to analyze their judicial history, temperament, and ruling patterns for your case.
               </p>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium shadow-sm"
               >
                 Select a Judge
               </button>
@@ -255,9 +255,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
             /* Selected Judge Display */
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+                <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg">
                   <svg
-                    className="w-7 h-7 text-amber-700"
+                    className="w-7 h-7 text-primary-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -271,10 +271,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-ink-900">
                     Presiding Judge
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-ink-600">
                     {selectedJudgeData.name}
                   </p>
                 </div>
@@ -283,10 +283,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
               {/* Centered Judge Name */}
               <div className="flex-1 flex justify-center">
                 <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-ink-900">
                     {selectedJudgeData.name}
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-ink-600">
                     {selectedJudgeData.experience} years experience
                   </p>
                 </div>
@@ -294,7 +294,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
               >
                 Change Judge
               </button>
@@ -305,74 +305,79 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
-                  Select Presiding Judge
-                </h2>
-                <p className="text-amber-100 text-sm">
-                  Choose the judge who will preside over your case
-                </p>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="text-white hover:text-gray-200 transition-colors"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+            <div
+              className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm transition-opacity"
+              onClick={() => setIsModalOpen(false)}
+            ></div>
+            <div className="relative inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-2xl">
+              <div className="flex flex-col max-h-[80vh]">
+                <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-5 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Select Presiding Judge
+                    </h2>
+                    <p className="text-primary-100 text-sm">
+                      Choose the judge who will preside over your case
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-white hover:text-surface-200 transition-colors rounded-full p-2"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
 
-            {/* Judge Cards in Modal */}
-            <div className="p-6 space-y-4">
-              {judges.map((judge) => (
-                <div
-                  key={judge.id}
-                  onClick={() => handleJudgeSelect(judge.id)}
-                  className={`bg-white rounded-lg shadow-sm border-2 transition-all cursor-pointer hover:shadow-lg ${selectedJudge === judge.id
-                    ? "border-amber-500 ring-2 ring-amber-200"
-                    : "border-gray-200 hover:border-gray-300"
-                    }`}
-                >
-                  <div className="p-6">
-                    {/* Judge Header */}
-                    <div className="flex items-start justify-between mb-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-8 h-8 text-amber-700"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-                            />
-                          </svg>
-                        </div>
+                {/* Judge Cards in Modal */}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-surface-000">
+                  {judges.map((judge) => (
+                    <div
+                      key={judge.id}
+                      onClick={() => handleJudgeSelect(judge.id)}
+                      className={`bg-surface-000 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-lg ${selectedJudge === judge.id
+                        ? "border-primary-500 ring-2 ring-primary-200"
+                        : "border-border-200 hover:border-primary-300"
+                        }`}
+                    >
+                      <div className="p-6">
+                        {/* Judge Header */}
+                        <div className="flex items-start justify-between mb-6">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-shrink-0 w-14 h-14 bg-gradient-to-br from-primary-100 to-primary-200 rounded-full flex items-center justify-center">
+                              <svg
+                                className="w-8 h-8 text-primary-600"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
+                                />
+                              </svg>
+                            </div>
                         <div>
-                          <h3 className="text-2xl font-bold text-gray-900">
+                          <h3 className="text-2xl font-bold text-ink-900">
                             {judge.name}
                           </h3>
-                          <p className="text-gray-600 mt-1">
-                            {judge.experience} years experience •{" "}
-                            {judge.background}
+                          <p className="text-ink-600 mt-1">
+                            {judge.experience} years experience • {judge.background}
                           </p>
                         </div>
                       </div>
@@ -392,24 +397,24 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {/* Historical Ruling Patterns */}
                       <div className="space-y-4">
-                        <h4 className="font-bold text-gray-900 text-lg">
+                        <h4 className="font-bold text-ink-900 text-lg">
                           Historical Ruling Patterns
                         </h4>
 
                         <div>
-                          <p className="font-semibold text-gray-800 mb-2">
+                          <p className="font-semibold text-ink-800 mb-2">
                             Criminal Cases:
                           </p>
                           <div className="space-y-1 text-sm">
-                            <p className="text-gray-700">
+                            <p className="text-ink-600">
                               Conviction:{" "}
                               {judge.criminalCases.conviction}%
                             </p>
-                            <p className="text-gray-700">
+                            <p className="text-ink-600">
                               Dismissal:{" "}
                               {judge.criminalCases.dismissal}%
                             </p>
-                            <p className="text-gray-700">
+                            <p className="text-ink-600">
                               Plea Deals:{" "}
                               {judge.criminalCases.pleaDeals}%
                             </p>
@@ -417,15 +422,15 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                         </div>
 
                         <div>
-                          <p className="font-semibold text-gray-800 mb-2">
+                          <p className="font-semibold text-ink-800 mb-2">
                             Civil Cases:
                           </p>
                           <div className="space-y-1 text-sm">
-                            <p className="text-gray-700">
+                            <p className="text-ink-600">
                               Plaintiff Wins:{" "}
                               {judge.civilCases.plaintiffWins}%
                             </p>
-                            <p className="text-gray-700">
+                            <p className="text-ink-600">
                               Defendant Wins:{" "}
                               {judge.civilCases.defendantWins}%
                             </p>
@@ -435,7 +440,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
                       {/* Notable Decision Patterns */}
                       <div className="space-y-4">
-                        <h4 className="font-bold text-gray-900 text-lg">
+                        <h4 className="font-bold text-ink-900 text-lg">
                           Notable Decision Patterns
                         </h4>
                         <ul className="space-y-2">
@@ -443,9 +448,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
                             (pattern, index) => (
                               <li
                                 key={index}
-                                className="flex items-start gap-2 text-sm text-gray-700"
+                                className="flex items-start gap-2 text-sm text-ink-600"
                               >
-                                <span className="text-amber-600 mt-0.5">
+                                <span className="text-primary-500 mt-0.5">
                                   •
                                 </span>
                                 <span>{pattern}</span>
@@ -457,15 +462,15 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
                       {/* Judicial Temperament */}
                       <div className="space-y-4">
-                        <h4 className="font-bold text-gray-900 text-lg">
+                        <h4 className="font-bold text-ink-900 text-lg">
                           Judicial Temperament
                         </h4>
-                        <p className="text-gray-700 text-sm">
+                        <p className="text-ink-600 text-sm">
                           {judge.temperament}
                         </p>
                         <div className="pt-2">
-                          <div className="inline-block bg-gray-100 px-4 py-2 rounded-lg">
-                            <p className="text-sm font-semibold text-gray-900">
+                          <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
+                            <p className="text-sm font-semibold text-ink-900">
                               {judge.experience} years experience
                             </p>
                           </div>
@@ -478,7 +483,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
             </div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  )}
       <SaveCaseButton
         caseId={caseId}
         field="judge"

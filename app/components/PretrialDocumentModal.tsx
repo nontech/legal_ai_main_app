@@ -52,32 +52,32 @@ export default function PretrialDocumentModal({
   const getStatusBadge = (status: Document["status"]) => {
     const styles = {
       not_started: {
-        bg: "bg-gray-100",
-        text: "text-gray-700",
+        bg: "bg-surface-100",
+        text: "text-ink-600",
         label: "Not Started",
         icon: "○",
       },
       draft: {
-        bg: "bg-yellow-100",
-        text: "text-yellow-800",
+        bg: "bg-highlight-200",
+        text: "text-highlight-600",
         label: "Draft",
         icon: "✎",
       },
       in_progress: {
-        bg: "bg-blue-100",
-        text: "text-blue-800",
+        bg: "bg-primary-100",
+        text: "text-primary-600",
         label: "In Progress",
         icon: "⟳",
       },
       complete: {
-        bg: "bg-green-100",
-        text: "text-green-800",
+        bg: "bg-success-100",
+        text: "text-success-600",
         label: "Complete",
         icon: "✓",
       },
       filed: {
-        bg: "bg-purple-100",
-        text: "text-purple-800",
+        bg: "bg-accent-100",
+        text: "text-accent-600",
         label: "Filed",
         icon: "✓✓",
       },
@@ -95,13 +95,17 @@ export default function PretrialDocumentModal({
 
   const getPriorityBadge = (priority: Document["priority"]) => {
     const styles = {
-      low: { bg: "bg-gray-100", text: "text-gray-600", label: "Low" },
+      low: { bg: "bg-surface-100", text: "text-ink-600", label: "Low" },
       medium: {
-        bg: "bg-blue-100",
-        text: "text-blue-700",
+        bg: "bg-accent-100",
+        text: "text-accent-600",
         label: "Medium",
       },
-      high: { bg: "bg-red-100", text: "text-red-700", label: "High" },
+      high: {
+        bg: "bg-critical-100",
+        text: "text-critical-600",
+        label: "High",
+      },
     };
     const style = styles[priority];
     return (
@@ -119,10 +123,10 @@ export default function PretrialDocumentModal({
   const totalCount = documents.length;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 bg-primary-950/70 z-50 flex items-center justify-center p-4">
+      <div className="bg-surface-000 rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+        <div className="bg-gradient-to-r from-primary-700 to-primary-500 p-6 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {editingDocument && (
@@ -153,7 +157,7 @@ export default function PretrialDocumentModal({
                     ? editingDocument.name
                     : phase.title}
                 </h2>
-                <p className="text-blue-100 text-sm mt-1">
+                <p className="text-primary-100 text-sm mt-1">
                   {editingDocument
                     ? "Edit document details and content"
                     : phase.description}
@@ -185,18 +189,18 @@ export default function PretrialDocumentModal({
         {!editingDocument ? (
           <>
             {/* Progress Summary */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 border-b border-blue-200">
+            <div className="bg-gradient-to-r from-surface-100 to-accent-100 p-4 border-b border-border-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-900">
+                <span className="text-sm font-semibold text-ink-900">
                   Progress
                 </span>
-                <span className="text-lg font-bold text-blue-600">
+                <span className="text-lg font-bold text-primary-600">
                   {completedCount}/{totalCount}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-surface-200 rounded-full h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  className="bg-primary-600 h-2 rounded-full transition-all duration-500"
                   style={{
                     width: `${(completedCount / totalCount) * 100}%`,
                   }}
@@ -210,18 +214,18 @@ export default function PretrialDocumentModal({
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
-                    className="bg-white border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
+                    className="bg-surface-000 border-2 border-border-200 rounded-lg p-4 hover:shadow-md transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          <h4 className="font-semibold text-gray-900 text-base">
+                          <h4 className="font-semibold text-ink-900 text-base">
                             {doc.name}
                           </h4>
                           {getStatusBadge(doc.status)}
                           {getPriorityBadge(doc.priority)}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-ink-600">
                           {doc.dueDate && (
                             <span className="flex items-center gap-1">
                               <svg
@@ -268,7 +272,7 @@ export default function PretrialDocumentModal({
                               e.stopPropagation();
                               setEditingDocument(doc);
                             }}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+                            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center gap-2"
                           >
                             <svg
                               className="w-4 h-4"
@@ -293,7 +297,7 @@ export default function PretrialDocumentModal({
                                 e.stopPropagation();
                                 setEditingDocument(doc);
                               }}
-                              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                              className="px-4 py-2 bg-surface-000 border border-border-200 text-ink-600 rounded-lg hover:bg-surface-100 transition-colors font-medium"
                             >
                               Edit
                             </button>
@@ -303,7 +307,7 @@ export default function PretrialDocumentModal({
                                 e.stopPropagation();
                                 setEditingDocument(doc);
                               }}
-                              className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                              className="px-4 py-2 bg-surface-000 border border-border-200 text-ink-600 rounded-lg hover:bg-surface-100 transition-colors font-medium"
                             >
                               View
                             </button>
@@ -317,10 +321,10 @@ export default function PretrialDocumentModal({
             </div>
 
             {/* Footer */}
-            <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-end">
+            <div className="bg-surface-100 px-6 py-4 border-t border-border-200 flex justify-end">
               <button
                 onClick={onClose}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
               >
                 Close
               </button>
@@ -370,23 +374,23 @@ function InlineDocumentEditor({
   return (
     <>
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-6 bg-surface-100">
         <div className="space-y-6">
           {/* Metadata Controls */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
+          <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
+            <h3 className="text-sm font-semibold text-ink-600 mb-4 uppercase tracking-wide">
               Document Properties
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Status */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-ink-600 mb-2">
                   Status
                 </label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="not_started">Not Started</option>
                   <option value="draft">Draft</option>
@@ -398,13 +402,13 @@ function InlineDocumentEditor({
 
               {/* Priority */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-ink-600 mb-2">
                   Priority
                 </label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -414,26 +418,26 @@ function InlineDocumentEditor({
 
               {/* Deadline */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-ink-600 mb-2">
                   Deadline (Optional)
                 </label>
                 <input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-border-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
             </div>
           </div>
 
           {/* Document Content Editor */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+              <h3 className="text-sm font-semibold text-ink-600 uppercase tracking-wide">
                 Document Content
               </h3>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 text-xs text-ink-500">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -454,7 +458,7 @@ function InlineDocumentEditor({
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[400px] px-4 py-3 font-mono text-sm text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+              className="w-full min-h-[400px] px-4 py-3 font-mono text-sm text-ink-900 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y"
               placeholder="Start typing your document content..."
               style={{
                 lineHeight: "1.8",
@@ -465,10 +469,10 @@ function InlineDocumentEditor({
           </div>
 
           {/* Upload File Option */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-accent-100 border border-accent-500 rounded-lg p-4">
             <div className="flex items-start gap-3">
               <svg
-                className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"
+                className="w-5 h-5 text-accent-500 mt-0.5 flex-shrink-0"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -481,14 +485,14 @@ function InlineDocumentEditor({
                 />
               </svg>
               <div className="flex-1">
-                <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                <h4 className="text-sm font-semibold text-primary-900 mb-1">
                   Upload Existing Document
                 </h4>
-                <p className="text-sm text-blue-700 mb-3">
+                <p className="text-sm text-primary-600 mb-3">
                   Already have this document? Upload it to replace the
                   template.
                 </p>
-                <button className="px-4 py-2 bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 transition-colors font-medium text-sm flex items-center gap-2">
+                <button className="px-4 py-2 bg-surface-000 border border-accent-500 text-accent-600 rounded-lg hover:bg-accent-100 transition-colors font-medium text-sm flex items-center gap-2">
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -511,16 +515,16 @@ function InlineDocumentEditor({
       </div>
 
       {/* Footer with Save/Cancel */}
-      <div className="bg-gray-50 px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+      <div className="bg-surface-100 px-6 py-4 border-t border-border-200 flex justify-between items-center">
         <button
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          className="px-4 py-2 border border-border-200 text-ink-600 rounded-lg hover:bg-surface-100 transition-colors font-medium"
         >
           Cancel
         </button>
         <button
           onClick={handleSave}
-          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center gap-2"
         >
           <svg
             className="w-4 h-4"

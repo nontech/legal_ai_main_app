@@ -61,27 +61,27 @@ export default function QuickAnalysisForm({
   const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<"idle" | "calculating" | "redirecting">("idle");
+  const isLoading = loadingStage !== "idle";
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
-    case_information: { label: "Case Information", color: "blue", icon: "📋" },
-    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "purple", icon: "🔍" },
-    relevant_legal_precedents: { label: "Legal Precedents", color: "green", icon: "⚖️" },
-    key_witness_and_testimony: { label: "Witness & Testimony", color: "orange", icon: "👤" },
-    police_report: { label: "Police Report", color: "red", icon: "🚔" },
-    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "yellow", icon: "⚠️" },
+    case_information: { label: "Case Information", color: "primary", icon: "📋" },
+    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "accent", icon: "🔍" },
+    relevant_legal_precedents: { label: "Legal Precedents", color: "success", icon: "⚖️" },
+    key_witness_and_testimony: { label: "Witness & Testimony", color: "highlight", icon: "👤" },
+    police_report: { label: "Police Report", color: "critical", icon: "🚔" },
+    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
   };
 
   const getCategoryColor = (color: string) => {
     const colorMap: Record<string, string> = {
-      blue: "bg-blue-100 text-blue-700 border-blue-300",
-      purple: "bg-purple-100 text-purple-700 border-purple-300",
-      green: "bg-green-100 text-green-700 border-green-300",
-      orange: "bg-orange-100 text-orange-700 border-orange-300",
-      red: "bg-red-100 text-red-700 border-red-300",
-      yellow: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      primary: "bg-primary-100 text-primary-600 border-primary-200",
+      accent: "bg-accent-100 text-accent-600 border-accent-500",
+      success: "bg-success-100 text-success-600 border-success-500",
+      highlight: "bg-highlight-200 text-highlight-600 border-highlight-500",
+      critical: "bg-critical-100 text-critical-600 border-critical-500",
     };
-    return colorMap[color] || colorMap.blue;
+    return colorMap[color] || colorMap.primary;
   };
 
   const classifyFile = async (file: File, index: number) => {
@@ -300,7 +300,7 @@ export default function QuickAnalysisForm({
       return;
     }
 
-    setIsLoading(true);
+    setLoadingStage("calculating");
 
     try {
       let targetCaseId = caseId;
@@ -370,6 +370,7 @@ export default function QuickAnalysisForm({
       );
 
       // Navigate to results page with case ID and analysis data
+      setLoadingStage("redirecting");
       router.push(`/case-analysis/detailed?step=7&caseId=${targetCaseId}`);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
@@ -378,45 +379,76 @@ export default function QuickAnalysisForm({
         JSON.stringify(formData)
       );
       alert(e instanceof Error ? e.message : "Error analyzing case. Please try again.");
-    } finally {
-      setIsLoading(false);
+      setLoadingStage("idle");
     }
   };
 
   return (
     <div className="relative">
-      {/* Sticky Header */}
-      <div className="sticky top-20 z-20 bg-gray-50 pb-8">
-        <div className="text-center pt-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Quick Case Analysis
-          </h1>
-          <p className="text-gray-600">
-            Fill in the basic information below to get your
-            preliminary analysis
-          </p>
+      {isLoading && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-primary-950/70 backdrop-blur-sm transition-opacity">
+          <div className="bg-surface-000/95 border border-primary-700/30 rounded-3xl px-10 py-12 shadow-[0_30px_80px_-10px_rgba(8,47,73,0.45)] flex flex-col items-center gap-5 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center shadow-inner">
+              {loadingStage === "redirecting" ? (
+                <svg
+                  className="w-8 h-8 text-primary-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8 text-primary-600 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-ink-900 tracking-tight">
+                {loadingStage === "redirecting" ? "Results Ready" : "Calculating Results"}
+              </h3>
+              <p className="text-sm text-ink-600 leading-relaxed">
+                {loadingStage === "redirecting"
+                  ? "Redirecting you to the detailed case analysis dashboard."
+                  : "Analyzing documents, case factors, and legal precedents to build your strategy."}
+              </p>
+            </div>
+            <div className="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-primary-500 transition-all duration-500 ${
+                  loadingStage === "redirecting" ? "w-full" : "w-3/5 animate-pulse"
+                }`}
+              ></div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Scrollable Content Area - with padding bottom for fixed button */}
-      <div className="max-w-6xl mx-auto px-4 pb-32 h-[calc(100vh-360px)] overflow-y-auto">
+      )}
+      <div className="max-w-6xl mx-auto px-4 pb-32 space-y-6">
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
           <CompactJurisdiction onUpdate={setJurisdiction} initialValues={jurisdiction} />
 
           {/* Case Type */}
-          <CompactCaseType onUpdate={(ct: any) => setCaseTypeId(ct?.id)} />
+          <CompactCaseType
+            initialCaseTypeId={caseTypeId || undefined}
+            onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
+          />
 
           {/* Role */}
           <CompactRole onUpdate={(r: any) => setRole(r)} initialValue={role as any} />
 
           {/* Basic Case Information */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
             <div className="flex items-center mb-6">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg mr-3">
+              <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
                 <svg
-                  className="w-5 h-5 text-blue-700"
+                  className="w-5 h-5 text-primary-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -430,10 +462,10 @@ export default function QuickAnalysisForm({
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">
+                <h3 className="text-lg font-bold text-ink-900">
                   Step 4: Case Information
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-600">
                   Basic details about your case
                 </p>
               </div>
@@ -444,7 +476,7 @@ export default function QuickAnalysisForm({
               <div>
                 <label
                   htmlFor="caseName"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
+                  className="block text-sm font-semibold text-ink-600 mb-2"
                 >
                   Case Title/Name{" "}
                   <span className="text-red-500">*</span>
@@ -455,7 +487,7 @@ export default function QuickAnalysisForm({
                   value={caseName}
                   onChange={(e) => setCaseName(e.target.value)}
                   placeholder="e.g., Smith v. Johnson, State v. Anderson"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  className="w-full px-4 py-3 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-ink-900"
                 />
               </div>
 
@@ -464,7 +496,7 @@ export default function QuickAnalysisForm({
                 <div className="flex items-center justify-between mb-2">
                   <label
                     htmlFor="caseDescription"
-                    className="block text-sm font-semibold text-gray-700"
+                    className="block text-sm font-semibold text-ink-600"
                   >
                     Comprehensive Case Description{" "}
                     <span className="text-red-500">*</span>
@@ -474,8 +506,8 @@ export default function QuickAnalysisForm({
                       type="button"
                       onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
                       className={`px-2 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${isMarkdownPreview
-                        ? "bg-green-100 text-green-700 hover:bg-green-200"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-success-100 text-success-600 hover:bg-success-100/80"
+                        : "bg-surface-100 text-ink-600 hover:bg-surface-200"
                         }`}
                     >
                       <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -487,7 +519,7 @@ export default function QuickAnalysisForm({
                   )}
                 </div>
                 {isMarkdownPreview && caseDescription ? (
-                  <div className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 min-h-40 max-h-80 overflow-y-auto markdown-preview">
+                  <div className="w-full p-4 border border-border-200 rounded-lg bg-surface-100 min-h-40 max-h-80 overflow-y-auto markdown-preview">
                     <MarkdownRenderer content={caseDescription} />
                   </div>
                 ) : (
@@ -497,10 +529,10 @@ export default function QuickAnalysisForm({
                     onChange={(e) => setCaseDescription(e.target.value)}
                     placeholder="Provide a detailed description of the case, including key facts, timeline of events, parties involved, and the nature of the dispute or charges. Be as specific as possible."
                     rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none"
+                    className="w-full px-4 py-3 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-ink-900 resize-none"
                   />
                 )}
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-ink-500 mt-2">
                   Include dates, locations, key events, and circumstances. Markdown formatting is supported.
                 </p>
               </div>
@@ -510,7 +542,7 @@ export default function QuickAnalysisForm({
       </div>
 
       {/* Fixed Calculate Results Button at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-surface-000 border-t border-border-200 shadow-lg z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex flex-col items-center">
             <button
@@ -523,7 +555,7 @@ export default function QuickAnalysisForm({
                 !jurisdiction?.court?.trim() ||
                 !caseTypeId?.trim() ||
                 !role?.trim()}
-              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-bold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg flex items-center gap-3"
+              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center gap-3"
             >
               {isLoading ? (
                 <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24">
@@ -545,11 +577,19 @@ export default function QuickAnalysisForm({
                   />
                 </svg>
               )}
-              <span>{isLoading ? "Calculating..." : "Calculate Results"}</span>
+              <span>
+                {loadingStage === "redirecting"
+                  ? "Redirecting..."
+                  : isLoading
+                  ? "Calculating..."
+                  : "Calculate Results"}
+              </span>
             </button>
             {isLoading ? (
-              <p className="text-center text-sm text-blue-600 mt-2 font-medium">
-                🔄 Analyzing your case and fetching results...
+              <p className="text-center text-sm text-primary-600 mt-2 font-medium">
+                {loadingStage === "redirecting"
+                  ? "Analysis complete. Taking you to your results..."
+                  : "🔄 Analyzing your case and fetching results..."}
               </p>
             ) : (
               !caseName?.trim() ||
@@ -561,7 +601,7 @@ export default function QuickAnalysisForm({
               !caseTypeId?.trim() ||
               !role?.trim()
             ) && (
-                <p className="text-center text-sm text-gray-500 mt-2">
+                <p className="text-center text-sm text-ink-500 mt-2">
                   Please fill in all required fields to continue
                 </p>
               )}

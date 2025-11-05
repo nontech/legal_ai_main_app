@@ -26,20 +26,6 @@ export default function CompactJurisdiction({
   const [city, setCity] = useState(initialValues.city || "");
   const [court, setCourt] = useState(initialValues.court || "");
 
-  const handleChange = (field: string, value: string) => {
-    const updates = { country, state, city, court };
-    updates[field as keyof typeof updates] = value;
-
-    if (field === "country") setCountry(value);
-    if (field === "state") setState(value);
-    if (field === "city") setCity(value);
-    if (field === "court") setCourt(value);
-
-    if (onUpdate) {
-      onUpdate(updates);
-    }
-  };
-
   const countryOptions = [
     "United States of America",
     "Canada",
@@ -69,12 +55,69 @@ export default function CompactJurisdiction({
     "Middle District of Alabama",
   ];
 
+  const [isCountryManual, setIsCountryManual] = useState(
+    () =>
+      !!initialValues.country &&
+      !countryOptions.includes(initialValues.country ?? ""),
+  );
+  const [isStateManual, setIsStateManual] = useState(
+    () =>
+      !!initialValues.state &&
+      !stateOptions.includes(initialValues.state ?? ""),
+  );
+  const [isCityManual, setIsCityManual] = useState(
+    () =>
+      !!initialValues.city &&
+      !cityOptions.includes(initialValues.city ?? ""),
+  );
+  const [isCourtManual, setIsCourtManual] = useState(
+    () =>
+      !!initialValues.court &&
+      !courtOptions.includes(initialValues.court ?? ""),
+  );
+
+  const handleChange = (field: string, value: string) => {
+    const updates = { country, state, city, court };
+    updates[field as keyof typeof updates] = value;
+
+    if (field === "country") setCountry(value);
+    if (field === "state") setState(value);
+    if (field === "city") setCity(value);
+    if (field === "court") setCourt(value);
+
+    if (onUpdate) {
+      onUpdate(updates);
+    }
+  };
+
+  const handleSelectChange = (
+    field: "country" | "state" | "city" | "court",
+    value: string,
+  ) => {
+    const isManualSelection = value === "Other";
+
+    if (field === "country") {
+      setIsCountryManual(isManualSelection);
+    }
+    if (field === "state") {
+      setIsStateManual(isManualSelection);
+    }
+    if (field === "city") {
+      setIsCityManual(isManualSelection);
+    }
+    if (field === "court") {
+      setIsCourtManual(isManualSelection);
+    }
+
+    handleChange(field, isManualSelection ? "" : value);
+  };
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
+    <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
       <div className="flex items-center mb-4">
-        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-lg mr-3">
+        <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
           <svg
-            className="w-5 h-5 text-gray-700"
+            className="w-5 h-5 text-primary-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -94,111 +137,147 @@ export default function CompactJurisdiction({
           </svg>
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold text-ink-900">
             Step 1: Jurisdiction{" "}
             <span className="text-red-500">*</span>
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-ink-600">
             Where your case will be heard
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        {/* Country */}
         <div>
           <label
             htmlFor="country"
-            className="block text-xs font-semibold text-gray-700 mb-1.5"
+            className="block text-xs font-semibold text-ink-600 mb-1.5"
           >
             Country
           </label>
-          <input
+          <select
             id="country"
-            type="text"
-            list="countryList"
-            value={country}
-            onChange={(e) => handleChange("country", e.target.value)}
-            placeholder="Enter country"
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          />
-          <datalist id="countryList">
+            value={isCountryManual ? "Other" : country}
+            onChange={(e) => handleSelectChange("country", e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+          >
+            <option value="">Select country</option>
             {countryOptions.map((opt) => (
-              <option key={opt} value={opt} />
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
-          </datalist>
+            <option value="Other">Other (enter manually)</option>
+          </select>
+          {(isCountryManual ||
+            (country && !countryOptions.includes(country))) && (
+            <input
+              type="text"
+              value={country}
+              onChange={(e) => handleChange("country", e.target.value)}
+              placeholder="Enter country"
+              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+              autoComplete="off"
+            />
+          )}
         </div>
 
-        {/* State/Province */}
         <div>
           <label
             htmlFor="state"
-            className="block text-xs font-semibold text-gray-700 mb-1.5"
+            className="block text-xs font-semibold text-ink-600 mb-1.5"
           >
             State/Province
           </label>
-          <input
+          <select
             id="state"
-            type="text"
-            list="stateList"
-            value={state}
-            onChange={(e) => handleChange("state", e.target.value)}
-            placeholder="Enter state"
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          />
-          <datalist id="stateList">
+            value={isStateManual ? "Other" : state}
+            onChange={(e) => handleSelectChange("state", e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+          >
+            <option value="">Select state</option>
             {stateOptions.map((opt) => (
-              <option key={opt} value={opt} />
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
-          </datalist>
+            <option value="Other">Other (enter manually)</option>
+          </select>
+          {(isStateManual ||
+            (state && !stateOptions.includes(state))) && (
+            <input
+              type="text"
+              value={state}
+              onChange={(e) => handleChange("state", e.target.value)}
+              placeholder="Enter state"
+              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+              autoComplete="off"
+            />
+          )}
         </div>
 
-        {/* City */}
         <div>
           <label
             htmlFor="city"
-            className="block text-xs font-semibold text-gray-700 mb-1.5"
+            className="block text-xs font-semibold text-ink-600 mb-1.5"
           >
             City
           </label>
-          <input
+          <select
             id="city"
-            type="text"
-            list="cityList"
-            value={city}
-            onChange={(e) => handleChange("city", e.target.value)}
-            placeholder="Enter city"
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          />
-          <datalist id="cityList">
+            value={isCityManual ? "Other" : city}
+            onChange={(e) => handleSelectChange("city", e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+          >
+            <option value="">Select city</option>
             {cityOptions.map((opt) => (
-              <option key={opt} value={opt} />
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
-          </datalist>
+            <option value="Other">Other (enter manually)</option>
+          </select>
+          {(isCityManual || (city && !cityOptions.includes(city))) && (
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => handleChange("city", e.target.value)}
+              placeholder="Enter city"
+              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            />
+          )}
         </div>
 
-        {/* Court */}
         <div>
           <label
             htmlFor="court"
-            className="block text-xs font-semibold text-gray-700 mb-1.5"
+            className="block text-xs font-semibold text-ink-600 mb-1.5"
           >
             Court
           </label>
-          <input
+          <select
             id="court"
-            type="text"
-            list="courtList"
-            value={court}
-            onChange={(e) => handleChange("court", e.target.value)}
-            placeholder="Enter court"
-            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-          />
-          <datalist id="courtList">
+            value={isCourtManual ? "Other" : court}
+            onChange={(e) => handleSelectChange("court", e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+          >
+            <option value="">Select court</option>
             {courtOptions.map((opt) => (
-              <option key={opt} value={opt} />
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
             ))}
-          </datalist>
+            <option value="Other">Other (enter manually)</option>
+          </select>
+          {(isCourtManual || (court && !courtOptions.includes(court))) && (
+            <input
+              type="text"
+              value={court}
+              onChange={(e) => handleChange("court", e.target.value)}
+              placeholder="Enter court"
+              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            />
+          )}
         </div>
       </div>
     </div>

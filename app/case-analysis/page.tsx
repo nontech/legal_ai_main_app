@@ -12,9 +12,7 @@ type Step = "upload" | "form";
 function CaseAnalysisContent() {
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>("upload");
-  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>(
-    []
-  );
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
   const [uploadedMetadata, setUploadedMetadata] = useState<any>({});
   const [caseInformationFiles, setCaseInformationFiles] = useState<File[]>([]);
   const [hasVisitedForm, setHasVisitedForm] = useState(false);
@@ -24,11 +22,11 @@ function CaseAnalysisContent() {
   useEffect(() => {
     const paramCaseId = searchParams.get("caseId");
     const paramStep = searchParams.get("step");
-    
+
     if (paramCaseId) {
       setCaseId(paramCaseId);
     }
-    
+
     if (paramStep === "form" && paramCaseId) {
       setCurrentStep("form");
       setHasVisitedForm(true);
@@ -59,133 +57,55 @@ function CaseAnalysisContent() {
     }
   };
 
-  const handleBack = () => {
-    setCurrentStep("upload");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-surface-100">
       <Navbar />
 
-      {/* Main Content with left sidebar and right main area */}
-      <main className="pt-28 pb-20 min-h-[calc(100vh-80px)]">
-        <div className="max-w-7xl mx-auto px-4 h-full">
-          <div className="flex gap-8 h-full items-start">
-            {/* Left Sidebar - Vertical Stepper */}
-            <div className="w-48 mt-0 flex-shrink-0 h-full flex items-center">
-              <div className="w-full sticky top-1/3 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-8">Quick Analysis</h3>
-                <div className="flex flex-col gap-4">
-                  {/* Step 1 */}
-                  <button
-                    onClick={() => handleStepClick(1)}
-                    className={`group flex items-start gap-3 text-left transition-all p-4 rounded-lg ${currentStep === "upload"
-                      ? "bg-blue-50 shadow-sm"
-                      : currentStep === "form"
-                        ? "bg-gray-50"
-                        : ""
-                      }`}
-                  >
-                    <div
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${currentStep === "form"
-                        ? "bg-green-500 text-white ring-2 ring-green-200"
-                        : currentStep === "upload"
-                          ? "bg-blue-600 text-white ring-2 ring-blue-200"
-                          : "bg-gray-300 text-gray-700"
-                        }`}
-                    >
-                      1
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`font-semibold text-sm transition-colors ${currentStep === "upload"
-                          ? "text-blue-700"
-                          : currentStep === "form"
-                            ? "text-gray-600"
-                            : "text-gray-700"
-                          }`}
-                      >
-                        Upload
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {uploadedDocuments.length > 0
-                          ? `${uploadedDocuments.length} file${uploadedDocuments.length !== 1 ? "s" : ""}`
-                          : "Add documents"}
-                      </p>
-                    </div>
-                  </button>
-
-                  {/* Connecting Line */}
-                  <div className="flex justify-center">
-                    <div
-                      className={`w-0.5 h-8 transition-colors ${currentStep === "form" ? "bg-blue-500" : "bg-gray-300"
-                        }`}
-                    ></div>
-                  </div>
-
-                  {/* Step 2 */}
-                  <button
-                    onClick={() => handleStepClick(2)}
-                    disabled={!hasVisitedForm}
-                    className={`group flex items-start gap-3 text-left transition-all p-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed ${currentStep === "form"
-                      ? "bg-blue-50 shadow-sm"
-                      : "bg-gray-50"
-                      }`}
-                  >
-                    <div
-                      className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${currentStep === "form"
-                        ? "bg-blue-600 text-white ring-2 ring-blue-200"
-                        : "bg-gray-300 text-gray-700"
-                        }`}
-                    >
-                      2
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`font-semibold text-sm transition-colors ${currentStep === "form"
-                          ? "text-blue-700"
-                          : "text-gray-700"
-                          }`}
-                      >
-                        Analyze
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {!hasVisitedForm ? "Start here" : "Review results"}
-                      </p>
-                    </div>
-                  </button>
-                </div>
-              </div>
+      <main className="pt-24 pb-16 min-h-[calc(100vh-80px)]">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col gap-4">
+          <section className="bg-surface-000 rounded-xl shadow-sm border border-border-200 p-4">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-ink-900">
+                Quick Case Analysis
+              </h3>
             </div>
 
-            {/* Right Content Area - Full Width */}
-            <div className="flex-1 min-w-0">
-              {currentStep === "upload" && (
-                <DocumentUploadStep onContinue={handleDocumentsUploaded} caseId={caseId} />
-              )}
-
-              {currentStep === "form" && (
-                <QuickAnalysisForm 
-                  initialDocuments={uploadedDocuments}
-                  uploadedMetadata={uploadedMetadata}
-                  caseInformationFiles={caseInformationFiles}
-                  caseId={caseId}
-                />
-              )}
+            <div className="mt-3 overflow-x-auto">
+              <HorizontalStepper
+                currentStep={getCurrentStepNumber()}
+                onStepClick={handleStepClick}
+              />
             </div>
-          </div>
+          </section>
+
+          <section className="bg-surface-000 rounded-xl shadow-sm border border-border-200 p-6">
+            {currentStep === "upload" && (
+              <DocumentUploadStep
+                onContinue={handleDocumentsUploaded}
+                caseId={caseId}
+              />
+            )}
+
+            {currentStep === "form" && (
+              <QuickAnalysisForm
+                initialDocuments={uploadedDocuments}
+                uploadedMetadata={uploadedMetadata}
+                caseInformationFiles={caseInformationFiles}
+                caseId={caseId}
+              />
+            )}
+          </section>
         </div>
       </main>
     </div>
   );
 }
-
 function SuspenseFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-surface-100">
       <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin h-12 w-12 border-4 border-blue-300 border-t-blue-600 rounded-full"></div>
-        <p className="text-gray-600">Loading...</p>
+        <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full"></div>
+        <p className="text-ink-600">Loading...</p>
       </div>
     </div>
   );
@@ -198,4 +118,3 @@ export default function CaseAnalysis() {
     </Suspense>
   );
 }
-

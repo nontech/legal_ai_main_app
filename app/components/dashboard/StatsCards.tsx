@@ -21,13 +21,13 @@ function StatCard({
   iconColor,
 }: StatCardProps) {
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 transition-all duration-300 hover:shadow-lg hover:scale-105 hover:-translate-y-1">
+    <div className="bg-surface-000 rounded-2xl p-6 shadow-sm border border-border-200 transition-all duration-300 hover:shadow-lg hover:scale-105 hover:-translate-y-1">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <p className="text-sm font-semibold text-gray-600 mb-1">
+          <p className="text-sm font-semibold text-ink-600 mb-1">
             {title}
           </p>
-          <p className="text-4xl font-bold text-gray-900">{value}</p>
+          <p className="text-4xl font-bold text-ink-900">{value}</p>
         </div>
         <div
           className={`flex items-center justify-center w-12 h-12 rounded-xl ${iconBg}`}
@@ -35,11 +35,26 @@ function StatCard({
           <div className={iconColor}>{icon}</div>
         </div>
       </div>
-      <p className="text-xs text-gray-500 flex items-center gap-1">
+      <p className="text-xs text-ink-500 flex items-center gap-1">
         {subtitle}
       </p>
     </div>
   );
+}
+
+function resolveCaseStatus(dbCase: any): string {
+  const directStatus = dbCase?.status;
+  if (typeof directStatus === "string" && directStatus.trim()) {
+    return directStatus.trim();
+  }
+  const detailStatus =
+    dbCase?.case_details?.status ||
+    dbCase?.case_details?.case_status ||
+    dbCase?.case_details?.["case_information"]?.status;
+  if (typeof detailStatus === "string" && detailStatus.trim()) {
+    return detailStatus.trim();
+  }
+  return "Active";
 }
 
 export default function StatsCards() {
@@ -65,25 +80,18 @@ export default function StatsCards() {
           setIsAuthenticated(true);
           const cases = json.cases || [];
 
-          // Filter out untitled cases for stats calculation
-          const validCases = cases.filter((c: any) => {
-            const caseName = c.case_details?.["case_information"]?.caseName;
-            return caseName && caseName !== "Untitled Case";
-          });
-
-          // Calculate stats from valid cases only
-          const totalCases = validCases.length;
-          const activeCases = validCases.filter((c: any) => c.status === "Active" || !c.status).length;
-          const underReview = validCases.filter((c: any) => c.status === "Under Review").length;
-          const completed = validCases.filter((c: any) => c.status === "Completed").length;
+          const totalCases = cases.length;
+          const activeCases = cases.filter((c: any) => resolveCaseStatus(c) === "Active").length;
+          const underReview = cases.filter((c: any) => resolveCaseStatus(c) === "Under Review").length;
+          const completed = cases.filter((c: any) => resolveCaseStatus(c) === "Completed").length;
 
           setStats([
             {
               title: "Total Cases",
               value: totalCases,
               subtitle: "All time cases",
-              iconBg: "bg-gray-100",
-              iconColor: "text-gray-700",
+              iconBg: "bg-surface-100",
+              iconColor: "text-ink-700",
               icon: (
                 <svg
                   className="w-6 h-6"
@@ -104,8 +112,8 @@ export default function StatsCards() {
               title: "Active Cases",
               value: activeCases,
               subtitle: "Currently active",
-              iconBg: "bg-yellow-100",
-              iconColor: "text-yellow-600",
+              iconBg: "bg-highlight-200",
+              iconColor: "text-highlight-600",
               icon: (
                 <svg
                   className="w-6 h-6"
@@ -126,8 +134,8 @@ export default function StatsCards() {
               title: "Under Review",
               value: underReview,
               subtitle: "Pending review",
-              iconBg: "bg-blue-100",
-              iconColor: "text-blue-600",
+              iconBg: "bg-primary-100",
+              iconColor: "text-primary-600",
               icon: (
                 <svg
                   className="w-6 h-6"
@@ -148,8 +156,8 @@ export default function StatsCards() {
               title: "Completed",
               value: completed,
               subtitle: "Successfully closed",
-              iconBg: "bg-green-100",
-              iconColor: "text-green-600",
+              iconBg: "bg-success-100",
+              iconColor: "text-success-600",
               icon: (
                 <svg
                   className="w-6 h-6"
@@ -183,7 +191,7 @@ export default function StatsCards() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="bg-gray-200 rounded-2xl p-6 shadow-sm border border-gray-300 animate-pulse h-32"></div>
+          <div key={i} className="bg-surface-200 rounded-2xl p-6 shadow-sm border border-border-300 animate-pulse h-32"></div>
         ))}
       </div>
     );
@@ -194,16 +202,16 @@ export default function StatsCards() {
       <div className="relative">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 opacity-40 pointer-events-none">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 h-32"></div>
+            <div key={i} className="bg-surface-000 rounded-2xl p-6 shadow-sm border border-border-200 h-32"></div>
           ))}
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center bg-white bg-opacity-90 backdrop-blur-sm px-6 py-4 rounded-lg">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Sign in to view your stats</h3>
-            <p className="text-sm text-gray-600 mb-4">Please sign in to access your case statistics</p>
+          <div className="text-center bg-surface-000/90 backdrop-blur-sm px-6 py-4 rounded-lg">
+            <h3 className="text-lg font-bold text-ink-900 mb-2">Sign in to view your stats</h3>
+            <p className="text-sm text-ink-600 mb-4">Please sign in to access your case statistics</p>
             <button
               onClick={() => router.push("/auth/signin")}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
+              className="bg-gradient-to-r from-primary-700 to-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-700 transition-all"
             >
               Sign In
             </button>
@@ -221,4 +229,5 @@ export default function StatsCards() {
     </div>
   );
 }
+
 

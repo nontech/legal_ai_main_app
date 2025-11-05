@@ -69,12 +69,12 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
   };
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-surface-000/90 backdrop-blur-md border-b border-border-200 shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <div className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-primary-700 to-primary-500 rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
               <svg
                 className="w-6 h-6 text-white"
                 fill="none"
@@ -90,7 +90,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-tight">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
                 Legal Case Analysis
               </span>
             </div>
@@ -101,7 +101,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
             {isAuthenticated && showPretrialButton && (
               <button
                 onClick={onPretrialClick}
-                className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg hover:scale-105"
+                className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg hover:scale-105"
               >
                 <svg
                   className="w-4 h-4"
@@ -123,27 +123,27 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
             {isAuthenticated && (
               <Link
                 href="/documents"
-                className="relative px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 group"
+                className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
               >
                 <span className="relative z-10">Documents Library</span>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
             )}
 
             {isLoading ? (
-              <div className="px-4 py-2.5 text-gray-700">
-                <div className="w-8 h-4 bg-gray-200 rounded animate-pulse"></div>
+              <div className="px-4 py-2.5 text-ink-600">
+                <div className="w-8 h-4 bg-surface-200 rounded animate-pulse"></div>
               </div>
             ) : isAuthenticated ? (
               // User Menu - Authenticated
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 rounded-lg hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 rounded-lg hover:bg-surface-100 cursor-pointer"
                 >
-                  <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
+                  <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
                     <svg
-                      className="w-4 h-4 text-blue-600"
+                      className="w-4 h-4 text-primary-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -175,17 +175,17 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
 
                 {/* Dropdown Menu */}
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-2 z-50">
                     <Link
                       href="/"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="block px-4 py-2 text-sm text-ink-600 hover:bg-surface-100 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 cursor-pointer hover:bg-red-50 transition-colors border-t border-gray-200"
+                      className="w-full text-left px-4 py-2 text-sm text-critical-500 cursor-pointer hover:bg-critical-100 transition-colors border-t border-border-200"
                     >
                       Sign Out
                     </button>
@@ -197,16 +197,16 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               <>
                 <Link
                   href="/auth/signin"
-                  className="relative px-4 py-2.5 text-gray-700 hover:text-gray-900 font-medium transition-all duration-200 group"
+                  className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
                   <span className="relative z-10">Sign In</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500 group-hover:w-full transition-all duration-300"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
                 </Link>
 
-                <div className="ml-2 pl-2 border-l border-gray-200">
+                <div className="ml-2 pl-2 border-l border-border-200">
                   <Link
                     href="/auth/signup"
-                    className="px-6 py-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 inline-block"
+                    className="px-6 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 inline-block"
                   >
                     Sign Up
                   </Link>
