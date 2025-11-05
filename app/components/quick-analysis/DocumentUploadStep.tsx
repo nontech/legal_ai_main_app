@@ -30,6 +30,7 @@ export default function DocumentUploadStep({
   const [isUploading, setIsUploading] = useState(false);
   const [caseId, setCaseId] = useState<string | null>(initialCaseId || null);
   const [isCreatingCase, setIsCreatingCase] = useState(!initialCaseId);
+  const [isDragActive, setIsDragActive] = useState(false);
   const caseCreationAttempted = useRef(false);
 
   // Create a case on mount if caseId is not provided
@@ -117,25 +118,77 @@ export default function DocumentUploadStep({
     }
   };
 
+  const processIncomingFiles = (incomingFiles: File[]) => {
+    if (incomingFiles.length === 0) {
+      return;
+    }
+
+    const timestamp = Date.now();
+    const newClassifiedFiles = incomingFiles.map((file, index) => ({
+      id: `${timestamp}-${index}-${Math.random()}`, // Generate unique ID
+      file,
+      category: "case_information" as DocumentCategory,
+      isClassifying: true,
+    }));
+
+    setClassifiedFiles((prev) => [...prev, ...newClassifiedFiles]);
+
+    // Classify each new file
+    newClassifiedFiles.forEach((cf) => {
+      classifyDocument(cf.file, cf.id);
+    });
+  };
+
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      const newClassifiedFiles = newFiles.map((file) => ({
-        id: `${Date.now()}-${Math.random()}`, // Generate unique ID
-        file,
-        category: "case_information" as DocumentCategory,
-        isClassifying: true,
-      }));
-
-      setClassifiedFiles((prev) => [...prev, ...newClassifiedFiles]);
-
-      // Classify each new file
-      newClassifiedFiles.forEach((cf) => {
-        classifyDocument(cf.file, cf.id);
-      });
+      processIncomingFiles(newFiles);
     }
+  };
+
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isUploading) return;
+    if (!isDragActive) {
+      setIsDragActive(true);
+    }
+    event.dataTransfer.dropEffect = "copy";
+  };
+
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isUploading) return;
+    if (!isDragActive) {
+      setIsDragActive(true);
+    }
+  };
+
+  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Avoid prematurely resetting when moving between children
+    if (
+      event.currentTarget.contains(event.relatedTarget as Node | null)
+    ) {
+      return;
+    }
+
+    setIsDragActive(false);
+  };
+
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragActive(false);
+    if (isUploading) return;
+
+    const droppedFiles = Array.from(event.dataTransfer.files || []);
+    processIncomingFiles(droppedFiles);
   };
 
   const handleRemoveFile = (fileId: string) => {
@@ -269,8 +322,14 @@ export default function DocumentUploadStep({
               className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
                 isUploading
                   ? "border-border-200"
-                  : "border-border-200 hover:border-primary-300"
+                  : isDragActive
+                    ? "border-primary-400 bg-primary-50"
+                    : "border-border-200 hover:border-primary-300"
               }`}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             >
               <input
                 type="file"

@@ -26,20 +26,6 @@ export default function CompactJurisdiction({
   const [city, setCity] = useState(initialValues.city || "");
   const [court, setCourt] = useState(initialValues.court || "");
 
-  const handleChange = (field: string, value: string) => {
-    const updates = { country, state, city, court };
-    updates[field as keyof typeof updates] = value;
-
-    if (field === "country") setCountry(value);
-    if (field === "state") setState(value);
-    if (field === "city") setCity(value);
-    if (field === "court") setCourt(value);
-
-    if (onUpdate) {
-      onUpdate(updates);
-    }
-  };
-
   const countryOptions = [
     "United States of America",
     "Canada",
@@ -68,6 +54,63 @@ export default function CompactJurisdiction({
     "Northern District of Alabama",
     "Middle District of Alabama",
   ];
+
+  const [isCountryManual, setIsCountryManual] = useState(
+    () =>
+      !!initialValues.country &&
+      !countryOptions.includes(initialValues.country ?? ""),
+  );
+  const [isStateManual, setIsStateManual] = useState(
+    () =>
+      !!initialValues.state &&
+      !stateOptions.includes(initialValues.state ?? ""),
+  );
+  const [isCityManual, setIsCityManual] = useState(
+    () =>
+      !!initialValues.city &&
+      !cityOptions.includes(initialValues.city ?? ""),
+  );
+  const [isCourtManual, setIsCourtManual] = useState(
+    () =>
+      !!initialValues.court &&
+      !courtOptions.includes(initialValues.court ?? ""),
+  );
+
+  const handleChange = (field: string, value: string) => {
+    const updates = { country, state, city, court };
+    updates[field as keyof typeof updates] = value;
+
+    if (field === "country") setCountry(value);
+    if (field === "state") setState(value);
+    if (field === "city") setCity(value);
+    if (field === "court") setCourt(value);
+
+    if (onUpdate) {
+      onUpdate(updates);
+    }
+  };
+
+  const handleSelectChange = (
+    field: "country" | "state" | "city" | "court",
+    value: string,
+  ) => {
+    const isManualSelection = value === "Other";
+
+    if (field === "country") {
+      setIsCountryManual(isManualSelection);
+    }
+    if (field === "state") {
+      setIsStateManual(isManualSelection);
+    }
+    if (field === "city") {
+      setIsCityManual(isManualSelection);
+    }
+    if (field === "court") {
+      setIsCourtManual(isManualSelection);
+    }
+
+    handleChange(field, isManualSelection ? "" : value);
+  };
 
   return (
     <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
@@ -114,8 +157,8 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="country"
-            value={countryOptions.includes(country) ? country : country ? "Other" : ""}
-            onChange={(e) => handleChange("country", e.target.value === "Other" ? "" : e.target.value)}
+            value={isCountryManual ? "Other" : country}
+            onChange={(e) => handleSelectChange("country", e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
           >
             <option value="">Select country</option>
@@ -126,7 +169,8 @@ export default function CompactJurisdiction({
             ))}
             <option value="Other">Other (enter manually)</option>
           </select>
-          {country && !countryOptions.includes(country) && (
+          {(isCountryManual ||
+            (country && !countryOptions.includes(country))) && (
             <input
               type="text"
               value={country}
@@ -147,8 +191,8 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="state"
-            value={stateOptions.includes(state) ? state : state ? "Other" : ""}
-            onChange={(e) => handleChange("state", e.target.value === "Other" ? "" : e.target.value)}
+            value={isStateManual ? "Other" : state}
+            onChange={(e) => handleSelectChange("state", e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
           >
             <option value="">Select state</option>
@@ -159,7 +203,8 @@ export default function CompactJurisdiction({
             ))}
             <option value="Other">Other (enter manually)</option>
           </select>
-          {state && !stateOptions.includes(state) && (
+          {(isStateManual ||
+            (state && !stateOptions.includes(state))) && (
             <input
               type="text"
               value={state}
@@ -180,8 +225,8 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="city"
-            value={cityOptions.includes(city) ? city : city ? "Other" : ""}
-            onChange={(e) => handleChange("city", e.target.value === "Other" ? "" : e.target.value)}
+            value={isCityManual ? "Other" : city}
+            onChange={(e) => handleSelectChange("city", e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
           >
             <option value="">Select city</option>
@@ -192,7 +237,7 @@ export default function CompactJurisdiction({
             ))}
             <option value="Other">Other (enter manually)</option>
           </select>
-          {city && !cityOptions.includes(city) && (
+          {(isCityManual || (city && !cityOptions.includes(city))) && (
             <input
               type="text"
               value={city}
@@ -212,8 +257,8 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="court"
-            value={courtOptions.includes(court) ? court : court ? "Other" : ""}
-            onChange={(e) => handleChange("court", e.target.value === "Other" ? "" : e.target.value)}
+            value={isCourtManual ? "Other" : court}
+            onChange={(e) => handleSelectChange("court", e.target.value)}
             className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
           >
             <option value="">Select court</option>
@@ -224,7 +269,7 @@ export default function CompactJurisdiction({
             ))}
             <option value="Other">Other (enter manually)</option>
           </select>
-          {court && !courtOptions.includes(court) && (
+          {(isCourtManual || (court && !courtOptions.includes(court))) && (
             <input
               type="text"
               value={court}
