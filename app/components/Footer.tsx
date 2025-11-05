@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-accent-500 to-accent-400 rounded-lg shadow-md">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary-700 to-primary-500 rounded-lg shadow-md">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -257,6 +257,5 @@ export default function Footer() {
     </footer>
   );
 }
-
 
 
