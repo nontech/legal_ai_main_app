@@ -27,9 +27,21 @@ interface Case {
 }
 
 // Map DB case to UI case
+function getCaseTitle(dbCase: DBCase): string | null {
+  const rawTitle = dbCase.case_details?.["case_information"]?.caseName;
+  if (!rawTitle) return null;
+  const trimmed = rawTitle.trim();
+  if (!trimmed || trimmed.toLowerCase() === "untitled case") {
+    return null;
+  }
+  return trimmed;
+}
+
 function mapDBCaseToUI(dbCase: DBCase): Case {
   const details = dbCase.case_details || {};
-  const title = details["case_information"]?.caseName || `Case ${dbCase.id}`;
+  const title =
+    getCaseTitle(dbCase) ||
+    `Case ${dbCase.id.slice(0, 8).toUpperCase()}`;
   const caseType = dbCase.case_type === "criminal" ? "Criminal" : "Civil";
 
   // Calculate lastUpdated as relative time
@@ -59,8 +71,7 @@ function mapDBCaseToUI(dbCase: DBCase): Case {
 
 // Filter out untitled cases (cases with no caseName)
 function isValidCase(dbCase: DBCase): boolean {
-  const caseName = dbCase.case_details?.["case_information"]?.caseName;
-  return caseName && caseName !== "Untitled Case";
+  return Boolean(dbCase?.id);
 }
 
 export default function CasePortfolio() {
@@ -172,7 +183,7 @@ export default function CasePortfolio() {
           </div>
           <button
             onClick={() => router.push("/case-analysis")}
-            className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
+            className="bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
           >
             <svg
               className="w-5 h-5"

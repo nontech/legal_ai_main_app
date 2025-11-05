@@ -278,12 +278,12 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
     <>
       <div className="space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-ink-900 mb-4">
               Select Case Type
             </h2>
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto">
+            <p className="text-lg text-ink-600 max-w-4xl mx-auto">
               Choose the fundamental nature of your legal case to
               ensure accurate analysis and applicable legal standards.
             </p>
@@ -291,10 +291,10 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
         </div>
 
         {/* Confirmation Card */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+        <div className="bg-highlight-200 border border-transparent rounded-lg p-6">
           <div className="flex items-start gap-3">
             <svg
-              className="w-6 h-6 text-amber-600 flex-shrink-0 mt-1"
+              className="w-6 h-6 text-highlight-600 flex-shrink-0 mt-1"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -307,10 +307,10 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
               />
             </svg>
             <div>
-              <h4 className="font-bold text-gray-900 mb-2">
+              <h4 className="font-bold text-ink-900 mb-2">
                 Case Type Selection Confirmed
               </h4>
-              <p className="text-gray-700 text-sm">
+              <p className="text-ink-600 text-sm">
                 You have selected{" "}
                 <span className="font-semibold">
                   {selectedCaseType?.title || "N/A"}
@@ -324,12 +324,12 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
         </div>
 
         {/* Selected Case Type Display */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center justify-center w-12 h-12 bg-amber-100 rounded-lg">
+              <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg">
                 <svg
-                  className="w-7 h-7 text-amber-700"
+                  className="w-7 h-7 text-primary-600"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -343,10 +343,10 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                 </svg>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900">
+                <h3 className="text-xl font-bold text-ink-900">
                   Case Type
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-600">
                   {selectedCaseType?.subtitle || "N/A"}
                 </p>
               </div>
@@ -354,14 +354,14 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
 
             {/* Centered Case Type Name */}
             <div className="flex-1 flex justify-center">
-              <span className="text-lg font-semibold text-gray-900">
+              <span className="text-lg font-semibold text-ink-900">
                 {selectedCaseType?.title || "N/A"}
               </span>
             </div>
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium text-sm whitespace-nowrap"
+              className="px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
             >
               Change Case Type
             </button>
@@ -375,21 +375,21 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
           <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
             {/* Background overlay */}
             <div
-              className="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"
+              className="fixed inset-0 bg-primary-950/80 transition-opacity"
               onClick={() => setIsModalOpen(false)}
             ></div>
 
             {/* Modal panel */}
-            <div className="relative inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-2xl rounded-2xl">
+            <div className="relative inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-2xl">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4">
+              <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-white">
                     Select Case Type
                   </h2>
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="text-white hover:text-gray-200 transition-colors"
+                    className="text-white hover:text-surface-200 transition-colors"
                   >
                     <svg
                       className="w-6 h-6"
@@ -406,7 +406,7 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                     </svg>
                   </button>
                 </div>
-                <p className="text-amber-50 text-sm mt-1">
+                <p className="text-primary-100 text-sm mt-1">
                   Choose the fundamental nature of your legal case to
                   ensure accurate analysis and applicable legal
                   standards.
@@ -421,8 +421,8 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
                       className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
-                        ? "border-amber-500 bg-amber-50"
-                        : "border-gray-200 hover:border-amber-300"
+                        ? "border-primary-500 bg-primary-100"
+                        : "border-border-200 hover:border-primary-300"
                         }`}
                     >
                       <div className="flex items-start mb-2">
@@ -430,17 +430,17 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                           {caseType.icon}
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 text-sm mb-1">
+                          <h3 className="font-bold text-ink-900 text-sm mb-1">
                             {caseType.title}
                           </h3>
-                          <p className="text-xs text-gray-600 mb-2">
+                          <p className="text-xs text-ink-600 mb-2">
                             {caseType.subtitle}
                           </p>
                         </div>
                         {selectedCaseType?.id === caseType.id && (
                           <div className="flex-shrink-0">
                             <svg
-                              className="w-5 h-5 text-amber-500"
+                              className="w-5 h-5 text-primary-600"
                               fill="currentColor"
                               viewBox="0 0 20 20"
                             >
@@ -454,7 +454,7 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                         )}
                       </div>
 
-                      <div className="text-xs text-gray-600 space-y-1 mb-2">
+                      <div className="text-xs text-ink-600 space-y-1 mb-2">
                         {caseType.typicalCases
                           .slice(0, 3)
                           .map((case_, index) => (
@@ -462,7 +462,7 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                               key={index}
                               className="flex items-start"
                             >
-                              <span className="text-amber-500 mr-1">
+                              <span className="text-primary-500 mr-1">
                                 •
                               </span>
                               <span className="line-clamp-1">
@@ -472,7 +472,7 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                           ))}
                       </div>
 
-                      <div className="text-xs text-gray-500 pt-2 border-t border-gray-200">
+                      <div className="text-xs text-ink-500 pt-2 border-t border-border-200">
                         <span className="font-medium">Proof:</span>{" "}
                         {caseType.standardOfProof}
                       </div>
@@ -482,10 +482,10 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
               </div>
 
               {/* Modal Footer */}
-              <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <div className="bg-surface-100 px-6 py-4 flex justify-end">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  className="px-6 py-2 bg-surface-200 text-ink-600 rounded-lg hover:bg-surface-200/80 transition-colors font-medium"
                 >
                   Close
                 </button>

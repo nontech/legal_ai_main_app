@@ -4,13 +4,13 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-br from-[#1a2332] to-[#2d3e50] text-white border-t border-gray-700">
+    <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white border-t border-primary-700/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-500 rounded-lg shadow-md">
+              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-primary-700 to-primary-500 rounded-lg shadow-md">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
@@ -29,14 +29,14 @@ export default function Footer() {
                 <h3 className="text-lg font-bold">Legal Analytics</h3>
               </div>
             </div>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="text-sm text-white/70 mb-4">
               AI-powered legal case analysis and comprehensive case
               management platform.
             </p>
             <div className="flex space-x-4">
               <a
                 href="#"
-                className="text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-white/70 hover:text-accent-400 transition-colors"
                 aria-label="Twitter"
               >
                 <svg
@@ -49,7 +49,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-white/70 hover:text-accent-400 transition-colors"
                 aria-label="LinkedIn"
               >
                 <svg
@@ -62,7 +62,7 @@ export default function Footer() {
               </a>
               <a
                 href="#"
-                className="text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-white/70 hover:text-accent-400 transition-colors"
                 aria-label="GitHub"
               >
                 <svg
@@ -78,14 +78,14 @@ export default function Footer() {
 
           {/* Product Column */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-4">
               Product
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Features
                 </Link>
@@ -93,7 +93,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Case Analysis
                 </Link>
@@ -101,7 +101,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Document Management
                 </Link>
@@ -109,7 +109,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Pricing
                 </Link>
@@ -117,7 +117,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Integrations
                 </Link>
@@ -127,14 +127,14 @@ export default function Footer() {
 
           {/* Company Column */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-4">
               Company
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   About Us
                 </Link>
@@ -142,7 +142,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Careers
                 </Link>
@@ -150,7 +150,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Blog
                 </Link>
@@ -158,7 +158,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Press
                 </Link>
@@ -166,7 +166,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Partners
                 </Link>
@@ -176,14 +176,14 @@ export default function Footer() {
 
           {/* Support Column */}
           <div>
-            <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-4">
               Support
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Help Center
                 </Link>
@@ -191,7 +191,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Documentation
                 </Link>
@@ -199,7 +199,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   API Reference
                 </Link>
@@ -207,7 +207,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Contact Us
                 </Link>
@@ -215,7 +215,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   Status
                 </Link>
@@ -225,28 +225,28 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-700">
+        <div className="pt-8 border-t border-primary-700/60">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-white/70">
               © {new Date().getFullYear()} Legal Analytics. All rights
               reserved.
             </p>
             <div className="flex space-x-6">
               <Link
                 href="/"
-                className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-sm text-white/70 hover:text-accent-400 transition-colors"
               >
                 Privacy Policy
               </Link>
               <Link
                 href="/"
-                className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-sm text-white/70 hover:text-accent-400 transition-colors"
               >
                 Terms of Service
               </Link>
               <Link
                 href="/"
-                className="text-sm text-gray-400 hover:text-amber-400 transition-colors"
+                className="text-sm text-white/70 hover:text-accent-400 transition-colors"
               >
                 Cookie Policy
               </Link>
@@ -257,4 +257,6 @@ export default function Footer() {
     </footer>
   );
 }
+
+
 

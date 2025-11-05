@@ -60,11 +60,11 @@ export default function SaveCaseButton({
     };
 
     return (
-        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-gray-200">
+        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border-200">
             <button
                 onClick={handleSave}
                 disabled={isSaving || !caseId}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg font-semibold shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
                 {isSaving ? (
                     <>
@@ -84,7 +84,7 @@ export default function SaveCaseButton({
             </button>
 
             {message && (
-                <span className={`text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                <span className={`text-sm font-medium ${message.type === "success" ? "text-success-600" : "text-critical-600"}`}>
                     {message.text}
                 </span>
             )}
