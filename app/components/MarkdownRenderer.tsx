@@ -1,14 +1,32 @@
 "use client";
 
-import React from "react";
+import type { ComponentPropsWithoutRef, FC } from "react";
 import ReactMarkdown from "react-markdown";
-import type { Components } from "react-markdown";
+import type { Components, ExtraProps } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 interface MarkdownRendererProps {
   content: string;
   className?: string;
 }
+
+type CodeProps = ComponentPropsWithoutRef<"code"> &
+  ExtraProps & {
+    inline?: boolean;
+  };
+
+const CodeRenderer: FC<CodeProps> = ({ inline, node: _node, ...props }) =>
+  inline ? (
+    <code
+      className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono"
+      {...props}
+    />
+  ) : (
+    <code
+      className="bg-gray-900 text-gray-100 p-3 rounded-lg block font-mono text-sm mb-3 overflow-x-auto"
+      {...props}
+    />
+  );
 
 /**
  * MarkdownRenderer - Renders markdown content with proper styling
@@ -54,18 +72,7 @@ export default function MarkdownRenderer({
     em: ({ node: _node, ...props }) => (
       <em className="italic text-gray-800" {...props} />
     ),
-    code: ({ node: _node, inline, ...props }) =>
-      inline ? (
-        <code
-          className="bg-gray-100 text-red-600 px-1.5 py-0.5 rounded text-sm font-mono"
-          {...props}
-        />
-      ) : (
-        <code
-          className="bg-gray-900 text-gray-100 p-3 rounded-lg block font-mono text-sm mb-3 overflow-x-auto"
-          {...props}
-        />
-      ),
+    code: CodeRenderer,
     pre: ({ node: _node, ...props }) => (
       <pre
         className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-3 font-mono text-sm"
