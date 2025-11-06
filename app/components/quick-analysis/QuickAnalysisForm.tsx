@@ -6,6 +6,7 @@ import CompactJurisdiction from "./CompactJurisdiction";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
+import StreamingAnalysisDisplay from "../StreamingAnalysisDisplay";
 import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, Users } from "lucide-react";
 
 type DocumentCategory =
@@ -62,6 +63,9 @@ export default function QuickAnalysisForm({
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [loadingStage, setLoadingStage] = useState<"idle" | "calculating" | "redirecting">("idle");
+  const [isStreamingOpen, setIsStreamingOpen] = useState(false);
+  const [streamingCaseId, setStreamingCaseId] = useState<string | null>(null);
+  const [streamingResult, setStreamingResult] = useState<any>(null);
   const isLoading = loadingStage !== "idle";
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
@@ -343,18 +347,9 @@ export default function QuickAnalysisForm({
         targetCaseId = json.id as string;
       }
 
-      // Call the case analysis API
-      const analysisRes = await fetch("/api/cases/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ caseId: targetCaseId }),
-      });
-
-      const analysisJson = await analysisRes.json();
-
-      if (!analysisRes.ok || !analysisJson?.ok) {
-        throw new Error(analysisJson?.error || "Failed to analyze case");
-      }
+      // Open streaming analysis display and start streaming analysis
+      setStreamingCaseId(targetCaseId);
+      setIsStreamingOpen(true);
 
       // Store data in sessionStorage for the results screen to access
       sessionStorage.setItem(
@@ -365,13 +360,8 @@ export default function QuickAnalysisForm({
           jurisdiction,
           case_type: caseTypeId,
           role,
-          result: analysisJson.data.result,
         })
       );
-
-      // Navigate to results page with case ID and analysis data
-      setLoadingStage("redirecting");
-      router.push(`/case-analysis/detailed?step=7&caseId=${targetCaseId}`);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
       sessionStorage.setItem(
@@ -383,9 +373,36 @@ export default function QuickAnalysisForm({
     }
   };
 
+  const handleStreamingComplete = (result: any) => {
+    setStreamingResult(result);
+    setLoadingStage("redirecting");
+    
+    // Update sessionStorage with the result
+    const existingData = JSON.parse(sessionStorage.getItem("quickAnalysisData") || "{}");
+    sessionStorage.setItem(
+      "quickAnalysisData",
+      JSON.stringify({
+        ...existingData,
+        result,
+      })
+    );
+
+    // Navigate to results page after a short delay
+    setTimeout(() => {
+      router.push(`/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
+    }, 1000);
+  };
+
   return (
     <div className="relative">
-      {isLoading && (
+      <StreamingAnalysisDisplay
+        isOpen={isStreamingOpen}
+        caseId={streamingCaseId || ""}
+        onComplete={handleStreamingComplete}
+        onClose={() => setIsStreamingOpen(false)}
+      />
+
+      {isLoading && !isStreamingOpen && (
         <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-primary-950/70 backdrop-blur-sm transition-opacity">
           <div className="bg-surface-000/95 border border-primary-700/30 rounded-3xl px-10 py-12 shadow-[0_30px_80px_-10px_rgba(8,47,73,0.45)] flex flex-col items-center gap-5 text-center max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center shadow-inner">
