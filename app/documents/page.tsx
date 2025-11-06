@@ -28,7 +28,6 @@ const SECTION_CONFIG: Record<string, { title: string; icon: string }> = {
 };
 
 export default function DocumentsLibrary() {
-  const router = useRouter();
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

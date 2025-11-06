@@ -34,13 +34,13 @@ const stepIcons: Record<string, string> = {
 
 const stepLabels: Record<string, string> = {
   status: "Initializing",
-  charges_analysis: "Analyzing Charges",
-  rag_retrieval: "Retrieving Cases",
-  precedent_extraction: "Processing Precedents",
-  llm_precedent_generation: "Generating Precedents",
-  outcome_prediction: "Predicting Outcomes",
+  charges_analysis: "Analyzing Charges...",
+  rag_retrieval: "Retrieving Cases...",
+  precedent_extraction: "Processing Precedents...",
+  llm_precedent_generation: "Finding Precedents online..",
+  outcome_prediction: "Predicting Outcomes...",
   outcome_prediction_complete: "Outcome Calculated",
-  factors_analysis: "Analyzing Factors",
+  factors_analysis: "Analyzing Factors...",
   legal_assessment: "Legal Assessment",
   strategic_recommendations: "Strategic Recommendations",
   executive_summary: "Executive Summary",
@@ -57,6 +57,7 @@ export default function StreamingAnalysisDisplay({
   const [currentStep, setCurrentStep] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -135,7 +136,11 @@ export default function StreamingAnalysisDisplay({
                   if (event.type === "complete" && event.result) {
                     setProgress(100);
                     setIsLoading(false);
-                    onComplete(event.result);
+                    setIsComplete(true);
+                    // Delay the callback to allow UI to show completion
+                    setTimeout(() => {
+                      onComplete(event.result);
+                    }, 500);
                   }
 
                   // Handle errors
@@ -235,7 +240,7 @@ export default function StreamingAnalysisDisplay({
                   </p>
                 </div>
               </div>
-              {!isLoading && (
+              {isComplete && (
                 <button
                   onClick={onClose}
                   className="text-white hover:text-primary-100 transition-colors"
@@ -300,13 +305,12 @@ export default function StreamingAnalysisDisplay({
             {events.map((event, index) => (
               <div
                 key={index}
-                className={`p-4 rounded-lg border transition-all ${
-                  event.type === "error"
-                    ? "bg-critical-50 border-critical-200"
-                    : event.type === "complete"
-                      ? "bg-success-50 border-success-200"
-                      : "bg-surface-100 border-border-200"
-                }`}
+                className={`p-4 rounded-lg border transition-all ${event.type === "error"
+                  ? "bg-critical-50 border-critical-200"
+                  : event.type === "complete"
+                    ? "bg-success-50 border-success-200"
+                    : "bg-surface-100 border-border-200"
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-xl flex-shrink-0">
@@ -359,13 +363,13 @@ export default function StreamingAnalysisDisplay({
           </div>
 
           {/* Footer */}
-          {!isLoading && (
+          {isComplete && (
             <div className="bg-surface-50 px-8 py-4 border-t border-border-200 flex justify-end gap-3">
               <button
                 onClick={onClose}
                 className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
               >
-                View Results
+                Continue to Results
               </button>
             </div>
           )}
