@@ -346,9 +346,9 @@ export default function DocumentUploadStep({
                   isUploading ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
-                <div className="flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+                <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
                   <svg
-                    className="w-8 h-8 text-primary-600"
+                    className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -361,26 +361,25 @@ export default function DocumentUploadStep({
                     />
                   </svg>
                 </div>
-                <p className="text-lg font-semibold text-ink-900 mb-2">
-                  Drop files here or click to upload
+                <p className="text-base sm:text-lg font-semibold text-ink-900 mb-2">
+                  Drop files here or click
                 </p>
-                <p className="text-sm text-ink-500">
-                  Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10
-                  MB per file
+                <p className="text-xs sm:text-sm text-ink-500 text-center px-2">
+                  Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB
                 </p>
               </label>
             </div>
 
             {classifiedFiles.length > 0 && (
-              <div className="mt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-ink-900">
+              <div className="mt-4 sm:mt-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-ink-900">
                     Uploaded Files ({classifiedFiles.length})
                   </h3>
                   <button
                     onClick={() => setClassifiedFiles([])}
                     disabled={isUploading}
-                    className="text-sm text-critical-500 hover:text-critical-600 font-medium disabled:opacity-50"
+                    className="text-xs sm:text-sm text-critical-500 hover:text-critical-600 font-medium disabled:opacity-50"
                   >
                     Clear All
                   </button>
@@ -392,10 +391,10 @@ export default function DocumentUploadStep({
                     return (
                       <div
                         key={classifiedFile.id}
-                        className="flex items-center justify-between p-4 bg-surface-100 rounded-lg border border-border-200 hover:bg-surface-200 transition-colors"
+                        className="flex items-center justify-between p-2 sm:p-4 bg-surface-100 rounded-lg border border-border-200 hover:bg-surface-200 transition-colors gap-2"
                       >
                         <div className="flex items-center flex-1 min-w-0">
-                          <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3 flex-shrink-0">
+                          <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
                             <svg
                               className="w-5 h-5 text-primary-600"
                               fill="none"
@@ -464,7 +463,7 @@ export default function DocumentUploadStep({
             )}
           </div>
 
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center gap-2">
             <button
               onClick={handleContinue}
               disabled={
@@ -472,7 +471,7 @@ export default function DocumentUploadStep({
                 isUploading ||
                 classifiedFiles.some((cf) => cf.isClassifying)
               }
-              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3"
             >
               {isUploading ? (
                 <>
@@ -482,13 +481,13 @@ export default function DocumentUploadStep({
               ) : classifiedFiles.some((cf) => cf.isClassifying) ? (
                 <>
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  <span>Classifying Documents...</span>
+                  <span className="text-sm sm:text-base">Classifying...</span>
                 </>
               ) : (
                 <>
                   <span>Next</span>
                   <svg
-                    className="w-5 h-5"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"

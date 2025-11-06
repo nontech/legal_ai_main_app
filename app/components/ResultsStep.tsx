@@ -169,9 +169,9 @@ export default function ResultsStep() {
       )}
 
       {/* Main Title */}
-      <div className="text-center mb-4">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">Case Analysis Results</h2>
-        <p className="text-gray-600">Comprehensive analysis based on case details, judicial patterns, and legal precedents</p>
+      <div className="text-center mb-4 px-3 sm:px-0">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Case Analysis Results</h2>
+        <p className="text-sm sm:text-base text-gray-600">Comprehensive analysis based on case details, judicial patterns, and legal precedents</p>
       </div>
 
       {/* Predicted Outcome Probability - Featured Section */}
@@ -180,23 +180,23 @@ export default function ResultsStep() {
           background: "linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%)",
           border: "2px solid #ffd700",
           borderRadius: "12px",
-          padding: "30px",
+          padding: "16px 12px",
           textAlign: "center",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "28px" }}>🎯</span>
-            <h3 style={{ fontSize: "24px", fontWeight: "bold", color: "#333", margin: 0 }}>
-              Predicted Outcome Probability
+        }} className="mx-3 sm:mx-0">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+            <span style={{ fontSize: "24px" }}>🎯</span>
+            <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#333", margin: 0 }} className="sm:text-2xl">
+              Predicted Outcome
             </h3>
           </div>
 
-          <div style={{ marginBottom: "30px" }}>
+          <div style={{ marginBottom: "20px" }}>
             <div style={{
-              fontSize: "72px",
+              fontSize: "48px",
               fontWeight: "bold",
               color: "#d4a500",
               margin: "10px 0",
-            }}>
+            }} className="sm:text-6xl">
               {successProb}%
             </div>
             <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>

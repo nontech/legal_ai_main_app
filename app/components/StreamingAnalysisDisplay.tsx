@@ -274,7 +274,7 @@ export default function StreamingAnalysisDisplay({
 
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+      <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 pt-4 pb-20">
         {/* Background overlay - prevent closing while loading */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -282,12 +282,12 @@ export default function StreamingAnalysisDisplay({
         ></div>
 
         {/* Modal panel */}
-        <div className="relative inline-block w-full max-w-2xl my-8 overflow-hidden text-left transition-all transform bg-surface-000 shadow-2xl rounded-3xl border border-border-200">
+        <div className="relative inline-block w-full max-w-2xl my-8 overflow-hidden text-left transition-all transform bg-surface-000 shadow-2xl rounded-2xl sm:rounded-3xl border border-border-200">
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-8 py-6 sticky top-0 z-10">
+          <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-4 sm:px-8 py-4 sm:py-6 sticky top-0 z-10">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
+              <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
                   {isComplete ? (
                     <svg
                       className="w-6 h-6 text-primary-100"
@@ -324,11 +324,11 @@ export default function StreamingAnalysisDisplay({
                     </svg>
                   )}
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-white">
-                    {isComplete ? "Analysis Complete!" : "Live Case Analysis"}
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
+                    {isComplete ? "Complete!" : "Analyzing..."}
                   </h2>
-                  <p className="text-primary-100 text-sm">
+                  <p className="text-primary-100 text-xs sm:text-sm truncate">
                     {isComplete
                       ? "Redirecting to results page..."
                       : "Analyzing your case in real-time..."}
@@ -352,7 +352,7 @@ export default function StreamingAnalysisDisplay({
           {/* Content */}
           <div
             ref={scrollContainerRef}
-            className="px-8 py-6 max-h-[60vh] overflow-y-auto space-y-3"
+            className="px-4 sm:px-8 py-4 sm:py-6 max-h-[60vh] overflow-y-auto space-y-3"
           >
             {error && (
               <div className="bg-critical-50 border border-critical-200 rounded-lg p-4">

@@ -113,11 +113,11 @@ export default function CompactJurisdiction({
   };
 
   return (
-    <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
+    <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
+      <div className="flex items-start mb-3 sm:mb-4">
+        <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
           <svg
-            className="w-5 h-5 text-primary-600"
+            className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -136,12 +136,12 @@ export default function CompactJurisdiction({
             />
           </svg>
         </div>
-        <div>
-          <h3 className="text-lg font-bold text-ink-900">
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-lg font-bold text-ink-900">
             Step 1: Jurisdiction{" "}
             <span className="text-red-500">*</span>
           </h3>
-          <p className="text-sm text-ink-600">
+          <p className="text-xs sm:text-sm text-ink-600">
             Where your case will be heard
           </p>
         </div>

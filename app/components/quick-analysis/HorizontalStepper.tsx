@@ -15,7 +15,7 @@ export default function HorizontalStepper({
   ];
 
   return (
-    <div className="flex items-center justify-center gap-6">
+    <div className="flex items-center justify-center gap-2 sm:gap-4 lg:gap-6 min-w-max">
       {steps.map((step, index) => (
         <div key={step.number} className="flex items-center">
           {/* Step Circle and Label */}
@@ -25,7 +25,7 @@ export default function HorizontalStepper({
             disabled={!onStepClick}
           >
             <div
-              className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all ${
+              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border transition-all ${
                 currentStep >= step.number
                   ? "bg-primary-500 border-primary-500 text-white group-hover:bg-primary-600"
                   : "bg-surface-000 border-border-200 text-ink-400 group-hover:border-border-300"
@@ -33,7 +33,7 @@ export default function HorizontalStepper({
             >
               {currentStep > step.number ? (
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4 sm:w-5 sm:h-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -46,13 +46,13 @@ export default function HorizontalStepper({
                   />
                 </svg>
               ) : (
-                <span className="text-base font-semibold">
+                <span className="text-xs sm:text-base font-semibold">
                   {step.number}
                 </span>
               )}
             </div>
             <span
-              className={`mt-2 text-sm font-medium whitespace-nowrap ${
+              className={`mt-2 text-xs sm:text-sm font-medium whitespace-nowrap ${
                 currentStep >= step.number
                   ? "text-primary-600 group-hover:text-primary-700"
                   : "text-ink-500 group-hover:text-ink-600"
@@ -64,7 +64,7 @@ export default function HorizontalStepper({
 
           {/* Connecting Line */}
           {index < steps.length - 1 && (
-            <div className="w-20 h-0.5 mx-3 mb-4">
+            <div className="w-12 sm:w-20 h-0.5 mx-1 sm:mx-3 mb-4">
               <div
                 className={`h-full transition-all ${
                   currentStep > step.number

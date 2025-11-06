@@ -60,36 +60,36 @@ export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps
 
   return (
     <>
-      <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
+      <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="flex items-start sm:items-center flex-1">
             <div
-              className={`flex items-center justify-center w-10 h-10 rounded-lg mr-3 ${(selectedRole && selectedRoleData)
+              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${(selectedRole && selectedRoleData)
                 ? "bg-primary-100 text-primary-600"
                 : "bg-surface-100 text-ink-500"
               }`}
             >
               {selectedRole && selectedRoleData ? (
-                <span className="text-lg flex items-center justify-center">
+                <span className="text-base sm:text-lg flex items-center justify-center">
                   {selectedRoleData.icon}
                 </span>
               ) : (
-                <HelpCircle className="w-5 h-5" />
+                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
               )}
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-ink-900">
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-ink-900">
                 Step 3: Your Role{" "}
                 <span className="text-red-500">*</span>
               </h3>
-              <p className="text-sm text-ink-600">
+              <p className="text-xs sm:text-sm text-ink-600">
                 Your position in this case
               </p>
             </div>
           </div>
 
-          {/* Centered Role Name */}
-          <div className="flex-1 flex justify-center">
+          {/* Centered Role Name - Hidden on mobile */}
+          <div className="hidden sm:flex flex-1 justify-center">
             <span className="text-lg font-semibold text-ink-900">
               {selectedRoleData?.title}
             </span>
@@ -97,7 +97,7 @@ export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
           >
             {selectedRole ? "Change Role" : "Select Role"}
           </button>

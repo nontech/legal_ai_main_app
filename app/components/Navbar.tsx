@@ -15,6 +15,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Check authentication status
@@ -70,13 +71,13 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
 
   return (
     <nav className="bg-surface-000/90 backdrop-blur-md border-b border-border-200 shadow-lg fixed top-0 left-0 right-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo Section */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="flex items-center justify-center w-11 h-11 bg-gradient-to-br from-primary-700 to-primary-500 rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
+            <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-700 to-primary-500 rounded-lg sm:rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
               <svg
-                className="w-6 h-6 text-white"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-white"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -89,15 +90,15 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 />
               </svg>
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
+            <div className="flex flex-col hidden sm:flex">
+              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
                 Legal Case Analysis
               </span>
             </div>
           </Link>
 
-          {/* Navigation Links */}
-          <div className="flex items-center space-x-1">
+          {/* Desktop Navigation Links */}
+          <div className="hidden md:flex items-center space-x-1">
             {isAuthenticated && showPretrialButton && (
               <button
                 onClick={onPretrialClick}
@@ -214,7 +215,126 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               </>
             )}
           </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden ml-2 p-2 rounded-lg hover:bg-surface-100 transition-colors text-ink-600"
+          >
+            <svg
+              className={`w-6 h-6 transition-transform ${isMobileMenuOpen ? "rotate-90" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+              />
+            </svg>
+          </button>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-border-200 py-3 space-y-2">
+            {isAuthenticated && showPretrialButton && (
+              <button
+                onClick={() => {
+                  onPretrialClick?.();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full text-left px-4 py-2.5 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all duration-200 font-medium flex items-center gap-2"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                  />
+                </svg>
+                <span>Pretrial Process</span>
+              </button>
+            )}
+
+            {isAuthenticated && (
+              <Link
+                href="/documents"
+                className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Documents Library
+              </Link>
+            )}
+
+            {!isLoading && isAuthenticated ? (
+              <>
+                <div className="px-4 py-2.5 border-t border-border-200 mt-2 pt-2">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
+                      <svg
+                        className="w-4 h-4 text-primary-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-sm text-ink-600 truncate">{userEmail || "Account"}</span>
+                  </div>
+                  <Link
+                    href="/"
+                    className="block px-3 py-2 text-sm text-ink-600 hover:bg-surface-100 rounded transition-colors"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={() => {
+                      handleSignOut();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-critical-500 hover:bg-critical-100 rounded transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </>
+            ) : !isLoading ? (
+              // Mobile Auth Buttons
+              <div className="space-y-2 border-t border-border-200 mt-2 pt-2">
+                <Link
+                  href="/auth/signin"
+                  className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="block px-4 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 text-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign Up
+                </Link>
+              </div>
+            ) : null}
+          </div>
+        )}
       </div>
     </nav>
   );

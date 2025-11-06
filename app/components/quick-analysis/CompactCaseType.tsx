@@ -227,27 +227,27 @@ export default function CompactCaseType({
 
   return (
     <>
-      <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
-              <span className="text-2xl text-primary-600">
+      <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+          <div className="flex items-start sm:items-center flex-1">
+            <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
+              <span className="text-xl sm:text-2xl text-primary-600">
                 {selectedCaseType.icon}
               </span>
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-ink-900">
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-ink-900">
                 Step 2: Case Type{" "}
                 <span className="text-red-500">*</span>
               </h3>
-              <p className="text-sm text-ink-600">
+              <p className="text-xs sm:text-sm text-ink-600 truncate">
                 {selectedCaseType.subtitle}
               </p>
             </div>
           </div>
 
-          {/* Centered Case Type Name */}
-          <div className="flex-1 flex justify-center">
+          {/* Centered Case Type Name - Hidden on mobile */}
+          <div className="hidden sm:flex flex-1 justify-center">
             <span className="text-lg font-semibold text-ink-900">
               {selectedCaseType.title}
             </span>
@@ -255,7 +255,7 @@ export default function CompactCaseType({
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm whitespace-nowrap shadow-sm"
+            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
           >
             Change Type
           </button>

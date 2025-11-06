@@ -396,7 +396,7 @@ export default function QuickAnalysisForm({
         onComplete={handleStreamingComplete}
         onClose={() => setIsStreamingOpen(false)}
       />
-      <div className="max-w-6xl mx-auto px-4 pb-32 space-y-6">
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 pb-32 space-y-6">
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
@@ -511,7 +511,7 @@ export default function QuickAnalysisForm({
 
       {/* Fixed Calculate Results Button at Bottom */}
       <div className="fixed bottom-0 left-0 right-0 bg-surface-000 border-t border-border-200 shadow-lg z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
           <div className="flex flex-col items-center">
             <button
               onClick={handleSubmit}
@@ -523,10 +523,10 @@ export default function QuickAnalysisForm({
                 !jurisdiction?.court?.trim() ||
                 !caseTypeId?.trim() ||
                 !role?.trim()}
-              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center gap-3"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center justify-center gap-2 sm:gap-3"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5 sm:w-6 sm:h-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

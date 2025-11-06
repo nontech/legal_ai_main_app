@@ -61,11 +61,11 @@ function CaseAnalysisContent() {
     <div className="min-h-screen bg-surface-100">
       <Navbar />
 
-      <main className="pt-24 pb-16 min-h-[calc(100vh-80px)]">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col gap-4">
-          <section className="bg-surface-000 rounded-xl shadow-sm border border-border-200 p-4">
+      <main className="pt-16 sm:pt-20 pb-16 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
+        <div className="max-w-5xl mx-auto px-3 sm:px-4 flex flex-col gap-3 sm:gap-4">
+          <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-4">
             <div className="text-center">
-              <h3 className="text-xl font-semibold text-ink-900">
+              <h3 className="text-lg sm:text-xl font-semibold text-ink-900">
                 Quick Case Analysis
               </h3>
             </div>
@@ -78,7 +78,7 @@ function CaseAnalysisContent() {
             </div>
           </section>
 
-          <section className="bg-surface-000 rounded-xl shadow-sm border border-border-200 p-6">
+          <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-6">
             {currentStep === "upload" && (
               <DocumentUploadStep
                 onContinue={handleDocumentsUploaded}
