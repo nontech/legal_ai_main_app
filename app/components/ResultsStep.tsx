@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 
 interface AnalysisResult {
   predicted_outcome?: any;
@@ -22,6 +23,7 @@ export default function ResultsStep() {
   const [error, setError] = useState<string | null>(null);
   const [caseInfo, setCaseInfo] = useState<any>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isStreamingOpen, setIsStreamingOpen] = useState(false);
 
   const fetchResults = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -48,28 +50,15 @@ export default function ResultsStep() {
 
   const handleRegenerate = async () => {
     setIsRegenerating(true);
-    try {
-      // Call the analyze API to regenerate results
-      const analysisRes = await fetch("/api/cases/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ caseId }),
-      });
+    setIsStreamingOpen(true);
+  };
 
-      const analysisJson = await analysisRes.json();
-
-      if (!analysisRes.ok || !analysisJson?.ok) {
-        throw new Error(analysisJson?.error || "Failed to regenerate analysis");
-      }
-
-      // Fetch the updated results from database
-      await fetchResults(false);
-    } catch (err) {
-      console.error("Failed to regenerate results:", err);
-      alert(err instanceof Error ? err.message : "Failed to regenerate results");
-    } finally {
-      setIsRegenerating(false);
-    }
+  const handleStreamingComplete = (result: any) => {
+    setResult(result);
+    setIsRegenerating(false);
+    setIsStreamingOpen(false);
+    // Refresh the data from the database
+    fetchResults(false);
   };
 
   useEffect(() => {
@@ -109,6 +98,13 @@ export default function ResultsStep() {
 
   return (
     <div className="space-y-6">
+      <StreamingAnalysisDisplay
+        isOpen={isStreamingOpen}
+        caseId={caseId || ""}
+        onComplete={handleStreamingComplete}
+        onClose={() => setIsStreamingOpen(false)}
+      />
+
       {/* Header with Meta Info */}
       {caseInfo && (
         <div className="flex items-center justify-between text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
