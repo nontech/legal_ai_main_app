@@ -62,8 +62,11 @@ export default function QuickAnalysisForm({
   const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<"idle" | "calculating" | "redirecting">("idle");
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
   const [streamingCaseId, setStreamingCaseId] = useState<string | null>(null);
+  const [streamingResult, setStreamingResult] = useState<any>(null);
+  const isLoading = loadingStage !== "idle";
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "primary", icon: "📋" },
@@ -301,6 +304,8 @@ export default function QuickAnalysisForm({
       return;
     }
 
+    setLoadingStage("calculating");
+
     try {
       let targetCaseId = caseId;
 
@@ -342,21 +347,21 @@ export default function QuickAnalysisForm({
         targetCaseId = json.id as string;
       }
 
+      // Open streaming analysis display and start streaming analysis
+      setStreamingCaseId(targetCaseId);
+      setIsStreamingOpen(true);
+
       // Store data in sessionStorage for the results screen to access
       sessionStorage.setItem(
         "quickAnalysisData",
         JSON.stringify({
           ...formData,
-          caseResultId: targetCaseId || caseId,
+          caseResultId: targetCaseId,
           jurisdiction,
           case_type: caseTypeId,
           role,
         })
       );
-
-      // Open streaming analysis display and start streaming analysis
-      setStreamingCaseId(targetCaseId || caseId || null);
-      setIsStreamingOpen(true);
     } catch (e) {
       // Fallback: still store form data so user doesn't lose progress
       sessionStorage.setItem(
@@ -364,10 +369,14 @@ export default function QuickAnalysisForm({
         JSON.stringify(formData)
       );
       alert(e instanceof Error ? e.message : "Error analyzing case. Please try again.");
+      setLoadingStage("idle");
     }
   };
 
   const handleStreamingComplete = (result: any) => {
+    setStreamingResult(result);
+    setLoadingStage("redirecting");
+
     // Update sessionStorage with the result
     const existingData = JSON.parse(sessionStorage.getItem("quickAnalysisData") || "{}");
     sessionStorage.setItem(
@@ -378,8 +387,10 @@ export default function QuickAnalysisForm({
       })
     );
 
-    // Navigate to results page
-    router.push(`/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
+    // Navigate to results page after a short delay
+    setTimeout(() => {
+      router.push(`/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
+    }, 1000);
   };
 
   return (
@@ -390,6 +401,49 @@ export default function QuickAnalysisForm({
         onComplete={handleStreamingComplete}
         onClose={() => setIsStreamingOpen(false)}
       />
+
+      {isLoading && !isStreamingOpen && (
+        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-primary-950/70 backdrop-blur-sm transition-opacity">
+          <div className="bg-surface-000/95 border border-primary-700/30 rounded-3xl px-10 py-12 shadow-[0_30px_80px_-10px_rgba(8,47,73,0.45)] flex flex-col items-center gap-5 text-center max-w-md mx-auto">
+            <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center shadow-inner">
+              {loadingStage === "redirecting" ? (
+                <svg
+                  className="w-8 h-8 text-primary-600"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-8 h-8 text-primary-600 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              )}
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-ink-900 tracking-tight">
+                {loadingStage === "redirecting" ? "Results Ready" : "Calculating Results"}
+              </h3>
+              <p className="text-sm text-ink-600 leading-relaxed">
+                {loadingStage === "redirecting"
+                  ? "Redirecting you to the detailed case analysis dashboard."
+                  : "Analyzing documents, case factors, and legal precedents to build your strategy."}
+              </p>
+            </div>
+            <div className="w-full h-1.5 bg-surface-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-primary-500 transition-all duration-500 ${loadingStage === "redirecting" ? "w-full" : "w-3/5 animate-pulse"
+                  }`}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="max-w-6xl mx-auto px-4 pb-32 space-y-6">
         {/* Form Sections */}
         <div className="space-y-6">
@@ -509,7 +563,7 @@ export default function QuickAnalysisForm({
           <div className="flex flex-col items-center">
             <button
               onClick={handleSubmit}
-              disabled={isStreamingOpen || !caseName?.trim() ||
+              disabled={isLoading || !caseName?.trim() ||
                 !caseDescription?.trim() ||
                 !jurisdiction?.country?.trim() ||
                 !jurisdiction?.state?.trim() ||
@@ -519,33 +573,54 @@ export default function QuickAnalysisForm({
                 !role?.trim()}
               className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center gap-3"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-              <span>Calculate Results</span>
+              {isLoading ? (
+                <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                  />
+                </svg>
+              )}
+              <span>
+                {loadingStage === "redirecting"
+                  ? "Redirecting..."
+                  : isLoading
+                    ? "Calculating..."
+                    : "Calculate Results"}
+              </span>
             </button>
-            {(!caseName?.trim() ||
+            {isLoading ? (
+              <p className="text-center text-sm text-primary-600 mt-2 font-medium">
+                {loadingStage === "redirecting"
+                  ? "Analysis complete. Taking you to your results..."
+                  : "🔄 Analyzing your case and fetching results..."}
+              </p>
+            ) : (
+              !caseName?.trim() ||
               !caseDescription?.trim() ||
               !jurisdiction?.country?.trim() ||
               !jurisdiction?.state?.trim() ||
               !jurisdiction?.city?.trim() ||
               !jurisdiction?.court?.trim() ||
               !caseTypeId?.trim() ||
-              !role?.trim()) && (
-                <p className="text-center text-sm text-ink-500 mt-2">
-                  Please fill in all required fields to continue
-                </p>
-              )}
+              !role?.trim()
+            ) && (
+              <p className="text-center text-sm text-ink-500 mt-2">
+                Please fill in all required fields to continue
+              </p>
+            )}
           </div>
         </div>
       </div>

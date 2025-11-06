@@ -96,7 +96,7 @@ export async function POST(
             async start(controller) {
                 try {
                     const azureResponse = await fetch(
-                        "https://legal-case-api.azurewebsites.net/api/v1/prediction/analyze-case-streaming",
+                        "http://127.0.0.1:8000/api/v1/prediction/analyze-case-streaming",
                         {
                             method: "POST",
                             headers: {
