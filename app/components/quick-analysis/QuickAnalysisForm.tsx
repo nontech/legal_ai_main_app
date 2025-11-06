@@ -523,7 +523,7 @@ export default function QuickAnalysisForm({
                 !jurisdiction?.court?.trim() ||
                 !caseTypeId?.trim() ||
                 !role?.trim()}
-              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center gap-3"
+              className="px-8 py-4 bg-primary-500 text-white rounded-xl font-bold text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center gap-3"
             >
               <svg
                 className="w-6 h-6"
