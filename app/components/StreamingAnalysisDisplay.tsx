@@ -30,6 +30,7 @@ const stepIcons: Record<string, string> = {
   legal_assessment: "⚖️",
   strategic_recommendations: "💡",
   executive_summary: "📋",
+  finalization: "✨",
 };
 
 const stepLabels: Record<string, string> = {
@@ -44,6 +45,7 @@ const stepLabels: Record<string, string> = {
   legal_assessment: "Legal Assessment",
   strategic_recommendations: "Strategic Recommendations",
   executive_summary: "Executive Summary",
+  finalization: "Finalizing Results",
 };
 
 export default function StreamingAnalysisDisplay({
@@ -102,12 +104,30 @@ export default function StreamingAnalysisDisplay({
 
         const decoder = new TextDecoder();
         let buffer = "";
-        const totalSteps = 11; // Total expected steps
+        const stepsList = [
+          "status",
+          "charges_analysis",
+          "rag_retrieval",
+          "precedent_extraction",
+          "llm_precedent_generation",
+          "outcome_prediction",
+          "outcome_prediction_complete",
+          "factors_analysis",
+          "legal_assessment",
+          "strategic_recommendations",
+          "executive_summary",
+        ];
+        const totalSteps = stepsList.length;
+        let lastResult: any = null;
+        let completionHandled = false;
 
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done) {
+              console.log("Stream ended, lastResult:", lastResult ? "exists" : "null");
+              break;
+            }
 
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split("\n");
@@ -128,27 +148,19 @@ export default function StreamingAnalysisDisplay({
 
                   // Update progress based on step completion
                   if (event.step) {
-                    const stepIndex = [
-                      "status",
-                      "charges_analysis",
-                      "rag_retrieval",
-                      "precedent_extraction",
-                      "llm_precedent_generation",
-                      "outcome_prediction",
-                      "factors_analysis",
-                      "legal_assessment",
-                      "strategic_recommendations",
-                      "executive_summary",
-                    ].indexOf(event.step);
+                    const stepIndex = stepsList.indexOf(event.step);
                     if (stepIndex !== -1) {
-                      setProgress(
-                        Math.round(((stepIndex + 1) / totalSteps) * 100)
-                      );
+                      const progressPercent = Math.round(((stepIndex + 1) / totalSteps) * 100);
+                      setProgress(progressPercent);
+                      console.log(`Progress: ${progressPercent}% (step ${stepIndex + 1}/${totalSteps})`);
                     }
                   }
 
                   // Handle completion
                   if (event.type === "complete" && event.result) {
+                    console.log("Received complete event with result");
+                    lastResult = event.result;
+                    completionHandled = true;
                     setProgress(100);
                     setIsComplete(true);
                     setIsLoading(false);
@@ -162,6 +174,77 @@ export default function StreamingAnalysisDisplay({
                 } catch (e) {
                   console.error("Failed to parse event:", dataStr, e);
                 }
+              }
+            }
+          }
+
+          // If stream ended without handling completion, try to fetch result from database
+          if (!completionHandled) {
+            if (lastResult) {
+              console.log("Stream ended, forcing completion with lastResult");
+              setProgress(100);
+              setIsComplete(true);
+              setIsLoading(false);
+              onComplete(lastResult);
+            } else {
+              console.warn("Stream ended without complete event, fetching result from database...");
+
+              // Add a status event to inform user
+              setEvents((prev) => [...prev, {
+                type: "status",
+                message: "Finalizing results...",
+                step: "finalization"
+              }]);
+
+              // Retry fetching from database with exponential backoff
+              const maxRetries = 5;
+              let retryCount = 0;
+              let resultFetched = false;
+
+              while (retryCount < maxRetries && !resultFetched) {
+                // Wait before each attempt (increasing wait time)
+                const waitTime = Math.min(1000 * Math.pow(1.5, retryCount), 5000);
+                console.log(`Attempt ${retryCount + 1}/${maxRetries} - waiting ${waitTime}ms...`);
+
+                // Update status message with retry info
+                if (retryCount > 0) {
+                  setEvents((prev) => {
+                    const newEvents = [...prev];
+                    const lastEvent = newEvents[newEvents.length - 1];
+                    if (lastEvent?.step === "finalization") {
+                      lastEvent.message = `Finalizing results (${retryCount + 1}/${maxRetries})...`;
+                    }
+                    return newEvents;
+                  });
+                }
+
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+
+                try {
+                  const response = await fetch(`/api/cases/${caseId}`);
+                  const data = await response.json();
+
+                  if (data.ok && data.data?.result) {
+                    console.log(`Successfully fetched result from database on attempt ${retryCount + 1}`);
+                    setProgress(100);
+                    setIsComplete(true);
+                    setIsLoading(false);
+                    onComplete(data.data.result);
+                    resultFetched = true;
+                    break;
+                  } else {
+                    console.log(`Attempt ${retryCount + 1}: No result yet in database`);
+                  }
+                } catch (fetchError) {
+                  console.error(`Attempt ${retryCount + 1} failed:`, fetchError);
+                }
+
+                retryCount++;
+              }
+
+              if (!resultFetched) {
+                console.error("Failed to fetch result after all retries");
+                throw new Error("Analysis is taking longer than expected. Please refresh the page in a moment to see your results.");
               }
             }
           }

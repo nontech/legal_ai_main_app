@@ -94,6 +94,9 @@ export async function POST(
 
         const customReadable = new ReadableStream({
             async start(controller) {
+                // Get a fresh Supabase client for this stream context
+                const streamSupabase = await getSupabaseServerClient();
+
                 try {
                     const azureResponse = await fetch(
                         "https://legal-case-api.azurewebsites.net/api/v1/prediction/analyze-case-streaming",
@@ -136,29 +139,64 @@ export async function POST(
 
                     const reader = azureResponse.body.getReader();
                     let lastResult: any = null;
+                    let buffer = ""; // Buffer to accumulate incomplete data lines
 
                     try {
                         while (true) {
                             const { done, value } = await reader.read();
                             if (done) break;
 
-                            const chunk = new TextDecoder().decode(value);
-                            const lines = chunk.split("\n");
+                            // Append new chunk to buffer
+                            buffer += new TextDecoder().decode(value, { stream: true });
 
+                            // Split by double newline (SSE event separator)
+                            const events = buffer.split("\n\n");
+
+                            // Keep the last incomplete event in the buffer
+                            buffer = events.pop() || "";
+
+                            for (const event of events) {
+                                const lines = event.split("\n");
+                                for (const line of lines) {
+                                    if (line.startsWith("data: ")) {
+                                        const data = line.slice(6);
+                                        if (data.trim()) {
+                                            try {
+                                                const parsed = JSON.parse(data);
+                                                // Store the last result for database update
+                                                if (parsed.type === "complete" && parsed.result) {
+                                                    lastResult = parsed.result;
+                                                    console.log("✅ Captured complete event with result");
+                                                }
+                                                // Forward all events to client
+                                                controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+                                            } catch (e) {
+                                                console.error("Failed to parse SSE data (length:", data.length, ")");
+                                                console.error("First 200 chars:", data.substring(0, 200));
+                                                console.error("Last 200 chars:", data.substring(data.length - 200));
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Process any remaining data in buffer
+                        if (buffer.trim()) {
+                            const lines = buffer.split("\n");
                             for (const line of lines) {
                                 if (line.startsWith("data: ")) {
                                     const data = line.slice(6);
                                     if (data.trim()) {
                                         try {
                                             const parsed = JSON.parse(data);
-                                            // Store the last result for database update
                                             if (parsed.type === "complete" && parsed.result) {
                                                 lastResult = parsed.result;
+                                                console.log("✅ Captured complete event with result (from buffer)");
                                             }
-                                            // Forward all events to client
                                             controller.enqueue(encoder.encode(`data: ${data}\n\n`));
                                         } catch (e) {
-                                            console.error("Failed to parse SSE data:", data);
+                                            console.error("Failed to parse remaining buffer data");
                                         }
                                     }
                                 }
@@ -168,29 +206,63 @@ export async function POST(
                         reader.releaseLock();
                     }
 
+                    console.log("Stream reading completed. lastResult exists:", !!lastResult);
+
                     // After streaming is complete, update the database with final result
                     if (lastResult) {
-                        console.log("Updating database with final analysis result");
-                        const { error: updateError } = await supabase
-                            .from("cases")
-                            .update({
-                                result: lastResult,
-                            })
-                            .eq("id", caseId);
+                        console.log("Starting database update with final analysis result");
+                        console.log("CaseId:", caseId);
+                        console.log("Result keys:", Object.keys(lastResult));
 
-                        if (updateError) {
-                            console.error(
-                                "Failed to update case with analysis result:",
-                                updateError
-                            );
-                        } else {
-                            console.log(
-                                "Successfully saved streaming analysis result to database for case:",
-                                caseId
+                        try {
+                            const { data: updateData, error: updateError } = await streamSupabase
+                                .from("cases")
+                                .update({
+                                    result: lastResult,
+                                })
+                                .eq("id", caseId)
+                                .select();
+
+                            if (updateError) {
+                                console.error(
+                                    "Failed to update case with analysis result:",
+                                    updateError.message,
+                                    updateError.details,
+                                    updateError.hint
+                                );
+                                // Still send the error but don't throw to allow stream to close gracefully
+                                controller.enqueue(
+                                    encoder.encode(
+                                        `data: ${JSON.stringify({
+                                            type: "warning",
+                                            message: "Result saved but database update failed. Result may need to be regenerated.",
+                                        })}\n\n`
+                                    )
+                                );
+                            } else {
+                                console.log(
+                                    "Successfully saved streaming analysis result to database for case:",
+                                    caseId,
+                                    "Updated rows:",
+                                    updateData?.length
+                                );
+                            }
+                        } catch (dbError) {
+                            console.error("Database update threw exception:", dbError);
+                            controller.enqueue(
+                                encoder.encode(
+                                    `data: ${JSON.stringify({
+                                        type: "warning",
+                                        message: "Database error occurred while saving results.",
+                                    })}\n\n`
+                                )
                             );
                         }
+                    } else {
+                        console.warn("No lastResult to save to database");
                     }
 
+                    console.log("Closing stream controller");
                     controller.close();
                 } catch (error) {
                     console.error("Streaming error:", error);
