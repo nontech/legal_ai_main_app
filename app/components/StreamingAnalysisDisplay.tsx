@@ -57,10 +57,26 @@ export default function StreamingAnalysisDisplay({
   const [currentStep, setCurrentStep] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
-    if (!isOpen || !caseId) return;
+    if (!isOpen || !caseId) {
+      // Reset state when closed
+      hasStartedRef.current = false;
+      setEvents([]);
+      setIsLoading(false);
+      setCurrentStep("");
+      setError(null);
+      setProgress(0);
+      setIsComplete(false);
+      return;
+    }
+
+    // Prevent multiple simultaneous requests
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
 
     const startStreaming = async () => {
       setIsLoading(true);
@@ -134,6 +150,7 @@ export default function StreamingAnalysisDisplay({
                   // Handle completion
                   if (event.type === "complete" && event.result) {
                     setProgress(100);
+                    setIsComplete(true);
                     setIsLoading(false);
                     onComplete(event.result);
                   }
@@ -175,10 +192,10 @@ export default function StreamingAnalysisDisplay({
   return (
     <div className="fixed inset-0 z-[9999] overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
-        {/* Background overlay */}
+        {/* Background overlay - prevent closing while loading */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-          onClick={onClose}
+          onClick={isComplete ? onClose : undefined}
         ></div>
 
         {/* Modal panel */}
@@ -188,7 +205,21 @@ export default function StreamingAnalysisDisplay({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-primary-500/20 flex items-center justify-center">
-                  {isLoading ? (
+                  {isComplete ? (
+                    <svg
+                      className="w-6 h-6 text-primary-100"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  ) : (
                     <svg
                       className="w-6 h-6 text-primary-100 animate-spin"
                       fill="none"
@@ -208,53 +239,19 @@ export default function StreamingAnalysisDisplay({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                  ) : (
-                    <svg
-                      className="w-6 h-6 text-primary-100"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
                   )}
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-white">
-                    Live Case Analysis
+                    {isComplete ? "Analysis Complete!" : "Live Case Analysis"}
                   </h2>
                   <p className="text-primary-100 text-sm">
-                    {isLoading
-                      ? "Analyzing your case in real-time..."
-                      : "Analysis complete"}
+                    {isComplete
+                      ? "Redirecting to results page..."
+                      : "Analyzing your case in real-time..."}
                   </p>
                 </div>
               </div>
-              {!isLoading && (
-                <button
-                  onClick={onClose}
-                  className="text-white hover:text-primary-100 transition-colors"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              )}
             </div>
 
             {/* Progress Bar */}
@@ -356,18 +353,6 @@ export default function StreamingAnalysisDisplay({
               </div>
             ))}
           </div>
-
-          {/* Footer */}
-          {!isLoading && (
-            <div className="bg-surface-50 px-8 py-4 border-t border-border-200 flex justify-end gap-3">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
-              >
-                View Results
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>
