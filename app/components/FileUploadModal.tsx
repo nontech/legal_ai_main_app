@@ -82,7 +82,11 @@ export default function FileUploadModal({
   const [isSummaryEdited, setIsSummaryEdited] = useState(false);
   const [showCopiedToast, setShowCopiedToast] = useState(false);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
-  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
+  const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(() => {
+    // Collapse on mobile by default, expand on desktop
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 768;
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [editedTitle, setEditedTitle] = useState(caseTitle || "");
   const [editedDescription, setEditedDescription] = useState(caseDescription || "");
@@ -122,6 +126,16 @@ export default function FileUploadModal({
       setAiSummary(summaryText);
     }
   }, [initialFiles, sectionName, summaryText]);
+
+  // Handle window resize to collapse/expand left panel
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLeftPanelCollapsed(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -480,28 +494,28 @@ export default function FileUploadModal({
           className="fixed inset-0 bg-primary-950/80 backdrop-blur-sm transition-opacity"
           onClick={onClose}
         ></div>
-        <div className="relative inline-block w-full max-w-6xl my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-2xl">
-          <div className="flex flex-col max-h-[80vh]">
+        <div className="relative inline-block w-full max-w-6xl my-4 sm:my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-xl sm:rounded-2xl">
+          <div className="flex flex-col max-h-[80vh] sm:max-h-[90vh]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-5 text-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl text-white">{icon}</span>
-                  <div>
-                    <h2 className="text-2xl font-bold">
+            <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-3 sm:px-6 py-4 sm:py-5 text-white">
+              <div className="flex items-start sm:items-center justify-between gap-2">
+                <div className="flex items-start sm:items-center gap-2 sm:gap-3 min-w-0">
+                  <span className="text-xl sm:text-3xl text-white flex-shrink-0">{icon}</span>
+                  <div className="min-w-0">
+                    <h2 className="text-lg sm:text-2xl font-bold truncate sm:truncate">
                       {title || "Document Summary Review"}
                     </h2>
-                    <p className="text-primary-100 text-sm">
+                    <p className="text-primary-100 text-xs sm:text-sm line-clamp-2">
                       {description || "Upload documents or add text manually to create a comprehensive summary"}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={onClose}
-                  className="text-white hover:text-surface-200 cursor-pointer rounded-full p-2 transition-colors"
+                  className="text-white hover:text-surface-200 cursor-pointer rounded-full p-1 sm:p-2 transition-colors flex-shrink-0"
                 >
                   <svg
-                    className="w-6 h-6"
+                    className="w-5 h-5 sm:w-6 sm:h-6"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -521,10 +535,10 @@ export default function FileUploadModal({
             <div className="flex-1 overflow-hidden bg-surface-000">
               {isSplitView ? (
                 /* Split View Layout */
-                <div className="h-full flex px-6 py-6 gap-6">
+                <div className="h-full flex flex-col sm:flex-row px-3 sm:px-6 py-4 sm:py-6 gap-3 sm:gap-6">
                   {/* Left Panel - Documents */}
               <div
-                className={`border-r border-border-200 bg-surface-100 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-2/5"
+                className={`border-r border-border-200 bg-surface-100 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-full sm:w-2/5"
                   }`}
               >
                 {isLeftPanelCollapsed ? (
@@ -551,18 +565,18 @@ export default function FileUploadModal({
                 ) : (
                   /* Expanded State */
                   <>
-                    <div className="p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[56px]">
-                      <h3 className="font-semibold text-ink-900">
+                    <div className="p-2 sm:p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[48px] sm:min-h-[56px] gap-2">
+                      <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
                         Documents
                       </h3>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                         <button
                           onClick={() => fileInputRef.current?.click()}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium whitespace-nowrap"
+                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
                           title="Add more documents"
                         >
                           <svg
-                            className="w-5 h-5"
+                            className="w-4 h-4 sm:w-5 sm:h-5"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -574,7 +588,8 @@ export default function FileUploadModal({
                               d="M12 4v16m8-8H4"
                             />
                           </svg>
-                          Add Documents
+                          <span className="hidden sm:inline">Add Documents</span>
+                          <span className="sm:hidden">Add</span>
                         </button>
                         <input
                           ref={fileInputRef}
@@ -1557,12 +1572,12 @@ export default function FileUploadModal({
         )}
 
         {/* Footer */}
-        <div className="bg-surface-100 px-6 pt-6 pb-4 md:pt-8 border-t border-border-200 flex justify-end items-center gap-3">
+        <div className="bg-surface-100 px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 md:pt-8 border-t border-border-200 flex flex-col-reverse sm:flex-row justify-end items-center gap-2 sm:gap-3">
           {sectionName === "case_information" && onCaseDetailsUpdate ? (
             <button
               onClick={handleSaveCaseDetails}
               disabled={isSaving}
-              className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             >
               {isSaving ? (
                 <>
@@ -1585,7 +1600,7 @@ export default function FileUploadModal({
               <button
                 onClick={handleSaveChanges}
                 disabled={isSaving}
-                className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
                 {isSaving ? (
                   <>

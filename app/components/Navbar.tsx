@@ -90,8 +90,8 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 />
               </svg>
             </div>
-            <div className="flex flex-col hidden sm:flex">
-              <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
+            <div className="flex flex-col">
+              <span className="text-md sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
                 Legal Case Analysis
               </span>
             </div>

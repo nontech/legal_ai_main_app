@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Navbar from "../../components/Navbar";
 import ProgressStepper from "../../components/ProgressStepper";
+import MobileProgressBar from "../../components/MobileProgressBar";
 import JurisdictionSection from "../../components/JurisdictionSection";
 import CaseTypeSelector from "../../components/CaseTypeSelector";
 import RoleSelector from "../../components/RoleSelector";
@@ -26,7 +27,6 @@ function DetailedCaseAnalysisContent() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const totalSteps = 8; // Total number of steps
 
   // Track completion data for each step (percentage)
@@ -136,6 +136,17 @@ function DetailedCaseAnalysisContent() {
     }));
   }, []);
 
+  const steps = [
+    { id: "jurisdiction", label: "Jurisdiction", icon: null },
+    { id: "case-type", label: "Case Type", icon: null },
+    { id: "role", label: "Role", icon: null },
+    { id: "charges", label: "Charges", icon: null },
+    { id: "case-details", label: "Case Details", icon: null },
+    { id: "judge", label: "Judge", icon: null },
+    { id: "jury", label: "Jury", icon: null },
+    { id: "results", label: "Results", icon: null },
+  ];
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
@@ -163,6 +174,14 @@ function DetailedCaseAnalysisContent() {
     <div className="min-h-screen bg-gray-50">
       <Navbar onPretrialClick={() => setIsPretrialOpen(true)} showPretrialButton={true} />
       
+      {/* Mobile Progress Bar - Shown on mobile only */}
+      <MobileProgressBar
+        currentStep={currentStep}
+        steps={steps}
+        onStepChange={setCurrentStep}
+        completionData={completionData}
+      />
+      
       {/* Main content area */}
       <main className="pt-20 md:pt-32 pb-32 px-3 sm:px-4 lg:px-8">
         <div className="flex gap-6">
@@ -187,53 +206,6 @@ function DetailedCaseAnalysisContent() {
         </div>
       </main>
 
-      {/* Mobile Sidebar Toggle Button */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="md:hidden fixed bottom-24 right-4 z-40 bg-primary-500 text-white rounded-full p-3 shadow-lg hover:bg-primary-600 transition-colors"
-        title={isSidebarOpen ? "Close progress" : "Open progress"}
-      >
-        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </button>
-
-      {/* Mobile Sidebar Drawer */}
-      {isSidebarOpen && (
-        <>
-          {/* Overlay */}
-          <div
-            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
-            onClick={() => setIsSidebarOpen(false)}
-          ></div>
-
-          {/* Sidebar Panel */}
-          <div className="md:hidden fixed bottom-0 right-0 left-0 bg-white rounded-t-2xl shadow-2xl z-40 max-h-[80vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between rounded-t-2xl">
-              <h3 className="text-lg font-semibold text-gray-900">Progress</h3>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="px-4 py-4">
-              <ProgressStepper
-                currentStep={currentStep}
-                onStepChange={(step) => {
-                  setCurrentStep(step);
-                  setIsSidebarOpen(false);
-                }}
-                completionData={completionData}
-                caseId={caseId || undefined}
-              />
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Pretrial Process Modal */}
       {isPretrialOpen && (
