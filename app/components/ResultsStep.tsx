@@ -373,11 +373,11 @@ export default function ResultsStep() {
                 <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Element Analysis</h4>
               </div>
 
-              {["actus_reus", "mens_rea", "causation", "harm_damages"].map((prop) => {
-                const elem = (result.legal_assessment.elements_analysis as any)?.[prop];
-                if (!elem) return null;
+              {Object.entries(result.legal_assessment.elements_analysis).map(([prop, elem]) => {
+                if (!elem || typeof elem !== 'object') return null;
 
-                const prob = Math.round(elem.probability * 100);
+                const elemData = elem as any;
+                const prob = Math.round(elemData.probability ? elemData.probability * 100 : elemData.score ? elemData.score * 100 : 0);
                 const getColor = (p: number) => {
                   if (p > 60) return { bg: "#ffebee", border: "#e74c3c", badge: "Likely" };
                   if (p > 40) return { bg: "#fff3cd", border: "#f39c12", badge: "Probable" };
@@ -396,10 +396,10 @@ export default function ResultsStep() {
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
                       <div>
                         <p style={{ fontWeight: "600", color: "#333", margin: "0 0 2px 0", fontSize: "14px" }}>
-                          {elem.label}
+                          {elemData.label}
                         </p>
                         <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
-                          {elem.description}
+                          {elemData.description}
                         </p>
                       </div>
                       <span style={{
