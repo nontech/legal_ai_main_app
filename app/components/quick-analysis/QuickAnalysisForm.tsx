@@ -23,6 +23,8 @@ interface ClassifiedFile {
   isClassifying: boolean;
 }
 
+type RoleType = "defendant" | "plaintiff";
+
 interface QuickAnalysisFormProps {
   initialDocuments?: File[];
   onCalculateResults?: (data: any) => void;
@@ -58,8 +60,8 @@ export default function QuickAnalysisForm({
     }
   );
   // Store the case type as its string id that API expects
-  const [caseTypeId, setCaseTypeId] = useState<string>(uploadedMetadata?.caseType || "");
-  const [role, setRole] = useState<string>(uploadedMetadata?.role || "");
+  const [caseTypeId, setCaseTypeId] = useState<string>(uploadedMetadata?.caseType?.toLowerCase() || "");
+  const [role, setRole] = useState<string>(uploadedMetadata?.role?.toLowerCase() || "plaintiff" as RoleType);
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
