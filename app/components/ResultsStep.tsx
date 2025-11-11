@@ -9,6 +9,7 @@ interface AnalysisResult {
   executive_summary?: any;
   key_factors?: Record<string, any>;
   legal_assessment?: any;
+  case_analysis?: any;
   strategic_recommendations?: any[];
   precedent_cases?: any[];
 }
@@ -90,11 +91,20 @@ export default function ResultsStep() {
     );
   }
 
-  const successProb = result.predicted_outcome.win_probability
+  const isCriminalCase = result.case_analysis?.case_type === "criminal";
+  const successProb = result.predicted_outcome?.win_probability
     ? Math.round(result.predicted_outcome.win_probability * 100)
     : 0;
 
-  const liabilityProb = Math.round((1 - (result.legal_assessment?.guilt_probability || 0)) * 100);
+  const guiltProb = isCriminalCase
+    ? Math.round((result.legal_assessment?.outcome_assessment?.guilt_probability || 0) * 100)
+    : null;
+
+  const liabilityProb = !isCriminalCase && result.case_analysis?.role === "plaintiff"
+    ? Math.round((result.legal_assessment?.outcome_assessment?.plaintiff_success_probability || 0) * 100)
+    : !isCriminalCase && result.case_analysis?.role === "defendant"
+      ? Math.round((result.legal_assessment?.outcome_assessment?.defendant_success_probability || 0) * 100)
+      : null;
 
   return (
     <div className="space-y-6">
@@ -177,16 +187,18 @@ export default function ResultsStep() {
       {/* Predicted Outcome Probability - Featured Section */}
       {result.predicted_outcome?.win_probability !== undefined && (
         <div style={{
-          background: "linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%)",
-          border: "2px solid #ffd700",
+          background: isCriminalCase
+            ? "linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%)"
+            : "linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%)",
+          border: isCriminalCase ? "2px solid #e74c3c" : "2px solid #ffd700",
           borderRadius: "12px",
           padding: "16px 12px",
           textAlign: "center",
         }} className="mx-3 sm:mx-0">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "24px" }}>🎯</span>
+            <span style={{ fontSize: "24px" }}>{isCriminalCase ? "⚖️" : "🎯"}</span>
             <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#333", margin: 0 }} className="sm:text-2xl">
-              Predicted Outcome
+              {isCriminalCase ? "Guilt Probability" : "Predicted Outcome"}
             </h3>
           </div>
 
@@ -194,13 +206,15 @@ export default function ResultsStep() {
             <div style={{
               fontSize: "48px",
               fontWeight: "bold",
-              color: "#d4a500",
+              color: isCriminalCase ? "#e74c3c" : "#d4a500",
               margin: "10px 0",
             }} className="sm:text-6xl">
-              {successProb}%
+              {isCriminalCase ? guiltProb : successProb}%
             </div>
             <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
-              Success Probability (Range: {Math.max(0, successProb - 8)}% – {Math.min(100, successProb + 8)}%)
+              {isCriminalCase
+                ? `Conviction Probability (Range: ${Math.max(0, guiltProb! - 8)}% – ${Math.min(100, guiltProb! + 8)}%)`
+                : `Success Probability (Range: ${Math.max(0, successProb - 8)}% – ${Math.min(100, successProb + 8)}%)`}
             </p>
           </div>
 
@@ -215,8 +229,10 @@ export default function ResultsStep() {
           }}>
             <div style={{
               height: "100%",
-              width: `${successProb}%`,
-              background: "linear-gradient(90deg, #4a90e2 0%, #357abd 100%)",
+              width: `${isCriminalCase ? guiltProb : successProb}%`,
+              background: isCriminalCase
+                ? "linear-gradient(90deg, #e74c3c 0%, #c0392b 100%)"
+                : "linear-gradient(90deg, #4a90e2 0%, #357abd 100%)",
               transition: "width 0.5s ease-out",
             }}></div>
           </div>
@@ -225,20 +241,22 @@ export default function ResultsStep() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
             <div>
               <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Confidence Level</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
-                {result.legal_assessment?.confidence_level
-                  ? (Math.round(result.legal_assessment.confidence_level * 100) > 70 ? "High" : "Moderate")
-                  : "N/A"}
+              <p style={{ color: isCriminalCase ? "#c62828" : "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                {result.predicted_outcome?.confidence_category || "Weak"}
               </p>
             </div>
             <div>
               <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Analysis Depth</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>Comprehensive</p>
+              <p style={{ color: isCriminalCase ? "#c62828" : "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                {result.predicted_outcome?.analysis_depth || "Detailed"}
+              </p>
             </div>
             <div>
               <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Risk Assessment</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
-                {successProb > 70 ? "Low" : successProb > 50 ? "Moderate" : "High"}
+              <p style={{ color: isCriminalCase ? "#c62828" : "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                {isCriminalCase
+                  ? (guiltProb! > 70 ? "High" : guiltProb! > 50 ? "Moderate" : "Low")
+                  : (successProb > 70 ? "Low" : successProb > 50 ? "Moderate" : "High")}
               </p>
             </div>
           </div>
@@ -304,63 +322,114 @@ export default function ResultsStep() {
         </div>
       )}
 
-      {/* Legal Liability Assessment */}
+      {/* Legal Assessment Section */}
       {result.legal_assessment && (
         <div style={{
-          background: "#fff5f5",
-          border: "1px solid #ffcccc",
+          background: isCriminalCase ? "#fff5f5" : "#fffbf5",
+          border: isCriminalCase ? "1px solid #ffcccc" : "1px solid #ffe0b2",
           borderRadius: "12px",
           padding: "24px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
             <span style={{ fontSize: "24px" }}>⚖️</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#c62828", margin: 0 }}>
-              Legal Liability Assessment
+            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: isCriminalCase ? "#c62828" : "#e67e22", margin: 0 }}>
+              {isCriminalCase ? "Criminal Assessment" : "Liability Assessment"}
             </h3>
           </div>
 
-          {/* Liability Status */}
-          {result.legal_assessment.guilt_probability !== undefined && (
+          {/* Assessment Status */}
+          {(guiltProb !== null || liabilityProb !== null) && (
             <div style={{
-              background: liabilityProb > 50 ? "#e8f5e9" : "#ffebee",
-              border: liabilityProb > 50 ? "2px solid #27ae60" : "2px solid #e74c3c",
+              background: isCriminalCase
+                ? (guiltProb! > 50 ? "#ffebee" : "#e8f5e9")
+                : (liabilityProb! > 50 ? "#e8f5e9" : "#ffebee"),
+              border: isCriminalCase
+                ? (guiltProb! > 50 ? "2px solid #e74c3c" : "2px solid #27ae60")
+                : (liabilityProb! > 50 ? "2px solid #27ae60" : "2px solid #e74c3c"),
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "20px",
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
-                <span style={{ fontSize: "24px" }}>{liabilityProb > 50 ? "✅" : "⚠️"}</span>
+                <span style={{ fontSize: "24px" }}>
+                  {isCriminalCase
+                    ? (guiltProb! > 50 ? "⚠️" : "✅")
+                    : (liabilityProb! > 50 ? "✅" : "⚠️")}
+                </span>
                 <h4 style={{
                   fontSize: "18px",
                   fontWeight: "bold",
-                  color: liabilityProb > 50 ? "#1b5e20" : "#c62828",
+                  color: isCriminalCase
+                    ? (guiltProb! > 50 ? "#c62828" : "#1b5e20")
+                    : (liabilityProb! > 50 ? "#1b5e20" : "#c62828"),
                   margin: 0,
                 }}>
-                  {liabilityProb > 50 ? "Likely Not Guilty" : "Likely Guilty"}
+                  {isCriminalCase
+                    ? (guiltProb! > 50 ? "Likely Guilty" : "Likely Not Guilty")
+                    : (liabilityProb! > 50 ? "Plaintiff Likely Succeeds" : "Defendant Likely Succeeds")}
                 </h4>
               </div>
-              <p style={{ color: liabilityProb > 50 ? "#2e7d32" : "#d32f2f", margin: "8px 0", fontSize: "13px" }}>
-                <strong>Confidence Level:</strong> {result.legal_assessment?.confidence_level
-                  ? (Math.round(result.legal_assessment.confidence_level * 100) > 70 ? "Moderate" : "Lower")
-                  : "N/A"}
+              <p style={{
+                color: isCriminalCase
+                  ? (guiltProb! > 50 ? "#d32f2f" : "#2e7d32")
+                  : (liabilityProb! > 50 ? "#2e7d32" : "#d32f2f"),
+                margin: "8px 0",
+                fontSize: "13px"
+              }}>
+                <strong>Confidence:</strong> {result.predicted_outcome?.confidence_category || "Weak"}
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "12px" }}>
                 <div style={{ flex: 1, height: "8px", background: "#ccc", borderRadius: "4px", overflow: "hidden" }}>
                   <div style={{
                     height: "100%",
-                    width: `${liabilityProb}%`,
-                    background: liabilityProb > 50 ? "#27ae60" : "#e74c3c",
+                    width: `${isCriminalCase ? guiltProb : liabilityProb}%`,
+                    background: isCriminalCase
+                      ? (guiltProb! > 50 ? "#e74c3c" : "#27ae60")
+                      : (liabilityProb! > 50 ? "#27ae60" : "#e74c3c"),
                   }}></div>
                 </div>
                 <span style={{
                   fontSize: "18px",
                   fontWeight: "bold",
-                  color: liabilityProb > 50 ? "#27ae60" : "#e74c3c",
+                  color: isCriminalCase
+                    ? (guiltProb! > 50 ? "#e74c3c" : "#27ae60")
+                    : (liabilityProb! > 50 ? "#27ae60" : "#e74c3c"),
                   minWidth: "45px",
                   textAlign: "right",
                 }}>
-                  {liabilityProb}%
+                  {isCriminalCase ? guiltProb : liabilityProb}%
                 </span>
+              </div>
+            </div>
+          )}
+
+          {/* Burden of Proof Section */}
+          {result.legal_assessment.burden_of_proof && (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📜</span>
+                <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Burden of Proof</h4>
+              </div>
+              <div style={{
+                background: "#f8f9fa",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                padding: "12px",
+                marginBottom: "12px",
+              }}>
+                <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "14px" }}>
+                  {result.legal_assessment.burden_of_proof.standard}
+                </p>
+                <p style={{ fontSize: "12px", color: "#666", margin: "0 0 8px 0" }}>
+                  {result.legal_assessment.burden_of_proof.description}
+                </p>
+                {result.legal_assessment.burden_of_proof.details && (
+                  <div style={{ fontSize: "12px", color: "#555", whiteSpace: "pre-wrap" }}>
+                    {Array.isArray(result.legal_assessment.burden_of_proof.details)
+                      ? result.legal_assessment.burden_of_proof.details.join("\n")
+                      : result.legal_assessment.burden_of_proof.details}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -370,7 +439,9 @@ export default function ResultsStep() {
             <div style={{ marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
                 <span style={{ fontSize: "20px" }}>🔍</span>
-                <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Element Analysis</h4>
+                <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                  {isCriminalCase ? "Criminal Elements Analysis" : "Liability Elements Analysis"}
+                </h4>
               </div>
 
               {Object.entries(result.legal_assessment.elements_analysis).map(([prop, elem]) => {
@@ -378,10 +449,35 @@ export default function ResultsStep() {
 
                 const elemData = elem as any;
                 const prob = Math.round(elemData.probability ? elemData.probability * 100 : elemData.score ? elemData.score * 100 : 0);
+
                 const getColor = (p: number) => {
-                  if (p > 60) return { bg: "#ffebee", border: "#e74c3c", badge: "Likely" };
-                  if (p > 40) return { bg: "#fff3cd", border: "#f39c12", badge: "Probable" };
-                  return { bg: "#f8f9fa", border: "#95a5a6", badge: "Weak" };
+                  if (isCriminalCase) {
+                    // For criminal cases: higher probability = stronger guilt evidence = bad
+                    if (p > 70) return { bg: "#ffebee", border: "#e74c3c", badge: "Strong" };
+                    if (p > 50) return { bg: "#fff3cd", border: "#f39c12", badge: "Moderate" };
+                    return { bg: "#e8f5e9", border: "#27ae60", badge: "Weak" };
+                  } else {
+                    // For civil cases: depends on role
+                    const isPlaintiff = result.case_analysis?.role === "plaintiff";
+                    const isDefendant = result.case_analysis?.role === "defendant";
+
+                    if (isPlaintiff) {
+                      // For plaintiff: high probability = strong evidence for plaintiff = good
+                      if (p > 70) return { bg: "#e8f5e9", border: "#27ae60", badge: "Strong" };
+                      if (p > 50) return { bg: "#fff3cd", border: "#f39c12", badge: "Moderate" };
+                      return { bg: "#ffebee", border: "#e74c3c", badge: "Weak" };
+                    } else if (isDefendant) {
+                      // For defendant: high probability = strong evidence against defendant = bad
+                      if (p > 70) return { bg: "#ffebee", border: "#e74c3c", badge: "Strong Against" };
+                      if (p > 50) return { bg: "#fff3cd", border: "#f39c12", badge: "Moderate Against" };
+                      return { bg: "#e8f5e9", border: "#27ae60", badge: "Weak Against" };
+                    } else {
+                      // Default for other roles
+                      if (p > 70) return { bg: "#e8f5e9", border: "#27ae60", badge: "Strong" };
+                      if (p > 50) return { bg: "#fff3cd", border: "#f39c12", badge: "Moderate" };
+                      return { bg: "#ffebee", border: "#e74c3c", badge: "Weak" };
+                    }
+                  }
                 };
                 const colors = getColor(prob);
 
@@ -415,6 +511,13 @@ export default function ResultsStep() {
                         {colors.badge}
                       </span>
                     </div>
+                    {elemData.evaluation && (
+                      <div style={{ marginBottom: "8px" }}>
+                        <p style={{ fontSize: "12px", color: "#555", margin: 0, fontStyle: "italic" }}>
+                          <strong>Evaluation:</strong> {elemData.evaluation}
+                        </p>
+                      </div>
+                    )}
                     <div style={{
                       display: "flex",
                       alignItems: "center",
@@ -438,6 +541,176 @@ export default function ResultsStep() {
             </div>
           )}
 
+          {/* Strength of Evidence Section */}
+          {result.legal_assessment.strength_of_evidence && (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>📊</span>
+                <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Strength of Evidence</h4>
+              </div>
+
+              {/* Overall Evidence Score */}
+              {result.legal_assessment.strength_of_evidence.overall_evidence_score !== undefined && (
+                <div style={{
+                  background: "#f8f9fa",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  marginBottom: "12px",
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                    <p style={{ fontWeight: "600", color: "#333", margin: 0, fontSize: "13px" }}>
+                      Overall Evidence Score
+                    </p>
+                    <span style={{ fontSize: "18px", fontWeight: "bold", color: "#2c5aa0" }}>
+                      {result.legal_assessment.strength_of_evidence.overall_evidence_score}/10
+                    </span>
+                  </div>
+                  <div style={{ height: "8px", background: "#e0e0e0", borderRadius: "4px", overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%",
+                      width: `${(result.legal_assessment.strength_of_evidence.overall_evidence_score / 10) * 100}%`,
+                      background: result.legal_assessment.strength_of_evidence.overall_evidence_score > 7
+                        ? "#27ae60"
+                        : result.legal_assessment.strength_of_evidence.overall_evidence_score > 5
+                          ? "#f39c12"
+                          : "#e74c3c",
+                    }}></div>
+                  </div>
+                </div>
+              )}
+
+              {/* Evidence Types */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "12px" }}>
+                {result.legal_assessment.strength_of_evidence.documentary_evidence && (
+                  <div style={{
+                    background: "#f8f9fa",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "6px",
+                    padding: "12px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "6px" }}>
+                      <p style={{ fontWeight: "600", color: "#333", margin: 0, fontSize: "13px" }}>
+                        📄 Documentary Evidence
+                      </p>
+                      <span style={{
+                        background: result.legal_assessment.strength_of_evidence.documentary_evidence.rating === "Strong"
+                          ? "#27ae60"
+                          : result.legal_assessment.strength_of_evidence.documentary_evidence.rating === "Moderate"
+                            ? "#f39c12"
+                            : "#e74c3c",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.legal_assessment.strength_of_evidence.documentary_evidence.rating}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                      {result.legal_assessment.strength_of_evidence.documentary_evidence.description}
+                    </p>
+                  </div>
+                )}
+
+                {result.legal_assessment.strength_of_evidence.witness_support && (
+                  <div style={{
+                    background: "#f8f9fa",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "6px",
+                    padding: "12px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "6px" }}>
+                      <p style={{ fontWeight: "600", color: "#333", margin: 0, fontSize: "13px" }}>
+                        👥 Witness Support
+                      </p>
+                      <span style={{
+                        background: result.legal_assessment.strength_of_evidence.witness_support.rating === "Strong"
+                          ? "#27ae60"
+                          : result.legal_assessment.strength_of_evidence.witness_support.rating === "Moderate"
+                            ? "#f39c12"
+                            : "#e74c3c",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.legal_assessment.strength_of_evidence.witness_support.rating}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                      {result.legal_assessment.strength_of_evidence.witness_support.description}
+                    </p>
+                  </div>
+                )}
+
+                {result.legal_assessment.strength_of_evidence.expert_reports && (
+                  <div style={{
+                    background: "#f8f9fa",
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "6px",
+                    padding: "12px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "6px" }}>
+                      <p style={{ fontWeight: "600", color: "#333", margin: 0, fontSize: "13px" }}>
+                        🔬 Expert Reports
+                      </p>
+                      <span style={{
+                        background: result.legal_assessment.strength_of_evidence.expert_reports.rating === "Strong"
+                          ? "#27ae60"
+                          : result.legal_assessment.strength_of_evidence.expert_reports.rating === "Moderate"
+                            ? "#f39c12"
+                            : "#e74c3c",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.legal_assessment.strength_of_evidence.expert_reports.rating}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                      {result.legal_assessment.strength_of_evidence.expert_reports.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Governing Law Section */}
+          {result.legal_assessment.governing_law && (
+            <div style={{ marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <span style={{ fontSize: "20px" }}>⚖️</span>
+                <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Governing Law</h4>
+              </div>
+              {result.legal_assessment.governing_law.provisions && (
+                <div>
+                  {(result.legal_assessment.governing_law.provisions as Array<{ provision: string; description: string }>).map((prov, idx) => (
+                    <div key={idx} style={{
+                      background: "#f8f9fa",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "10px",
+                      marginBottom: "8px",
+                    }}>
+                      <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "13px" }}>
+                        {prov.provision}
+                      </p>
+                      <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                        {prov.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Supporting Legal Authority */}
           {result.legal_assessment.supporting_authority && (
             <div>
@@ -446,33 +719,69 @@ export default function ResultsStep() {
                 <h4 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: 0 }}>Supporting Legal Authority</h4>
               </div>
 
+              {/* Defenses */}
+              {result.legal_assessment.supporting_authority.defenses &&
+                result.legal_assessment.supporting_authority.defenses.length > 0 && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p style={{ fontWeight: "600", color: "#333", margin: "0 0 8px 0", fontSize: "13px" }}>
+                      {isCriminalCase ? "Potential Defenses:" : "Defendant Defenses:"}
+                    </p>
+                    <div style={{
+                      background: "#f8f9fa",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "10px",
+                    }}>
+                      {(result.legal_assessment.supporting_authority.defenses as string[]).map((defense, idx) => (
+                        <p key={idx} style={{ fontSize: "12px", color: "#555", margin: "6px 0" }}>
+                          • {defense}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Procedural Rights */}
+              {result.legal_assessment.supporting_authority.procedural_rights &&
+                result.legal_assessment.supporting_authority.procedural_rights.length > 0 && (
+                  <div style={{ marginBottom: "16px" }}>
+                    <p style={{ fontWeight: "600", color: "#333", margin: "0 0 8px 0", fontSize: "13px" }}>
+                      Procedural Rights:
+                    </p>
+                    <div style={{
+                      background: "#f8f9fa",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "10px",
+                    }}>
+                      {(result.legal_assessment.supporting_authority.procedural_rights as string[]).map((right, idx) => (
+                        <p key={idx} style={{ fontSize: "12px", color: "#555", margin: "6px 0" }}>
+                          • {right}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Primary Statutes */}
               {result.legal_assessment.supporting_authority.primary_statutes &&
                 result.legal_assessment.supporting_authority.primary_statutes.length > 0 && (
-                  <div style={{ marginBottom: "12px" }}>
-                    {(result.legal_assessment.supporting_authority.primary_statutes as string[]).map((statute, idx) => (
-                      <div key={idx} style={{ marginBottom: "8px" }}>
-                        <p style={{ fontWeight: "600", color: "#333", margin: "0 0 2px 0", fontSize: "13px" }}>
-                          {statute.split(" - ")[0]}
+                  <div style={{ marginBottom: "16px" }}>
+                    <p style={{ fontWeight: "600", color: "#333", margin: "0 0 8px 0", fontSize: "13px" }}>
+                      Primary Statutes:
+                    </p>
+                    <div style={{
+                      background: "#f8f9fa",
+                      border: "1px solid #e0e0e0",
+                      borderRadius: "6px",
+                      padding: "10px",
+                    }}>
+                      {(result.legal_assessment.supporting_authority.primary_statutes as string[]).map((statute, idx) => (
+                        <p key={idx} style={{ fontSize: "12px", color: "#555", margin: "6px 0" }}>
+                          • {statute}
                         </p>
-                        <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
-                          <strong>Primary Statute</strong>
-                        </p>
-                        <p style={{ fontSize: "12px", color: "#666", margin: "4px 0 0 0" }}>
-                          {statute.split(" - ")[1] || statute}
-                        </p>
-                        <span style={{
-                          display: "inline-block",
-                          background: "#e8f5e9",
-                          color: "#1b5e20",
-                          padding: "2px 8px",
-                          borderRadius: "12px",
-                          fontSize: "11px",
-                          marginTop: "6px",
-                        }}>
-                          Direct Application
-                        </span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
             </div>
@@ -495,11 +804,11 @@ export default function ResultsStep() {
             </h3>
           </div>
 
-          {result.strategic_recommendations.slice(0, 3).map((rec, idx) => {
+          {result.strategic_recommendations.map((rec, idx) => {
             if (typeof rec === "object" && rec.title) {
               const getPriorityColor = (priority: string) => {
-                if (priority === "Critical") return "#e74c3c";
-                if (priority === "High") return "#f39c12";
+                if (priority === "Critical" || priority === "High") return "#e74c3c";
+                if (priority === "Moderate" || priority === "Medium") return "#f39c12";
                 return "#3498db";
               };
 
@@ -539,6 +848,11 @@ export default function ResultsStep() {
                   <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
                     {rec.description}
                   </p>
+                  {rec.category && (
+                    <p style={{ fontSize: "11px", color: "#999", margin: "8px 0 0 0" }}>
+                      Category: <strong>{rec.category}</strong>
+                    </p>
+                  )}
                 </div>
               );
             }
@@ -558,134 +872,220 @@ export default function ResultsStep() {
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
             <span style={{ fontSize: "24px" }}>📖</span>
             <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
-              Supporting Precedent
+              Supporting Precedent Cases ({result.precedent_cases.length})
             </h3>
           </div>
 
-          {result.precedent_cases.slice(0, 2).map((precedent, idx) => (
-            <div key={idx} style={{
-              background: "#f8f9fa",
-              border: "1px solid #e0e0e0",
-              borderLeft: "4px solid #3498db",
-              borderRadius: "8px",
-              padding: "16px",
-              marginBottom: "12px",
-            }}>
-              <p style={{ fontWeight: "600", color: "#2c5aa0", margin: "0 0 4px 0", fontSize: "14px" }}>
-                {precedent.case_name}
-              </p>
-              <p style={{ fontSize: "12px", color: "#666", margin: "0 0 12px 0" }}>
-                {precedent.citation}
-              </p>
+          {result.precedent_cases.map((precedent, idx) => {
+            const getSimilarityColor = (score: number) => {
+              if (score > 0.85) return "#27ae60";
+              if (score > 0.75) return "#f39c12";
+              return "#e74c3c";
+            };
 
-              <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
-                <span style={{
-                  background: "#e8f4f8",
-                  color: "#0c5460",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  fontSize: "11px",
-                }}>
-                  Similarity: {Math.round(precedent.similarity_score * 100)}%
-                </span>
-                {precedent.year && (
+            return (
+              <div key={idx} style={{
+                background: "#f8f9fa",
+                border: "1px solid #e0e0e0",
+                borderLeft: `4px solid ${getSimilarityColor(precedent.similarity_score)}`,
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "12px",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
+                  <div>
+                    <p style={{ fontWeight: "600", color: "#2c5aa0", margin: "0 0 4px 0", fontSize: "14px" }}>
+                      {precedent.case_name}
+                    </p>
+                    <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                      {precedent.citation}
+                    </p>
+                  </div>
                   <span style={{
-                    background: "#f0f0f0",
-                    color: "#333",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                  }}>
-                    {precedent.year}
-                  </span>
-                )}
-                {precedent.outcome && (
-                  <span style={{
-                    background: "#fff3cd",
-                    color: "#856404",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "11px",
-                  }}>
-                    Outcome: {precedent.outcome}
-                  </span>
-                )}
-              </div>
-
-              <p style={{ fontSize: "12px", color: "#666", margin: "0 0 12px 0" }}>
-                {precedent.summary}
-              </p>
-
-              {precedent.source_url && (
-                <a
-                  href={precedent.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "inline-block",
-                    background: "#3498db",
+                    background: getSimilarityColor(precedent.similarity_score),
                     color: "white",
-                    textDecoration: "none",
                     padding: "6px 12px",
-                    borderRadius: "4px",
+                    borderRadius: "12px",
                     fontSize: "12px",
                     fontWeight: "bold",
-                    transition: "background 0.2s",
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = "#2980b9")}
-                  onMouseOut={(e) => (e.currentTarget.style.background = "#3498db")}
-                >
-                  📖 Read Full Case
-                </a>
-              )}
-            </div>
-          ))}
+                    whiteSpace: "nowrap",
+                  }}>
+                    {Math.round(precedent.similarity_score * 100)}% Similar
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", gap: "8px", marginBottom: "12px", flexWrap: "wrap", marginTop: "8px" }}>
+                  {precedent.year && (
+                    <span style={{
+                      background: "#e8f4f8",
+                      color: "#0c5460",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                    }}>
+                      {precedent.year}
+                    </span>
+                  )}
+                  {precedent.outcome && (
+                    <span style={{
+                      background: "#fff3cd",
+                      color: "#856404",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                    }}>
+                      {precedent.outcome}
+                    </span>
+                  )}
+                  {precedent.source_name && (
+                    <span style={{
+                      background: "#f0f0f0",
+                      color: "#333",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "11px",
+                    }}>
+                      Source: {precedent.source_name}
+                    </span>
+                  )}
+                </div>
+
+                {precedent.holding && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "12px" }}>
+                      Holding:
+                    </p>
+                    <p style={{ fontSize: "12px", color: "#555", margin: 0, fontStyle: "italic" }}>
+                      "{precedent.holding}"
+                    </p>
+                  </div>
+                )}
+
+                <p style={{ fontSize: "12px", color: "#666", margin: "0 0 12px 0" }}>
+                  {precedent.summary}
+                </p>
+
+                {precedent.source_url && (
+                  <a
+                    href={precedent.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      background: "#3498db",
+                      color: "white",
+                      textDecoration: "none",
+                      padding: "6px 12px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      transition: "background 0.2s",
+                    }}
+                    onMouseOver={(e) => (e.currentTarget.style.background = "#2980b9")}
+                    onMouseOut={(e) => (e.currentTarget.style.background = "#3498db")}
+                  >
+                    📖 Read Full Case
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
       {/* Executive Summary */}
       {result.executive_summary && (
         <div style={{
-          background: "white",
-          border: "1px solid #e0e0e0",
+          background: isCriminalCase ? "#fff5f5" : "#fffbf5",
+          border: isCriminalCase ? "1px solid #ffcccc" : "1px solid #ffe0b2",
           borderRadius: "12px",
           padding: "24px",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
             <span style={{ fontSize: "24px" }}>📋</span>
             <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
               Executive Summary
             </h3>
           </div>
 
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+            {result.executive_summary.charges && (
+              <div style={{
+                background: "white",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                padding: "12px",
+              }}>
+                <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "12px" }}>
+                  {isCriminalCase ? "Charges:" : "Claims:"}
+                </p>
+                <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+                  {result.executive_summary.charges}
+                </p>
+              </div>
+            )}
+            {result.executive_summary.strength_rating && (
+              <div style={{
+                background: "white",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                padding: "12px",
+              }}>
+                <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "12px" }}>
+                  Strength Rating:
+                </p>
+                <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+                  {result.executive_summary.strength_rating}
+                </p>
+              </div>
+            )}
+          </div>
+
           {result.executive_summary.case_overview && (
-            <div style={{ marginBottom: "12px" }}>
-              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "13px" }}>
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 6px 0", fontSize: "13px" }}>
                 Case Overview:
               </p>
-              <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "#555", margin: 0 }}>
                 {result.executive_summary.case_overview}
               </p>
             </div>
           )}
 
+          {result.executive_summary.evidence_summary && (
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 6px 0", fontSize: "13px" }}>
+                Evidence Summary:
+              </p>
+              <p style={{ fontSize: "13px", color: "#555", margin: 0 }}>
+                {result.executive_summary.evidence_summary}
+              </p>
+            </div>
+          )}
+
           {result.executive_summary.strength_assessment && (
-            <div>
-              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "13px" }}>
+            <div style={{ marginBottom: "16px" }}>
+              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 6px 0", fontSize: "13px" }}>
                 Strength Assessment:
               </p>
-              <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "#555", margin: 0 }}>
                 {result.executive_summary.strength_assessment}
               </p>
             </div>
           )}
 
           {result.executive_summary.primary_recommendation && (
-            <div style={{ marginTop: "12px" }}>
-              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "13px" }}>
+            <div style={{
+              background: "white",
+              border: `2px solid ${isCriminalCase ? "#e74c3c" : "#f39c12"}`,
+              borderRadius: "8px",
+              padding: "12px",
+              marginTop: "12px",
+            }}>
+              <p style={{ fontWeight: "600", color: "#333", margin: "0 0 6px 0", fontSize: "13px" }}>
                 Primary Recommendation:
               </p>
-              <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+              <p style={{ fontSize: "13px", color: "#555", margin: 0 }}>
                 {result.executive_summary.primary_recommendation}
               </p>
             </div>

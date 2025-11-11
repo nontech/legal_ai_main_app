@@ -319,13 +319,12 @@ export default function DocumentUploadStep({
 
           <div className="bg-surface-000 rounded-2xl border-2 border-border-200 p-8 mb-6">
             <div
-              className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-                isUploading
-                  ? "border-border-200"
-                  : isDragActive
-                    ? "border-primary-400 bg-primary-50"
-                    : "border-border-200 hover:border-primary-300"
-              }`}
+              className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
+                ? "border-border-200"
+                : isDragActive
+                  ? "border-primary-400 bg-primary-50"
+                  : "border-border-200 hover:border-primary-300"
+                }`}
               onDragEnter={handleDragEnter}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
@@ -342,9 +341,8 @@ export default function DocumentUploadStep({
               />
               <label
                 htmlFor="fileUpload"
-                className={`cursor-pointer flex flex-col items-center ${
-                  isUploading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`cursor-pointer flex flex-col items-center ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
                   <svg
@@ -471,7 +469,7 @@ export default function DocumentUploadStep({
                 isUploading ||
                 classifiedFiles.some((cf) => cf.isClassifying)
               }
-              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 cursor-pointer"
             >
               {isUploading ? (
                 <>
