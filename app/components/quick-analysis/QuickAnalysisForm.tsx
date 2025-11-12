@@ -309,7 +309,14 @@ export default function QuickAnalysisForm({
 
       // If we have an existing caseId, update it; otherwise create a new case
       if (caseId) {
-        // Update existing case
+        // Update existing case with case details
+        const caseDetailsUpdate = {
+          case_information: {
+            caseName,
+            caseDescription,
+          },
+        };
+
         const res = await fetch(`/api/cases/update`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -318,6 +325,8 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            field: "case_details",
+            value: caseDetailsUpdate,
           }),
         });
         const json = await res.json();

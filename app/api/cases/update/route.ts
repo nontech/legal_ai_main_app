@@ -28,7 +28,33 @@ export async function PATCH(request: Request) {
 
         // Add field and value if provided
         if (field && value !== undefined) {
-            updateData[field] = value;
+            // Special handling for case_details: merge with existing data
+            if (field === "case_details") {
+                // First, fetch the existing case to get current case_details
+                const { data: existingCase, error: fetchError } = await supabase
+                    .from("cases")
+                    .select("case_details")
+                    .eq("id", caseId)
+                    .single();
+
+                if (fetchError) {
+                    return NextResponse.json(
+                        { ok: false, error: fetchError.message },
+                        { status: 500 }
+                    );
+                }
+
+                // Merge existing case_details with new value
+                const existingDetails = (existingCase && typeof existingCase.case_details === 'object' && existingCase.case_details !== null)
+                    ? existingCase.case_details
+                    : {};
+                updateData[field] = {
+                    ...(typeof existingDetails === "object" && existingDetails !== null ? existingDetails : {}),
+                    ...(typeof value === "object" && value !== null ? value : {}),
+                };
+            } else {
+                updateData[field] = value;
+            }
         }
 
         // Add case_type if provided
