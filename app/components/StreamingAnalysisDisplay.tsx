@@ -2,6 +2,165 @@
 
 import { useEffect, useState, useRef } from "react";
 
+// Hook for typing animation
+function useTypingAnimation(text: string, speed: number = 30) {
+    const [displayedText, setDisplayedText] = useState("");
+    const [isComplete, setIsComplete] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const textRef = useRef<string>("");
+    const hasAnimatedRef = useRef<boolean>(false);
+
+    useEffect(() => {
+        // Ensure text is a string and handle undefined/null
+        const safeText = String(text || "").trim();
+
+        if (!safeText) {
+            setDisplayedText("");
+            setIsComplete(false);
+            textRef.current = "";
+            hasAnimatedRef.current = false;
+            return;
+        }
+
+        // If this text has already been animated, show it immediately
+        if (textRef.current === safeText && hasAnimatedRef.current) {
+            setDisplayedText(safeText);
+            setIsComplete(true);
+            return;
+        }
+
+        // Reset for new text
+        if (textRef.current !== safeText) {
+            textRef.current = safeText;
+            hasAnimatedRef.current = false;
+            setDisplayedText("");
+            setIsComplete(false);
+        }
+
+        const words = safeText.split(" ").filter(word => word && word.length > 0);
+
+        // If no words, show empty text immediately
+        if (words.length === 0) {
+            setDisplayedText(safeText);
+            setIsComplete(true);
+            hasAnimatedRef.current = true;
+            return;
+        }
+
+        let currentIndex = 0;
+
+        // Show first word immediately
+        setDisplayedText(words[0] || "");
+        currentIndex = 1;
+
+        const typeNextWord = () => {
+            if (currentIndex < words.length && textRef.current === safeText) {
+                const nextWord = words[currentIndex];
+                if (nextWord) {
+                    setDisplayedText((prev) => prev ? `${prev} ${nextWord}` : nextWord);
+                }
+                currentIndex++;
+                timeoutRef.current = setTimeout(typeNextWord, speed);
+            } else if (textRef.current === safeText) {
+                setIsComplete(true);
+                hasAnimatedRef.current = true;
+            }
+        };
+
+        // Continue typing after a delay
+        if (words.length > 1) {
+            timeoutRef.current = setTimeout(typeNextWord, speed);
+        } else {
+            setIsComplete(true);
+            hasAnimatedRef.current = true;
+        }
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        };
+    }, [text, speed]);
+
+    return { displayedText: displayedText || "", isComplete };
+}
+
+// Typing animation component
+function TypingText({ text, prefix = "", onComplete }: { text: string; prefix?: string; onComplete?: () => void }) {
+    const { displayedText, isComplete } = useTypingAnimation(text || "", 30);
+    const hasCalledComplete = useRef(false);
+
+    useEffect(() => {
+        if (isComplete && !hasCalledComplete.current && onComplete) {
+            hasCalledComplete.current = true;
+            onComplete();
+        }
+    }, [isComplete, onComplete]);
+
+    // Ensure we never render undefined
+    const safeDisplayedText = displayedText || "";
+
+    return (
+        <p className="text-sm text-ink-600">
+            {prefix}{safeDisplayedText}
+            {!isComplete && safeDisplayedText && (
+                <span className="inline-block w-1 h-4 bg-ink-600 ml-1 animate-pulse">|</span>
+            )}
+        </p>
+    );
+}
+
+// Sequential typing component for multiple messages
+function SequentialTypingMessages({
+    messages,
+    pendingMessages,
+    currentIndex,
+    onMessageComplete
+}: {
+    messages: string[];
+    pendingMessages: string[];
+    currentIndex: number;
+    onMessageComplete: () => void;
+}) {
+    // Combine displayed and pending messages
+    const allMessages = [...messages, ...pendingMessages];
+
+    return (
+        <div className="space-y-1.5">
+            {allMessages.map((message, idx) => {
+                // Skip empty messages
+                if (!message || !message.trim()) {
+                    return null;
+                }
+
+                // Show completed messages (already displayed)
+                if (idx < currentIndex) {
+                    return (
+                        <p key={idx} className="text-sm text-ink-600">
+                            • {message}
+                        </p>
+                    );
+                }
+
+                // Show typing animation only for the current message
+                if (idx === currentIndex) {
+                    return (
+                        <TypingText
+                            key={idx}
+                            text={message}
+                            prefix="• "
+                            onComplete={onMessageComplete}
+                        />
+                    );
+                }
+
+                // Don't show pending messages yet
+                return null;
+            })}
+        </div>
+    );
+}
+
 interface StreamEvent {
     type: "status" | "reasoning" | "complete" | "error";
     message: string;
@@ -15,6 +174,8 @@ interface GroupedStep {
     baseStep: string;
     status: "in_progress" | "completed";
     messages: string[];
+    pendingMessages: string[];
+    currentMessageIndex: number;
     data?: any;
     icon: string;
     label: string;
@@ -178,16 +339,19 @@ export default function StreamingAnalysisDisplay({
                                                 updated.set(baseStep, {
                                                     baseStep,
                                                     status: isComplete ? "completed" : "in_progress",
-                                                    messages: [event.message],
+                                                    messages: [],
+                                                    pendingMessages: [event.message],
+                                                    currentMessageIndex: 0,
                                                     data: event.data,
                                                     icon: stepIcons[baseStep] || "📌",
                                                     label: stepLabels[baseStep] || step,
                                                 });
                                             } else {
-                                                // Add message if it's different from the last one (avoid duplicates)
-                                                const lastMessage = existing.messages[existing.messages.length - 1];
+                                                // Add message to pending if it's different from existing ones (avoid duplicates)
+                                                const allMessages = [...existing.messages, ...existing.pendingMessages];
+                                                const lastMessage = allMessages[allMessages.length - 1];
                                                 if (lastMessage !== event.message && event.message.trim()) {
-                                                    existing.messages.push(event.message);
+                                                    existing.pendingMessages.push(event.message);
                                                 }
                                                 // Update data if available
                                                 if (event.data) {
@@ -252,7 +416,9 @@ export default function StreamingAnalysisDisplay({
                                 updated.set("finalization", {
                                     baseStep: "finalization",
                                     status: "in_progress",
-                                    messages: ["Finalizing results..."],
+                                    messages: [],
+                                    pendingMessages: ["Finalizing results..."],
+                                    currentMessageIndex: 0,
                                     icon: "✨",
                                     label: "Finalizing Results",
                                 });
@@ -273,7 +439,8 @@ export default function StreamingAnalysisDisplay({
                                         const updated = new Map(prev);
                                         const finStep = updated.get("finalization");
                                         if (finStep) {
-                                            finStep.messages = [`Finalizing results (${retryCount + 1}/${maxRetries})...`];
+                                            finStep.pendingMessages = [`Finalizing results (${retryCount + 1}/${maxRetries})...`];
+                                            finStep.currentMessageIndex = finStep.messages.length;
                                         }
                                         return updated;
                                     });
@@ -468,13 +635,25 @@ export default function StreamingAnalysisDisplay({
                                         </div>
 
                                         {/* Display all messages for this step */}
-                                        <div className="space-y-1.5">
-                                            {step.messages.map((message, idx) => (
-                                                <p key={idx} className="text-sm text-ink-600">
-                                                    {"• "}{message}
-                                                </p>
-                                            ))}
-                                        </div>
+                                        <SequentialTypingMessages
+                                            messages={step.messages}
+                                            pendingMessages={step.pendingMessages}
+                                            currentIndex={step.currentMessageIndex}
+                                            onMessageComplete={() => {
+                                                setGroupedSteps((prev) => {
+                                                    const updated = new Map(prev);
+                                                    const existing = updated.get(step.baseStep);
+                                                    if (existing && existing.pendingMessages.length > 0) {
+                                                        // Move first pending message to displayed messages
+                                                        const [nextMessage, ...remainingPending] = existing.pendingMessages;
+                                                        existing.messages.push(nextMessage);
+                                                        existing.pendingMessages = remainingPending;
+                                                        existing.currentMessageIndex = existing.messages.length;
+                                                    }
+                                                    return updated;
+                                                });
+                                            }}
+                                        />
 
                                         {/* Display data if available */}
                                         {step.data && (
