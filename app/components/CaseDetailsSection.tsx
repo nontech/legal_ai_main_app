@@ -273,14 +273,38 @@ export default function CaseDetailsSection({
     ).length;
   };
 
-  // Notify parent of completion percentage
+  // Notify parent of completion percentage and save to database
   useEffect(() => {
+    const completedCount = getCompletedSectionsCount();
+    const percentage = Math.round((completedCount / SECTION_CONFIG.length) * 100);
+
     if (onCompletionChange) {
-      const completedCount = getCompletedSectionsCount();
-      const percentage = Math.round((completedCount / SECTION_CONFIG.length) * 100);
       onCompletionChange(percentage);
     }
-  }, [caseDetails, onCompletionChange]);
+
+    // Save completion status to database
+    const saveCompletionStatus = async () => {
+      if (!caseId) return;
+
+      try {
+        await fetch(`/api/cases/update`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId,
+            field: "case_details",
+            value: {
+              _completion_status: percentage,
+            },
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to save completion status:", error);
+      }
+    };
+
+    saveCompletionStatus();
+  }, [caseDetails, onCompletionChange, caseId]);
 
   const getModalContent = (dbKey: string) => {
     const config = SECTION_CONFIG.find((s) => s.dbKey === dbKey);
@@ -545,7 +569,7 @@ export default function CaseDetailsSection({
             {/* Case Information Card - Opens Modal */}
             <button
               onClick={() => setOpenModal("case-info")}
-            className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
+              className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center flex-1">

@@ -309,12 +309,20 @@ export default function QuickAnalysisForm({
 
       // If we have an existing caseId, update it; otherwise create a new case
       if (caseId) {
+        // Calculate completion status based on case_information
+        // Total sections: 6 (case_information, evidence, witnesses, precedents, police, challenges)
+        // Only case_information is filled, so 1/6 sections = ~17%
+        const totalSections = 6;
+        const completedSections = (caseName && caseDescription) ? 1 : 0;
+        const completionPercentage = Math.round((completedSections / totalSections) * 100);
+
         // Update existing case with case details
         const caseDetailsUpdate = {
           case_information: {
             caseName,
             caseDescription,
           },
+          _completion_status: completionPercentage,
         };
 
         const res = await fetch(`/api/cases/update`, {
@@ -352,6 +360,23 @@ export default function QuickAnalysisForm({
           throw new Error(json?.error || "Failed to create case result");
         }
         targetCaseId = json.id as string;
+
+        // Set initial completion status for the newly created case
+        const totalSections = 6;
+        const completedSections = (caseName && caseDescription) ? 1 : 0;
+        const completionPercentage = Math.round((completedSections / totalSections) * 100);
+
+        await fetch(`/api/cases/update`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId: targetCaseId,
+            field: "case_details",
+            value: {
+              _completion_status: completionPercentage,
+            },
+          }),
+        });
       }
 
       // Store data in sessionStorage for the results screen to access
