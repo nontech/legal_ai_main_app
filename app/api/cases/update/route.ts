@@ -44,14 +44,43 @@ export async function PATCH(request: Request) {
                     );
                 }
 
-                // Merge existing case_details with new value
+                // Merge existing case_details with new value (deep merge for nested objects)
                 const existingDetails = (existingCase && typeof existingCase.case_details === 'object' && existingCase.case_details !== null)
                     ? existingCase.case_details
                     : {};
-                updateData[field] = {
-                    ...(typeof existingDetails === "object" && existingDetails !== null ? existingDetails : {}),
-                    ...(typeof value === "object" && value !== null ? value : {}),
+
+                // Deep merge function for nested objects
+                const deepMerge = (target: any, source: any): any => {
+                    if (source === null || typeof source !== "object" || Array.isArray(source)) {
+                        return source;
+                    }
+
+                    const result = { ...target };
+                    for (const key in source) {
+                        if (source.hasOwnProperty(key)) {
+                            if (
+                                typeof source[key] === "object" &&
+                                source[key] !== null &&
+                                !Array.isArray(source[key]) &&
+                                typeof target[key] === "object" &&
+                                target[key] !== null &&
+                                !Array.isArray(target[key])
+                            ) {
+                                // Recursively merge nested objects
+                                result[key] = deepMerge(target[key], source[key]);
+                            } else {
+                                // Overwrite with new value
+                                result[key] = source[key];
+                            }
+                        }
+                    }
+                    return result;
                 };
+
+                updateData[field] = deepMerge(
+                    typeof existingDetails === "object" && existingDetails !== null ? existingDetails : {},
+                    typeof value === "object" && value !== null ? value : {}
+                );
             } else {
                 updateData[field] = value;
             }
