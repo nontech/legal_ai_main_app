@@ -537,879 +537,118 @@ export default function FileUploadModal({
                 /* Split View Layout */
                 <div className="h-full flex flex-col sm:flex-row px-3 sm:px-6 py-4 sm:py-6 gap-3 sm:gap-6">
                   {/* Left Panel - Documents */}
-              <div
-                className={`border-r border-border-200 bg-surface-100 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-full sm:w-2/5"
-                  }`}
-              >
-                {isLeftPanelCollapsed ? (
-                  /* Collapsed State */
-                  <button
-                    onClick={() => setIsLeftPanelCollapsed(false)}
-                  className="p-3 hover:bg-surface-100 transition-colors border-b border-border-200"
-                    title="Expand documents panel"
+                  <div
+                    className={`border-r border-border-200 bg-surface-100 flex flex-col transition-all duration-300 ${isLeftPanelCollapsed ? "w-12" : "w-full sm:w-2/5"
+                      }`}
                   >
-                    <svg
-                      className="w-6 h-6 text-ink-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5l7 7-7 7"
-                      />
-                    </svg>
-                  </button>
-                ) : (
-                  /* Expanded State */
-                  <>
-                    <div className="p-2 sm:p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[48px] sm:min-h-[56px] gap-2">
-                      <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
-                        Documents
-                      </h3>
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <button
-                          onClick={() => fileInputRef.current?.click()}
-                          className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
-                          title="Add more documents"
-                        >
-                          <svg
-                            className="w-4 h-4 sm:w-5 sm:h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 4v16m8-8H4"
-                            />
-                          </svg>
-                          <span className="hidden sm:inline">Add Documents</span>
-                          <span className="sm:hidden">Add</span>
-                        </button>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          multiple
-                          onChange={handleFileSelect}
-                          className="hidden"
-                          accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                        />
-                        <button
-                          onClick={() => setIsLeftPanelCollapsed(true)}
-                          className="text-ink-500 hover:text-ink-700 p-1 rounded hover:bg-surface-100"
-                          title="Collapse panel"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 19l-7-7 7-7"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                      {/* Empty State - No files at all */}
-                      {uploadedFiles.length === 0 && selectedFiles.length === 0 && (
-                        <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
-                          <div className="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center mb-4">
-                            <svg
-                            className="w-8 h-8 text-ink-400"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                              />
-                            </svg>
-                          </div>
-                          <h4 className="text-lg font-semibold text-ink-900 mb-2">
-                            No Documents
-                          </h4>
-                          <p className="text-sm text-ink-600 mb-4 max-w-xs">
-                            Select documents to upload and generate an AI summary for case analysis.
-                          </p>
-                          <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center gap-2"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M12 4v16m8-8H4"
-                              />
-                            </svg>
-                            Select Documents
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Selected Files Section */}
-                      {selectedFiles.length > 0 && (
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
-                              Selected Files ({selectedFiles.length})
-                            </h4>
-                            {caseId && sectionName && (
-                              <button
-                                onClick={handleUploadAllFiles}
-                                disabled={uploadingFileIds.size > 0}
-                                className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                              >
-                                {uploadingFileIds.size > 0 ? (
-                                  <>
-                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Uploading...
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                    </svg>
-                                    Upload All
-                                  </>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                          {selectedFiles.map((file) => (
-                            <div
-                              key={file.id}
-                              className="bg-primary-100 border border-primary-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
-                            >
-                              <div className="flex items-start gap-2">
-                                <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
-                                  <svg
-                                    className="w-4 h-4 text-primary-600"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                  </svg>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-ink-900 truncate">
-                                    {file.name}
-                                  </p>
-                                  <p className="text-xs text-ink-600">
-                                    Ready to upload
-                                  </p>
-                                </div>
-                                <button
-                                  onClick={() => handleRemoveFile(file.id, true)}
-                                  className="flex-shrink-0 text-red-600 hover:bg-red-100 rounded-lg p-1 transition-colors"
-                                  title="Remove"
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Uploaded Files Section */}
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
-                          Uploaded Files ({uploadedFiles.length})
-                        </h4>
-                        {uploadedFiles.length === 0 ? (
-                          <div className="text-center py-8 px-4 bg-surface-100 rounded-lg border border-border-200">
-                            <p className="text-sm text-ink-500">
-                              No files uploaded yet
-                            </p>
-                          </div>
-                        ) : (
-                          uploadedFiles.map((file, index) => {
-                            const fileKey = `${file.id ?? file.address ?? "file"}-${index}`;
-                            return (
-                              <div
-                                key={fileKey}
-                                className="bg-surface-000 border border-border-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
-                              >
-                                <div className="flex items-start gap-2">
-                                  <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
-                                    <svg
-                                      className="w-4 h-4 text-primary-600"
-                                      fill="none"
-                                      viewBox="0 0 24 24"
-                                      stroke="currentColor"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                      />
-                                    </svg>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-ink-900 truncate">
-                                      {file.name}
-                                    </p>
-                                    {(() => {
-                                      const uploadedLabel = formatUploadedDate(file.uploadedAt);
-                                      if (!uploadedLabel) return null;
-                                      return (
-                                        <p className="text-xs text-ink-500">
-                                          Uploaded {uploadedLabel}
-                                        </p>
-                                      );
-                                    })()}
-                                  </div>
-                                  {/* Three Dot Menu */}
-                                  <div className="relative flex-shrink-0">
-                                    <button
-                                      onClick={() =>
-                                        setOpenMenuId(
-                                          openMenuId === fileKey ? null : fileKey
-                                        )
-                                      }
-                                      className="text-ink-600 hover:bg-surface-100 rounded-lg p-1 transition-colors"
-                                      title="More actions"
-                                    >
-                                      <svg
-                                        className="w-4 h-4"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
-                                        />
-                                      </svg>
-                                    </button>
-
-                                    {/* Dropdown Menu */}
-                                    {openMenuId === fileKey && (
-                                      <>
-                                        {/* Backdrop to close menu when clicking outside */}
-                                        <div
-                                          className="fixed inset-0 z-10"
-                                          onClick={() => setOpenMenuId(null)}
-                                        />
-
-                                        {/* Menu */}
-                                        <div className="absolute right-0 top-8 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
-                                          <button
-                                            onClick={() => {
-                                              console.log("Print", file.name);
-                                              setOpenMenuId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                          >
-                                            <svg
-                                              className="w-5 h-5"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                              />
-                                            </svg>
-                                            Print
-                                          </button>
-
-                                          <button
-                                            onClick={() => {
-                                              console.log("Download", file.name);
-                                              setOpenMenuId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                          >
-                                            <svg
-                                              className="w-5 h-5"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                              />
-                                            </svg>
-                                            Download
-                                          </button>
-
-                                          <button
-                                            onClick={() => {
-                                              console.log("Send", file.name);
-                                              setOpenMenuId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                          >
-                                            <svg
-                                              className="w-5 h-5"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                                              />
-                                            </svg>
-                                            Send
-                                          </button>
-
-                                          <button
-                                            onClick={() => {
-                                              console.log("Preview", file.name);
-                                              setOpenMenuId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                          >
-                                            <svg
-                                              className="w-5 h-5"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                              />
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                              />
-                                            </svg>
-                                            Preview
-                                          </button>
-
-                                          <hr className="my-1 border-border-200" />
-
-                                          <button
-                                            onClick={async () => {
-                                              // If file has an address, it's been uploaded to DB, so use onDeleteFile
-                                              if (file.address && onDeleteFile) {
-                                                try {
-                                                  await onDeleteFile(file.address, file.name);
-                                                  // Remove from local state after successful deletion
-                                                  setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
-                                                } catch (error) {
-                                                  console.error("Error deleting file:", error);
-                                                }
-                                              } else {
-                                                // Otherwise just remove it locally
-                                                handleRemoveFile(file.id);
-                                              }
-                                              setOpenMenuId(null);
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
-                                          >
-                                            <svg
-                                              className="w-5 h-5"
-                                              fill="none"
-                                              viewBox="0 0 24 24"
-                                              stroke="currentColor"
-                                            >
-                                              <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                              />
-                                            </svg>
-                                            Delete
-                                          </button>
-                                        </div>
-                                      </>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    </div>
-
-                  </>
-                )}
-              </div>
-
-              {/* Right Panel - Summary */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {isGenerating ? (
-                  <div className="flex flex-col items-center justify-center flex-1 min-h-0">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-lg font-semibold text-ink-900 mb-2">
-                      Generating AI Summary...
-                    </p>
-                    <p className="text-sm text-ink-600">
-                      Analyzing your documents and creating a comprehensive summary
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Action Toolbar */}
-                    <div className="p-4 border-b border-border-200 bg-surface-000 flex-shrink-0">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* Download Dropdown */}
-                        <div className="relative">
-                          <button
-                            onClick={() => setShowDownloadMenu(!showDownloadMenu)}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                              />
-                            </svg>
-                            Download
-                          </button>
-
-                          {showDownloadMenu && (
-                            <>
-                              <div
-                                className="fixed inset-0 z-10"
-                                onClick={() => setShowDownloadMenu(false)}
-                              />
-                              <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
-                                <button
-                                  onClick={() => handleDownload("pdf")}
-                                  className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                >
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                    />
-                                  </svg>
-                                  Download as PDF
-                                </button>
-                                <button
-                                  onClick={() => handleDownload("txt")}
-                                  className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                                >
-                                  <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                  </svg>
-                                  Download as Text
-                                </button>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-                        <button
-                          onClick={handleCopySummary}
-                          className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                            />
-                          </svg>
-                          Copy
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Summary Content */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
-                      {(sectionName === "case_information") && (
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-sm font-medium text-ink-700 mb-2">
-                              Case Title
-                            </label>
-                            <input
-                              type="text"
-                              value={editedTitle}
-                              onChange={(e) => setEditedTitle(e.target.value)}
-                              className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900"
-                              placeholder="Enter case title"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-ink-700 mb-2">
-                              Case Description
-                            </label>
-                            <div className="flex gap-2 mb-2">
-                              {editedDescription && (
-                                <button
-                                  type="button"
-                                  onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                                  className={`px-3 py-1 text-sm font-medium rounded transition-colors flex items-center gap-2 ${isMarkdownPreview
-                                    ? "bg-success-100 text-success-600 hover:bg-success-100/80"
-                                    : "bg-surface-100 text-ink-700 hover:bg-surface-200"
-                                    }`}
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                  </svg>
-                                  {isMarkdownPreview ? "Edit" : "Preview"}
-                                </button>
-                              )}
-                            </div>
-                            {isMarkdownPreview && editedDescription ? (
-                              <div className="w-full p-4 border border-border-300 rounded-lg bg-surface-100 min-h-32 max-h-60 overflow-y-auto markdown-preview">
-                                <MarkdownRenderer content={editedDescription} />
-                              </div>
-                            ) : (
-                              <textarea
-                                value={editedDescription}
-                                onChange={(e) => setEditedDescription(e.target.value)}
-                                className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900 resize-y"
-                                rows={4}
-                                placeholder="Enter case description or generate from uploaded documents"
-                              />
-                            )}
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            {(uploadedFiles.some(f => f.address)) && (
-                              <button
-                                onClick={handleGenerateSummary}
-                                disabled={isGenerating}
-                                className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                              >
-                                {isGenerating ? (
-                                  <>
-                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Generating...
-                                  </>
-                                ) : editedDescription ? (
-                                  <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Regenerate Description
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                    Generate from Documents
-                                  </>
-                                )}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                      {sectionName !== "case_information" && (
-                        <div className="space-y-2">
-                          {/* Generate/Regenerate Button - Above Textarea */}
-                          {(uploadedFiles.some(f => f.address)) && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={handleGenerateSummary}
-                                disabled={isGenerating}
-                                className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                              >
-                                {isGenerating ? (
-                                  <>
-                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Generating...
-                                  </>
-                                ) : aiSummary ? (
-                                  <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
-                                    Regenerate Summary
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                    </svg>
-                                    Generate Summary
-                                  </>
-                                )}
-                              </button>
-
-                              {/* Preview Toggle Button */}
-                              {aiSummary && (
-                                <button
-                                  onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
-                                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                    : "bg-surface-100 text-ink-700 hover:bg-surface-200"
-                                    }`}
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                  </svg>
-                                  {isMarkdownPreview ? "Edit" : "Preview"}
-                                </button>
-                              )}
-
-                              {/* Word/Character Count - Above Textarea */}
-                              {aiSummary && (
-                                <div className="text-sm text-ink-600 ml-auto">
-                                  <div className="flex items-center gap-4">
-                                    <span>{getWordCount(aiSummary)} words</span>
-                                    <span>•</span>
-                                    <span>{getCharCount(aiSummary)} characters</span>
-                                    {isSummaryEdited && (
-                                      <span className="text-amber-600 font-medium">● Unsaved changes</span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          <div className="bg-surface-000 p-6 rounded-lg border border-border-200">
-                            {isMarkdownPreview && aiSummary ? (
-                              <div className="min-h-[400px] max-h-[600px] overflow-y-auto markdown-preview">
-                                <MarkdownRenderer content={aiSummary} />
-                              </div>
-                            ) : (
-                              <textarea
-                                ref={summaryRef}
-                                value={aiSummary}
-                                onChange={handleSummaryChange}
-                                className="w-full min-h-[400px] p-4 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y font-mono text-sm text-ink-900"
-                                placeholder={(uploadedFiles.length === 0 && selectedFiles.length === 0) ? "Click to add summary text or upload documents to generate a summary..." : "AI-generated summary will appear here or edit manually..."}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            /* Full Width Upload View */
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* Upload Zone */}
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging
-                  ? "border-primary-500 bg-primary-100"
-                  : "border-border-300 bg-surface-100"
-                  }`}
-              >
-                <div className="flex flex-col items-center">
-                  <svg
-                    className="w-16 h-16 text-ink-400 mb-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  <h3 className="text-xl font-semibold text-ink-900 mb-2">
-                    Drop files here or click to upload
-                  </h3>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="mt-4 px-6 py-3 bg-surface-000 border border-border-300 rounded-lg text-ink-700 font-medium hover:bg-surface-100 transition-colors"
-                  >
-                    Choose Files
-                  </button>
-                  <p className="text-sm text-ink-500 mt-4">
-                    Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF •
-                    Max 10 MB
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    onChange={handleFileSelect}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                  />
-                </div>
-              </div>
-
-              {/* Uploaded Files List */}
-              {uploadedFiles.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-lg text-ink-500">
-                    No files uploaded yet. Drag and drop or click "Choose Files" to add documents.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-ink-900">
-                    Uploaded Files ({uploadedFiles.length})
-                  </h3>
-                  {uploadedFiles.map((file, index) => {
-                    const fileKey = `${file.id ?? file.address ?? "file"}-${index}`;
-                    return (
-                      <div
-                        key={fileKey}
-                        className="bg-surface-000 border border-border-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                    {isLeftPanelCollapsed ? (
+                      /* Collapsed State */
+                      <button
+                        onClick={() => setIsLeftPanelCollapsed(false)}
+                        className="p-3 hover:bg-surface-100 transition-colors border-b border-border-200"
+                        title="Expand documents panel"
                       >
-                        <div className="flex items-center flex-1 min-w-0">
-                        <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
-                          <svg
-                            className="w-5 h-5 text-primary-600"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                          </svg>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-ink-900 truncate">
-                            {file.name}
-                          </p>
-                          {(() => {
-                            const dateLabel = formatUploadedDate(file.uploadedAt);
-                            return (
-                              <p className="text-xs text-ink-500">
-                                {dateLabel ? `Uploaded ${dateLabel}` : "Date unavailable"}
-                              </p>
-                            );
-                          })()}
-                        </div>
-                      </div>
-
-                      {/* Three Dot Menu */}
-                      <div className="relative ml-4 flex-shrink-0">
-                        <button
-                          onClick={() =>
-                            setOpenMenuId(
-                              openMenuId === fileKey ? null : fileKey
-                            )
-                          }
-                          className="text-ink-600 hover:bg-surface-100 rounded-lg p-2 transition-colors"
-                          title="More actions"
+                        <svg
+                          className="w-6 h-6 text-ink-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    ) : (
+                      /* Expanded State */
+                      <>
+                        <div className="p-2 sm:p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[48px] sm:min-h-[56px] gap-2">
+                          <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
+                            Documents
+                          </h3>
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
+                              title="Add more documents"
+                            >
+                              <svg
+                                className="w-4 h-4 sm:w-5 sm:h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M12 4v16m8-8H4"
+                                />
+                              </svg>
+                              <span className="hidden sm:inline">Add Documents</span>
+                              <span className="sm:hidden">Add</span>
+                            </button>
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              multiple
+                              onChange={handleFileSelect}
+                              className="hidden"
+                              accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
                             />
-                          </svg>
-                        </button>
+                            <button
+                              onClick={() => setIsLeftPanelCollapsed(true)}
+                              className="text-ink-500 hover:text-ink-700 p-1 rounded hover:bg-surface-100"
+                              title="Collapse panel"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M15 19l-7-7 7-7"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
 
-                        {/* Dropdown Menu */}
-                        {openMenuId === fileKey && (
-                          <>
-                            {/* Backdrop to close menu when clicking outside */}
-                            <div
-                              className="fixed inset-0 z-10"
-                              onClick={() => setOpenMenuId(null)}
-                            />
-
-                            {/* Menu */}
-                            <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                          {/* Empty State - No files at all */}
+                          {uploadedFiles.length === 0 && selectedFiles.length === 0 && (
+                            <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
+                              <div className="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center mb-4">
+                                <svg
+                                  className="w-8 h-8 text-ink-400"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <h4 className="text-lg font-semibold text-ink-900 mb-2">
+                                No Documents
+                              </h4>
+                              <p className="text-sm text-ink-600 mb-4 max-w-xs">
+                                Select documents to upload and generate an AI summary for case analysis.
+                              </p>
                               <button
-                                onClick={() => {
-                                  console.log("Print", file.name);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center gap-2"
                               >
                                 <svg
                                   className="w-5 h-5"
@@ -1421,21 +660,351 @@ export default function FileUploadModal({
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                    d="M12 4v16m8-8H4"
                                   />
                                 </svg>
-                                Print
+                                Select Documents
                               </button>
+                            </div>
+                          )}
 
+                          {/* Selected Files Section */}
+                          {selectedFiles.length > 0 && (
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
+                                  Selected Files ({selectedFiles.length})
+                                </h4>
+                                {caseId && sectionName && (
+                                  <button
+                                    onClick={handleUploadAllFiles}
+                                    disabled={uploadingFileIds.size > 0}
+                                    className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                                  >
+                                    {uploadingFileIds.size > 0 ? (
+                                      <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Uploading...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                        </svg>
+                                        Upload All
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                              {selectedFiles.map((file) => (
+                                <div
+                                  key={file.id}
+                                  className="bg-primary-100 border border-primary-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
+                                      <svg
+                                        className="w-4 h-4 text-primary-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
+                                      </svg>
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-medium text-ink-900 truncate">
+                                        {file.name}
+                                      </p>
+                                      <p className="text-xs text-ink-600">
+                                        Ready to upload
+                                      </p>
+                                    </div>
+                                    <button
+                                      onClick={() => handleRemoveFile(file.id, true)}
+                                      className="flex-shrink-0 text-red-600 hover:bg-red-100 rounded-lg p-1 transition-colors"
+                                      title="Remove"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Uploaded Files Section */}
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
+                              Uploaded Files ({uploadedFiles.length})
+                            </h4>
+                            {uploadedFiles.length === 0 ? (
+                              <div className="text-center py-8 px-4 bg-surface-100 rounded-lg border border-border-200">
+                                <p className="text-sm text-ink-500">
+                                  No files uploaded yet
+                                </p>
+                              </div>
+                            ) : (
+                              uploadedFiles.map((file, index) => {
+                                const fileKey = `${file.id ?? file.address ?? "file"}-${index}`;
+                                return (
+                                  <div
+                                    key={fileKey}
+                                    className="bg-surface-000 border border-border-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                                  >
+                                    <div className="flex items-start gap-2">
+                                      <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
+                                        <svg
+                                          className="w-4 h-4 text-primary-600"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                          />
+                                        </svg>
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-ink-900 truncate">
+                                          {file.name}
+                                        </p>
+                                        {(() => {
+                                          const uploadedLabel = formatUploadedDate(file.uploadedAt);
+                                          if (!uploadedLabel) return null;
+                                          return (
+                                            <p className="text-xs text-ink-500">
+                                              Uploaded {uploadedLabel}
+                                            </p>
+                                          );
+                                        })()}
+                                      </div>
+                                      {/* Three Dot Menu */}
+                                      <div className="relative flex-shrink-0">
+                                        <button
+                                          onClick={() =>
+                                            setOpenMenuId(
+                                              openMenuId === fileKey ? null : fileKey
+                                            )
+                                          }
+                                          className="text-ink-600 hover:bg-surface-100 rounded-lg p-1 transition-colors"
+                                          title="More actions"
+                                        >
+                                          <svg
+                                            className="w-4 h-4"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                            />
+                                          </svg>
+                                        </button>
+
+                                        {/* Dropdown Menu */}
+                                        {openMenuId === fileKey && (
+                                          <>
+                                            {/* Backdrop to close menu when clicking outside */}
+                                            <div
+                                              className="fixed inset-0 z-10"
+                                              onClick={() => setOpenMenuId(null)}
+                                            />
+
+                                            {/* Menu */}
+                                            <div className="absolute right-0 top-8 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
+                                              <button
+                                                onClick={() => {
+                                                  console.log("Print", file.name);
+                                                  setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                              >
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  viewBox="0 0 24 24"
+                                                  stroke="currentColor"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                                  />
+                                                </svg>
+                                                Print
+                                              </button>
+
+                                              <button
+                                                onClick={() => {
+                                                  console.log("Download", file.name);
+                                                  setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                              >
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  viewBox="0 0 24 24"
+                                                  stroke="currentColor"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                  />
+                                                </svg>
+                                                Download
+                                              </button>
+
+                                              <button
+                                                onClick={() => {
+                                                  console.log("Send", file.name);
+                                                  setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                              >
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  viewBox="0 0 24 24"
+                                                  stroke="currentColor"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                                  />
+                                                </svg>
+                                                Send
+                                              </button>
+
+                                              <button
+                                                onClick={() => {
+                                                  console.log("Preview", file.name);
+                                                  setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                              >
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  viewBox="0 0 24 24"
+                                                  stroke="currentColor"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                  />
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                  />
+                                                </svg>
+                                                Preview
+                                              </button>
+
+                                              <hr className="my-1 border-border-200" />
+
+                                              <button
+                                                onClick={async () => {
+                                                  // If file has an address, it's been uploaded to DB, so use onDeleteFile
+                                                  if (file.address && onDeleteFile) {
+                                                    try {
+                                                      await onDeleteFile(file.address, file.name);
+                                                      // Remove from local state after successful deletion
+                                                      setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
+                                                    } catch (error) {
+                                                      console.error("Error deleting file:", error);
+                                                    }
+                                                  } else {
+                                                    // Otherwise just remove it locally
+                                                    handleRemoveFile(file.id);
+                                                  }
+                                                  setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                                              >
+                                                <svg
+                                                  className="w-5 h-5"
+                                                  fill="none"
+                                                  viewBox="0 0 24 24"
+                                                  stroke="currentColor"
+                                                >
+                                                  <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                  />
+                                                </svg>
+                                                Delete
+                                              </button>
+                                            </div>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+
+                      </>
+                    )}
+                  </div>
+
+                  {/* Right Panel - Summary */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {isGenerating ? (
+                      <div className="flex flex-col items-center justify-center flex-1 min-h-0">
+                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+                        <p className="text-lg font-semibold text-ink-900 mb-2">
+                          Generating AI Summary...
+                        </p>
+                        <p className="text-sm text-ink-600">
+                          Analyzing your documents and creating a comprehensive summary
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Action Toolbar */}
+                        <div className="p-4 border-b border-border-200 bg-surface-000 flex-shrink-0">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Download Dropdown */}
+                            <div className="relative">
                               <button
-                                onClick={() => {
-                                  console.log("Download", file.name);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
                               >
                                 <svg
-                                  className="w-5 h-5"
+                                  className="w-4 h-4"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -1450,180 +1019,611 @@ export default function FileUploadModal({
                                 Download
                               </button>
 
-                              <button
-                                onClick={() => {
-                                  console.log("Send", file.name);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                              >
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                              {showDownloadMenu && (
+                                <>
+                                  <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setShowDownloadMenu(false)}
                                   />
-                                </svg>
-                                Send
-                              </button>
-
-                              <button
-                                onClick={() => {
-                                  console.log("Preview", file.name);
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
-                              >
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                  />
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                  />
-                                </svg>
-                                Preview
-                              </button>
-
-                              <hr className="my-1 border-border-200" />
-
-                              <button
-                                onClick={async () => {
-                                  // If file has an address, it's been uploaded to DB, so use onDeleteFile
-                                  if (file.address && onDeleteFile) {
-                                    try {
-                                      await onDeleteFile(file.address, file.name);
-                                      // Remove from local state after successful deletion
-                                      setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
-                                    } catch (error) {
-                                      console.error("Error deleting file:", error);
-                                    }
-                                  } else {
-                                    // Otherwise just remove it locally
-                                    handleRemoveFile(file.id);
-                                  }
-                                  setOpenMenuId(null);
-                                }}
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
-                              >
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                  />
-                                </svg>
-                                Delete
-                              </button>
+                                  <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
+                                    <button
+                                      onClick={() => handleDownload("pdf")}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                        />
+                                      </svg>
+                                      Download as PDF
+                                    </button>
+                                    <button
+                                      onClick={() => handleDownload("txt")}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
+                                      </svg>
+                                      Download as Text
+                                    </button>
+                                  </div>
+                                </>
+                              )}
                             </div>
-                          </>
-                        )}
-                      </div>
+
+                            <button
+                              onClick={handleCopySummary}
+                              className="flex items-center gap-2 px-3 py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-sm font-medium"
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                />
+                              </svg>
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Summary Content */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 min-h-0">
+                          {(sectionName === "case_information") && (
+                            <div className="space-y-4">
+                              <div>
+                                <label className="block text-sm font-medium text-ink-700 mb-2">
+                                  Case Title
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editedTitle}
+                                  onChange={(e) => setEditedTitle(e.target.value)}
+                                  className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900"
+                                  placeholder="Enter case title"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-ink-700 mb-2">
+                                  Case Description
+                                </label>
+                                <div className="flex gap-2 mb-2">
+                                  {editedDescription && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                                      className={`px-3 py-1 text-sm font-medium rounded transition-colors flex items-center gap-2 ${isMarkdownPreview
+                                        ? "bg-success-100 text-success-600 hover:bg-success-100/80"
+                                        : "bg-surface-100 text-ink-700 hover:bg-surface-200"
+                                        }`}
+                                    >
+                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      {isMarkdownPreview ? "Edit" : "Preview"}
+                                    </button>
+                                  )}
+                                </div>
+                                {isMarkdownPreview && editedDescription ? (
+                                  <div className="w-full p-4 border border-border-300 rounded-lg bg-surface-100 min-h-32 max-h-60 overflow-y-auto markdown-preview">
+                                    <MarkdownRenderer content={editedDescription} />
+                                  </div>
+                                ) : (
+                                  <textarea
+                                    value={editedDescription}
+                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                    className="w-full px-4 py-2 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-ink-900 resize-y"
+                                    rows={4}
+                                    placeholder="Enter case description or generate from uploaded documents"
+                                  />
+                                )}
+                              </div>
+                              <div className="flex gap-2 mt-2">
+                                {(uploadedFiles.some(f => f.address)) && (
+                                  <button
+                                    onClick={handleGenerateSummary}
+                                    disabled={isGenerating}
+                                    className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                  >
+                                    {isGenerating ? (
+                                      <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Generating...
+                                      </>
+                                    ) : editedDescription ? (
+                                      <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Regenerate Description
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Generate from Documents
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {sectionName !== "case_information" && (
+                            <div className="space-y-2">
+                              {/* Generate/Regenerate Button - Above Textarea */}
+                              {(uploadedFiles.some(f => f.address)) && (
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={handleGenerateSummary}
+                                    disabled={isGenerating}
+                                    className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                  >
+                                    {isGenerating ? (
+                                      <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Generating...
+                                      </>
+                                    ) : aiSummary ? (
+                                      <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
+                                        Regenerate Summary
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        Generate Summary
+                                      </>
+                                    )}
+                                  </button>
+
+                                  {/* Preview Toggle Button */}
+                                  {aiSummary && (
+                                    <button
+                                      onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
+                                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                        : "bg-surface-100 text-ink-700 hover:bg-surface-200"
+                                        }`}
+                                    >
+                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                      </svg>
+                                      {isMarkdownPreview ? "Edit" : "Preview"}
+                                    </button>
+                                  )}
+
+                                  {/* Word/Character Count - Above Textarea */}
+                                  {aiSummary && (
+                                    <div className="text-sm text-ink-600 ml-auto">
+                                      <div className="flex items-center gap-4">
+                                        <span>{getWordCount(aiSummary)} words</span>
+                                        <span>•</span>
+                                        <span>{getCharCount(aiSummary)} characters</span>
+                                        {isSummaryEdited && (
+                                          <span className="text-amber-600 font-medium">● Unsaved changes</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="bg-surface-000 p-6 rounded-lg border border-border-200">
+                                {isMarkdownPreview && aiSummary ? (
+                                  <div className="min-h-[400px] max-h-[600px] overflow-y-auto markdown-preview">
+                                    <MarkdownRenderer content={aiSummary} />
+                                  </div>
+                                ) : (
+                                  <textarea
+                                    ref={summaryRef}
+                                    value={aiSummary}
+                                    onChange={handleSummaryChange}
+                                    className="w-full min-h-[400px] p-4 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y font-mono text-sm text-ink-900"
+                                    placeholder={(uploadedFiles.length === 0 && selectedFiles.length === 0) ? "Click to add summary text or upload documents to generate a summary..." : "AI-generated summary will appear here or edit manually..."}
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Full Width Upload View */
+                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                  {/* Upload Zone */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${isDragging
+                      ? "border-primary-500 bg-primary-100"
+                      : "border-border-300 bg-surface-100"
+                      }`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <svg
+                        className="w-16 h-16 text-ink-400 mb-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      <h3 className="text-xl font-semibold text-ink-900 mb-2">
+                        Drop files here or click to upload
+                      </h3>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="mt-4 px-6 py-3 bg-surface-000 border border-border-300 rounded-lg text-ink-700 font-medium hover:bg-surface-100 transition-colors"
+                      >
+                        Choose Files
+                      </button>
+                      <p className="text-sm text-ink-500 mt-4">
+                        Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF •
+                        Max 10 MB
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                      />
                     </div>
-                    );
-                  })}
+                  </div>
+
+                  {/* Uploaded Files List */}
+                  {uploadedFiles.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-lg text-ink-500">
+                        No files uploaded yet. Drag and drop or click "Choose Files" to add documents.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <h3 className="font-semibold text-ink-900">
+                        Uploaded Files ({uploadedFiles.length})
+                      </h3>
+                      {uploadedFiles.map((file, index) => {
+                        const fileKey = `${file.id ?? file.address ?? "file"}-${index}`;
+                        return (
+                          <div
+                            key={fileKey}
+                            className="bg-surface-000 border border-border-200 rounded-lg p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                          >
+                            <div className="flex items-center flex-1 min-w-0">
+                              <div className="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center mr-3">
+                                <svg
+                                  className="w-5 h-5 text-primary-600"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-ink-900 truncate">
+                                  {file.name}
+                                </p>
+                                {(() => {
+                                  const dateLabel = formatUploadedDate(file.uploadedAt);
+                                  return (
+                                    <p className="text-xs text-ink-500">
+                                      {dateLabel ? `Uploaded ${dateLabel}` : "Date unavailable"}
+                                    </p>
+                                  );
+                                })()}
+                              </div>
+                            </div>
+
+                            {/* Three Dot Menu */}
+                            <div className="relative ml-4 flex-shrink-0">
+                              <button
+                                onClick={() =>
+                                  setOpenMenuId(
+                                    openMenuId === fileKey ? null : fileKey
+                                  )
+                                }
+                                className="text-ink-600 hover:bg-surface-100 rounded-lg p-2 transition-colors"
+                                title="More actions"
+                              >
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                                  />
+                                </svg>
+                              </button>
+
+                              {/* Dropdown Menu */}
+                              {openMenuId === fileKey && (
+                                <>
+                                  {/* Backdrop to close menu when clicking outside */}
+                                  <div
+                                    className="fixed inset-0 z-10"
+                                    onClick={() => setOpenMenuId(null)}
+                                  />
+
+                                  {/* Menu */}
+                                  <div className="absolute right-0 top-10 z-20 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-1">
+                                    <button
+                                      onClick={() => {
+                                        console.log("Print", file.name);
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                        />
+                                      </svg>
+                                      Print
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        console.log("Download", file.name);
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                        />
+                                      </svg>
+                                      Download
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        console.log("Send", file.name);
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                        />
+                                      </svg>
+                                      Send
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        console.log("Preview", file.name);
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-ink-700 hover:bg-surface-100 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                      </svg>
+                                      Preview
+                                    </button>
+
+                                    <hr className="my-1 border-border-200" />
+
+                                    <button
+                                      onClick={async () => {
+                                        // If file has an address, it's been uploaded to DB, so use onDeleteFile
+                                        if (file.address && onDeleteFile) {
+                                          try {
+                                            await onDeleteFile(file.address, file.name);
+                                            // Remove from local state after successful deletion
+                                            setUploadedFiles(uploadedFiles.filter(f => f.id !== file.id));
+                                          } catch (error) {
+                                            console.error("Error deleting file:", error);
+                                          }
+                                        } else {
+                                          // Otherwise just remove it locally
+                                          handleRemoveFile(file.id);
+                                        }
+                                        setOpenMenuId(null);
+                                      }}
+                                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                                    >
+                                      <svg
+                                        className="w-5 h-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                      </svg>
+                                      Delete
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Toast Notification */}
-        {showCopiedToast && (
-          <div className="absolute top-6 right-6 z-30 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-            Copied to clipboard!
-          </div>
-        )}
+            {/* Toast Notification */}
+            {showCopiedToast && (
+              <div className="absolute top-6 right-6 z-30 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 animate-fade-in">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Copied to clipboard!
+              </div>
+            )}
 
-        {/* Footer */}
-        <div className="bg-surface-100 px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 md:pt-8 border-t border-border-200 flex flex-col-reverse sm:flex-row justify-end items-center gap-2 sm:gap-3">
-          {sectionName === "case_information" && onCaseDetailsUpdate ? (
-            <button
-              onClick={handleSaveCaseDetails}
-              disabled={isSaving}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-            >
-              {isSaving ? (
-                <>
-                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Saving...
-                </>
+            {/* Footer */}
+            <div className="bg-surface-100 px-3 sm:px-6 pt-4 sm:pt-6 pb-3 sm:pb-4 md:pt-8 border-t border-border-200 flex flex-col-reverse sm:flex-row justify-end items-center gap-2 sm:gap-3">
+              {sectionName === "case_information" && onCaseDetailsUpdate ? (
+                <button
+                  onClick={handleSaveCaseDetails}
+                  disabled={isSaving}
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                >
+                  {isSaving ? (
+                    <>
+                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </>
+                  )}
+                </button>
               ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Save Changes
-                </>
+                caseId && sectionName && onSave && (
+                  <button
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                    className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                  >
+                    {isSaving ? (
+                      <>
+                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                      </>
+                    )}
+                  </button>
+                )
               )}
-            </button>
-          ) : (
-            caseId && sectionName && onSave && (
-              <button
-                onClick={handleSaveChanges}
-                disabled={isSaving}
-                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-              >
-                {isSaving ? (
-                  <>
-                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Save Changes
-                  </>
-                )}
-              </button>
-            )
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
   );
 }

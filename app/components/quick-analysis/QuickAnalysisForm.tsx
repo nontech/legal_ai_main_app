@@ -7,6 +7,7 @@ import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
 import StreamingAnalysisDisplay from "../StreamingAnalysisDisplay";
+import StreamingClassificationDisplay from "../StreamingClassificationDisplay";
 import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, Users } from "lucide-react";
 
 type DocumentCategory =
@@ -88,22 +89,14 @@ export default function QuickAnalysisForm({
     return colorMap[color] || colorMap.primary;
   };
 
-  const classifyFile = async (file: File, index: number) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+  const [isClassifyingOpen, setIsClassifyingOpen] = useState(false);
+  const [filesToClassify, setFilesToClassify] = useState<Array<{ file: File; fileId: string }>>([]);
 
-      const response = await fetch("/api/documents/classify", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Classification failed");
-      }
-
-      const result = await response.json();
-      const category = (result.category || "case_information") as DocumentCategory;
+  const handleClassificationComplete = (results: Array<{ fileId: string; result: any }>) => {
+    // Update all files with their classifications
+    results.forEach(({ fileId, result }) => {
+      const index = parseInt(fileId);
+      const category = (result.file_category || "case_information") as DocumentCategory;
 
       setClassifiedFiles((prev) =>
         prev.map((cf, i) =>
@@ -112,16 +105,10 @@ export default function QuickAnalysisForm({
             : cf
         )
       );
-    } catch (error) {
-      console.error("Failed to classify file:", error);
-      setClassifiedFiles((prev) =>
-        prev.map((cf, i) =>
-          i === index
-            ? { ...cf, category: "case_information", isClassifying: false }
-            : cf
-        )
-      );
-    }
+    });
+
+    setIsClassifyingOpen(false);
+    setFilesToClassify([]);
   };
 
   const handleFileUpload = (
@@ -137,10 +124,16 @@ export default function QuickAnalysisForm({
 
       setClassifiedFiles(prev => [...prev, ...newClassifiedFiles]);
 
-      // Classify each new file
-      newClassifiedFiles.forEach((cf, idx) => {
-        classifyFile(cf.file, classifiedFiles.length + idx);
-      });
+      // Immediately show classification UI with all files
+      const filesToClassify = newClassifiedFiles.map((cf, idx) => ({
+        file: cf.file,
+        fileId: `${classifiedFiles.length + idx}`,
+      }));
+
+      if (filesToClassify.length > 0) {
+        setFilesToClassify(filesToClassify);
+        setIsClassifyingOpen(true);
+      }
     }
   };
 
@@ -333,6 +326,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            charges: uploadedMetadata?.charges || [],
             field: "case_details",
             value: caseDetailsUpdate,
           }),
@@ -352,6 +346,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            charges: uploadedMetadata?.charges || [],
             result: null,
           }),
         });
@@ -591,6 +586,16 @@ export default function QuickAnalysisForm({
           </div>
         </div>
       </div>
+
+      <StreamingClassificationDisplay
+        isOpen={isClassifyingOpen}
+        files={filesToClassify}
+        onComplete={handleClassificationComplete}
+        onClose={() => {
+          setIsClassifyingOpen(false);
+          setFilesToClassify([]);
+        }}
+      />
     </div>
   );
 }

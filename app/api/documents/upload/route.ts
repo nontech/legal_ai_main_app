@@ -93,105 +93,35 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       console.error("Upload API error:", response.statusText);
-      const errorText = await response.text();
-      console.error("Error details:", errorText);
-      return Response.json(
-        { error: "Upload failed", details: errorText },
-        { status: response.status }
+      return new Response(
+        JSON.stringify({
+          type: "error",
+          message: "Upload failed"
+        }),
+        {
+          status: response.status,
+          headers: {
+            "Content-Type": "application/json",
+          }
+        }
       );
     }
 
-    const result = await response.json();
-    console.log("Upload result:", result);
-
-    // Process metadata if case_information category
-    if (fileCategory === "case_information" && result.case_metadata) {
-      try {
-        const metadata = result.case_metadata;
-        const updateData: any = {};
-        const existingCaseDetails = await getExistingCaseDetails(caseId);
-
-        // Extract jurisdiction data
-        if (metadata.country || metadata.state || metadata.city || metadata.court) {
-          updateData.jurisdiction = extractJurisdiction(metadata);
+    // Stream the response through to the client
+    if (response.body) {
+      return new Response(response.body, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "Connection": "keep-alive",
+          "X-Accel-Buffering": "no",
         }
-
-        // Extract case details with files as array of objects
-        if (metadata.case_name && metadata.case_description) {
-          const newFiles = (result.file_names || []).map((name: string, index: number) => ({
-            name,
-            address: (result.file_addresses || [])[index],
-          }));
-
-          updateData.case_details = {
-            ...existingCaseDetails as any,
-            case_information: {
-              caseName: metadata.case_name,
-              caseDescription: result.case_description,
-              summary: result.summary || "",
-              files: newFiles,
-            },
-          };
-        }
-
-        // Extract charges
-        if (metadata.charges) {
-          updateData.charges = processCharges(metadata.charges);
-        }
-
-        // Update database
-        await updateCaseInDatabase(caseId, updateData);
-
-        // Return metadata response
-        return Response.json({
-          ok: true,
-          data: result,
-          metadata: {
-            jurisdiction: extractJurisdiction(metadata),
-            caseName: metadata.case_name || "",
-            caseDescription: result.case_description || "",
-            caseType: metadata.case_type || "",
-            charges: metadata.charges ? processCharges(metadata.charges) : [],
-          },
-        });
-      } catch (metadataError) {
-        console.error("Error processing metadata:", metadataError);
-        return Response.json({
-          ok: true,
-          data: result,
-        });
-      }
-    } else {
-      // Handle other file categories with files as array of objects
-      try {
-        const existingCaseDetails = await getExistingCaseDetails(caseId);
-        const updateData: any = {};
-
-        if (result?.file_category) {
-          const newFiles = (result.file_names || []).map((name: string, index: number) => ({
-            name,
-            address: (result.file_addresses || [])[index],
-          }));
-
-          updateData.case_details = {
-            ...existingCaseDetails as any,
-            [result.file_category]: {
-              files: newFiles,
-              summary: result.summary || "",
-            },
-          };
-        }
-
-        await updateCaseInDatabase(caseId, updateData);
-      } catch (error) {
-        console.error("Error updating case details:", error);
-      }
+      });
     }
 
     return Response.json({
-      ok: true,
-      data: result,
-    });
+      error: "No response body from upload API"
+    }, { status: 500 });
   } catch (error) {
     console.error("Upload error:", error);
     return Response.json(

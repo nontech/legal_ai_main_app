@@ -1,18 +1,20 @@
 export async function POST(request: Request) {
     try {
         const formData = await request.formData();
-        const file = formData.get("file") as File;
+        const files = formData.getAll("files") as File[];
 
-        if (!file) {
+        if (!files || files.length === 0) {
             return Response.json(
-                { error: "No file provided" },
+                { error: "No files provided" },
                 { status: 400 }
             );
         }
 
-        // Create a new FormData for the external API
+        // Create a new FormData for the external API with all files
         const externalFormData = new FormData();
-        externalFormData.append("file", file);
+        files.forEach((file) => {
+            externalFormData.append("files", file);
+        });
 
         // Call the external classification API from the server side
         const response = await fetch(
@@ -25,29 +27,40 @@ export async function POST(request: Request) {
 
         if (!response.ok) {
             console.error("Classification API error:", response.statusText);
-            return Response.json(
+            return new Response(
+                JSON.stringify({
+                    type: "error",
+                    message: "Classification failed"
+                }),
                 {
-                    error: "Classification failed",
-                    category: "case_information" // Default fallback
-                },
-                { status: response.status }
+                    status: response.status,
+                    headers: {
+                        "Content-Type": "application/json",
+                    }
+                }
             );
         }
 
-        const result = await response.json();
-        console.log(result);
+        // Stream the response through to the client
+        if (response.body) {
+            return new Response(response.body, {
+                headers: {
+                    "Content-Type": "text/event-stream",
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "X-Accel-Buffering": "no",
+                }
+            });
+        }
 
         return Response.json({
-            ok: true,
-            category: result.file_category || "case_information",
-            data: result,
-        });
+            error: "No response body from classification API"
+        }, { status: 500 });
     } catch (error) {
         console.error("Classification error:", error);
         return Response.json(
             {
                 error: "Failed to classify document",
-                category: "case_information" // Default fallback
             },
             { status: 500 }
         );

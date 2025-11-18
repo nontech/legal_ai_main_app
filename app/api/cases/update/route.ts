@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function PATCH(request: Request) {
     try {
-        const { caseId, field, value, case_type, role, jurisdiction } = await request.json();
+        const { caseId, field, value, case_type, role, jurisdiction, charges } = await request.json();
 
         if (!caseId) {
             return NextResponse.json(
@@ -99,6 +99,11 @@ export async function PATCH(request: Request) {
         // Add jurisdiction if provided
         if (jurisdiction !== undefined) {
             updateData.jurisdiction = jurisdiction;
+        }
+
+        // Add charges if provided
+        if (charges !== undefined) {
+            updateData.charges = charges;
         }
 
         // If no fields to update, return error

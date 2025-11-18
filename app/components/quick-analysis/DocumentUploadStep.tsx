@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import StreamingClassificationDisplay from "../StreamingClassificationDisplay";
+import StreamingUploadDisplay from "../StreamingUploadDisplay";
 
 type DocumentCategory =
   | "case_information"
@@ -70,34 +72,19 @@ export default function DocumentUploadStep({
     potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
   };
 
-  const classifyDocument = async (file: File, fileId: string) => {
-    // Update file to show as classifying
-    setClassifiedFiles((prev) =>
-      prev.map((cf) =>
-        cf.id === fileId ? { ...cf, isClassifying: true } : cf
-      )
-    );
+  const [isClassifyingOpen, setIsClassifyingOpen] = useState(false);
+  const [filesToClassify, setFilesToClassify] = useState<Array<{ file: File; fileId: string }>>([]);
+  const [isUploadingOpen, setIsUploadingOpen] = useState(false);
+  const [filesToUpload, setFilesToUpload] = useState<Array<{ file: File; fileId: string }>>([]);
+  const [currentUploadCategory, setCurrentUploadCategory] = useState<string>("");
+  const uploadCompleteRef = useRef(false);
+  const uploadResultRef = useRef<any>(null);
 
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
+  const handleClassificationComplete = (results: Array<{ fileId: string; result: any }>) => {
+    // Update all files with their classifications
+    results.forEach(({ fileId, result }) => {
+      const classifiedCategory = (result.file_category || "case_information") as DocumentCategory;
 
-      const response = await fetch(
-        "/api/documents/classify",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Classification failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      const classifiedCategory = (result.category || "case_information") as DocumentCategory;
-
-      // Update file with classification
       setClassifiedFiles((prev) =>
         prev.map((cf) =>
           cf.id === fileId
@@ -105,17 +92,16 @@ export default function DocumentUploadStep({
             : cf
         )
       );
-    } catch (error) {
-      console.error("Failed to classify document:", error);
-      // Default to case_information on error
-      setClassifiedFiles((prev) =>
-        prev.map((cf) =>
-          cf.id === fileId
-            ? { ...cf, category: "case_information", isClassifying: false }
-            : cf
-        )
-      );
-    }
+    });
+
+    setIsClassifyingOpen(false);
+    setFilesToClassify([]);
+  };
+
+  const handleUploadComplete = (result: any) => {
+    console.log("Upload completed:", result);
+    uploadResultRef.current = result;
+    uploadCompleteRef.current = true;
   };
 
   const processIncomingFiles = (incomingFiles: File[]) => {
@@ -133,10 +119,16 @@ export default function DocumentUploadStep({
 
     setClassifiedFiles((prev) => [...prev, ...newClassifiedFiles]);
 
-    // Classify each new file
-    newClassifiedFiles.forEach((cf) => {
-      classifyDocument(cf.file, cf.id);
-    });
+    // Immediately show classification UI with the new files
+    const filesToClassify = newClassifiedFiles.map((cf) => ({
+      file: cf.file,
+      fileId: cf.id,
+    }));
+
+    if (filesToClassify.length > 0) {
+      setFilesToClassify(filesToClassify);
+      setIsClassifyingOpen(true);
+    }
   };
 
   const handleFileUpload = (
@@ -250,39 +242,167 @@ export default function DocumentUploadStep({
       let collectedMetadata: any = {};
       const caseInformationFiles: File[] = [];
 
-      // Upload each category group
-      for (const [category, files] of Object.entries(groupedByCategory)) {
-        const formData = new FormData();
-        files.forEach((file) => {
-          formData.append("files", file);
-        });
-        formData.append("file_category", category);
-        formData.append("user_id", userId);
-        formData.append("case_id", caseId || "test-case");
+      // Check if we have any files to upload
+      if (Object.keys(groupedByCategory).length > 0) {
+        // Prepare all files for upload in a single batch
+        const allFilesToUpload: Array<{ file: File; fileId: string; category: string }> = [];
 
-        try {
-          const response = await fetch(
-            "/api/documents/upload",
-            {
-              method: "POST",
-              body: formData,
-            }
-          );
+        for (const [category, files] of Object.entries(groupedByCategory)) {
+          const filesToUploadForCategory = classifiedFiles
+            .filter((cf) => {
+              const classifiedCategory = cf.category as string;
+              return classifiedCategory === category;
+            })
+            .map((cf) => ({
+              file: cf.file,
+              fileId: cf.id,
+              category: category,
+            }));
 
-          if (!response.ok) {
-            throw new Error(`Upload failed: ${response.statusText}`);
-          }
+          allFilesToUpload.push(...filesToUploadForCategory);
+        }
 
-          const result = await response.json();
-          console.log(`Uploaded ${category}:`, result);
+        if (allFilesToUpload.length > 0) {
+          // Reset upload complete flag and result
+          uploadCompleteRef.current = false;
+          uploadResultRef.current = null;
 
-          // If this is case_information, collect metadata
-          if (category === "case_information" && result.metadata) {
-            collectedMetadata = result.metadata;
-            caseInformationFiles.push(...files);
-          }
-        } catch (error) {
-          console.error(`Failed to upload ${category}:`, error);
+          // Show single modal for all uploads
+          setCurrentUploadCategory("multiple");
+          setFilesToUpload(allFilesToUpload);
+          setIsUploadingOpen(true);
+
+          // Wait for all uploads to complete
+          await new Promise<void>((resolve) => {
+            const checkComplete = setInterval(async () => {
+              if (uploadCompleteRef.current) {
+                clearInterval(checkComplete);
+                setIsUploadingOpen(false);
+
+                // Extract metadata from upload result if available
+                if (uploadResultRef.current) {
+                  const result = uploadResultRef.current;
+
+                  // Extract case information metadata
+                  if (result.case_title) {
+                    collectedMetadata.caseName = result.case_title;
+                    collectedMetadata.caseDescription = result.case_description || "";
+                    collectedMetadata.caseType = result.case_type || "";
+
+                    if (result.case_metadata) {
+                      collectedMetadata.jurisdiction = {
+                        country: result.case_metadata.country || "",
+                        state: result.case_metadata.state || "",
+                        city: result.case_metadata.city || "",
+                        court: result.case_metadata.court || "",
+                      };
+                      collectedMetadata.role = result.case_metadata.role || "plaintiff";
+
+                      // Extract charges if available
+                      if (result.case_metadata.charges && Array.isArray(result.case_metadata.charges)) {
+                        collectedMetadata.charges = result.case_metadata.charges.map((charge: any, index: number) => ({
+                          id: `charge-${Date.now()}-${index}`,
+                          statuteNumber: charge.statute_number || "",
+                          chargeDescription: charge.charge_description || "",
+                          essentialFacts: charge.essential_facts || "",
+                          defendantPlea: charge.defendants_plea || "not-guilty",
+                        }));
+                      }
+                    }
+                  }
+
+                  // Save file info and summaries to case_details
+                  if (caseId && result) {
+                    try {
+                      console.log("Upload result:", result);
+                      console.log("Files to upload with categories:", allFilesToUpload);
+
+                      // Build case details update with file info for each category
+                      const caseDetailsUpdate: Record<string, any> = {};
+
+                      // If we have categoryResults from multiple uploads
+                      if (result.categoryResults && Object.keys(result.categoryResults).length > 0) {
+                        for (const [category, categoryResult] of Object.entries(result.categoryResults)) {
+                          const catResult = categoryResult as any;
+                          if (catResult.file_addresses && catResult.file_names) {
+                            const files = catResult.file_names.map((name: string, index: number) => ({
+                              name,
+                              address: catResult.file_addresses?.[index] || "",
+                            }));
+
+                            caseDetailsUpdate[category] = {
+                              files,
+                              summary: catResult.summary || "",
+                              summaryGenerated: !!catResult.summary,
+                            };
+                          }
+                        }
+                      } else {
+                        // Fallback: single category result
+                        if (result.file_addresses && result.file_names) {
+                          // Get categories from allFilesToUpload
+                          const categories = new Set(allFilesToUpload.map(item => item.category));
+
+                          for (const category of categories) {
+                            const files = result.file_names.map((name: string, index: number) => ({
+                              name,
+                              address: result.file_addresses?.[index] || "",
+                            }));
+
+                            caseDetailsUpdate[category] = {
+                              files,
+                              summary: result.summary || "",
+                              summaryGenerated: !!result.summary,
+                            };
+                          }
+                        }
+                      }
+
+                      // Also update case_information with case name and description
+                      if (collectedMetadata.caseName || collectedMetadata.caseDescription) {
+                        if (!caseDetailsUpdate["case_information"]) {
+                          caseDetailsUpdate["case_information"] = {};
+                        }
+                        caseDetailsUpdate["case_information"].caseName = collectedMetadata.caseName || "";
+                        caseDetailsUpdate["case_information"].caseDescription = collectedMetadata.caseDescription || "";
+                      }
+
+                      console.log("Files grouped by category:", caseDetailsUpdate);
+                      console.log("Case details update:", caseDetailsUpdate);
+
+                      // Save to database
+                      const updateResponse = await fetch(`/api/cases/update`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          caseId,
+                          field: "case_details",
+                          value: caseDetailsUpdate,
+                        }),
+                      });
+
+                      if (!updateResponse.ok) {
+                        console.error("Failed to save file info:", await updateResponse.text());
+                      } else {
+                        console.log("Successfully saved file info to database");
+                      }
+                    } catch (error) {
+                      console.error("Failed to save file info to database:", error);
+                    }
+                  }
+                }
+
+                resolve();
+              }
+            }, 100);
+
+            // Timeout after 5 minutes
+            setTimeout(() => {
+              clearInterval(checkComplete);
+              setIsUploadingOpen(false);
+              resolve();
+            }, 300000);
+          });
         }
       }
 
@@ -372,7 +492,7 @@ export default function DocumentUploadStep({
               <div className="mt-4 sm:mt-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
                   <h3 className="text-base sm:text-lg font-semibold text-ink-900">
-                    Uploaded Files ({classifiedFiles.length})
+                    Selected Files ({classifiedFiles.length})
                   </h3>
                   <button
                     onClick={() => setClassifiedFiles([])}
@@ -515,6 +635,30 @@ export default function DocumentUploadStep({
           </div>
         </>
       )}
+
+      <StreamingClassificationDisplay
+        isOpen={isClassifyingOpen}
+        files={filesToClassify}
+        onComplete={handleClassificationComplete}
+        onClose={() => {
+          setIsClassifyingOpen(false);
+          setFilesToClassify([]);
+        }}
+      />
+
+      <StreamingUploadDisplay
+        isOpen={isUploadingOpen}
+        files={filesToUpload}
+        fileCategory={currentUploadCategory}
+        onComplete={(result) => {
+          // Upload complete - signal to handleContinue
+          handleUploadComplete(result);
+        }}
+        onClose={() => {
+          setIsUploadingOpen(false);
+          setFilesToUpload([]);
+        }}
+      />
     </div>
   );
 }
