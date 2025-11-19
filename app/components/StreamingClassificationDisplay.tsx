@@ -105,6 +105,7 @@ export default function StreamingClassificationDisplay({
             const decoder = new TextDecoder();
             let buffer = "";
             let completionHandled = false;
+            let localTotalFiles = filesToClassify.length;
 
             try {
                 while (true) {
@@ -131,10 +132,11 @@ export default function StreamingClassificationDisplay({
                                 // Handle total files count from initialization
                                 if (event.total_files) {
                                     setTotalFiles(event.total_files);
+                                    localTotalFiles = event.total_files;
                                 }
 
                                 // Calculate progress based on current file processing
-                                if (event.file_index && event.total_files) {
+                                if (event.file_index && localTotalFiles > 0) {
                                     const stepProgressMap: Record<string, number> = {
                                         file_processing: 5,
                                         reading_file: 15,
@@ -146,7 +148,7 @@ export default function StreamingClassificationDisplay({
 
                                     // Calculate progress for completed files
                                     const completedFiles = event.file_index - 1;
-                                    const progressPerFile = 95 / event.total_files;
+                                    const progressPerFile = 95 / localTotalFiles;
                                     const completedFilesProgress = completedFiles * progressPerFile;
 
                                     // Add progress for current file

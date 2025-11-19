@@ -90,7 +90,7 @@ export default function StreamingUploadDisplay({
     try {
       // Group files by category
       const filesByCategory = new Map<string, File[]>();
-      
+
       filesToUpload.forEach(({ file, category }) => {
         const cat = category || fileCategory;
         if (!filesByCategory.has(cat)) {
@@ -100,7 +100,8 @@ export default function StreamingUploadDisplay({
       });
 
       const decoder = new TextDecoder();
-      let completionHandled = false;
+      let processedFilesCount = 0;
+      const globalTotalFiles = filesToUpload.length;
 
       // Upload each category sequentially
       for (const [category, categoryFiles] of filesByCategory.entries()) {
@@ -151,7 +152,7 @@ export default function StreamingUploadDisplay({
                   setEvents((prev) => [...prev, event]);
 
                   // Calculate progress based on current file processing
-                  if (event.file_index && event.total_files) {
+                  if (event.file_index) {
                     const stepProgressMap: Record<string, number> = {
                       file_processing: 5,
                       reading_file: 15,
@@ -164,8 +165,8 @@ export default function StreamingUploadDisplay({
                     };
 
                     // Calculate progress for completed files
-                    const completedFiles = event.file_index - 1;
-                    const progressPerFile = 90 / event.total_files;
+                    const completedFiles = processedFilesCount + event.file_index - 1;
+                    const progressPerFile = 90 / globalTotalFiles;
                     const completedFilesProgress = completedFiles * progressPerFile;
 
                     // Add progress for current file
@@ -192,13 +193,10 @@ export default function StreamingUploadDisplay({
                   if (event.type === "complete" && event.result) {
                     console.log("Upload complete for category:", category);
                     const result = event.result as any;
-                    
+
                     // Store result by category
                     categoryResultsRef.current[category] = result;
                     lastResultRef.current = result; // Keep last for backward compatibility
-
-                    setProgress(100);
-                    completionHandled = true;
                   }
                 } catch (e) {
                   console.error("Failed to parse event:", dataStr, e);
@@ -209,17 +207,20 @@ export default function StreamingUploadDisplay({
         } finally {
           reader.releaseLock();
         }
+
+        // Update processed count after category is complete
+        processedFilesCount += categoryFiles.length;
       }
 
-      if (completionHandled) {
-        // Combine all category results before completing
-        if (Object.keys(categoryResultsRef.current).length > 0) {
-          const combinedResult = {
-            ...lastResultRef.current,
-            categoryResults: categoryResultsRef.current,
-          };
-          lastResultRef.current = combinedResult;
-        }
+      // Combine all category results before completing
+      if (Object.keys(categoryResultsRef.current).length > 0) {
+        const combinedResult = {
+          ...lastResultRef.current,
+          categoryResults: categoryResultsRef.current,
+        };
+        lastResultRef.current = combinedResult;
+
+        setProgress(100);
         setAllComplete(true);
       }
     } catch (err) {
@@ -355,15 +356,14 @@ export default function StreamingUploadDisplay({
             {events.map((event, index) => (
               <div
                 key={index}
-                className={`p-3 rounded border transition-all ${
-                  event.type === "error"
-                    ? "bg-critical-50 border-critical-200"
-                    : event.type === "warning"
+                className={`p-3 rounded border transition-all ${event.type === "error"
+                  ? "bg-critical-50 border-critical-200"
+                  : event.type === "warning"
                     ? "bg-warn-50 border-warn-200"
                     : event.type === "complete"
-                    ? "bg-success-50 border-success-200"
-                    : "bg-surface-100 border-border-200"
-                }`}
+                      ? "bg-success-50 border-success-200"
+                      : "bg-surface-100 border-border-200"
+                  }`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-lg flex-shrink-0 mt-0.5">
@@ -371,15 +371,14 @@ export default function StreamingUploadDisplay({
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className={`font-semibold text-sm ${
-                        event.type === "error"
-                          ? "text-critical-900"
-                          : event.type === "warning"
+                      <h4 className={`font-semibold text-sm ${event.type === "error"
+                        ? "text-critical-900"
+                        : event.type === "warning"
                           ? "text-warn-900"
                           : event.type === "complete"
-                          ? "text-green-700"
-                          : "text-ink-900"
-                      }`}>
+                            ? "text-green-700"
+                            : "text-ink-900"
+                        }`}>
                         {stepLabels[event.step || event.type] || event.message}
                       </h4>
                       {event.file_index && event.total_files && (
