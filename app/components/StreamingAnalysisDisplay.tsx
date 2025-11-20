@@ -686,7 +686,7 @@ export default function StreamingAnalysisDisplay({
                                     if (lastResultRef.current) {
                                         onComplete(lastResultRef.current);
                                     }
-                                    onClose();
+                                    // onClose() is NOT called here to prevent dialog closing before navigation
                                 }}
                                 className="px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
                             >
