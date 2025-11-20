@@ -57,6 +57,7 @@ export default function StreamingClassificationDisplay({
     const streamStartedRef = useRef(false);
     const lastResultRef = useRef<any>(null);
     const fileIdMapRef = useRef<Map<string, string>>(new Map());
+    const fileNameToIndexMapRef = useRef<Map<string, number>>(new Map());
 
     useEffect(() => {
         if (!isOpen || files.length === 0) {
@@ -67,15 +68,19 @@ export default function StreamingClassificationDisplay({
             setProcessedFiles(0);
             streamStartedRef.current = false;
             fileIdMapRef.current.clear();
+            fileNameToIndexMapRef.current.clear();
             return;
         }
 
         if (streamStartedRef.current) return;
         streamStartedRef.current = true;
 
-        // Create mapping of file names to IDs
-        files.forEach(({ file, fileId }) => {
+        setTotalFiles(files.length);
+
+        // Create mapping of file names to IDs and Indexes
+        files.forEach(({ file, fileId }, index) => {
             fileIdMapRef.current.set(file.name, fileId);
+            fileNameToIndexMapRef.current.set(file.name, index + 1);
         });
 
         startClassificationForAllFiles(files);
@@ -135,8 +140,14 @@ export default function StreamingClassificationDisplay({
                                     localTotalFiles = event.total_files;
                                 }
 
+                                // Determine file index
+                                let fileIndex = event.file_index;
+                                if (!fileIndex && event.file_name) {
+                                    fileIndex = fileNameToIndexMapRef.current.get(event.file_name);
+                                }
+
                                 // Calculate progress based on current file processing
-                                if (event.file_index && localTotalFiles > 0) {
+                                if (fileIndex && localTotalFiles > 0) {
                                     const stepProgressMap: Record<string, number> = {
                                         file_processing: 5,
                                         reading_file: 15,
@@ -146,16 +157,19 @@ export default function StreamingClassificationDisplay({
                                         classification_complete: 95,
                                     };
 
-                                    // Calculate progress for completed files
-                                    const completedFiles = event.file_index - 1;
-                                    const progressPerFile = 95 / localTotalFiles;
-                                    const completedFilesProgress = completedFiles * progressPerFile;
+                                    // Calculate progress
+                                    const currentFileIndex0 = fileIndex - 1; // 0-based index of current file
+                                    const totalFilesCount = localTotalFiles;
+                                    const progressPerFile = 100 / totalFilesCount;
 
-                                    // Add progress for current file
+                                    // Progress from fully completed files
+                                    const completedFilesProgress = currentFileIndex0 * progressPerFile;
+
+                                    // Progress within current file
                                     const currentStepProgress = stepProgressMap[event.step || ""] || 0;
-                                    const currentFileProgress = (currentStepProgress / 100) * progressPerFile;
+                                    const currentFileProgressContribution = (currentStepProgress / 100) * progressPerFile;
 
-                                    const totalProgress = completedFilesProgress + currentFileProgress;
+                                    const totalProgress = completedFilesProgress + currentFileProgressContribution;
 
                                     setProgress(Math.min(Math.round(totalProgress), 99));
                                 } else if (event.step) {
@@ -370,9 +384,9 @@ export default function StreamingClassificationDisplay({
                                                 }`}>
                                                 {stepLabels[event.step || event.type] || event.message}
                                             </h4>
-                                            {event.file_index && event.total_files && (
+                                            {event.file_index && (
                                                 <span className="text-xs text-ink-500">
-                                                    ({event.file_index}/{event.total_files})
+                                                    ({event.file_index}/{event.total_files || totalFiles})
                                                 </span>
                                             )}
                                         </div>

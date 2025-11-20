@@ -302,20 +302,13 @@ export default function QuickAnalysisForm({
 
       // If we have an existing caseId, update it; otherwise create a new case
       if (caseId) {
-        // Calculate completion status based on case_information
-        // Total sections: 6 (case_information, evidence, witnesses, precedents, police, challenges)
-        // Only case_information is filled, so 1/6 sections = ~17%
-        const totalSections = 6;
-        const completedSections = (caseName && caseDescription) ? 1 : 0;
-        const completionPercentage = Math.round((completedSections / totalSections) * 100);
 
         // Update existing case with case details
         const caseDetailsUpdate = {
           case_information: {
             caseName,
             caseDescription,
-          },
-          _completion_status: completionPercentage,
+          }
         };
 
         const res = await fetch(`/api/cases/update`, {

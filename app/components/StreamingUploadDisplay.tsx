@@ -164,16 +164,22 @@ export default function StreamingUploadDisplay({
                       file_complete: 95,
                     };
 
-                    // Calculate progress for completed files
-                    const completedFiles = processedFilesCount + event.file_index - 1;
-                    const progressPerFile = 90 / globalTotalFiles;
-                    const completedFilesProgress = completedFiles * progressPerFile;
+                    // Calculate progress
+                    // event.file_index is 1-based within the current batch
+                    // processedFilesCount is the count of files in previous batches
+                    // globalTotalFiles is the total number of files across all batches
 
-                    // Add progress for current file
+                    const currentGlobalIndex = processedFilesCount + event.file_index - 1; // 0-based global index
+                    const progressPerFile = 100 / globalTotalFiles;
+
+                    // Progress from fully completed files
+                    const completedFilesProgress = currentGlobalIndex * progressPerFile;
+
+                    // Progress within current file
                     const currentStepProgress = stepProgressMap[event.step || ""] || 0;
-                    const currentFileProgress = (currentStepProgress / 100) * progressPerFile;
+                    const currentFileProgressContribution = (currentStepProgress / 100) * progressPerFile;
 
-                    const totalProgress = completedFilesProgress + currentFileProgress;
+                    const totalProgress = completedFilesProgress + currentFileProgressContribution;
 
                     setProgress(Math.min(Math.round(totalProgress), 99));
                   } else if (event.step === "case_metadata_extraction" || event.step === "case_description_generation" || event.step === "summary_generation") {

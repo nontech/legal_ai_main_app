@@ -319,6 +319,7 @@ export default function DocumentUploadStep({
 
                       // Build case details update with file info for each category
                       const caseDetailsUpdate: Record<string, any> = {};
+                      let completionCount = 0;
 
                       // If we have categoryResults from multiple uploads
                       if (result.categoryResults && Object.keys(result.categoryResults).length > 0) {
@@ -335,6 +336,7 @@ export default function DocumentUploadStep({
                               summary: catResult.summary || "",
                               summaryGenerated: !!catResult.summary,
                             };
+                            completionCount++;
                           }
                         }
                       } else {
@@ -354,9 +356,11 @@ export default function DocumentUploadStep({
                               summary: result.summary || "",
                               summaryGenerated: !!result.summary,
                             };
+                            completionCount++;
                           }
                         }
                       }
+                      const completionPercentage = Math.round((completionCount / 6) * 100);
 
                       // Also update case_information with case name and description
                       if (collectedMetadata.caseName || collectedMetadata.caseDescription) {
@@ -366,6 +370,7 @@ export default function DocumentUploadStep({
                         caseDetailsUpdate["case_information"].caseName = collectedMetadata.caseName || "";
                         caseDetailsUpdate["case_information"].caseDescription = collectedMetadata.caseDescription || "";
                       }
+                      caseDetailsUpdate._completion_status = completionPercentage;
 
                       console.log("Files grouped by category:", caseDetailsUpdate);
                       console.log("Case details update:", caseDetailsUpdate);
