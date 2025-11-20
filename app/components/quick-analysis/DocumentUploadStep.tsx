@@ -37,7 +37,7 @@ export default function DocumentUploadStep({
 
   // Create a case on mount if caseId is not provided
   useEffect(() => {
-    if (!initialCaseId && !caseCreationAttempted.current) {
+    if (!initialCaseId && !caseCreationAttempted.current && !caseId) {
       caseCreationAttempted.current = true;
 
       const createCase = async () => {

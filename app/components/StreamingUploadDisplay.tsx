@@ -324,7 +324,7 @@ export default function StreamingUploadDisplay({
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                    {allComplete ? "Upload Complete!" : "Uploading Documents..."}
+                    {allComplete ? "Upload Complete!" : "Uploading & Extracting Information..."}
                   </h2>
                   <p className="text-primary-100 text-xs sm:text-sm truncate">
                     {files.length} file{files.length !== 1 ? "s" : ""}{fileCategory !== "multiple" && ` • ${fileCategory}`}

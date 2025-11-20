@@ -302,6 +302,7 @@ export default function QuickAnalysisForm({
 
       // If we have an existing caseId, update it; otherwise create a new case
       if (caseId) {
+        targetCaseId = caseId;
 
         // Update existing case with case details
         const caseDetailsUpdate = {
