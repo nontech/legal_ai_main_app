@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
         // Call the external API
         const response = await fetch(
-            "http://localhost:8000/api/v1/prediction/generate-game-plan-streaming",
+            "https://legal-case-api.azurewebsites.net/api/v1/prediction/generate-game-plan-streaming",
             {
                 method: "POST",
                 headers: {

@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
+import GamePlanDisplay from "./GamePlanDisplay";
 
 interface AnalysisResult {
   predicted_outcome?: any;
@@ -226,23 +227,7 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
             </div>
 
             {gamePlan ? (
-              <div style={{
-                background: "#f8f9fa",
-                border: "1px solid #e0e0e0",
-                borderRadius: "8px",
-                padding: "16px",
-              }}>
-                <pre style={{
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                  fontSize: "13px",
-                  color: "#333",
-                  margin: 0,
-                  fontFamily: "inherit",
-                }}>
-                  {JSON.stringify(gamePlan, null, 2)}
-                </pre>
-              </div>
+              <GamePlanDisplay gamePlan={gamePlan} />
             ) : (
               <div style={{
                 textAlign: "center",
@@ -411,7 +396,7 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
             <button
               onClick={handleRegenerate}
               disabled={isRegenerating}
-              className="p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              className="cursor-pointer p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               title={isRegenerating ? "Regenerating..." : "Regenerate Results"}
             >
               {isRegenerating ? (
