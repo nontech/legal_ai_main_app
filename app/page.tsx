@@ -8,6 +8,7 @@ import CasePortfolio from "./components/dashboard/CasePortfolio";
 import ConfidentialByDesign from "./components/dashboard/ConfidentialByDesign";
 import Footer from "./components/Footer";
 import PretrialProcess from "./components/PretrialProcess";
+import UseCases from "./components/UseCases";
 
 export default function Dashboard() {
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
@@ -30,6 +31,8 @@ export default function Dashboard() {
 
       {/* Confidential by Design Section */}
       <ConfidentialByDesign />
+      {/* Who are you? Section */}
+      <UseCases />
 
       {/* Footer */}
       <Footer />
