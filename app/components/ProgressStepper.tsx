@@ -203,6 +203,26 @@ export default function ProgressStepper({
         </svg>
       ),
     },
+    {
+      id: "game-plan",
+      label: "Game Plan",
+      subSections: 1,
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19l-7-7m0 0l7-7m-7 7h18"
+          />
+        </svg>
+      ),
+    },
   ];
 
   const getCompletion = (index: number) => {
@@ -313,7 +333,7 @@ export default function ProgressStepper({
                     >
                       {step.label}
                     </div>
-                    {!isComplete && completion < 100 && step.id !== "results" && step.id !== "case-details" && (
+                    {!isComplete && completion < 100 && step.id !== "results" && step.id !== "game-plan" && step.id !== "case-details" && (
                       <div className="flex items-center gap-1 mt-0.5">
                         <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -323,8 +343,8 @@ export default function ProgressStepper({
                     )}
                   </div>
 
-                  {/* Completion Circle - Hidden for Results step */}
-                  {step.id !== "results" && (
+                  {/* Completion Circle - Hidden for Results and Game Plan steps */}
+                  {step.id !== "results" && step.id !== "game-plan" && (
                     <div className="flex-shrink-0">
                       {step.id === "case-details" ? (
                         /* For Case Details: Show percentage circle */

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
+import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
 
 interface AnalysisResult {
   predicted_outcome?: any;
@@ -14,7 +15,7 @@ interface AnalysisResult {
   precedent_cases?: any[];
 }
 
-export default function ResultsStep() {
+export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlanOnly?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = searchParams.get("caseId");
@@ -36,6 +37,8 @@ export default function ResultsStep() {
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [stepReasonings, setStepReasonings] = useState<Record<string, string>>({});
   const [showAllFactors, setShowAllFactors] = useState(false);
+  const [gamePlan, setGamePlan] = useState<any>(null);
+  const [isGamePlanStreamingOpen, setIsGamePlanStreamingOpen] = useState(false);
 
   const fetchResults = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -51,6 +54,7 @@ export default function ResultsStep() {
 
       setCaseInfo(data.data);
       setResult(data.data.result);
+      setGamePlan(data.data.game_plan || null);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch results:", err);
@@ -69,6 +73,36 @@ export default function ResultsStep() {
     setResult(result);
     setIsRegenerating(false);
     setIsStreamingOpen(false);
+    // Refresh the data from the database
+    fetchResults(false);
+  };
+
+  const handleGenerateGamePlan = () => {
+    if (!caseId || !result || !caseInfo) {
+      alert("Missing required data to generate game plan");
+      return;
+    }
+
+    // Extract case info
+    const case_info = {
+      role: caseInfo.role || "",
+      case_type: caseInfo.case_type || "",
+      case_title: caseInfo.case_details?.case_information?.caseName || "",
+      case_description: caseInfo.case_details?.case_information?.caseDescription || "",
+      city: caseInfo.jurisdiction?.city || "",
+      state_province: caseInfo.jurisdiction?.state || "",
+      country: caseInfo.jurisdiction?.country || "",
+      evidence_summary: caseInfo.case_details?.evidence_and_supporting_materials?.summary || "",
+      key_witnesses_summary: caseInfo.case_details?.key_witness_and_testimony?.summary || "",
+    };
+
+    // Open the streaming display modal
+    setIsGamePlanStreamingOpen(true);
+  };
+
+  const handleGamePlanStreamingComplete = (result: any) => {
+    setGamePlan(result);
+    setIsGamePlanStreamingOpen(false);
     // Refresh the data from the database
     fetchResults(false);
   };
@@ -135,6 +169,97 @@ export default function ResultsStep() {
     fetchResults();
   }, [caseId]);
 
+  // If showing only game plan, render just that section
+  if (showGamePlanOnly) {
+    return (
+      <>
+        <StreamingGamePlanDisplay
+          isOpen={isGamePlanStreamingOpen}
+          caseId={caseId || ""}
+          case_analysis={result}
+          case_info={caseInfo}
+          onComplete={handleGamePlanStreamingComplete}
+          onClose={() => setIsGamePlanStreamingOpen(false)}
+        />
+
+        <div style={{ maxWidth: "100%", width: "100%" }}>
+          <div style={{
+            background: "white",
+            border: "1px solid #e8e8e8",
+            borderRadius: "16px",
+            padding: "28px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "24px" }}>🎯</span>
+                <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                  Game Plan
+                </h3>
+              </div>
+              <button
+                onClick={handleGenerateGamePlan}
+                disabled={loading}
+                type="button"
+                title={gamePlan ? "Regenerate Game Plan" : "Generate Game Plan"}
+                style={{
+                  background: loading ? "#ccc" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  boxShadow: loading ? "none" : "0 4px 12px rgba(102, 126, 234, 0.3)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  pointerEvents: loading ? "none" : "auto",
+                  opacity: loading ? 0.6 : 1,
+                }}
+              >
+                <span>✨</span>
+                {gamePlan ? "Regenerate" : "Generate"} Game Plan
+              </button>
+            </div>
+
+            {gamePlan ? (
+              <div style={{
+                background: "#f8f9fa",
+                border: "1px solid #e0e0e0",
+                borderRadius: "8px",
+                padding: "16px",
+              }}>
+                <pre style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                  fontSize: "13px",
+                  color: "#333",
+                  margin: 0,
+                  fontFamily: "inherit",
+                }}>
+                  {JSON.stringify(gamePlan, null, 2)}
+                </pre>
+              </div>
+            ) : (
+              <div style={{
+                textAlign: "center",
+                padding: "40px 20px",
+                color: "#666",
+              }}>
+                <p style={{ fontSize: "14px", margin: 0 }}>
+                  {loading ? "Loading..." : "Click \"Generate Game Plan\" to create a strategic action plan for your case"}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -167,6 +292,15 @@ export default function ResultsStep() {
         caseId={caseId || ""}
         onComplete={handleStreamingComplete}
         onClose={() => setIsStreamingOpen(false)}
+      />
+
+      <StreamingGamePlanDisplay
+        isOpen={isGamePlanStreamingOpen}
+        caseId={caseId || ""}
+        case_analysis={result}
+        case_info={caseInfo}
+        onComplete={handleGamePlanStreamingComplete}
+        onClose={() => setIsGamePlanStreamingOpen(false)}
       />
 
       {/* Reasoning Panel Toggle Button */}

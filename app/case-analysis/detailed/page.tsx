@@ -27,7 +27,7 @@ function DetailedCaseAnalysisContent() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
-  const totalSteps = 8; // Total number of steps
+  const totalSteps = 9; // Total number of steps (added Game Plan)
 
   // Track completion data for each step (percentage)
   const [completionData, setCompletionData] = useState<{
@@ -41,6 +41,7 @@ function DetailedCaseAnalysisContent() {
     5: 0, // Judge
     6: 0, // Jury
     7: 0, // Results
+    8: 0, // Game Plan
   });
 
   // Fetch case data and calculate completion percentages
@@ -53,16 +54,17 @@ function DetailedCaseAnalysisContent() {
 
       if (json.ok && json.data) {
         const data = json.data;
-        const newCompletionData: { [key: number]: number } = {
-          0: 0,
-          1: 0,
-          2: 0,
-          3: 0,
-          4: 0,
-          5: 0,
-          6: 0,
-          7: 0,
-        };
+      const newCompletionData: { [key: number]: number } = {
+        0: 0,
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        6: 0,
+        7: 0,
+        8: 0,
+      };
 
         // Check jurisdiction (step 0)
         if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.state && data.jurisdiction.city && data.jurisdiction.court) {
@@ -145,6 +147,7 @@ function DetailedCaseAnalysisContent() {
     { id: "judge", label: "Judge", icon: null },
     { id: "jury", label: "Jury", icon: null },
     { id: "results", label: "Results", icon: null },
+    { id: "game-plan", label: "Game Plan", icon: null },
   ];
 
   const renderStepContent = () => {
@@ -165,6 +168,8 @@ function DetailedCaseAnalysisContent() {
         return <JuryComposition caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
       case 7:
         return <ResultsStep />;
+      case 8:
+        return <ResultsStep showGamePlanOnly={true} />;
       default:
         return <JurisdictionSection caseId={caseId} />;
     }
