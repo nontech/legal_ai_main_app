@@ -688,7 +688,7 @@ export default function StreamingAnalysisDisplay({
                                     }
                                     // onClose() is NOT called here to prevent dialog closing before navigation
                                 }}
-                                className="px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                                className="cursor-pointer px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
                             >
                                 View Results →
                             </button>
