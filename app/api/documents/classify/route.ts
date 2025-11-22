@@ -18,7 +18,7 @@ export async function POST(request: Request) {
 
         // Call the external classification API from the server side
         const response = await fetch(
-            "https://legal-case-api.azurewebsites.net/api/v1/documents/classify-document",
+            "https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net/api/v1/documents/classify-document",
             {
                 method: "POST",
                 body: externalFormData,
