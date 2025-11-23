@@ -147,7 +147,7 @@ const JurisdictionsManager = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -273,7 +273,7 @@ const JurisdictionsManager = () => {
     }
   };
 
-  const handleBulkImport = async (e: React.FormEvent) => {
+  const handleBulkImport = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!bulkCountryId) {
       toast({
