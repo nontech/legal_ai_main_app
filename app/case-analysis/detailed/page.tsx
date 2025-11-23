@@ -27,6 +27,7 @@ function DetailedCaseAnalysisContent() {
     initialStep ? parseInt(initialStep) : 0
   );
   const [countryId, setCountryId] = useState<string>("");
+  const [jurisdictionId, setJurisdictionId] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
@@ -156,7 +157,7 @@ function DetailedCaseAnalysisContent() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} />;
+        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} onJurisdictionChange={setJurisdictionId} />;
       case 1:
         return <CaseTypeSelector caseId={caseId} countryId={countryId} />;
       case 2:
@@ -166,7 +167,7 @@ function DetailedCaseAnalysisContent() {
       case 4:
         return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
+        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} jurisdictionId={jurisdictionId} />;
       case 6:
         return <JuryComposition caseId={caseId} countryId={countryId} onSaveSuccess={fetchCaseCompletion} />;
       case 7:

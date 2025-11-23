@@ -106,7 +106,7 @@ const DEFAULT_JUDGES: Judge[] = [
   },
 ];
 
-export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void; jurisdictionId?: string }) {
+export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }: { caseId?: string; onSaveSuccess?: () => void; jurisdictionId?: string }) {
   const [judges, setJudges] = useState<Judge[]>(DEFAULT_JUDGES);
   const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,7 +115,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
   // Fetch judges when jurisdiction changes
   useEffect(() => {
-    if (!caseId) {
+    if (!jurisdictionId) {
       setJudges(DEFAULT_JUDGES);
       return;
     }
@@ -123,7 +123,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
     const fetchJudgesFromAPI = async () => {
       try {
         setIsFetchingJudges(true);
-        const res = await fetch(`/api/admin/judges?jurisdiction_id=${caseId}`);
+        const res = await fetch(`/api/admin/judges?jurisdiction_id=${jurisdictionId}`);
         const json = await res.json();
 
         if (json.ok && json.data && Array.isArray(json.data)) {
@@ -156,7 +156,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
     };
 
     fetchJudgesFromAPI();
-  }, [caseId]);
+  }, [jurisdictionId]);
 
   useEffect(() => {
     const loadSavedJudge = async () => {

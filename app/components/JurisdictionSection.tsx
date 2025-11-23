@@ -20,9 +20,10 @@ interface JurisdictionSectionProps {
   caseId?: string;
   onCompletionChange?: (isComplete: boolean) => void;
   onCountryChange?: (countryId: string) => void;
+  onJurisdictionChange?: (jurisdictionId: string) => void;
 }
 
-export default function JurisdictionSection({ caseId, onCompletionChange, onCountryChange }: JurisdictionSectionProps) {
+export default function JurisdictionSection({ caseId, onCompletionChange, onCountryChange, onJurisdictionChange }: JurisdictionSectionProps) {
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
   const [country, setCountry] = useState<string>("");
@@ -130,6 +131,19 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
       onCountryChange(countryId);
     }
   }, [countryId, onCountryChange]);
+
+  // Notify parent of jurisdiction change
+  useEffect(() => {
+    if (onJurisdictionChange && state && city && court && jurisdictions.length > 0) {
+      // Find the jurisdiction that matches the selected state, city, and court
+      const matchingJurisdiction = jurisdictions.find(
+        j => j.state_province === state && j.city === city && j.court === court
+      );
+      if (matchingJurisdiction) {
+        onJurisdictionChange(matchingJurisdiction.id);
+      }
+    }
+  }, [state, city, court, jurisdictions, onJurisdictionChange]);
 
   const handleCountryChange = (selectedCountryName: string) => {
     setCountry(selectedCountryName);
