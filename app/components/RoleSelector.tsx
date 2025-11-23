@@ -7,12 +7,58 @@ type RoleType = "defendant" | "plaintiff";
 
 interface RoleSelectorProps {
   caseId?: string;
+  countryId?: string;
 }
 
-export default function RoleSelector({ caseId }: RoleSelectorProps) {
+export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
+  const [roles, setRoles] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(!!caseId);
+  const [isFetchingRoles, setIsFetchingRoles] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch roles from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setRoles(null);
+      return;
+    }
+
+    const fetchRolesFromAPI = async () => {
+      try {
+        setIsFetchingRoles(true);
+        const res = await fetch(`/api/admin/roles?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data && typeof json.data === 'object') {
+          // Transform API response to roles format
+          const rolesObj: any = {};
+          Object.entries(json.data).forEach(([key, value]: [string, any]) => {
+            rolesObj[key] = {
+              title: value.title || value.name || key,
+              subtitle: value.subtitle || value.description || "",
+              icon: value.icon || null,
+              responsibilities: value.responsibilities || value.typical_responsibilities || [],
+              strategicFocus: value.strategicFocus || value.strategic_focus || "",
+            };
+          });
+          setRoles(rolesObj);
+        } else {
+          setRoles(null);
+          setError(json.error || "Failed to fetch roles");
+        }
+      } catch (err) {
+        console.error("Failed to fetch roles:", err);
+        setRoles(null);
+        setError("Failed to fetch roles");
+      } finally {
+        setIsFetchingRoles(false);
+      }
+    };
+
+    fetchRolesFromAPI();
+  }, [countryId]);
 
   useEffect(() => {
     if (caseId) {
@@ -45,7 +91,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
     setIsModalOpen(false);
   };
 
-  const roles = {
+  // Define default roles
+  const DEFAULT_ROLES = {
     defendant: {
       title: "Defendant/Respondent",
       subtitle: "Party defending against legal action",
@@ -102,10 +149,16 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
     },
   };
 
-  const selectedRoleData = roles[selectedRole || "plaintiff"];
+  const effectiveRoles = roles || DEFAULT_ROLES;
+  const selectedRoleData = selectedRole ? effectiveRoles[selectedRole] : null;
 
   return (
     <>
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
       <div className="space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
@@ -242,6 +295,7 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
                 {/* Defendant Card */}
+                {effectiveRoles.defendant && (
                 <button
                   onClick={() => handleRoleSelect("defendant")}
                   className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
@@ -256,14 +310,14 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                         : "bg-surface-200 text-ink-500"
                         }`}
                     >
-                      {roles.defendant.icon}
+                      {effectiveRoles.defendant?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {roles.defendant.title}
+                        {effectiveRoles.defendant?.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {roles.defendant.subtitle}
+                        {effectiveRoles.defendant?.subtitle}
                       </p>
                     </div>
                   </div>
@@ -273,8 +327,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
-                      {roles.defendant.responsibilities.map(
-                        (resp, index) => (
+                      {effectiveRoles.defendant?.responsibilities?.map(
+                        (resp: string, index: number) => (
                           <li
                             key={index}
                             className="text-sm text-ink-600 flex items-start"
@@ -294,12 +348,14 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
-                      {roles.defendant.strategicFocus}
+                      {effectiveRoles.defendant?.strategicFocus}
                     </p>
                   </div>
                 </button>
+                )}  
 
                 {/* Plaintiff Card */}
+                {effectiveRoles.plaintiff && (
                 <button
                   onClick={() => handleRoleSelect("plaintiff")}
                   className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
@@ -314,14 +370,14 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                         : "bg-surface-200 text-ink-500"
                         }`}
                     >
-                      {roles.plaintiff.icon}
+                      {effectiveRoles.plaintiff?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {roles.plaintiff.title}
+                        {effectiveRoles.plaintiff?.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {roles.plaintiff.subtitle}
+                        {effectiveRoles.plaintiff?.subtitle}
                       </p>
                     </div>
                   </div>
@@ -331,8 +387,8 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
-                      {roles.plaintiff.responsibilities.map(
-                        (resp, index) => (
+                      {effectiveRoles.plaintiff?.responsibilities?.map(
+                        (resp: string, index: number) => (
                           <li
                             key={index}
                             className="text-sm text-ink-600 flex items-start"
@@ -352,10 +408,11 @@ export default function RoleSelector({ caseId }: RoleSelectorProps) {
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
-                      {roles.plaintiff.strategicFocus}
+                      {effectiveRoles.plaintiff?.strategicFocus}
                     </p>
                   </div>
                 </button>
+                )}
               </div>
 
               {/* Selected Role Summary in Modal */}

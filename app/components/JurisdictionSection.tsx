@@ -3,18 +3,92 @@
 import { useState, useEffect } from "react";
 import SaveCaseButton from "./SaveCaseButton";
 
+interface Country {
+  id: string;
+  name: string;
+}
+
+interface Jurisdiction {
+  id: string;
+  country_id: string;
+  state_province: string | null;
+  city: string | null;
+  court: string | null;
+}
+
 interface JurisdictionSectionProps {
   caseId?: string;
   onCompletionChange?: (isComplete: boolean) => void;
+  onCountryChange?: (countryId: string) => void;
 }
 
-export default function JurisdictionSection({ caseId, onCompletionChange }: JurisdictionSectionProps) {
+export default function JurisdictionSection({ caseId, onCompletionChange, onCountryChange }: JurisdictionSectionProps) {
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
   const [country, setCountry] = useState<string>("");
+  const [countryId, setCountryId] = useState<string>("");
   const [state, setState] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [court, setCourt] = useState<string>("");
   const [isLoading, setIsLoading] = useState(!!caseId);
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const [isLoadingJurisdictions, setIsLoadingJurisdictions] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch countries on mount
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setIsLoadingCountries(true);
+        const res = await fetch("/api/admin/countries");
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          setCountries(json.data);
+        } else {
+          setError(json.error || "Failed to fetch countries");
+        }
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
+        setError("Failed to fetch countries");
+      } finally {
+        setIsLoadingCountries(false);
+      }
+    };
+
+    fetchCountries();
+  }, []);
+
+  // Fetch jurisdictions when country is selected
+  useEffect(() => {
+    if (!countryId) {
+      setJurisdictions([]);
+      return;
+    }
+
+    const fetchJurisdictions = async () => {
+      try {
+        setIsLoadingJurisdictions(true);
+        const res = await fetch(`/api/admin/jurisdictions?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          setJurisdictions(json.data);
+        } else {
+          setError(json.error || "Failed to fetch jurisdictions");
+        }
+      } catch (err) {
+        console.error("Failed to fetch jurisdictions:", err);
+        setError("Failed to fetch jurisdictions");
+      } finally {
+        setIsLoadingJurisdictions(false);
+      }
+    };
+
+    fetchJurisdictions();
+  }, [countryId]);
+
+  // Fetch case data if caseId exists
   useEffect(() => {
     if (caseId) {
       const fetchCaseData = async () => {
@@ -49,6 +123,21 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
       onCompletionChange(!!isComplete);
     }
   }, [country, state, city, court, onCompletionChange]);
+
+  // Notify parent of country change
+  useEffect(() => {
+    if (onCountryChange && countryId) {
+      onCountryChange(countryId);
+    }
+  }, [countryId, onCountryChange]);
+
+  const handleCountryChange = (selectedCountryName: string) => {
+    setCountry(selectedCountryName);
+    const selected = countries.find(c => c.name === selectedCountryName);
+    if (selected) {
+      setCountryId(selected.id);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -86,7 +175,13 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
         </p>
       </div>
 
-      {isLoading ? (
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
+      )}
+
+      {isLoading || isLoadingCountries ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
@@ -109,20 +204,19 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   Country
                 </label>
-                <input
+                <select
                   id="country"
-                  type="text"
-                  list="countryList"
                   value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  placeholder="Enter or select country"
+                  onChange={(e) => handleCountryChange(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
-                />
-                <datalist id="countryList">
-                  <option value="United States of America" />
-                  <option value="Canada" />
-                  <option value="United Kingdom" />
-                </datalist>
+                >
+                  <option value="">Select a country</option>
+                  {countries.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* State/Province Field */}
@@ -133,24 +227,26 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   State/Province
                 </label>
-                <input
+                <select
                   id="state"
-                  type="text"
-                  list="stateList"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  placeholder="Enter or select state"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
-                />
-                <datalist id="stateList">
-                  <option value="Alabama" />
-                  <option value="Alaska" />
-                  <option value="Arizona" />
-                  <option value="California" />
-                  <option value="Florida" />
-                  <option value="New York" />
-                  <option value="Texas" />
-                </datalist>
+                  disabled={isLoadingJurisdictions || !countryId}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select a state/province</option>
+                  {jurisdictions && jurisdictions.length > 0 ? (
+                    [...new Set(jurisdictions.map(j => j.state_province))].map((state_prov) => (
+                      state_prov && (
+                        <option key={state_prov} value={state_prov}>
+                          {state_prov}
+                        </option>
+                      )
+                    ))
+                  ) : (
+                    <option disabled>No states available</option>
+                  )}
+                </select>
               </div>
             </div>
 
@@ -164,21 +260,28 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   City
                 </label>
-                <input
+                <select
                   id="city"
-                  type="text"
-                  list="cityList"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  placeholder="Enter or select city"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
-                />
-                <datalist id="cityList">
-                  <option value="Mobile" />
-                  <option value="Birmingham" />
-                  <option value="Montgomery" />
-                  <option value="Huntsville" />
-                </datalist>
+                  disabled={isLoadingJurisdictions || !countryId}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select a city</option>
+                  {jurisdictions && jurisdictions.length > 0 ? (
+                    jurisdictions
+                      .filter(j => !state || j.state_province === state)
+                      .map((j) => (
+                        j.city && (
+                          <option key={j.id} value={j.city}>
+                            {j.city}
+                          </option>
+                        )
+                      ))
+                  ) : (
+                    <option disabled>No cities available</option>
+                  )}
+                </select>
               </div>
 
               {/* Court Field */}
@@ -189,20 +292,28 @@ export default function JurisdictionSection({ caseId, onCompletionChange }: Juri
                 >
                   Court
                 </label>
-                <input
+                <select
                   id="court"
-                  type="text"
-                  list="courtList"
                   value={court}
                   onChange={(e) => setCourt(e.target.value)}
-                  placeholder="Enter or select court"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
-                />
-                <datalist id="courtList">
-                  <option value="Southern District of Alabama" />
-                  <option value="Northern District of Alabama" />
-                  <option value="Middle District of Alabama" />
-                </datalist>
+                  disabled={isLoadingJurisdictions || !countryId}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                >
+                  <option value="">Select a court</option>
+                  {jurisdictions && jurisdictions.length > 0 ? (
+                    jurisdictions
+                      .filter(j => (!state || j.state_province === state) && (!city || j.city === city))
+                      .map((j) => (
+                        j.court && (
+                          <option key={j.id} value={j.court}>
+                            {j.court}
+                          </option>
+                        )
+                      ))
+                  ) : (
+                    <option disabled>No courts available</option>
+                  )}
+                </select>
               </div>
             </div>
           </div>

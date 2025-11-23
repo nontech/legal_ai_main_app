@@ -14,15 +14,24 @@ interface CaseType {
 
 interface CaseTypeSelectorProps {
   caseId?: string;
+  countryId?: string;
 }
 
-export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
+export default function CaseTypeSelector({
+  caseId,
+  countryId,
+}: CaseTypeSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCaseType, setSelectedCaseType] = useState<CaseType | null>(null);
+  const [selectedCaseType, setSelectedCaseType] =
+    useState<CaseType | null>(null);
+  const [caseTypes, setCaseTypes] = useState<CaseType[]>([]);
   const [isLoading, setIsLoading] = useState(!!caseId);
+  const [isFetchingCaseTypes, setIsFetchingCaseTypes] =
+    useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Define caseTypes array first so it can be used in useEffect
-  const caseTypes: CaseType[] = [
+  // Default case types as fallback
+  const defaultCaseTypes: CaseType[] = [
     {
       id: "tax",
       title: "Tax Law",
@@ -236,6 +245,54 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
     },
   ];
 
+  // Fetch case types from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setCaseTypes(defaultCaseTypes);
+      return;
+    }
+
+    const fetchCaseTypesFromAPI = async () => {
+      try {
+        setIsFetchingCaseTypes(true);
+        const res = await fetch(
+          `/api/admin/case-types?country_id=${countryId}`
+        );
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          // Transform API response (JSONB object) to array format
+          const apiCaseTypes = Object.entries(json.data).map(
+            ([key, value]: [string, any]) => ({
+              id: key,
+              title: value.name || value.title || key,
+              subtitle: value.description || value.subtitle || "",
+              icon: value.icon || "⚖️",
+              typicalCases:
+                value.typical_cases || value.typicalCases || [],
+              standardOfProof:
+                value.standard_of_proof ||
+                value.standardOfProof ||
+                "",
+            })
+          );
+          setCaseTypes(apiCaseTypes);
+        } else {
+          setCaseTypes(defaultCaseTypes);
+          setError(json.error || "Failed to fetch case types");
+        }
+      } catch (err) {
+        console.error("Failed to fetch case types:", err);
+        setCaseTypes(defaultCaseTypes);
+        setError("Failed to fetch case types");
+      } finally {
+        setIsFetchingCaseTypes(false);
+      }
+    };
+
+    fetchCaseTypesFromAPI();
+  }, [countryId]);
+
   useEffect(() => {
     if (caseId) {
       const fetchCaseTypeData = async () => {
@@ -245,18 +302,22 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
 
           if (json.ok && json.data?.case_type) {
             const caseTypeId = json.data.case_type;
-            const foundCaseType = caseTypes.find(ct => ct.id === caseTypeId);
+            const foundCaseType = caseTypes.find(
+              (ct) => ct.id === caseTypeId
+            );
             if (foundCaseType) {
               setSelectedCaseType(foundCaseType);
             } else {
-              setSelectedCaseType(caseTypes[1]); // Civil Law default
+              setSelectedCaseType(
+                caseTypes[1] || defaultCaseTypes[1]
+              ); // Civil Law default
             }
           } else {
-            setSelectedCaseType(caseTypes[1]); // Civil Law default
+            setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default
           }
         } catch (error) {
           console.error("Failed to fetch case type data:", error);
-          setSelectedCaseType(caseTypes[1]); // Civil Law default on error
+          setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default on error
         } finally {
           setIsLoading(false);
         }
@@ -264,10 +325,10 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
 
       fetchCaseTypeData();
     } else {
-      setSelectedCaseType(caseTypes[1]); // Civil Law default
+      setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default
       setIsLoading(false);
     }
-  }, [caseId]);
+  }, [caseId, caseTypes]);
 
   const handleSelectCaseType = (caseType: CaseType) => {
     setSelectedCaseType(caseType);
@@ -420,10 +481,11 @@ export default function CaseTypeSelector({ caseId }: CaseTypeSelectorProps) {
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
-                        ? "border-primary-500 bg-primary-100"
-                        : "border-border-200 hover:border-primary-300"
-                        }`}
+                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                        selectedCaseType?.id === caseType.id
+                          ? "border-primary-500 bg-primary-100"
+                          : "border-border-200 hover:border-primary-300"
+                      }`}
                     >
                       <div className="flex items-start mb-2">
                         <div className="text-3xl mr-3">

@@ -14,9 +14,10 @@ interface CaseType {
 interface CompactCaseTypeProps {
   onUpdate?: (caseType: CaseType) => void;
   initialCaseTypeId?: string;
+  countryId?: string;
 }
 
-const CASE_TYPES: CaseType[] = [
+const DEFAULT_CASE_TYPES: CaseType[] = [
     {
       id: "tax",
       title: "Tax Law",
@@ -190,31 +191,75 @@ const CASE_TYPES: CaseType[] = [
 
 const DEFAULT_CASE_TYPE_ID = "civil";
 const DEFAULT_CASE_TYPE =
-  CASE_TYPES.find((caseType) => caseType.id === DEFAULT_CASE_TYPE_ID) ??
-  CASE_TYPES[0]!;
+  DEFAULT_CASE_TYPES.find((caseType) => caseType.id === DEFAULT_CASE_TYPE_ID) ??
+  DEFAULT_CASE_TYPES[0]!;
 
-function getCaseTypeById(id?: string | null) {
+function getCaseTypeById(id?: string | null, caseTypes?: CaseType[]) {
   if (!id) return undefined;
-  return CASE_TYPES.find((caseType) => caseType.id === id);
+  return (caseTypes || DEFAULT_CASE_TYPES).find((caseType) => caseType.id === id);
 }
 
 export default function CompactCaseType({
   onUpdate,
   initialCaseTypeId,
+  countryId,
 }: CompactCaseTypeProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [caseTypes, setCaseTypes] = useState<CaseType[]>(DEFAULT_CASE_TYPES);
   const [selectedCaseType, setSelectedCaseType] = useState<CaseType>(() => {
-    const initialSelection = getCaseTypeById(initialCaseTypeId);
+    const initialSelection = getCaseTypeById(initialCaseTypeId, DEFAULT_CASE_TYPES);
     return initialSelection ?? DEFAULT_CASE_TYPE;
   });
+  const [isFetchingCaseTypes, setIsFetchingCaseTypes] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch case types from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setCaseTypes(DEFAULT_CASE_TYPES);
+      return;
+    }
+
+    const fetchCaseTypesFromAPI = async () => {
+      try {
+        setIsFetchingCaseTypes(true);
+        const res = await fetch(`/api/admin/case-types?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          // Transform API response (JSONB object) to array format
+          const apiCaseTypes = Object.entries(json.data).map(([key, value]: [string, any]) => ({
+            id: key,
+            title: value.name || value.title || key,
+            subtitle: value.description || value.subtitle || "",
+            icon: value.icon || "⚖️",
+            typicalCases: value.typical_cases || value.typicalCases || [],
+            standardOfProof: value.standard_of_proof || value.standardOfProof || "",
+          }));
+          setCaseTypes(apiCaseTypes);
+        } else {
+          setCaseTypes(DEFAULT_CASE_TYPES);
+          setError(json.error || "Failed to fetch case types");
+        }
+      } catch (err) {
+        console.error("Failed to fetch case types:", err);
+        setCaseTypes(DEFAULT_CASE_TYPES);
+        setError("Failed to fetch case types");
+      } finally {
+        setIsFetchingCaseTypes(false);
+      }
+    };
+
+    fetchCaseTypesFromAPI();
+  }, [countryId]);
 
   useEffect(() => {
     const targetSelection =
-      getCaseTypeById(initialCaseTypeId) ?? DEFAULT_CASE_TYPE;
+      getCaseTypeById(initialCaseTypeId, caseTypes) ?? DEFAULT_CASE_TYPE;
     setSelectedCaseType((current) =>
       current.id === targetSelection.id ? current : targetSelection
     );
-  }, [initialCaseTypeId]);
+  }, [initialCaseTypeId, caseTypes]);
 
   useEffect(() => {
     onUpdate?.(selectedCaseType);
@@ -310,8 +355,13 @@ export default function CompactCaseType({
 
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {CASE_TYPES.map((caseType) => (
+                  {caseTypes.map((caseType) => (
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
