@@ -260,7 +260,7 @@ export default function CaseTypeSelector({
         );
         const json = await res.json();
 
-        if (json.ok && json.data) {
+        if (json.ok && json.data && Object.keys(json.data).length > 0) {
           // Transform API response (JSONB object) to array format
           const apiCaseTypes = Object.entries(json.data).map(
             ([key, value]: [string, any]) => ({
@@ -278,7 +278,11 @@ export default function CaseTypeSelector({
           );
           setCaseTypes(apiCaseTypes);
         } else {
+          // No API data found, use default case types
           setCaseTypes(defaultCaseTypes);
+        }
+
+        if (!json.ok) {
           setError(json.error || "Failed to fetch case types");
         }
       } catch (err) {
