@@ -174,83 +174,87 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
         </div>
 
         {/* Confirmation Card */}
-        <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
-          <div className="flex items-start gap-2 sm:gap-3">
-            <svg
-              className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                Role Selection Confirmed
-              </h4>
-              <p className="text-ink-600 text-xs sm:text-sm">
-                You have selected{" "}
-                <span className="font-semibold">
-                  {selectedRoleData.title}
-                </span>{" "}
-                - The analysis will be tailored to your strategic
-                position and legal burden in this case.
-              </p>
+        {selectedRoleData && (
+          <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
+                  Role Selection Confirmed
+                </h4>
+                <p className="text-ink-600 text-xs sm:text-sm">
+                  You have selected{" "}
+                  <span className="font-semibold">
+                    {selectedRoleData.title}
+                  </span>{" "}
+                  - The analysis will be tailored to your strategic
+                  position and legal burden in this case.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Compact Display with Button */}
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-            <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1">
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex-shrink-0">
-                <svg
-                  className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                  />
-                </svg>
+        {selectedRoleData && (
+          <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1">
+                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex-shrink-0">
+                  <svg
+                    className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-xl font-bold text-ink-900">
+                    Your Role
+                  </h3>
+                  <p className="text-xs sm:text-sm text-ink-600 truncate">
+                    {selectedRoleData.subtitle}
+                  </p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <h3 className="text-base sm:text-xl font-bold text-ink-900">
-                  Your Role
-                </h3>
-                <p className="text-xs sm:text-sm text-ink-600 truncate">
-                  {selectedRoleData.subtitle}
-                </p>
-              </div>
-            </div>
 
-            {/* Centered Role Name - Hidden on mobile */}
-            <div className="hidden sm:flex flex-1 justify-center">
-              <div className="text-center">
-                <p className="text-lg font-semibold text-ink-900">
-                  {selectedRoleData.title}
-                </p>
+              {/* Centered Role Name - Hidden on mobile */}
+              <div className="hidden sm:flex flex-1 justify-center">
+                <div className="text-center">
+                  <p className="text-lg font-semibold text-ink-900">
+                    {selectedRoleData.title}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
-            >
-              Change Role
-            </button>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
+              >
+                Change Role
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -416,16 +420,18 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
               </div>
 
               {/* Selected Role Summary in Modal */}
-              <div className="bg-highlight-200 border border-transparent rounded-lg p-4 mt-6">
-                <p className="text-sm text-ink-700">
-                  <span className="font-semibold">
-                    Selected Role:
-                  </span>{" "}
-                  {selectedRoleData.title} - The analysis will be
-                  tailored to your strategic position and legal burden
-                  in this case.
-                </p>
-              </div>
+              {selectedRoleData && (
+                <div className="bg-highlight-200 border border-transparent rounded-lg p-4 mt-6">
+                  <p className="text-sm text-ink-700">
+                    <span className="font-semibold">
+                      Selected Role:
+                    </span>{" "}
+                    {selectedRoleData.title} - The analysis will be
+                    tailored to your strategic position and legal burden
+                    in this case.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
