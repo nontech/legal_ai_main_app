@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from("case_type")
       .select("case_types")
-      .eq("country_id", country_id)
-      .single();
+      .eq("country_id", country_id);
 
     if (error) {
       return NextResponse.json(
@@ -31,9 +30,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Return the first matching record's case_types, or empty object if none found
+    const caseTypeData = data && data.length > 0 ? data[0].case_types : {};
+
     return NextResponse.json({
       ok: true,
-      data: data?.case_types || {},
+      data: caseTypeData || {},
     });
   } catch (err: any) {
     return NextResponse.json(
