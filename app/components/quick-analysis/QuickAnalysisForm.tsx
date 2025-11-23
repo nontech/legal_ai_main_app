@@ -42,6 +42,7 @@ export default function QuickAnalysisForm({
   caseId,
 }: QuickAnalysisFormProps) {
   const router = useRouter();
+  const [countryId, setCountryId] = useState<string>("");
   const [caseName, setCaseName] = useState(uploadedMetadata?.caseName || "");
   const [caseDescription, setCaseDescription] = useState(uploadedMetadata?.caseDescription || "");
   const [classifiedFiles, setClassifiedFiles] = useState<ClassifiedFile[]>(
@@ -58,6 +59,7 @@ export default function QuickAnalysisForm({
       state: "",
       city: "",
       court: "",
+      country_id: "",
     }
   );
   // Store the case type as its string id that API expects
@@ -453,16 +455,29 @@ export default function QuickAnalysisForm({
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
-          <CompactJurisdiction onUpdate={setJurisdiction} initialValues={jurisdiction} />
+          <CompactJurisdiction 
+            onUpdate={(data) => {
+              setJurisdiction(data);
+              if (data.country_id) {
+                setCountryId(data.country_id);
+              }
+            }} 
+            initialValues={jurisdiction} 
+          />
 
           {/* Case Type */}
           <CompactCaseType
             initialCaseTypeId={caseTypeId || undefined}
+            countryId={countryId}
             onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
           />
 
           {/* Role */}
-          <CompactRole onUpdate={(r: any) => setRole(r)} initialValue={role as any} />
+          <CompactRole 
+            countryId={countryId}
+            onUpdate={(r: any) => setRole(r)} 
+            initialValue={role as any} 
+          />
 
           {/* Basic Case Information */}
           <div className="bg-surface-000 rounded-lg border border-border-200 p-6">

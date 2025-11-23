@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Briefcase, Shield, HelpCircle } from "lucide-react";
 
 type RoleType = "defendant" | "plaintiff";
@@ -8,12 +8,58 @@ type RoleType = "defendant" | "plaintiff";
 interface CompactRoleProps {
   onUpdate?: (role: RoleType) => void;
   initialValue?: RoleType | null;
+  countryId?: string;
 }
 
-export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps) {
+export default function CompactRole({ onUpdate, initialValue, countryId }: CompactRoleProps) {
+  const [roles, setRoles] = useState<any>(null);
   const [selectedRole, setSelectedRole] =
     useState<RoleType | null>(initialValue || null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFetchingRoles, setIsFetchingRoles] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch roles from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setRoles(null);
+      return;
+    }
+
+    const fetchRolesFromAPI = async () => {
+      try {
+        setIsFetchingRoles(true);
+        const res = await fetch(`/api/admin/roles?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data && typeof json.data === 'object') {
+          // Transform API response to roles format
+          const rolesObj: any = {};
+          Object.entries(json.data).forEach(([key, value]: [string, any]) => {
+            rolesObj[key] = {
+              title: value.title || value.name || key,
+              subtitle: value.subtitle || value.description || "",
+              icon: value.icon || null,
+              responsibilities: value.responsibilities || value.typical_responsibilities || [],
+              strategicFocus: value.strategicFocus || value.strategic_focus || "",
+            };
+          });
+          setRoles(rolesObj);
+        } else {
+          setRoles(null);
+          setError(json.error || "Failed to fetch roles");
+        }
+      } catch (err) {
+        console.error("Failed to fetch roles:", err);
+        setRoles(null);
+        setError("Failed to fetch roles");
+      } finally {
+        setIsFetchingRoles(false);
+      }
+    };
+
+    fetchRolesFromAPI();
+  }, [countryId]);
 
   const handleRoleChange = (role: RoleType) => {
     setSelectedRole(role);
@@ -23,7 +69,7 @@ export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps
     }
   };
 
-  const roles = {
+  const DEFAULT_ROLES = {
     defendant: {
       title: "Defendant/Respondent",
       subtitle: "Party defending against legal action",
@@ -56,10 +102,16 @@ export default function CompactRole({ onUpdate, initialValue }: CompactRoleProps
     },
   };
 
-  const selectedRoleData = selectedRole ? roles[selectedRole] : null;
+  const effectiveRoles = roles || DEFAULT_ROLES;
+  const selectedRoleData = selectedRole ? effectiveRoles[selectedRole] : null;
 
   return (
     <>
+      {error && (
+        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+          {error}
+        </div>
+      )}
       <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
           <div className="flex items-start sm:items-center flex-1">
