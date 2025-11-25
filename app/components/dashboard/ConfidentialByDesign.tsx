@@ -4,11 +4,13 @@ import Link from "next/link";
 
 export default function ConfidentialByDesign() {
   return (
-    <section className="py-20 bg-surface-200">
+    <section className="py-20 bg-gradient-to-br from-surface-050 via-surface-100 to-primary-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center text-ink-900">
-            Confidential by design
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
+            <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-accent-600 bg-clip-text text-transparent">
+              Confidential by design
+            </span>
           </h2>
           <p className="text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
             Legal work is sensitive. Lawgorithm is built with security and confidentiality as first principles, not an afterthought.
