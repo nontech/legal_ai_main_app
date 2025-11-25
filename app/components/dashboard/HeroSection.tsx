@@ -4,14 +4,19 @@ import Link from "next/link";
 
 export default function HeroSection() {
   return (
-    <div className="bg-gradient-to-br from-primary-950 to-primary-700 text-white pt-20">
+    <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/40 text-gray-900 pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-white">
-            Not another chatbot. A scenario engine for legal
-            decisions.
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+            <span className="text-gray-900">
+              Not another chatbot.
+            </span>{" "}
+            <span className="text-accent-400">A scenario engine</span>{" "}
+            <span className="text-gray-900">
+              for legal decisions.
+            </span>
           </h1>
-          <p className="text-xl text-surface-200 mb-10 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
             Lawgorithm ingests your case facts and documents, compares
             them against patterns in past cases, and produces
             structured scenario analyses you can actually use: likely
@@ -39,7 +44,7 @@ export default function HeroSection() {
                 />
               </svg>
             </Link>
-            <div className="flex items-center gap-2 text-sm text-surface-300/80">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
               <svg
                 className="w-4 h-4"
                 fill="none"
@@ -61,10 +66,10 @@ export default function HeroSection() {
         {/* Feature Grid */}
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8 mt-16">
           {/* Column 1 */}
-          <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-colors duration-300">
-            <div className="w-12 h-12 bg-success-500/20 rounded-xl flex items-center justify-center mb-4">
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 hover:bg-gray-50 transition-colors duration-300 shadow-sm">
+            <div className="w-12 h-12 bg-success-500/30 rounded-xl flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-success-400"
+                className="w-6 h-6 text-success-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -77,10 +82,10 @@ export default function HeroSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
               Clear viability assessment
             </h3>
-            <ul className="text-surface-200 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
+            <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
               <li>Concise view of strengths & weaknesses</li>
               <li>At-a-glance risk assessment</li>
               <li>Claim-by-claim viability check</li>
@@ -88,10 +93,10 @@ export default function HeroSection() {
           </div>
 
           {/* Column 2 */}
-          <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-colors duration-300">
-            <div className="w-12 h-12 bg-primary-500/20 rounded-xl flex items-center justify-center mb-4">
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 hover:bg-gray-50 transition-colors duration-300 shadow-sm">
+            <div className="w-12 h-12 bg-primary-500/30 rounded-xl flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-primary-400"
+                className="w-6 h-6 text-primary-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -104,10 +109,10 @@ export default function HeroSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
               Scenario breakdowns
             </h3>
-            <ul className="text-surface-200 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
+            <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
               <li>Best, base, and worst-case outcomes</li>
               <li>Detailed qualitative reasoning</li>
               <li>Explainable logic for stakeholders</li>
@@ -115,10 +120,10 @@ export default function HeroSection() {
           </div>
 
           {/* Column 3 */}
-          <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/10 transition-colors duration-300">
-            <div className="w-12 h-12 bg-accent-500/20 rounded-xl flex items-center justify-center mb-4">
+          <div className="p-6 bg-white rounded-2xl border border-gray-200 hover:bg-gray-50 transition-colors duration-300 shadow-sm">
+            <div className="w-12 h-12 bg-accent-500/30 rounded-xl flex items-center justify-center mb-4">
               <svg
-                className="w-6 h-6 text-accent-400"
+                className="w-6 h-6 text-accent-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -131,10 +136,10 @@ export default function HeroSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
               Actionable next steps
             </h3>
-            <ul className="text-surface-200 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
+            <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
               <li>Checklists for missing documents</li>
               <li>Suggested lines of research</li>
               <li>Client clarification questions</li>
