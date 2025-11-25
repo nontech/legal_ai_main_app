@@ -16,6 +16,7 @@ import JudgeSelection from "../../components/JudgeSelection";
 import PretrialProcess from "../../components/PretrialProcess";
 import JuryComposition from "../../components/JuryComposition";
 import ResultsStep from "../../components/ResultsStep";
+import VerdictStep from "../../components/VerdictStep";
 
 function DetailedCaseAnalysisContent() {
   const searchParams = useSearchParams();
@@ -27,7 +28,7 @@ function DetailedCaseAnalysisContent() {
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
-  const totalSteps = 9; // Total number of steps (added Game Plan)
+  const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
 
   // Track completion data for each step (percentage)
   const [completionData, setCompletionData] = useState<{
@@ -42,6 +43,7 @@ function DetailedCaseAnalysisContent() {
     6: 0, // Jury
     7: 0, // Results
     8: 0, // Game Plan
+    9: 0, // Verdict
   });
 
   // Fetch case data and calculate completion percentages
@@ -170,6 +172,8 @@ function DetailedCaseAnalysisContent() {
         return <ResultsStep />;
       case 8:
         return <ResultsStep showGamePlanOnly={true} />;
+      case 9:
+        return <VerdictStep />;
       default:
         return <JurisdictionSection caseId={caseId} />;
     }

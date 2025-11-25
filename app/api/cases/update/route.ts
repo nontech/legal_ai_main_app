@@ -104,6 +104,15 @@ export async function PATCH(request: Request) {
         // Add charges if provided
         if (charges !== undefined) {
             updateData.charges = charges;
+
+            // Initialize verdicts for each charge with "pending" status
+            const initialVerdicts: Record<string, string> = {};
+            if (Array.isArray(charges)) {
+                charges.forEach((charge: any) => {
+                    initialVerdicts[charge.id] = "pending";
+                });
+            }
+            updateData.verdict = initialVerdicts;
         }
 
         // If no fields to update, return error

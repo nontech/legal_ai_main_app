@@ -6,8 +6,9 @@ import Navbar from "../components/Navbar";
 import HorizontalStepper from "../components/quick-analysis/HorizontalStepper";
 import DocumentUploadStep from "../components/quick-analysis/DocumentUploadStep";
 import QuickAnalysisForm from "../components/quick-analysis/QuickAnalysisForm";
+import VerdictStep from "../components/VerdictStep";
 
-type Step = "upload" | "form";
+type Step = "upload" | "form" | "verdict";
 
 function CaseAnalysisContent() {
   const searchParams = useSearchParams();
@@ -45,7 +46,9 @@ function CaseAnalysisContent() {
   };
 
   const getCurrentStepNumber = () => {
-    return currentStep === "upload" ? 1 : 2;
+    if (currentStep === "upload") return 1;
+    if (currentStep === "form") return 2;
+    return 3; // verdict
   };
 
   const handleStepClick = (stepNumber: number) => {
@@ -54,6 +57,9 @@ function CaseAnalysisContent() {
     } else if (stepNumber === 2 && hasVisitedForm) {
       // Only allow going to step 2 if user has visited it before
       setCurrentStep("form");
+    } else if (stepNumber === 3 && hasVisitedForm) {
+      // Only allow going to step 3 if user has visited form
+      setCurrentStep("verdict");
     }
   };
 
@@ -93,6 +99,10 @@ function CaseAnalysisContent() {
                 caseInformationFiles={caseInformationFiles}
                 caseId={caseId}
               />
+            )}
+
+            {currentStep === "verdict" && (
+              <VerdictStep />
             )}
           </section>
         </div>

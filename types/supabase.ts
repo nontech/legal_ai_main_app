@@ -29,6 +29,7 @@ export type Database = {
           result: Json | null
           role: string | null
           status: string | null
+          verdict: Json | null
         }
         Insert: {
           case_details?: Json | null
@@ -44,6 +45,7 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          verdict?: Json | null
         }
         Update: {
           case_details?: Json | null
@@ -59,6 +61,7 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          verdict?: Json | null
         }
         Relationships: []
       }

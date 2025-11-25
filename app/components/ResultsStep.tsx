@@ -109,7 +109,6 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
     fetchResults(false);
   };
 
-
   const toggleFactorExpanded = (factorKey: string) => {
     const newExpanded = new Set(expandedFactors);
     if (newExpanded.has(factorKey)) {
