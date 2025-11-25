@@ -18,16 +18,24 @@ interface ChargesSectionProps {
 export default function ChargesSection({ caseId, onCompletionChange }: ChargesSectionProps) {
   const [charges, setCharges] = useState<Charge[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [caseType, setCaseType] = useState<string>("criminal");
+  const [isLoadingCaseType, setIsLoadingCaseType] = useState(true);
 
   useEffect(() => {
     if (caseId) {
       const fetchChargesData = async () => {
         try {
+          setIsLoadingCaseType(true);
           const res = await fetch(`/api/cases/${caseId}`);
           const json = await res.json();
 
           if (json.ok && json.data) {
             const caseData = json.data;
+
+            // Load case type
+            if (caseData.case_type) {
+              setCaseType(caseData.case_type);
+            }
 
             // Load charges if they exist
             if (caseData.charges && Array.isArray(caseData.charges)) {
@@ -43,20 +51,25 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
           }
         } catch (error) {
           console.error("Failed to fetch charges data:", error);
+        } finally {
+          setIsLoadingCaseType(false);
         }
       };
 
       fetchChargesData();
     }
-  }, [caseId]);
+  }, [caseId, onCompletionChange]);
 
   const addCharge = () => {
+    const isCriminal = caseType?.toLowerCase() === "criminal";
+    const defaultPlea = isCriminal ? "not-guilty" : "non-liable";
+
     const newCharge: Charge = {
       id: Date.now().toString(),
       statuteNumber: "",
       chargeDescription: "",
       essentialFacts: "",
-      defendantPlea: "not-guilty",
+      defendantPlea: defaultPlea,
     };
     setCharges([...(charges || []), newCharge]);
   };
@@ -130,22 +143,26 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
     }
   };
 
+  const isCriminal = caseType?.toLowerCase() === "criminal";
+  const chargeLabel = isCriminal ? "Charges" : "Claims";
+  const chargeWord = isCriminal ? "charge" : "claim";
+
   return (
     <div className="space-y-6">
-      {/* Charges Section */}
+      {/* Charges/Claims Section */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Charges</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{chargeLabel}</h2>
             <p className="text-sm text-gray-600 mt-1">
-              Add and manage charges for your case
+              Add and manage {chargeLabel.toLowerCase()} for your case
             </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="text-sm text-gray-600">
-            {charges?.length || 0} charge{charges?.length !== 1 ? "s" : ""} added
+            {charges?.length || 0} {chargeWord}{charges?.length !== 1 ? "s" : ""} added
           </div>
           <button
             onClick={addCharge}
@@ -164,7 +181,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Add Charge
+            Add {chargeLabel === "Charges" ? "Charge" : "Claim"}
           </button>
         </div>
 
@@ -219,7 +236,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Charge Description
+                    {chargeLabel === "Charges" ? "Charge Description" : "Claim Description"}
                   </label>
                   <textarea
                     value={charge.chargeDescription}
@@ -253,7 +270,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Defendant's Plea
+                    {caseType?.toLowerCase() === "criminal" ? "Defendant's Plea" : "Defendant's Claim"}
                   </label>
                   <select
                     value={charge.defendantPlea}
@@ -262,10 +279,21 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                     }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                   >
-                    <option value="not-guilty">Not Guilty</option>
-                    <option value="guilty">Guilty</option>
-                    <option value="nolo">Nolo Contendere</option>
-                    <option value="pending">Pending</option>
+                    {caseType?.toLowerCase() === "criminal" ? (
+                      <>
+                        <option value="not-guilty">Not Guilty</option>
+                        <option value="guilty">Guilty</option>
+                        <option value="nolo">Nolo Contendere</option>
+                        <option value="pending">Pending</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="non-liable">Non-Liable</option>
+                        <option value="liable">Liable</option>
+                        <option value="nolo">Nolo Contendere</option>
+                        <option value="pending">Pending</option>
+                      </>
+                    )}
                   </select>
                 </div>
               </div>

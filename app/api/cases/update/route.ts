@@ -105,10 +105,13 @@ export async function PATCH(request: Request) {
         if (charges !== undefined) {
             updateData.charges = charges;
 
-            // Initialize verdicts for each charge with "pending" status
+            // Initialize verdicts for each charge based on case type
             const initialVerdicts: Record<string, string> = {};
             if (Array.isArray(charges)) {
                 charges.forEach((charge: any) => {
+                    // For criminal cases, use guilty/not_guilty/pending verdicts
+                    // For civil cases, use liable/non_liable/pending verdicts
+                    // Default to "pending" for both types
                     initialVerdicts[charge.id] = "pending";
                 });
             }

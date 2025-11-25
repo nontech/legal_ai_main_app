@@ -15,6 +15,7 @@ function SignUpContent() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
 
     const handleSignUp = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -46,17 +47,14 @@ function SignUpContent() {
                 throw new Error(json?.error || "Sign-up failed");
             }
 
-            // Store email in sessionStorage
+            // Store email and caseId in sessionStorage for later
             if (json.email) {
                 sessionStorage.setItem("userEmail", json.email);
+                sessionStorage.setItem("pendingCaseId", caseId || "");
             }
 
-            // Redirect to dashboard or case page
-            if (caseId) {
-                router.push(`/case-analysis/detailed?step=7&caseId=${caseId}`);
-            } else {
-                router.push("/");
-            }
+            // Show email confirmation screen
+            setShowEmailConfirmation(true);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Unknown error");
         } finally {
@@ -64,6 +62,83 @@ function SignUpContent() {
         }
     };
 
+    // Email confirmation screen
+    if (showEmailConfirmation) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+                <div className="w-full max-w-md">
+                    {/* Success Card */}
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                        <div className="text-center">
+                            {/* Success Icon */}
+                            <div className="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mx-auto mb-6">
+                                <svg
+                                    className="w-8 h-8 text-green-600"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                    />
+                                </svg>
+                            </div>
+
+                            {/* Heading */}
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                                Check your email
+                            </h2>
+
+                            {/* Description */}
+                            <p className="text-gray-600 mb-2">
+                                We've sent a confirmation link to:
+                            </p>
+                            <p className="text-lg font-semibold text-blue-600 mb-6">
+                                {email}
+                            </p>
+
+                            {/* Instructions */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
+                                <p className="text-sm text-gray-700 mb-3 font-medium">
+                                    To complete your registration:
+                                </p>
+                                <ol className="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+                                    <li>Open the email we sent to you</li>
+                                    <li>Click the confirmation link in the email</li>
+                                    <li>Your account will be activated immediately</li>
+                                </ol>
+                            </div>
+
+                            {/* Info Box */}
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <p className="text-sm text-yellow-800">
+                                    💡 <span className="font-medium">Tip:</span> Check your spam or junk folder if you don't see the email
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-6 text-center">
+                        <p className="text-sm text-gray-600 mb-3">
+                            Already confirmed your email?
+                        </p>
+                        <Link
+                            href="/auth/signin"
+                            className="text-blue-600 font-semibold hover:text-blue-700"
+                        >
+                            Go to Sign In →
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Sign up form
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
             <div className="w-full max-w-md">
@@ -150,7 +225,7 @@ function SignUpContent() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="cursor-pointer w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Creating account..." : "Create Account"}
                         </button>

@@ -194,7 +194,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                   href="/auth/signin"
                   className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
-                  <span className="relative z-10">Sign In</span>
+                  <span className="relative z-10 cursor-pointer">Sign In</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
                 </Link>
 
@@ -313,7 +313,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               <div className="space-y-2 border-t border-border-200 mt-2 pt-2">
                 <Link
                   href="/auth/signin"
-                  className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
+                  className="cursor-pointer block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign In

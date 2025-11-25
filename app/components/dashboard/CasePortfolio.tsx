@@ -161,7 +161,7 @@ export default function CasePortfolio() {
             <p className="text-sm text-gray-600 mb-4">Please sign in to access your case portfolio</p>
             <button
               onClick={() => router.push("/auth/signin")}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
+              className="cursor-pointer bg-gradient-to-r from-accent-400 to-accent-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-accent-500 hover:to-accent-400 transition-all"
             >
               Sign In
             </button>
@@ -183,7 +183,7 @@ export default function CasePortfolio() {
           </div>
           <button
             onClick={() => router.push("/case-analysis")}
-            className="bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
+            className="cursor-pointer bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
           >
             <svg
               className="w-5 h-5"

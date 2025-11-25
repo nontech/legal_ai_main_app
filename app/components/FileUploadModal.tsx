@@ -986,10 +986,10 @@ export default function FileUploadModal({
                       <div className="flex flex-col items-center justify-center flex-1 min-h-0">
                         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
                         <p className="text-lg font-semibold text-ink-900 mb-2">
-                          Generating AI Summary...
+                          Extracting information from documents...
                         </p>
                         <p className="text-sm text-ink-600">
-                          Analyzing your documents and creating a comprehensive summary
+                          Analyzing your documents and extracting information from them
                         </p>
                       </div>
                     ) : (
@@ -1185,7 +1185,7 @@ export default function FileUploadModal({
                                   <button
                                     onClick={handleGenerateSummary}
                                     disabled={isGenerating}
-                                    className="px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="cursor-pointer px-4 py-2 text-sm font-medium bg-primary-100 text-primary-700 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                   >
                                     {isGenerating ? (
                                       <>
@@ -1197,16 +1197,16 @@ export default function FileUploadModal({
                                     ) : aiSummary ? (
                                       <>
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        Regenerate Summary
+                                        Extract information from documents
                                       </>
                                     ) : (
                                       <>
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        Generate Summary
+                                        Extract information from documents
                                       </>
                                     )}
                                   </button>
@@ -1215,7 +1215,7 @@ export default function FileUploadModal({
                                   {aiSummary && (
                                     <button
                                       onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                                      className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
+                                      className={`cursor-pointer px-3 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2 ${isMarkdownPreview
                                         ? "bg-green-100 text-green-700 hover:bg-green-200"
                                         : "bg-surface-100 text-ink-700 hover:bg-surface-200"
                                         }`}
@@ -1244,9 +1244,9 @@ export default function FileUploadModal({
                                 </div>
                               )}
 
-                              <div className="bg-surface-000 p-6 rounded-lg border border-border-200">
+                              <div className="bg-surface-000 rounded-lg">
                                 {isMarkdownPreview && aiSummary ? (
-                                  <div className="min-h-[400px] max-h-[600px] overflow-y-auto markdown-preview">
+                                  <div className="p-4 min-h-[400px] max-h-[600px] overflow-y-auto markdown-preview">
                                     <MarkdownRenderer content={aiSummary} />
                                   </div>
                                 ) : (
@@ -1254,8 +1254,8 @@ export default function FileUploadModal({
                                     ref={summaryRef}
                                     value={aiSummary}
                                     onChange={handleSummaryChange}
-                                    className="w-full min-h-[400px] p-4 border border-border-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-y font-mono text-sm text-ink-900"
-                                    placeholder={(uploadedFiles.length === 0 && selectedFiles.length === 0) ? "Click to add summary text or upload documents to generate a summary..." : "AI-generated summary will appear here or edit manually..."}
+                                    className="w-full min-h-[400px] p-4 border border-border-300 rounded-lg resize-y font-mono text-sm text-ink-900"
+                                    placeholder={(uploadedFiles.length === 0 && selectedFiles.length === 0) ? "Click to add information or upload documents to extract information from them..." : "Information will appear here or edit manually..."}
                                   />
                                 )}
                               </div>
