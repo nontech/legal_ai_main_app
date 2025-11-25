@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/dashboard/HeroSection";
 import StatsCards from "./components/dashboard/StatsCards";
 import CasePortfolio from "./components/dashboard/CasePortfolio";
+import ConfidentialByDesign from "./components/dashboard/ConfidentialByDesign";
 import Footer from "./components/Footer";
 import PretrialProcess from "./components/PretrialProcess";
 
@@ -26,6 +27,9 @@ export default function Dashboard() {
         {/* Case Portfolio */}
         <CasePortfolio />
       </main>
+
+      {/* Confidential by Design Section */}
+      <ConfidentialByDesign />
 
       {/* Footer */}
       <Footer />
