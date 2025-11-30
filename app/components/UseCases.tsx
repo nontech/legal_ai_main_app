@@ -17,6 +17,8 @@ interface ProfileCardProps {
 }
 
 function ProfileCard({ title, features, icon, href }: ProfileCardProps) {
+  const isComingSoon = href === "#";
+
   return (
     <div className="bg-surface-000 rounded-xl p-6 shadow-md border border-border-200 transition-all duration-300 hover:shadow-lg hover:border-primary-300 flex flex-col h-full min-h-[280px]">
       <div className="flex items-center gap-3 mb-4">
@@ -52,12 +54,21 @@ function ProfileCard({ title, features, icon, href }: ProfileCardProps) {
           </li>
         ))}
       </ul>
-      <Link
-        href={href}
-        className="flex items-center justify-center gap-2 bg-white border border-border-300 text-ink-700 px-6 py-3 rounded-lg hover:bg-surface-50 hover:border-border-400 transition-all duration-200 mt-auto font-semibold shadow-sm"
-      >
-        <span>Learn More</span>
-      </Link>
+      {isComingSoon ? (
+        <button
+          disabled
+          className="flex items-center justify-center gap-2 bg-surface-100 border border-border-200 text-ink-400 px-6 py-3 rounded-lg mt-auto font-semibold cursor-not-allowed"
+        >
+          <span>Coming Soon</span>
+        </button>
+      ) : (
+        <Link
+          href={href}
+          className="flex items-center justify-center gap-2 bg-primary-900 text-white border border-primary-900 px-6 py-3 rounded-lg hover:bg-primary-800 transition-all duration-200 mt-auto font-semibold shadow-sm"
+        >
+          <span>Learn More</span>
+        </Link>
+      )}
     </div>
   );
 }
@@ -82,7 +93,7 @@ export default function UseCases() {
         "Learn likely outcomes before consultation",
       ],
       icon: <User className="w-6 h-6" />,
-      href: "#",
+      href: "/individuals",
     },
     {
       title: "Optimize Workflows for Legal Operations",
