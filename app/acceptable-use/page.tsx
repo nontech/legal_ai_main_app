@@ -2,9 +2,9 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Acceptable Use Policy - Lawgorithm",
+  title: "Acceptable Use Policy - TheLawThing",
   description:
-    "Acceptable Use Policy for Lawgorithm legal AI platform",
+    "Acceptable Use Policy for TheLawThing legal AI platform",
 };
 
 export default function AcceptableUse() {
@@ -32,7 +32,7 @@ export default function AcceptableUse() {
               </h2>
               <p>
                 This Acceptable Use Policy ("AUP") outlines the rules
-                and guidelines for using Lawgorithm's AI-powered legal
+                and guidelines for using TheLawThing's AI-powered legal
                 case analysis platform (the "Service"). By using the
                 Service, you agree to comply with this AUP.
               </p>
@@ -198,10 +198,10 @@ export default function AcceptableUse() {
                 If you become aware of any violation of this AUP,
                 please report it to us immediately at{" "}
                 <a
-                  href="mailto:abuse@lawgorithm.dev"
+                  href="mailto:abuse@TheLawThing.dev"
                   className="text-primary-600 hover:underline"
                 >
-                  abuse@lawgorithm.dev
+                  abuse@TheLawThing.dev
                 </a>
                 .
               </p>
@@ -225,10 +225,10 @@ export default function AcceptableUse() {
               <p>
                 Questions about this AUP? Contact us at{" "}
                 <a
-                  href="mailto:legal@lawgorithm.dev"
+                  href="mailto:legal@TheLawThing.dev"
                   className="text-primary-600 hover:underline"
                 >
-                  legal@lawgorithm.dev
+                  legal@TheLawThing.dev
                 </a>
                 .
               </p>

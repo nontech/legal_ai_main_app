@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Pricing - Lawgorithm",
-  description: "Pricing plans for Lawgorithm legal AI platform",
+  title: "Pricing - TheLawThing",
+  description: "Pricing plans for TheLawThing legal AI platform",
 };
 
 export default function Pricing() {
@@ -21,7 +21,7 @@ export default function Pricing() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Flexible Plans</h2>
               <p>
-                Lawgorithm offers flexible pricing options designed to scale with your practice. All plans include access to our core scenario engine features.
+                TheLawThing offers flexible pricing options designed to scale with your practice. All plans include access to our core scenario engine features.
               </p>
             </section>
 
@@ -72,7 +72,7 @@ export default function Pricing() {
                 Ready to learn more about pricing? Contact us to discuss your needs:
               </p>
               <p className="mt-4">
-                <strong>Email:</strong> <a href="mailto:contact@lawgorithm.dev" className="text-primary-600 hover:underline">contact@lawgorithm.dev</a>
+                <strong>Email:</strong> <a href="mailto:contact@TheLawThing.dev" className="text-primary-600 hover:underline">contact@TheLawThing.dev</a>
               </p>
             </section>
           </div>

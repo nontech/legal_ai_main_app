@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Documentation - Lawgorithm",
-  description: "Documentation for Lawgorithm legal AI platform",
+  title: "Documentation - TheLawThing",
+  description: "Documentation for TheLawThing legal AI platform",
 };
 
 export default function Documentation() {
@@ -14,14 +14,14 @@ export default function Documentation() {
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
           <h1 className="text-4xl font-bold text-ink-900 mb-4">Documentation</h1>
           <p className="text-lg text-ink-600 mb-8">
-            Learn how to use Lawgorithm's AI-powered scenario engine for legal case analysis.
+            Learn how to use TheLawThing's AI-powered scenario engine for legal case analysis.
           </p>
 
           <div className="prose prose-lg max-w-none space-y-8 text-ink-700">
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Getting Started</h2>
               <p>
-                Lawgorithm is a scenario engine that analyzes your case facts and documents to produce structured scenario analyses. This guide will help you get started.
+                TheLawThing is a scenario engine that analyzes your case facts and documents to produce structured scenario analyses. This guide will help you get started.
               </p>
 
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">Creating Your First Analysis</h3>
@@ -29,13 +29,13 @@ export default function Documentation() {
                 <li><strong>Start a New Case:</strong> Click "Start New Analysis" from the dashboard</li>
                 <li><strong>Upload Documents:</strong> Upload case documents, pleadings, and relevant materials</li>
                 <li><strong>Enter Case Facts:</strong> Provide key case details including jurisdiction, case type, and relevant facts</li>
-                <li><strong>Review Analysis:</strong> Lawgorithm will generate scenario breakdowns, viability assessments, and actionable next steps</li>
+                <li><strong>Review Analysis:</strong> TheLawThing will generate scenario breakdowns, viability assessments, and actionable next steps</li>
               </ol>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Understanding Your Results</h2>
-              
+
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">Viability Assessment</h3>
               <p>
                 Each claim or issue receives a risk assessment:
@@ -48,7 +48,7 @@ export default function Documentation() {
 
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">Scenario Breakdowns</h3>
               <p>
-                Lawgorithm provides three scenario analyses:
+                TheLawThing provides three scenario analyses:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Best-Case:</strong> Most favorable outcome based on available evidence</li>
@@ -86,7 +86,7 @@ export default function Documentation() {
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Best Practices</h2>
-              
+
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">Data Quality</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Provide complete and accurate case facts</li>
@@ -115,7 +115,7 @@ export default function Documentation() {
               <div className="bg-warning-100 border-l-4 border-warning-500 p-4 my-4">
                 <p className="font-semibold text-ink-900 mb-2">Important:</p>
                 <p>
-                  Lawgorithm is not a law firm and does not provide legal advice. All outputs are assistive tools intended to support professional judgment. Results are non-deterministic and should be reviewed by qualified counsel. You are solely responsible for all legal decisions and actions.
+                  TheLawThing is not a law firm and does not provide legal advice. All outputs are assistive tools intended to support professional judgment. Results are non-deterministic and should be reviewed by qualified counsel. You are solely responsible for all legal decisions and actions.
                 </p>
               </div>
             </section>
@@ -126,7 +126,7 @@ export default function Documentation() {
                 If you have questions or need assistance, please contact our support team:
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
-                <li><strong>Email:</strong> <a href="mailto:support@lawgorithm.dev" className="text-primary-600 hover:underline">support@lawgorithm.dev</a></li>
+                <li><strong>Email:</strong> <a href="mailto:support@TheLawThing.dev" className="text-primary-600 hover:underline">support@TheLawThing.dev</a></li>
                 <li><strong>Response Time:</strong> We typically respond within 24-48 hours</li>
               </ul>
             </section>

@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Imprint - Lawgorithm",
-  description: "Legal notice and imprint for Lawgorithm",
+  title: "Imprint - TheLawThing",
+  description: "Legal notice and imprint for TheLawThing",
 };
 
 export default function Imprint() {
@@ -19,7 +19,7 @@ export default function Imprint() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Provider Information</h2>
               <p>
-                <strong>Legal Entity Name:</strong> Lawgorithm<br />
+                <strong>Legal Entity Name:</strong> TheLawThing<br />
                 <strong>Registered Office:</strong> [To be updated with actual address]<br />
                 <strong>Postal Code & City:</strong> [To be updated]<br />
                 <strong>Country:</strong> [To be updated]
@@ -51,8 +51,8 @@ export default function Imprint() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Contact Information</h2>
               <p>
-                <strong>Email:</strong> <a href="mailto:contact@lawgorithm.dev" className="text-primary-600 hover:underline">contact@lawgorithm.dev</a><br />
-                <strong>Support:</strong> <a href="mailto:support@lawgorithm.dev" className="text-primary-600 hover:underline">support@lawgorithm.dev</a><br />
+                <strong>Email:</strong> <a href="mailto:contact@TheLawThing.dev" className="text-primary-600 hover:underline">contact@TheLawThing.dev</a><br />
+                <strong>Support:</strong> <a href="mailto:support@TheLawThing.dev" className="text-primary-600 hover:underline">support@TheLawThing.dev</a><br />
                 <strong>Phone:</strong> [To be updated]
               </p>
             </section>
@@ -78,7 +78,7 @@ export default function Imprint() {
 
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">No Legal Advice</h3>
               <p>
-                Lawgorithm is not a law firm and does not provide legal advice. The Service provides AI-generated analysis and insights for informational purposes only. All legal decisions should be made in consultation with qualified legal counsel.
+                TheLawThing is not a law firm and does not provide legal advice. The Service provides AI-generated analysis and insights for informational purposes only. All legal decisions should be made in consultation with qualified legal counsel.
               </p>
             </section>
 

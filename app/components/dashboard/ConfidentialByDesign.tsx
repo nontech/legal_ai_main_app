@@ -13,7 +13,7 @@ export default function ConfidentialByDesign() {
             </span>
           </h2>
           <p className="text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
-            Legal work is sensitive. Lawgorithm is built with security and confidentiality as first principles, not an afterthought.
+            Legal work is sensitive. TheLawThing is built with security and confidentiality as first principles, not an afterthought.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8">

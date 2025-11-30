@@ -13,7 +13,7 @@ export default function HeroSection() {
             </span>
           </h1>
           <p className="text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Lawgorithm ingests your case facts and documents, compares
+            TheLawThing ingests your case facts and documents, compares
             them against patterns in past cases, and produces
             structured scenario analyses you can actually use: likely
             outcomes, key uncertainties, and the evidence that moves

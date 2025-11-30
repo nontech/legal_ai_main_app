@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Terms of Service - Lawgorithm",
-  description: "Terms of Service for Lawgorithm legal AI platform",
+  title: "Terms of Service - TheLawThing",
+  description: "Terms of Service for TheLawThing legal AI platform",
 };
 
 export default function TermsOfService() {
@@ -19,14 +19,14 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">1. Acceptance of Terms</h2>
               <p>
-                By accessing or using Lawgorithm's AI-powered legal case analysis platform (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these Terms, you may not access the Service.
+                By accessing or using TheLawThing's AI-powered legal case analysis platform (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of these Terms, you may not access the Service.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">2. Important Disclaimer</h2>
               <div className="bg-warning-100 border-l-4 border-warning-500 p-4 my-4">
-                <p className="font-semibold text-ink-900 mb-2">Lawgorithm is not a law firm and does not provide legal advice.</p>
+                <p className="font-semibold text-ink-900 mb-2">TheLawThing is not a law firm and does not provide legal advice.</p>
                 <p>
                   The Service provides AI-generated analysis, predictions, and insights based on patterns in legal data. All outputs are assistive tools intended to support professional judgment, not replace it. Results are non-deterministic and should be reviewed by qualified legal counsel. You are solely responsible for all legal decisions and actions taken based on the Service.
                 </p>
@@ -65,7 +65,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">5. Intellectual Property</h2>
               <p>
-                The Service, including all software, algorithms, and content, is owned by Lawgorithm and protected by intellectual property laws. You retain ownership of content you upload, but grant us a license to use it to provide the Service.
+                The Service, including all software, algorithms, and content, is owned by TheLawThing and protected by intellectual property laws. You retain ownership of content you upload, but grant us a license to use it to provide the Service.
               </p>
             </section>
 
@@ -86,14 +86,14 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">8. Limitation of Liability</h2>
               <p>
-                TO THE MAXIMUM EXTENT PERMITTED BY LAW, LAWGORITHM SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES RESULTING FROM YOUR USE OF THE SERVICE.
+                TO THE MAXIMUM EXTENT PERMITTED BY LAW, TheLawThing SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES, WHETHER INCURRED DIRECTLY OR INDIRECTLY, OR ANY LOSS OF DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES RESULTING FROM YOUR USE OF THE SERVICE.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">9. Indemnification</h2>
               <p>
-                You agree to indemnify and hold harmless Lawgorithm from any claims, damages, losses, or expenses (including attorneys' fees) arising from your use of the Service or violation of these Terms.
+                You agree to indemnify and hold harmless TheLawThing from any claims, damages, losses, or expenses (including attorneys' fees) arising from your use of the Service or violation of these Terms.
               </p>
             </section>
 
@@ -121,7 +121,7 @@ export default function TermsOfService() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">13. Contact</h2>
               <p>
-                Questions about these Terms? Contact us at <a href="mailto:legal@lawgorithm.dev" className="text-primary-600 hover:underline">legal@lawgorithm.dev</a>.
+                Questions about these Terms? Contact us at <a href="mailto:legal@TheLawThing.dev" className="text-primary-600 hover:underline">legal@TheLawThing.dev</a>.
               </p>
             </section>
           </div>

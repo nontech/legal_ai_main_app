@@ -135,7 +135,7 @@ export default function UseCases() {
             Find Your Legal Edge
           </h2>
           <p className="text-lg text-ink-600 max-w-2xl mx-auto">
-            Lawgorithm provides tailored solutions for your legal needs. Discover how our intelligent analysis can work for you.
+            TheLawThing provides tailored solutions for your legal needs. Discover how our intelligent analysis can work for you.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

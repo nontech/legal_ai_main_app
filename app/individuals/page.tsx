@@ -49,15 +49,15 @@ export default function IndividualsPage() {
                 </div>
             </section>
 
-            {/* Who Lawgorithm Helps */}
+            {/* Who TheLawThing Helps */}
             <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-050">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-20">
                         <h2 className="text-4xl font-bold text-primary-900 mb-6">
-                            Who Lawgorithm Helps
+                            Who TheLawThing Helps
                         </h2>
                         <p className="text-xl text-ink-600 max-w-3xl mx-auto font-medium">
-                            Lawgorithm is built for people suddenly thrown into stressful legal situations – especially in Germany and the EU.
+                            TheLawThing is built for people suddenly thrown into stressful legal situations – especially in Germany and the EU.
                         </p>
                     </div>
 
@@ -109,15 +109,15 @@ export default function IndividualsPage() {
                 </div>
             </section>
 
-            {/* Why People Use Lawgorithm (Before vs After) */}
+            {/* Why People Use TheLawThing (Before vs After) */}
             <section className="py-24 px-4 sm:px-6 lg:px-8 bg-surface-100">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold text-primary-900 mb-6">
-                            Why People Use Lawgorithm
+                            Why People Use TheLawThing
                         </h2>
                         <p className="text-xl text-ink-600 max-w-3xl mx-auto font-medium">
-                            Lawgorithm turns uncertainty into a concrete plan.
+                            TheLawThing turns uncertainty into a concrete plan.
                         </p>
                     </div>
 
@@ -177,7 +177,7 @@ export default function IndividualsPage() {
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-primary-900 mb-3">1. Clear Case Strength Assessment</h3>
-                                <p className="text-ink-600 mb-2">Upload your documents and describe what happened. Lawgorithm analyzes your situation and gives you:</p>
+                                <p className="text-ink-600 mb-2">Upload your documents and describe what happened. TheLawThing analyzes your situation and gives you:</p>
                                 <ul className="space-y-2 text-ink-600">
                                     <li className="flex items-start gap-2"><CheckCircle2 className="w-5 h-5 text-accent-600 flex-shrink-0 mt-0.5" /> A straightforward case strength indicator: strong, uncertain, or weak</li>
                                     <li className="flex items-start gap-2"><CheckCircle2 className="w-5 h-5 text-accent-600 flex-shrink-0 mt-0.5" /> Key arguments in your favor – and potential problems</li>
@@ -222,7 +222,7 @@ export default function IndividualsPage() {
                             </div>
                             <div>
                                 <h3 className="text-2xl font-bold text-primary-900 mb-3">4. Document & Evidence Checklist</h3>
-                                <p className="text-ink-600 mb-2">Lawgorithm helps you get organized:</p>
+                                <p className="text-ink-600 mb-2">TheLawThing helps you get organized:</p>
                                 <ul className="space-y-2 text-ink-600">
                                     <li className="flex items-start gap-2"><CheckCircle2 className="w-5 h-5 text-accent-600 flex-shrink-0 mt-0.5" /> Checklist of documents you should collect</li>
                                     <li className="flex items-start gap-2"><CheckCircle2 className="w-5 h-5 text-accent-600 flex-shrink-0 mt-0.5" /> Gap analysis: what’s missing and why it matters</li>
@@ -422,7 +422,7 @@ export default function IndividualsPage() {
                             Know Before You Pay
                         </h2>
                         <p className="text-xl text-ink-600 max-w-3xl mx-auto font-medium">
-                            Lawgorithm is designed to reduce the risk of spending money blindly on legal fees.
+                            TheLawThing is designed to reduce the risk of spending money blindly on legal fees.
                         </p>
                     </div>
 
