@@ -9,15 +9,11 @@ export default function HeroSection() {
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             <span className="text-gray-900">
-              Not another chatbot.
-            </span>{" "}
-            <span className="text-accent-400">A scenario engine</span>{" "}
-            <span className="text-gray-900">
-              for legal decisions.
+              Predict Legal Case Outcomes
             </span>
           </h1>
           <p className="text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Lawgorithm ingests your case facts and documents, compares
+            Our app ingests your case facts and documents, compares
             them against patterns in past cases, and produces
             structured scenario analyses you can actually use: likely
             outcomes, key uncertainties, and the evidence that moves

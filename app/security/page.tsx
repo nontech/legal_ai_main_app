@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Security - Lawgorithm",
-  description: "Security information for Lawgorithm legal AI platform",
+  title: "Security - TheLawThing",
+  description: "Security information for TheLawThing legal AI platform",
 };
 
 export default function Security() {
@@ -19,13 +19,13 @@ export default function Security() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Our Commitment</h2>
               <p>
-                Lawgorithm is built with defense-in-depth security principles. We implement multiple layers of security controls to protect your data and ensure the integrity of our Service.
+                TheLawThing is built with defense-in-depth security principles. We implement multiple layers of security controls to protect your data and ensure the integrity of our Service.
               </p>
             </section>
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Security Measures</h2>
-              
+
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">Encryption</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>In Transit:</strong> All data transmitted to and from the Service uses TLS 1.2+ encryption</li>
@@ -98,7 +98,7 @@ export default function Security() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Vulnerability Reporting</h2>
               <p>
-                We welcome responsible disclosure of security vulnerabilities. If you discover a security issue, please report it to <a href="mailto:security@lawgorithm.dev" className="text-primary-600 hover:underline">security@lawgorithm.dev</a>.
+                We welcome responsible disclosure of security vulnerabilities. If you discover a security issue, please report it to <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:underline">security@TheLawThing.dev</a>.
               </p>
               <p className="mt-4">
                 Please include:
@@ -123,7 +123,7 @@ export default function Security() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Contact</h2>
               <p>
-                For security-related inquiries, please contact <a href="mailto:security@lawgorithm.dev" className="text-primary-600 hover:underline">security@lawgorithm.dev</a>.
+                For security-related inquiries, please contact <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:underline">security@TheLawThing.dev</a>.
               </p>
             </section>
           </div>

@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Use Cases - Lawgorithm",
-  description: "Use cases for Lawgorithm legal AI platform",
+  title: "Use Cases - TheLawThing",
+  description: "Use cases for TheLawThing legal AI platform",
 };
 
 export default function UseCases() {
@@ -14,14 +14,14 @@ export default function UseCases() {
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
           <h1 className="text-4xl font-bold text-ink-900 mb-4">Use Cases</h1>
           <p className="text-lg text-ink-600 mb-8">
-            Discover how Lawgorithm helps legal professionals make better strategic decisions.
+            Discover how TheLawThing helps legal professionals make better strategic decisions.
           </p>
 
           <div className="prose prose-lg max-w-none space-y-8 text-ink-700">
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Case Strategy Development</h2>
               <p>
-                Before committing significant resources to a case, use Lawgorithm to assess viability and explore potential outcomes. Get structured scenario analyses that help you:
+                Before committing significant resources to a case, use TheLawThing to assess viability and explore potential outcomes. Get structured scenario analyses that help you:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Evaluate the strength of your legal position</li>
@@ -34,7 +34,7 @@ export default function UseCases() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">Client Communication</h2>
               <p>
-                Help clients understand their case prospects with clear, explainable scenario breakdowns. Lawgorithm provides:
+                Help clients understand their case prospects with clear, explainable scenario breakdowns. TheLawThing provides:
               </p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Qualitative reasoning that you can explain to clients</li>

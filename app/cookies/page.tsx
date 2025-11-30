@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Cookie Policy - Lawgorithm",
-  description: "Cookie Policy for Lawgorithm legal AI platform",
+  title: "Cookie Policy - TheLawThing",
+  description: "Cookie Policy for TheLawThing legal AI platform",
 };
 
 export default function CookiePolicy() {
@@ -25,7 +25,7 @@ export default function CookiePolicy() {
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">2. Types of Cookies We Use</h2>
-              
+
               <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.1 Strictly Necessary Cookies</h3>
               <p>
                 These cookies are essential for the Service to function properly. They enable core functionality such as authentication, security, and load balancing. You cannot opt out of these cookies.
@@ -85,7 +85,7 @@ export default function CookiePolicy() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">8. Contact Us</h2>
               <p>
-                If you have questions about our use of cookies, please contact us at <a href="mailto:privacy@lawgorithm.dev" className="text-primary-600 hover:underline">privacy@lawgorithm.dev</a>.
+                If you have questions about our use of cookies, please contact us at <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
               </p>
             </section>
           </div>

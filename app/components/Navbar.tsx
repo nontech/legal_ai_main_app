@@ -86,7 +86,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
             </div>
             <div className="flex flex-col">
               <span className="text-md sm:text-lg lg:text-xl font-bold text-ink-900 leading-tight">
-                Lawgorithm
+                TheLawThing
               </span>
             </div>
           </Link>

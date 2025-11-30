@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Contact - Lawgorithm",
-  description: "Contact Lawgorithm for support and inquiries",
+  title: "Contact - TheLawThing",
+  description: "Contact TheLawThing for support and inquiries",
 };
 
 export default function Contact() {
@@ -14,7 +14,7 @@ export default function Contact() {
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
           <h1 className="text-4xl font-bold text-ink-900 mb-4">Contact & Support</h1>
           <p className="text-lg text-ink-600 mb-8">
-            Get in touch with the Lawgorithm team. We're here to help with questions, support, and inquiries.
+            Get in touch with the TheLawThing team. We're here to help with questions, support, and inquiries.
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 mt-8">
@@ -29,8 +29,8 @@ export default function Contact() {
                 For technical support, account issues, or questions about using the platform.
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:support@lawgorithm.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  support@lawgorithm.dev
+                <a href="mailto:support@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
+                  support@TheLawThing.dev
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
@@ -49,8 +49,8 @@ export default function Contact() {
                 For business inquiries, partnerships, or general questions.
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:contact@lawgorithm.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  contact@lawgorithm.dev
+                <a href="mailto:contact@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
+                  contact@TheLawThing.dev
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
@@ -69,8 +69,8 @@ export default function Contact() {
                 Report security vulnerabilities or incidents.
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:security@lawgorithm.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  security@lawgorithm.dev
+                <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
+                  security@TheLawThing.dev
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
@@ -89,8 +89,8 @@ export default function Contact() {
                 For legal questions, privacy requests, or compliance inquiries.
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:legal@lawgorithm.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  legal@lawgorithm.dev
+                <a href="mailto:legal@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
+                  legal@TheLawThing.dev
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
@@ -102,7 +102,7 @@ export default function Contact() {
           <div className="mt-12 p-6 bg-primary-50 rounded-xl border border-primary-200">
             <h2 className="text-xl font-bold text-ink-900 mb-3">Office Hours</h2>
             <p className="text-ink-700">
-              Our support team is available Monday through Friday, 9:00 AM - 6:00 PM EST. 
+              Our support team is available Monday through Friday, 9:00 AM - 6:00 PM EST.
               For urgent security issues, please use the security email above and mark your message as "URGENT".
             </p>
           </div>

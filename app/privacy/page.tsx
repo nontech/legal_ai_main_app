@@ -2,8 +2,8 @@ import Link from "next/link";
 import Navbar from "../components/Navbar";
 
 export const metadata = {
-  title: "Privacy Policy - Lawgorithm",
-  description: "Privacy Policy for Lawgorithm legal AI platform",
+  title: "Privacy Policy - TheLawThing",
+  description: "Privacy Policy for TheLawThing legal AI platform",
 };
 
 export default function PrivacyPolicy() {
@@ -19,7 +19,7 @@ export default function PrivacyPolicy() {
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">1. Introduction</h2>
               <p>
-                Lawgorithm ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered legal case analysis platform (the "Service").
+                TheLawThing ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered legal case analysis platform (the "Service").
               </p>
             </section>
 
@@ -85,7 +85,7 @@ export default function PrivacyPolicy() {
                 <li>Withdraw consent</li>
               </ul>
               <p className="mt-4">
-                To exercise these rights, please contact us at <a href="mailto:privacy@lawgorithm.dev" className="text-primary-600 hover:underline">privacy@lawgorithm.dev</a>.
+                To exercise these rights, please contact us at <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
               </p>
             </section>
 
@@ -123,7 +123,7 @@ export default function PrivacyPolicy() {
                 If you have questions about this Privacy Policy, please contact us at:
               </p>
               <p className="mt-2">
-                <strong>Email:</strong> <a href="mailto:privacy@lawgorithm.dev" className="text-primary-600 hover:underline">privacy@lawgorithm.dev</a>
+                <strong>Email:</strong> <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>
               </p>
             </section>
           </div>

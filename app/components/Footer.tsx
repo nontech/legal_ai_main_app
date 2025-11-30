@@ -22,7 +22,7 @@ export default function Footer() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-bold">Lawgorithm</h3>
+                <h3 className="text-lg font-bold">TheLawThing</h3>
               </div>
             </div>
             <p className="text-sm text-white/70 mb-6 leading-relaxed">
@@ -30,7 +30,7 @@ export default function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href=""
+                href="https://www.linkedin.com/company/thelawthing/about/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/70 hover:text-accent-400 transition-colors"
@@ -175,10 +175,10 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-white/70">
-              © {currentYear} Lawgorithm. All rights reserved.
+              © {currentYear} TheLawThing. All rights reserved.
             </p>
             <p className="text-sm text-white/60">
-              Lawgorithm is not a law firm and does not provide legal advice.
+              TheLawThing is not a law firm and does not provide legal advice.
             </p>
           </div>
         </div>
