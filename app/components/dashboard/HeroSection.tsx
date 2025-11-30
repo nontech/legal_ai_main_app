@@ -9,11 +9,11 @@ export default function HeroSection() {
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             <span className="text-gray-900">
-              Your AI Co‑Counsel for Outcome‑Driven Case Strategy
+              Predict Legal Case Outcomes
             </span>
           </h1>
           <p className="text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-            TheLawThing ingests your case facts and documents, compares
+            Our app ingests your case facts and documents, compares
             them against patterns in past cases, and produces
             structured scenario analyses you can actually use: likely
             outcomes, key uncertainties, and the evidence that moves
