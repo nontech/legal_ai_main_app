@@ -526,11 +526,10 @@ const JudgesManager = () => {
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        judge.jurisdiction_id
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${judge.jurisdiction_id
                           ? "bg-blue-100 text-blue-800"
                           : "bg-purple-100 text-purple-800"
-                      }`}
+                        }`}
                     >
                       {judge.jurisdiction_id ? "Specific" : "Default"}
                     </span>

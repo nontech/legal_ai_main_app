@@ -448,97 +448,97 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
 
                         {/* Three Column Layout */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 hidden sm:grid">
-                      {/* Historical Ruling Patterns */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Historical Ruling Patterns
-                        </h4>
+                          {/* Historical Ruling Patterns */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Historical Ruling Patterns
+                            </h4>
 
-                        <div>
-                          <p className="font-semibold text-ink-800 mb-2">
-                            Criminal Cases:
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-ink-600">
-                              Conviction:{" "}
-                              {judge.criminalCases.conviction}%
-                            </p>
-                            <p className="text-ink-600">
-                              Dismissal:{" "}
-                              {judge.criminalCases.dismissal}%
-                            </p>
-                            <p className="text-ink-600">
-                              Plea Deals:{" "}
-                              {judge.criminalCases.pleaDeals}%
-                            </p>
+                            <div>
+                              <p className="font-semibold text-ink-800 mb-2">
+                                Criminal Cases:
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <p className="text-ink-600">
+                                  Conviction:{" "}
+                                  {judge.criminalCases.conviction}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Dismissal:{" "}
+                                  {judge.criminalCases.dismissal}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Plea Deals:{" "}
+                                  {judge.criminalCases.pleaDeals}%
+                                </p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <p className="font-semibold text-ink-800 mb-2">
+                                Civil Cases:
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <p className="text-ink-600">
+                                  Plaintiff Wins:{" "}
+                                  {judge.civilCases.plaintiffWins}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Defendant Wins:{" "}
+                                  {judge.civilCases.defendantWins}%
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <p className="font-semibold text-ink-800 mb-2">
-                            Civil Cases:
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-ink-600">
-                              Plaintiff Wins:{" "}
-                              {judge.civilCases.plaintiffWins}%
-                            </p>
-                            <p className="text-ink-600">
-                              Defendant Wins:{" "}
-                              {judge.civilCases.defendantWins}%
-                            </p>
+                          {/* Notable Decision Patterns */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Notable Decision Patterns
+                            </h4>
+                            <ul className="space-y-2">
+                              {judge.notablePatterns.map(
+                                (pattern, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start gap-2 text-sm text-ink-600"
+                                  >
+                                    <span className="text-primary-500 mt-0.5">
+                                      •
+                                    </span>
+                                    <span>{pattern}</span>
+                                  </li>
+                                )
+                              )}
+                            </ul>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Notable Decision Patterns */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Notable Decision Patterns
-                        </h4>
-                        <ul className="space-y-2">
-                          {judge.notablePatterns.map(
-                            (pattern, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-2 text-sm text-ink-600"
-                              >
-                                <span className="text-primary-500 mt-0.5">
-                                  •
-                                </span>
-                                <span>{pattern}</span>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-
-                      {/* Judicial Temperament */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Judicial Temperament
-                        </h4>
-                        <p className="text-ink-600 text-sm">
-                          {judge.temperament}
-                        </p>
-                        <div className="pt-2">
-                          <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
-                            <p className="text-sm font-semibold text-ink-900">
-                              {judge.experience} years experience
+                          {/* Judicial Temperament */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Judicial Temperament
+                            </h4>
+                            <p className="text-ink-600 text-sm">
+                              {judge.temperament}
                             </p>
+                            <div className="pt-2">
+                              <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
+                                <p className="text-sm font-semibold text-ink-900">
+                                  {judge.experience} years experience
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  )}
+      )}
       <SaveCaseButton
         caseId={caseId}
         field="judge"

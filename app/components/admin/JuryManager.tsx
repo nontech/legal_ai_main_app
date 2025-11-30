@@ -460,11 +460,10 @@ const JuryManager = () => {
                   </div>
                   <div className="flex gap-2 items-center">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        data.is_active
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${data.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
-                      }`}
+                        }`}
                     >
                       {data.is_active ? "Active" : "Inactive"}
                     </span>

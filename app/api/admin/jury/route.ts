@@ -31,8 +31,8 @@ export async function GET(request: NextRequest) {
     // Return the first matching record's data, or empty objects if none found
     const juryData = data && data.length > 0 ? data[0] : {};
 
-    return NextResponse.json({ 
-      ok: true, 
+    return NextResponse.json({
+      ok: true,
       data: {
         demographics: juryData?.demographics || {},
         characteristics: juryData?.characteristics || {}

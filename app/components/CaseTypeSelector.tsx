@@ -580,11 +580,10 @@ export default function CaseTypeSelector({
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                        selectedCaseType?.id === caseType.id
+                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
                           ? "border-primary-500 bg-primary-100"
                           : "border-border-200 hover:border-primary-300"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start mb-2">
                         <div className="text-3xl mr-3">
