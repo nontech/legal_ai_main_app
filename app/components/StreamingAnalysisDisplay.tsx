@@ -89,13 +89,19 @@ function useTypingAnimation(text: string, speed: number = 30) {
 function TypingText({ text, prefix = "", onComplete }: { text: string; prefix?: string; onComplete?: () => void }) {
     const { displayedText, isComplete } = useTypingAnimation(text || "", 30);
     const hasCalledComplete = useRef(false);
+    const onCompleteRef = useRef(onComplete);
+
+    // Keep ref up to date
+    useEffect(() => {
+        onCompleteRef.current = onComplete;
+    }, [onComplete]);
 
     useEffect(() => {
-        if (isComplete && !hasCalledComplete.current && onComplete) {
+        if (isComplete && !hasCalledComplete.current && onCompleteRef.current) {
             hasCalledComplete.current = true;
-            onComplete();
+            onCompleteRef.current();
         }
-    }, [isComplete, onComplete]);
+    }, [isComplete]);
 
     // Ensure we never render undefined
     const safeDisplayedText = displayedText || "";
@@ -244,9 +250,15 @@ export default function StreamingAnalysisDisplay({
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const hasStartedRef = useRef(false);
     const lastResultRef = useRef<any>(null);
+    const onCompleteRef = useRef(onComplete);
 
     // Track order of steps for consistent display
     const stepOrderRef = useRef<string[]>([]);
+
+    // Keep onCompleteRef up to date
+    useEffect(() => {
+        onCompleteRef.current = onComplete;
+    }, [onComplete]);
 
     useEffect(() => {
         if (!isOpen || !caseId) {
@@ -407,7 +419,7 @@ export default function StreamingAnalysisDisplay({
                             setProgress(100);
                             setIsComplete(true);
                             setIsLoading(false);
-                            onComplete(lastResult);
+                            onCompleteRef.current?.(lastResult);
                         } else {
                             console.warn("Stream ended without complete event, fetching result from database...");
 
@@ -457,7 +469,7 @@ export default function StreamingAnalysisDisplay({
                                         setProgress(100);
                                         setIsComplete(true);
                                         setIsLoading(false);
-                                        onComplete(data.data.result);
+                                        onCompleteRef.current?.(data.data.result);
                                         resultFetched = true;
                                         break;
                                     } else {
@@ -488,7 +500,7 @@ export default function StreamingAnalysisDisplay({
         };
 
         startStreaming();
-    }, [isOpen, caseId, onComplete]);
+    }, [isOpen, caseId]);
 
     // Auto-scroll to latest event
     useEffect(() => {
@@ -684,7 +696,7 @@ export default function StreamingAnalysisDisplay({
                             <button
                                 onClick={() => {
                                     if (lastResultRef.current) {
-                                        onComplete(lastResultRef.current);
+                                        onCompleteRef.current?.(lastResultRef.current);
                                     }
                                     // onClose() is NOT called here to prevent dialog closing before navigation
                                 }}

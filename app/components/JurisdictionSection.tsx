@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import SaveCaseButton from "./SaveCaseButton";
 import SearchableSelect from "./ui/searchable-select";
 
@@ -22,6 +22,23 @@ interface JurisdictionSectionProps {
   onCompletionChange?: (isComplete: boolean) => void;
   onCountryChange?: (countryId: string) => void;
   onJurisdictionChange?: (jurisdictionId: string) => void;
+  // For Quick Analysis compact mode
+  variant?: "full" | "compact";
+  onUpdate?: (data: {
+    country: string;
+    state: string;
+    city: string;
+    court: string;
+    country_id: string;
+  }) => void;
+  initialValues?: {
+    country?: string;
+    state?: string;
+    city?: string;
+    court?: string;
+    country_id?: string;
+  };
+  hideSaveButton?: boolean;
 }
 
 export default function JurisdictionSection({
@@ -29,6 +46,10 @@ export default function JurisdictionSection({
   onCompletionChange,
   onCountryChange,
   onJurisdictionChange,
+  variant = "full",
+  onUpdate,
+  initialValues,
+  hideSaveButton = false,
 }: JurisdictionSectionProps) {
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
@@ -51,6 +72,12 @@ export default function JurisdictionSection({
   const [isLoadingJurisdictions, setIsLoadingJurisdictions] =
     useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Use refs to store callbacks to prevent infinite loops
+  const onUpdateRef = useRef(onUpdate);
+  const onCompletionChangeRef = useRef(onCompletionChange);
+  const lastUpdateRef = useRef<string>("");
+  const hasInitializedRef = useRef(false);
 
   // Fetch countries on mount
   useEffect(() => {
@@ -106,6 +133,42 @@ export default function JurisdictionSection({
 
     fetchJurisdictions();
   }, [countryId]);
+
+  // Initialize from initialValues if provided (for Quick Analysis)
+  // Only run once on mount to avoid resetting user input
+  useEffect(() => {
+    if (
+      initialValues &&
+      countries.length > 0 &&
+      !caseId &&
+      !hasInitializedRef.current
+    ) {
+      hasInitializedRef.current = true;
+      const { country, state, city, court, country_id } =
+        initialValues;
+
+      if (country) {
+        const selectedCountry = countries.find(
+          (c) => c.name === country
+        );
+        if (selectedCountry) {
+          setCountry(country);
+          setCountryId(selectedCountry.id);
+        } else {
+          setCountry("__other__");
+          setCustomCountry(country);
+        }
+      }
+
+      if (state) {
+        // Check if state exists in jurisdictions when they load
+        setState(state);
+      }
+      if (city) setCity(city);
+      if (court) setCourt(court);
+      if (country_id) setCountryId(country_id);
+    }
+  }, [initialValues, countries, caseId]);
 
   // Fetch case data if caseId exists
   useEffect(() => {
@@ -197,17 +260,47 @@ export default function JurisdictionSection({
     }
   }, [jurisdictions, state, city, court]);
 
-  // Track completion
+  // Keep refs up to date
   useEffect(() => {
-    if (onCompletionChange) {
-      const countryValue =
-        country === "__other__" ? customCountry : country;
-      const stateValue = state === "__other__" ? customState : state;
-      const cityValue = city === "__other__" ? customCity : city;
-      const courtValue = court === "__other__" ? customCourt : court;
-      const isComplete =
-        countryValue && stateValue && cityValue && courtValue;
-      onCompletionChange(!!isComplete);
+    onUpdateRef.current = onUpdate;
+    onCompletionChangeRef.current = onCompletionChange;
+  }, [onUpdate, onCompletionChange]);
+
+  // Track completion and notify parent (for both modes)
+  useEffect(() => {
+    const countryValue =
+      country === "__other__" ? customCountry : country;
+    const stateValue = state === "__other__" ? customState : state;
+    const cityValue = city === "__other__" ? customCity : city;
+    const courtValue = court === "__other__" ? customCourt : court;
+    const isComplete =
+      countryValue && stateValue && cityValue && courtValue;
+
+    if (onCompletionChangeRef.current) {
+      onCompletionChangeRef.current(!!isComplete);
+    }
+
+    // For Quick Analysis mode - only call if values actually changed
+    if (onUpdateRef.current) {
+      const currentValues = JSON.stringify({
+        country: countryValue,
+        state: stateValue,
+        city: cityValue,
+        court: courtValue,
+        country_id: countryId,
+      });
+
+      // Only call onUpdate if values actually changed
+      if (currentValues !== lastUpdateRef.current) {
+        lastUpdateRef.current = currentValues;
+        onUpdateRef.current({
+          country: countryValue,
+          state: stateValue,
+          city: cityValue,
+          court: courtValue,
+          country_id: countryId,
+        });
+      }
     }
   }, [
     country,
@@ -218,7 +311,7 @@ export default function JurisdictionSection({
     customState,
     customCity,
     customCourt,
-    onCompletionChange,
+    countryId,
   ]);
 
   // Notify parent of country change
@@ -265,12 +358,18 @@ export default function JurisdictionSection({
 
   const handleCountryChange = (selectedCountryName: string) => {
     setCountry(selectedCountryName);
+
+    // Always clear dependent fields when country changes
+    setState("");
+    setCity("");
+    setCourt("");
+    setCustomState("");
+    setCustomCity("");
+    setCustomCourt("");
+
     if (selectedCountryName === "__other__") {
       setCountryId("");
-      // Clear dependent fields when switching to "Other"
-      setState("");
-      setCity("");
-      setCourt("");
+      setCustomCountry("");
     } else {
       const selected = countries.find(
         (c) => c.name === selectedCountryName
@@ -278,7 +377,7 @@ export default function JurisdictionSection({
       if (selected) {
         setCountryId(selected.id);
       }
-      // Clear custom value if switching from "Other"
+      // Clear custom country value when switching to predefined country
       setCustomCountry("");
     }
   };
@@ -334,14 +433,26 @@ export default function JurisdictionSection({
     )
   ).map((c) => ({ value: c!, label: c! }));
 
+  const isCompact = variant === "compact";
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+    <div
+      className={`bg-white rounded-lg border border-gray-200 ${
+        isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
+      }`}
+    >
       {/* Section Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-center mb-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full mr-3">
+      {isCompact ? (
+        <div className="flex items-start mb-3 sm:mb-4">
+          <div
+            className={`flex items-center justify-center ${
+              isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
+            } bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0`}
+          >
             <svg
-              className="w-6 h-6 text-gray-700"
+              className={`${
+                isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
+              } text-primary-600`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -360,15 +471,50 @@ export default function JurisdictionSection({
               />
             </svg>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">
-            Select Jurisdiction
-          </h2>
+          <div className="min-w-0">
+            <h3 className="text-base sm:text-lg font-bold text-ink-900">
+              Step 1: Jurisdiction{" "}
+              <span className="text-red-500">*</span>
+            </h3>
+            <p className="text-xs sm:text-sm text-ink-600">
+              Where your case will be heard
+            </p>
+          </div>
         </div>
-        <p className="text-center text-gray-600 text-lg">
-          Choose the location where your case will be filed or is
-          currently being heard.
-        </p>
-      </div>
+      ) : (
+        <div className="mb-8">
+          <div className="flex items-center justify-center mb-3">
+            <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-full mr-3">
+              <svg
+                className="w-6 h-6 text-gray-700"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Select Jurisdiction
+            </h2>
+          </div>
+          <p className="text-center text-gray-600 text-lg">
+            Choose the location where your case will be filed or is
+            currently being heard.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
@@ -377,7 +523,13 @@ export default function JurisdictionSection({
       )}
 
       {isLoading || isLoadingCountries ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div
+          className={`grid grid-cols-1 ${
+            isCompact
+              ? "md:grid-cols-4 gap-3"
+              : "md:grid-cols-2 gap-6"
+          } ${isCompact ? "mb-0" : "mb-8"}`}
+        >
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
               <div className="h-5 bg-gray-200 rounded w-20 mb-2"></div>
@@ -387,23 +539,17 @@ export default function JurisdictionSection({
         </div>
       ) : (
         <>
-          {/* Form Fields in Two Rows - 2 fields per row */}
-          <div className="space-y-6 mb-8">
-            {/* First Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Form Fields */}
+          {isCompact ? (
+            /* Compact Layout - 4 columns */
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               {/* Country Field */}
               <div>
-                <label
-                  htmlFor="country"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Country
-                </label>
                 <SearchableSelect
                   options={countryOptions}
                   value={country}
                   onChange={handleCountryChange}
-                  placeholder="Select a country"
+                  placeholder="Select country"
                   allowOther={true}
                   otherLabel="Other (specify)"
                 />
@@ -420,17 +566,11 @@ export default function JurisdictionSection({
 
               {/* State/Province Field */}
               <div>
-                <label
-                  htmlFor="state"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  State/Province
-                </label>
                 <SearchableSelect
                   options={stateOptions}
                   value={state}
                   onChange={setState}
-                  placeholder="Select a state/province"
+                  placeholder="Select state/province"
                   disabled={
                     isLoadingJurisdictions ||
                     (!countryId && country !== "__other__")
@@ -448,23 +588,14 @@ export default function JurisdictionSection({
                   />
                 )}
               </div>
-            </div>
 
-            {/* Second Row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* City Field */}
               <div>
-                <label
-                  htmlFor="city"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  City
-                </label>
                 <SearchableSelect
                   options={cityOptions}
                   value={city}
                   onChange={setCity}
-                  placeholder="Select a city"
+                  placeholder="Select city"
                   disabled={
                     isLoadingJurisdictions ||
                     (!countryId && country !== "__other__")
@@ -485,17 +616,11 @@ export default function JurisdictionSection({
 
               {/* Court Field */}
               <div>
-                <label
-                  htmlFor="court"
-                  className="block text-sm font-semibold text-gray-700 mb-2"
-                >
-                  Court
-                </label>
                 <SearchableSelect
                   options={courtOptions}
                   value={court}
                   onChange={setCourt}
-                  placeholder="Select a court"
+                  placeholder="Select court"
                   disabled={
                     isLoadingJurisdictions ||
                     (!countryId && country !== "__other__")
@@ -514,17 +639,150 @@ export default function JurisdictionSection({
                 )}
               </div>
             </div>
-          </div>
-          <SaveCaseButton
-            caseId={caseId}
-            field="jurisdiction"
-            value={{
-              country: getFinalValue(country, customCountry),
-              state: getFinalValue(state, customState),
-              city: getFinalValue(city, customCity),
-              court: getFinalValue(court, customCourt),
-            }}
-          />
+          ) : (
+            /* Full Layout - 2 rows with 2 columns each */
+            <div className="space-y-6 mb-8">
+              {/* First Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Country Field */}
+                <div>
+                  <label
+                    htmlFor="country"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Country
+                  </label>
+                  <SearchableSelect
+                    options={countryOptions}
+                    value={country}
+                    onChange={handleCountryChange}
+                    placeholder="Select a country"
+                    allowOther={true}
+                    otherLabel="Other (specify)"
+                  />
+                  {country === "__other__" && (
+                    <input
+                      type="text"
+                      value={customCountry}
+                      onChange={(e) =>
+                        setCustomCountry(e.target.value)
+                      }
+                      placeholder="Enter country name"
+                      className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  )}
+                </div>
+
+                {/* State/Province Field */}
+                <div>
+                  <label
+                    htmlFor="state"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    State/Province
+                  </label>
+                  <SearchableSelect
+                    options={stateOptions}
+                    value={state}
+                    onChange={setState}
+                    placeholder="Select a state/province"
+                    disabled={
+                      isLoadingJurisdictions ||
+                      (!countryId && country !== "__other__")
+                    }
+                    allowOther={true}
+                    otherLabel="Other (specify)"
+                  />
+                  {state === "__other__" && (
+                    <input
+                      type="text"
+                      value={customState}
+                      onChange={(e) => setCustomState(e.target.value)}
+                      placeholder="Enter state/province"
+                      className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Second Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* City Field */}
+                <div>
+                  <label
+                    htmlFor="city"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    City
+                  </label>
+                  <SearchableSelect
+                    options={cityOptions}
+                    value={city}
+                    onChange={setCity}
+                    placeholder="Select a city"
+                    disabled={
+                      isLoadingJurisdictions ||
+                      (!countryId && country !== "__other__")
+                    }
+                    allowOther={true}
+                    otherLabel="Other (specify)"
+                  />
+                  {city === "__other__" && (
+                    <input
+                      type="text"
+                      value={customCity}
+                      onChange={(e) => setCustomCity(e.target.value)}
+                      placeholder="Enter city name"
+                      className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  )}
+                </div>
+
+                {/* Court Field */}
+                <div>
+                  <label
+                    htmlFor="court"
+                    className="block text-sm font-semibold text-gray-700 mb-2"
+                  >
+                    Court
+                  </label>
+                  <SearchableSelect
+                    options={courtOptions}
+                    value={court}
+                    onChange={setCourt}
+                    placeholder="Select a court"
+                    disabled={
+                      isLoadingJurisdictions ||
+                      (!countryId && country !== "__other__")
+                    }
+                    allowOther={true}
+                    otherLabel="Other (specify)"
+                  />
+                  {court === "__other__" && (
+                    <input
+                      type="text"
+                      value={customCourt}
+                      onChange={(e) => setCustomCourt(e.target.value)}
+                      placeholder="Enter court name"
+                      className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {!hideSaveButton && caseId && (
+            <SaveCaseButton
+              caseId={caseId}
+              field="jurisdiction"
+              value={{
+                country: getFinalValue(country, customCountry),
+                state: getFinalValue(state, customState),
+                city: getFinalValue(city, customCity),
+                court: getFinalValue(court, customCourt),
+              }}
+            />
+          )}
         </>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import CompactJurisdiction from "./CompactJurisdiction";
+import JurisdictionSection from "../JurisdictionSection";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
@@ -455,14 +455,16 @@ export default function QuickAnalysisForm({
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
-          <CompactJurisdiction 
+          <JurisdictionSection
+            variant="compact"
             onUpdate={(data) => {
               setJurisdiction(data);
               if (data.country_id) {
                 setCountryId(data.country_id);
               }
-            }} 
-            initialValues={jurisdiction} 
+            }}
+            initialValues={jurisdiction}
+            hideSaveButton={true}
           />
 
           {/* Case Type */}

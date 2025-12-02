@@ -17,6 +17,57 @@ interface CompactCaseTypeProps {
   countryId?: string;
 }
 
+// Map icon names to emoji characters
+const ICON_MAP: { [key: string]: string } = {
+  "dollar-sign": "💰",
+  DollarSign: "💰",
+  scale: "⚖️",
+  Scale: "⚖️",
+  briefcase: "💼",
+  Briefcase: "💼",
+  users: "👥",
+  Users: "👥",
+  shield: "🛡️",
+  Shield: "🛡️",
+  heart: "❤️",
+  Heart: "❤️",
+  leaf: "🌱",
+  Leaf: "🌱",
+  globe: "🌍",
+  Globe: "🌍",
+  home: "🏠",
+  Home: "🏠",
+  building: "🏢",
+  Building: "🏢",
+  gavel: "⚔️",
+  Gavel: "⚔️",
+  anchor: "⚓",
+  Anchor: "⚓",
+  "hard-hat": "👷",
+  HardHat: "👷",
+  lightbulb: "💡",
+  Lightbulb: "💡",
+  book: "📚",
+  Book: "📚",
+  "file-text": "📄",
+  FileText: "📄",
+  ship: "🚢",
+  Ship: "🚢",
+  plane: "✈️",
+  Plane: "✈️",
+  badge: "🎖️",
+  Badge: "🎖️",
+  default: "⚖️",
+};
+
+const getEmojiIcon = (iconName: string | undefined): string => {
+  if (!iconName) return ICON_MAP["default"];
+  // If it's already an emoji, return it
+  if (iconName.match(/[\u{1F300}-\u{1F9FF}]/u)) return iconName;
+  // Otherwise, look it up in the map
+  return ICON_MAP[iconName] || ICON_MAP["default"];
+};
+
 const DEFAULT_CASE_TYPES: CaseType[] = [
     {
       id: "tax",
@@ -228,14 +279,26 @@ export default function CompactCaseType({
 
         if (json.ok && json.data) {
           // Transform API response (JSONB object) to array format
-          const apiCaseTypes = Object.entries(json.data).map(([key, value]: [string, any]) => ({
-            id: key,
-            title: value.name || value.title || key,
-            subtitle: value.description || value.subtitle || "",
-            icon: value.icon || "⚖️",
-            typicalCases: value.typical_cases || value.typicalCases || [],
-            standardOfProof: value.standard_of_proof || value.standardOfProof || "",
-          }));
+          const apiCaseTypes = Object.entries(json.data).map(([key, value]: [string, any]) => {
+            // Get icon and convert to emoji
+            let icon = value.icon;
+            if (icon) {
+              icon = getEmojiIcon(icon);
+            } else {
+              // Try to find from default case types
+              const defaultCaseType = DEFAULT_CASE_TYPES.find((ct) => ct.id === key);
+              icon = defaultCaseType?.icon || "⚖️";
+            }
+            
+            return {
+              id: key,
+              title: value.name || value.title || key,
+              subtitle: value.description || value.subtitle || "",
+              icon: icon,
+              typicalCases: value.typical_cases || value.typicalCases || [],
+              standardOfProof: value.standard_of_proof || value.standardOfProof || "",
+            };
+          });
           setCaseTypes(apiCaseTypes);
         } else {
           setCaseTypes(DEFAULT_CASE_TYPES);
@@ -277,7 +340,7 @@ export default function CompactCaseType({
           <div className="flex items-start sm:items-center flex-1">
             <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
               <span className="text-xl sm:text-2xl text-primary-600">
-                {selectedCaseType.icon}
+                {selectedCaseType?.icon || "⚖️"}
               </span>
             </div>
             <div className="min-w-0">
@@ -294,7 +357,7 @@ export default function CompactCaseType({
           {/* Centered Case Type Name - Hidden on mobile */}
           <div className="hidden sm:flex flex-1 justify-center">
             <span className="text-lg font-semibold text-ink-900">
-              {selectedCaseType.title}
+              {selectedCaseType?.title || "Select Case Type"}
             </span>
           </div>
 
