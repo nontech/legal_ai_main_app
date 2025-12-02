@@ -12,12 +12,32 @@ if (!SUPABASE_CMS_URL || !SUPABASE_CMS_PUBLISHABLE_KEY) {
   );
 }
 
+// Create a custom storage implementation that safely handles localStorage
+const browserStorage = {
+  getItem: (key: string) => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string) => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(key, value);
+    }
+  },
+  removeItem: (key: string) => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(key);
+    }
+  },
+};
+
 export const supabase = createClient<Database>(
   SUPABASE_CMS_URL,
   SUPABASE_CMS_PUBLISHABLE_KEY,
   {
     auth: {
-      storage: localStorage,
+      storage: browserStorage,
       persistSession: true,
       autoRefreshToken: true,
     },
