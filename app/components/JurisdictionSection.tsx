@@ -78,6 +78,7 @@ export default function JurisdictionSection({
   const onCompletionChangeRef = useRef(onCompletionChange);
   const lastUpdateRef = useRef<string>("");
   const hasInitializedRef = useRef(false);
+  const hasCheckedInitialValuesRef = useRef(false);
 
   // Fetch countries on mount
   useEffect(() => {
@@ -135,17 +136,29 @@ export default function JurisdictionSection({
   }, [countryId]);
 
   // Initialize from initialValues if provided (for Quick Analysis)
-  // Only run once on mount to avoid resetting user input
+  // Only initialize when we have actual data, not empty objects
   useEffect(() => {
-    if (
-      initialValues &&
-      countries.length > 0 &&
-      !caseId &&
-      !hasInitializedRef.current
-    ) {
+    if (!initialValues || !countries.length || caseId) return;
+
+    const { country, state, city, court, country_id } = initialValues;
+    const hasActualData = Boolean(country || state || city || court);
+
+    // Debug logging
+    console.log("🔍 JurisdictionSection initialValues:", {
+      hasActualData,
+      hasInitialized: hasInitializedRef.current,
+      initialValues,
+    });
+
+    // Only initialize if we have data AND haven't initialized yet
+    if (hasActualData && !hasInitializedRef.current) {
       hasInitializedRef.current = true;
-      const { country, state, city, court, country_id } =
-        initialValues;
+      // Reset the check flag so we can verify values when jurisdictions load
+      hasCheckedInitialValuesRef.current = false;
+      console.log(
+        "✅ Initializing JurisdictionSection with:",
+        initialValues
+      );
 
       if (country) {
         const selectedCountry = countries.find(
@@ -154,19 +167,34 @@ export default function JurisdictionSection({
         if (selectedCountry) {
           setCountry(country);
           setCountryId(selectedCountry.id);
+          // Set state/city/court - they will be validated when jurisdictions load
+          if (state) setState(state);
+          if (city) setCity(city);
+          if (court) setCourt(court);
         } else {
           setCountry("__other__");
           setCustomCountry(country);
+          // If country is "Other", move dependent fields to "Other" too
+          if (state) {
+            setState("__other__");
+            setCustomState(state);
+          }
+          if (city) {
+            setCity("__other__");
+            setCustomCity(city);
+          }
+          if (court) {
+            setCourt("__other__");
+            setCustomCourt(court);
+          }
         }
+      } else if (country_id) {
+        // If we have country_id but no country name, set it directly
+        setCountryId(country_id);
+        if (state) setState(state);
+        if (city) setCity(city);
+        if (court) setCourt(court);
       }
-
-      if (state) {
-        // Check if state exists in jurisdictions when they load
-        setState(state);
-      }
-      if (city) setCity(city);
-      if (court) setCourt(court);
-      if (country_id) setCountryId(country_id);
     }
   }, [initialValues, countries, caseId]);
 
@@ -229,36 +257,143 @@ export default function JurisdictionSection({
   }, [caseId, countries]);
 
   // Check if saved values match predefined options when jurisdictions load
+  // Only check once when jurisdictions first load, not on every state change
   useEffect(() => {
-    if (jurisdictions.length > 0 && state && state !== "__other__") {
-      const stateExists = jurisdictions.some(
-        (j) => j.state_province === state
+    // Only check if we have jurisdictions and haven't checked initial values yet
+    if (
+      jurisdictions.length === 0 ||
+      hasCheckedInitialValuesRef.current
+    ) {
+      return;
+    }
+
+    // Helper function for case-insensitive, trimmed comparison
+    const matches = (
+      value1: string,
+      value2: string | null | undefined
+    ): boolean => {
+      if (!value1 || !value2) return false;
+      return (
+        value1.trim().toLowerCase() === value2.trim().toLowerCase()
+      );
+    };
+
+    let needsUpdate = false;
+    let newState = state;
+    let newCity = city;
+    let newCourt = court;
+    let newCustomState = customState;
+    let newCustomCity = customCity;
+    let newCustomCourt = customCourt;
+
+    // Check state
+    if (state && state !== "__other__") {
+      const stateExists = jurisdictions.some((j) =>
+        matches(state, j.state_province)
       );
       if (!stateExists) {
-        // State doesn't exist in options - move to "Other"
-        setCustomState(state);
-        setState("__other__");
+        console.log(
+          `⚠️ State "${state}" not found in jurisdictions, moving to "Other"`
+        );
+        newCustomState = state;
+        newState = "__other__";
+        needsUpdate = true;
+      } else {
+        // Find the exact match to use the database value (handles case/whitespace differences)
+        const matchedJurisdiction = jurisdictions.find((j) =>
+          matches(state, j.state_province)
+        );
+        if (
+          matchedJurisdiction &&
+          matchedJurisdiction.state_province &&
+          matchedJurisdiction.state_province !== state
+        ) {
+          console.log(
+            `🔄 Normalizing state: "${state}" → "${matchedJurisdiction.state_province}"`
+          );
+          newState = matchedJurisdiction.state_province;
+          needsUpdate = true;
+        }
       }
     }
 
-    if (jurisdictions.length > 0 && city && city !== "__other__") {
-      const cityExists = jurisdictions.some((j) => j.city === city);
+    // Check city
+    if (city && city !== "__other__") {
+      const cityExists = jurisdictions.some((j) =>
+        matches(city, j.city)
+      );
       if (!cityExists) {
-        setCustomCity(city);
-        setCity("__other__");
+        console.log(
+          `⚠️ City "${city}" not found in jurisdictions, moving to "Other"`
+        );
+        newCustomCity = city;
+        newCity = "__other__";
+        needsUpdate = true;
+      } else {
+        // Find the exact match to use the database value
+        const matchedJurisdiction = jurisdictions.find((j) =>
+          matches(city, j.city)
+        );
+        if (
+          matchedJurisdiction &&
+          matchedJurisdiction.city &&
+          matchedJurisdiction.city !== city
+        ) {
+          console.log(
+            `🔄 Normalizing city: "${city}" → "${matchedJurisdiction.city}"`
+          );
+          newCity = matchedJurisdiction.city;
+          needsUpdate = true;
+        }
       }
     }
 
-    if (jurisdictions.length > 0 && court && court !== "__other__") {
-      const courtExists = jurisdictions.some(
-        (j) => j.court === court
+    // Check court
+    if (court && court !== "__other__") {
+      const courtExists = jurisdictions.some((j) =>
+        matches(court, j.court)
       );
       if (!courtExists) {
-        setCustomCourt(court);
-        setCourt("__other__");
+        console.log(
+          `⚠️ Court "${court}" not found in jurisdictions, moving to "Other"`
+        );
+        newCustomCourt = court;
+        newCourt = "__other__";
+        needsUpdate = true;
+      } else {
+        // Find the exact match to use the database value
+        const matchedJurisdiction = jurisdictions.find((j) =>
+          matches(court, j.court)
+        );
+        if (
+          matchedJurisdiction &&
+          matchedJurisdiction.court &&
+          matchedJurisdiction.court !== court
+        ) {
+          console.log(
+            `🔄 Normalizing court: "${court}" → "${matchedJurisdiction.court}"`
+          );
+          newCourt = matchedJurisdiction.court;
+          needsUpdate = true;
+        }
       }
     }
-  }, [jurisdictions, state, city, court]);
+
+    // Apply updates in a single batch to avoid multiple re-renders
+    if (needsUpdate) {
+      if (newState !== state) setState(newState);
+      if (newCity !== city) setCity(newCity);
+      if (newCourt !== court) setCourt(newCourt);
+      if (newCustomState !== customState)
+        setCustomState(newCustomState);
+      if (newCustomCity !== customCity) setCustomCity(newCustomCity);
+      if (newCustomCourt !== customCourt)
+        setCustomCourt(newCustomCourt);
+    }
+
+    // Mark as checked
+    hasCheckedInitialValuesRef.current = true;
+  }, [jurisdictions]); // Only depend on jurisdictions, not state/city/court
 
   // Keep refs up to date
   useEffect(() => {
@@ -366,6 +501,9 @@ export default function JurisdictionSection({
     setCustomState("");
     setCustomCity("");
     setCustomCourt("");
+
+    // Reset the check flag so we re-check values when new jurisdictions load
+    hasCheckedInitialValuesRef.current = false;
 
     if (selectedCountryName === "__other__") {
       setCountryId("");
