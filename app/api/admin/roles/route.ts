@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
 
     if (!country_id) {
       return NextResponse.json(
-        { ok: false, error: "country_id query parameter is required" },
+        {
+          ok: false,
+          error: "country_id query parameter is required",
+        },
         { status: 400 }
       );
     }
@@ -27,14 +30,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-<<<<<<< HEAD
     // Return the first matching record's role_types, or empty object if none found
-    const roleTypeData = data && data.length > 0 ? data[0].role_types : {};
+    const roleTypeData =
+      data && data.length > 0 ? data[0].role_types : {};
 
     return NextResponse.json({ ok: true, data: roleTypeData || {} });
-=======
-    return NextResponse.json({ ok: true, data: data?.role_types || {} });
->>>>>>> c2a05b85d4be96d57f9a706138976b44fae63a8e
   } catch (err: any) {
     return NextResponse.json(
       { ok: false, error: err.message },
@@ -42,4 +42,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

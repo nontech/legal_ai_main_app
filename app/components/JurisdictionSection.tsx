@@ -23,9 +23,16 @@ interface JurisdictionSectionProps {
   onJurisdictionChange?: (jurisdictionId: string) => void;
 }
 
-export default function JurisdictionSection({ caseId, onCompletionChange, onCountryChange, onJurisdictionChange }: JurisdictionSectionProps) {
+export default function JurisdictionSection({
+  caseId,
+  onCompletionChange,
+  onCountryChange,
+  onJurisdictionChange,
+}: JurisdictionSectionProps) {
   const [countries, setCountries] = useState<Country[]>([]);
-  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
+  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
+    []
+  );
   const [country, setCountry] = useState<string>("");
   const [countryId, setCountryId] = useState<string>("");
   const [state, setState] = useState<string>("");
@@ -33,7 +40,8 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
   const [court, setCourt] = useState<string>("");
   const [isLoading, setIsLoading] = useState(!!caseId);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
-  const [isLoadingJurisdictions, setIsLoadingJurisdictions] = useState(false);
+  const [isLoadingJurisdictions, setIsLoadingJurisdictions] =
+    useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch countries on mount
@@ -70,7 +78,9 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
     const fetchJurisdictions = async () => {
       try {
         setIsLoadingJurisdictions(true);
-        const res = await fetch(`/api/admin/jurisdictions?country_id=${countryId}`);
+        const res = await fetch(
+          `/api/admin/jurisdictions?country_id=${countryId}`
+        );
         const json = await res.json();
 
         if (json.ok && json.data) {
@@ -91,18 +101,29 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
 
   // Fetch case data if caseId exists
   useEffect(() => {
-    if (caseId) {
+    if (caseId && countries.length > 0) {
       const fetchCaseData = async () => {
         try {
           const res = await fetch(`/api/cases/${caseId}`);
           const json = await res.json();
 
           if (json.ok && json.data?.jurisdiction) {
-            const { country, state, city, court } = json.data.jurisdiction;
+            const { country, state, city, court } =
+              json.data.jurisdiction;
             setCountry(country || "");
             setState(state || "");
             setCity(city || "");
             setCourt(court || "");
+
+            // Also set the countryId to enable dependent fields
+            if (country) {
+              const selectedCountry = countries.find(
+                (c) => c.name === country
+              );
+              if (selectedCountry) {
+                setCountryId(selectedCountry.id);
+              }
+            }
           }
         } catch (error) {
           console.error("Failed to fetch case data:", error);
@@ -112,10 +133,10 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
       };
 
       fetchCaseData();
-    } else {
+    } else if (!caseId) {
       setIsLoading(false);
     }
-  }, [caseId]);
+  }, [caseId, countries]);
 
   // Track completion
   useEffect(() => {
@@ -134,10 +155,19 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
 
   // Notify parent of jurisdiction change
   useEffect(() => {
-    if (onJurisdictionChange && state && city && court && jurisdictions.length > 0) {
+    if (
+      onJurisdictionChange &&
+      state &&
+      city &&
+      court &&
+      jurisdictions.length > 0
+    ) {
       // Find the jurisdiction that matches the selected state, city, and court
       const matchingJurisdiction = jurisdictions.find(
-        j => j.state_province === state && j.city === city && j.court === court
+        (j) =>
+          j.state_province === state &&
+          j.city === city &&
+          j.court === court
       );
       if (matchingJurisdiction) {
         onJurisdictionChange(matchingJurisdiction.id);
@@ -147,7 +177,9 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
 
   const handleCountryChange = (selectedCountryName: string) => {
     setCountry(selectedCountryName);
-    const selected = countries.find(c => c.name === selectedCountryName);
+    const selected = countries.find(
+      (c) => c.name === selectedCountryName
+    );
     if (selected) {
       setCountryId(selected.id);
     }
@@ -221,7 +253,9 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
                 <select
                   id="country"
                   value={country}
-                  onChange={(e) => handleCountryChange(e.target.value)}
+                  onChange={(e) =>
+                    handleCountryChange(e.target.value)
+                  }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white text-gray-900"
                 >
                   <option value="">Select a country</option>
@@ -250,13 +284,18 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
                 >
                   <option value="">Select a state/province</option>
                   {jurisdictions && jurisdictions.length > 0 ? (
-                    [...new Set(jurisdictions.map(j => j.state_province))].map((state_prov) => (
-                      state_prov && (
-                        <option key={state_prov} value={state_prov}>
-                          {state_prov}
-                        </option>
-                      )
-                    ))
+                    [
+                      ...new Set(
+                        jurisdictions.map((j) => j.state_province)
+                      ),
+                    ].map(
+                      (state_prov) =>
+                        state_prov && (
+                          <option key={state_prov} value={state_prov}>
+                            {state_prov}
+                          </option>
+                        )
+                    )
                   ) : (
                     <option disabled>No states available</option>
                   )}
@@ -284,14 +323,17 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
                   <option value="">Select a city</option>
                   {jurisdictions && jurisdictions.length > 0 ? (
                     jurisdictions
-                      .filter(j => !state || j.state_province === state)
-                      .map((j) => (
-                        j.city && (
-                          <option key={j.id} value={j.city}>
-                            {j.city}
-                          </option>
-                        )
-                      ))
+                      .filter(
+                        (j) => !state || j.state_province === state
+                      )
+                      .map(
+                        (j) =>
+                          j.city && (
+                            <option key={j.id} value={j.city}>
+                              {j.city}
+                            </option>
+                          )
+                      )
                   ) : (
                     <option disabled>No cities available</option>
                   )}
@@ -316,14 +358,19 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
                   <option value="">Select a court</option>
                   {jurisdictions && jurisdictions.length > 0 ? (
                     jurisdictions
-                      .filter(j => (!state || j.state_province === state) && (!city || j.city === city))
-                      .map((j) => (
-                        j.court && (
-                          <option key={j.id} value={j.court}>
-                            {j.court}
-                          </option>
-                        )
-                      ))
+                      .filter(
+                        (j) =>
+                          (!state || j.state_province === state) &&
+                          (!city || j.city === city)
+                      )
+                      .map(
+                        (j) =>
+                          j.court && (
+                            <option key={j.id} value={j.court}>
+                              {j.court}
+                            </option>
+                          )
+                      )
                   ) : (
                     <option disabled>No courts available</option>
                   )}
@@ -336,7 +383,8 @@ export default function JurisdictionSection({ caseId, onCompletionChange, onCoun
             field="jurisdiction"
             value={{ country, state, city, court }}
           />
-        </>)}</div>
+        </>
+      )}
+    </div>
   );
 }
-
