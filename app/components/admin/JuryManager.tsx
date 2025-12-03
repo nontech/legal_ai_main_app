@@ -51,8 +51,9 @@ interface JuryData {
   country_id: string;
   demographics: any;
   characteristics: any;
-  is_active: boolean;
-  created_at: string;
+  is_active: boolean | null;
+  created_at: string | null;
+  updated_at?: string | null;
   countries?: { name: string };
 }
 

@@ -29,20 +29,16 @@ export async function GET(request: NextRequest) {
     }
 
     // Return the first matching record's data, or empty objects if none found
-    const juryData = data && data.length > 0 ? data[0] : {};
+    const juryData = data && data.length > 0 ? data[0] : {} as any;
 
     return NextResponse.json({
       ok: true,
       data: {
         demographics: juryData?.demographics || {},
         characteristics: juryData?.characteristics || {}
-      }
+      },
     });
   } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, error: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
   }
 }
-

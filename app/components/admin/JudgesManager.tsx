@@ -54,9 +54,9 @@ interface Country {
 
 interface Jurisdiction {
   id: string;
-  state_province: string;
-  city: string;
-  court: string;
+  state_province: string | null;
+  city: string | null;
+  court: string | null;
 }
 
 interface Judge {
@@ -64,9 +64,11 @@ interface Judge {
   country_id: string;
   jurisdiction_id: string | null;
   judge_info: any;
-  created_at: string;
+  created_at: string | null;
+  updated_at?: string | null;
+  is_active?: boolean | null;
   countries?: { name: string };
-  jurisdiction?: Jurisdiction;
+  jurisdiction?: Jurisdiction | null;
 }
 
 const JudgesManager = () => {
@@ -422,8 +424,8 @@ const JudgesManager = () => {
                           key={jurisdiction.id}
                           value={jurisdiction.id}
                         >
-                          {jurisdiction.state_province} -{" "}
-                          {jurisdiction.city} - {jurisdiction.court}
+                          {jurisdiction.state_province || "N/A"} -{" "}
+                          {jurisdiction.city || "N/A"} - {jurisdiction.court || "N/A"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -512,8 +514,8 @@ const JudgesManager = () => {
                   <TableCell>
                     {judge.jurisdiction ? (
                       <span className="text-sm">
-                        {judge.jurisdiction.state_province} -{" "}
-                        {judge.jurisdiction.city}
+                        {judge.jurisdiction.state_province || "N/A"} -{" "}
+                        {judge.jurisdiction.city || "N/A"}
                       </span>
                     ) : (
                       <span className="text-slate-500 italic">
@@ -527,8 +529,8 @@ const JudgesManager = () => {
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${judge.jurisdiction_id
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-purple-100 text-purple-800"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-purple-100 text-purple-800"
                         }`}
                     >
                       {judge.jurisdiction_id ? "Specific" : "Default"}

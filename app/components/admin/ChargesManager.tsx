@@ -47,7 +47,8 @@ interface ChargesData {
   responsible_courts: any;
   case_types: any;
   charge_sheets: any;
-  created_at: string;
+  created_at: string | null;
+  updated_at?: string | null;
   countries?: { name: string };
 }
 

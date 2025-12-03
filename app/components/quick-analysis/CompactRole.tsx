@@ -119,7 +119,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
               className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${(selectedRole && selectedRoleData)
                 ? "bg-primary-100 text-primary-600"
                 : "bg-surface-100 text-ink-500"
-              }`}
+                }`}
             >
               {selectedRole && selectedRoleData ? (
                 <span className="text-base sm:text-lg flex items-center justify-center">
@@ -225,7 +225,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                     </h4>
                     <ul className="space-y-1">
                       {effectiveRoles.defendant?.responsibilities?.map(
-                        (resp, index) => (
+                        (resp: string, index: number) => (
                           <li
                             key={index}
                             className="text-sm text-ink-600 flex items-start"
@@ -283,7 +283,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                     </h4>
                     <ul className="space-y-1">
                       {effectiveRoles.plaintiff?.responsibilities?.map(
-                        (resp, index) => (
+                        (resp: string, index: number) => (
                           <li
                             key={index}
                             className="text-sm text-ink-600 flex items-start"

@@ -44,7 +44,8 @@ interface CaseTypeData {
   id: string;
   country_id: string;
   case_types: any;
-  created_at: string;
+  created_at: string | null;
+  updated_at?: string | null;
   countries?: { name: string };
 }
 

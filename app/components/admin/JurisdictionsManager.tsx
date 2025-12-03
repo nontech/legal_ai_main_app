@@ -58,10 +58,11 @@ interface Country {
 interface Jurisdiction {
   id: string;
   country_id: string;
-  state_province: string;
-  city: string;
-  court: string;
-  created_at: string;
+  state_province: string | null;
+  city: string | null;
+  court: string | null;
+  created_at: string | null;
+  updated_at?: string | null;
   countries?: { name: string };
 }
 
@@ -206,9 +207,9 @@ const JurisdictionsManager = () => {
     setEditingJurisdiction(jurisdiction);
     setFormData({
       country_id: jurisdiction.country_id,
-      state: jurisdiction.state_province,
-      city: jurisdiction.city,
-      court: jurisdiction.court,
+      state: jurisdiction.state_province || "",
+      city: jurisdiction.city || "",
+      court: jurisdiction.court || "",
     });
     setIsDialogOpen(true);
   };
@@ -526,10 +527,10 @@ const JurisdictionsManager = () => {
                     {jurisdiction.countries?.name}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {jurisdiction.state_province}
+                    {jurisdiction.state_province || "N/A"}
                   </TableCell>
-                  <TableCell>{jurisdiction.city}</TableCell>
-                  <TableCell>{jurisdiction.court}</TableCell>
+                  <TableCell>{jurisdiction.city || "N/A"}</TableCell>
+                  <TableCell>{jurisdiction.court || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button

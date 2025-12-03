@@ -44,7 +44,8 @@ interface RoleData {
   id: string;
   country_id: string;
   role_types: any;
-  created_at: string;
+  created_at: string | null;
+  updated_at?: string | null;
   countries?: { name: string };
 }
 
