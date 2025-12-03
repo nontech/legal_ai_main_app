@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Legal Case Analysis - AI-Powered Legal Research",
+  title: "TheLawThing - AI-Powered Legal Research",
   description:
     "Intelligent legal case analysis platform with AI-powered insights, document management, and case law research.",
 };

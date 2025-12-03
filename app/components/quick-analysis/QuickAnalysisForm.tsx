@@ -283,6 +283,30 @@ export default function QuickAnalysisForm({
     return true;
   };
 
+  const normalizeCharges = (charges: any[], isCriminal: boolean) => {
+    return charges.map(charge => ({
+      ...charge,
+      defendantPlea: normalizePlea(charge.defendantPlea, isCriminal)
+    }));
+  };
+
+  const normalizePlea = (plea: string, isCriminal: boolean): string => {
+    // For criminal cases: guilty, not-guilty, nolo, pending
+    // For civil cases: liable, non-liable, nolo, pending
+
+    if (isCriminal) {
+      // Convert civil pleas to criminal pleas
+      if (plea === "liable") return "guilty";
+      if (plea === "non-liable" || plea === "non_liable") return "not-guilty";
+      return plea; // guilty, not-guilty, nolo, pending remain as is
+    } else {
+      // Convert criminal pleas to civil pleas
+      if (plea === "guilty") return "liable";
+      if (plea === "not-guilty") return "non-liable";
+      return plea; // liable, non-liable, nolo, pending remain as is
+    }
+  };
+
   const handleSubmit = async () => {
     // Collect all form data
     const formData = {
@@ -299,6 +323,8 @@ export default function QuickAnalysisForm({
       return;
     }
 
+    const isCriminalCase = caseTypeId?.toLowerCase() === "criminal";
+
     try {
       let targetCaseId = caseId;
 
@@ -314,6 +340,7 @@ export default function QuickAnalysisForm({
           }
         };
 
+        const normalizedCharges = normalizeCharges(uploadedMetadata?.charges || [], isCriminalCase);
         const res = await fetch(`/api/cases/update`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -322,7 +349,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
-            charges: uploadedMetadata?.charges || [],
+            charges: normalizedCharges,
             field: "case_details",
             value: caseDetailsUpdate,
           }),
@@ -333,6 +360,7 @@ export default function QuickAnalysisForm({
         }
       } else {
         // Create new case
+        const normalizedCharges = normalizeCharges(uploadedMetadata?.charges || [], isCriminalCase);
         const res = await fetch("/api/cases", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -342,7 +370,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
-            charges: uploadedMetadata?.charges || [],
+            charges: normalizedCharges,
             result: null,
           }),
         });

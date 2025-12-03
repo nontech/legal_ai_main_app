@@ -3,6 +3,8 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
+import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
+import GamePlanDisplay from "./GamePlanDisplay";
 
 interface AnalysisResult {
   predicted_outcome?: any;
@@ -14,7 +16,7 @@ interface AnalysisResult {
   precedent_cases?: any[];
 }
 
-export default function ResultsStep() {
+export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlanOnly?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = searchParams.get("caseId");
@@ -24,6 +26,7 @@ export default function ResultsStep() {
   const [error, setError] = useState<string | null>(null);
   const [caseInfo, setCaseInfo] = useState<any>(null);
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
   const [expandedFactors, setExpandedFactors] = useState<Set<string>>(new Set());
   const [expandedBurdenOfProof, setExpandedBurdenOfProof] = useState(false);
@@ -36,6 +39,22 @@ export default function ResultsStep() {
   const [showReasoningPanel, setShowReasoningPanel] = useState(false);
   const [stepReasonings, setStepReasonings] = useState<Record<string, string>>({});
   const [showAllFactors, setShowAllFactors] = useState(false);
+  const [gamePlan, setGamePlan] = useState<any>(null);
+  const [isGamePlanStreamingOpen, setIsGamePlanStreamingOpen] = useState(false);
+  const [showOutcomeReasoning, setShowOutcomeReasoning] = useState(false);
+
+  useEffect(() => {
+    // Check authentication status
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/cases");
+        setIsAuthenticated(res.status !== 401);
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const fetchResults = async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -51,6 +70,7 @@ export default function ResultsStep() {
 
       setCaseInfo(data.data);
       setResult(data.data.result);
+      setGamePlan(data.data.game_plan || null);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch results:", err);
@@ -73,6 +93,35 @@ export default function ResultsStep() {
     fetchResults(false);
   };
 
+  const handleGenerateGamePlan = () => {
+    if (!caseId || !result || !caseInfo) {
+      alert("Missing required data to generate game plan");
+      return;
+    }
+
+    // Extract case info
+    const case_info = {
+      role: caseInfo.role || "",
+      case_type: caseInfo.case_type || "",
+      case_title: caseInfo.case_details?.case_information?.caseName || "",
+      case_description: caseInfo.case_details?.case_information?.caseDescription || "",
+      city: caseInfo.jurisdiction?.city || "",
+      state_province: caseInfo.jurisdiction?.state || "",
+      country: caseInfo.jurisdiction?.country || "",
+      evidence_summary: caseInfo.case_details?.evidence_and_supporting_materials?.summary || "",
+      key_witnesses_summary: caseInfo.case_details?.key_witness_and_testimony?.summary || "",
+    };
+
+    // Open the streaming display modal
+    setIsGamePlanStreamingOpen(true);
+  };
+
+  const handleGamePlanStreamingComplete = (result: any) => {
+    setGamePlan(result);
+    setIsGamePlanStreamingOpen(false);
+    // Refresh the data from the database
+    fetchResults(false);
+  };
 
   const toggleFactorExpanded = (factorKey: string) => {
     const newExpanded = new Set(expandedFactors);
@@ -135,6 +184,81 @@ export default function ResultsStep() {
     fetchResults();
   }, [caseId]);
 
+  // If showing only game plan, render just that section
+  if (showGamePlanOnly) {
+    return (
+      <>
+        <StreamingGamePlanDisplay
+          isOpen={isGamePlanStreamingOpen}
+          caseId={caseId || ""}
+          case_analysis={result}
+          case_info={caseInfo}
+          onComplete={handleGamePlanStreamingComplete}
+          onClose={() => setIsGamePlanStreamingOpen(false)}
+        />
+
+        <div style={{ maxWidth: "100%", width: "100%" }}>
+          <div style={{
+            background: "white",
+            border: "1px solid #e8e8e8",
+            borderRadius: "16px",
+            padding: "28px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ fontSize: "24px" }}>🎯</span>
+                <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                  Game Plan
+                </h3>
+              </div>
+              <button
+                onClick={handleGenerateGamePlan}
+                disabled={loading}
+                type="button"
+                title={gamePlan ? "Regenerate Game Plan" : "Generate Game Plan"}
+                style={{
+                  background: loading ? "#ccc" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontWeight: "600",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  boxShadow: loading ? "none" : "0 4px 12px rgba(102, 126, 234, 0.3)",
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  pointerEvents: loading ? "none" : "auto",
+                  opacity: loading ? 0.6 : 1,
+                }}
+              >
+                <span>✨</span>
+                {gamePlan ? "Regenerate" : "Generate"} Game Plan
+              </button>
+            </div>
+
+            {gamePlan ? (
+              <GamePlanDisplay gamePlan={gamePlan} />
+            ) : (
+              <div style={{
+                textAlign: "center",
+                padding: "40px 20px",
+                color: "#666",
+              }}>
+                <p style={{ fontSize: "14px", margin: 0 }}>
+                  {loading ? "Loading..." : "Click \"Generate Game Plan\" to create a strategic action plan for your case"}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -167,6 +291,15 @@ export default function ResultsStep() {
         caseId={caseId || ""}
         onComplete={handleStreamingComplete}
         onClose={() => setIsStreamingOpen(false)}
+      />
+
+      <StreamingGamePlanDisplay
+        isOpen={isGamePlanStreamingOpen}
+        caseId={caseId || ""}
+        case_analysis={result}
+        case_info={caseInfo}
+        onComplete={handleGamePlanStreamingComplete}
+        onClose={() => setIsGamePlanStreamingOpen(false)}
       />
 
       {/* Reasoning Panel Toggle Button */}
@@ -274,24 +407,26 @@ export default function ResultsStep() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={handleRegenerate}
-              disabled={isRegenerating}
-              className="p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-              title={isRegenerating ? "Regenerating..." : "Regenerate Results"}
-            >
-              {isRegenerating ? (
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              )}
-              <span className="text-xs font-medium">{isRegenerating ? "Regenerating..." : "Regenerate"}</span>
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={handleRegenerate}
+                disabled={isRegenerating}
+                className="cursor-pointer p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                title={isRegenerating ? "Regenerating..." : "Regenerate Results"}
+              >
+                {isRegenerating ? (
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                )}
+                <span className="text-xs font-medium">{isRegenerating ? "Regenerating..." : "Regenerate"}</span>
+              </button>
+            )}
             <button
               onClick={() => window.print()}
               className="p-2 hover:bg-gray-200 rounded transition-colors"
@@ -328,72 +463,303 @@ export default function ResultsStep() {
 
       {/* Predicted Outcome Probability - Featured Section */}
       {result.predicted_outcome?.win_probability !== undefined && (
-        <div style={{
-          background: "linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%)",
-          border: "2px solid #f39c12",
-          borderRadius: "16px",
-          padding: "28px 24px",
-          textAlign: "center",
-          boxShadow: "0 8px 24px rgba(243, 156, 18, 0.12)",
-        }} className="mx-3 sm:mx-0">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "24px" }}>🎯</span>
-            <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#333", margin: 0 }} className="sm:text-2xl">
-              Likelihood of {caseInfo.role.charAt(0).toUpperCase() + caseInfo.role.slice(1)}'s Success
-            </h3>
-          </div>
-
-          <div style={{ marginBottom: "20px" }}>
-            <div style={{
-              fontSize: "48px",
-              fontWeight: "bold",
-              color: "#d4a500",
-              margin: "10px 0",
-            }} className="sm:text-6xl">
-              {successProb}%
-            </div>
-            <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
-              Success Probability (Range: {Math.max(0, successProb - 8)}% – {Math.min(100, successProb + 8)}%)
-            </p>
-          </div>
-
-          {/* Progress Bar */}
+        <div className="mx-3 sm:mx-0">
           <div style={{
-            width: "100%",
-            height: "20px",
-            background: "#e0e0e0",
-            borderRadius: "10px",
-            overflow: "hidden",
-            marginBottom: "25px",
+            background: "linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%)",
+            border: "2px solid #f39c12",
+            borderRadius: "16px",
+            padding: "28px 24px",
+            textAlign: "center",
+            boxShadow: "0 8px 24px rgba(243, 156, 18, 0.12)",
           }}>
-            <div style={{
-              height: "100%",
-              width: `${successProb}%`,
-              background: "linear-gradient(90deg, #4a90e2 0%, #357abd 100%)",
-              transition: "width 0.5s ease-out",
-            }}></div>
-          </div>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "24px", flexWrap: "wrap" }}>
+              <span style={{ fontSize: "24px" }}>🎯</span>
+              <h3 style={{ fontSize: "18px", fontWeight: "bold", color: "#333", margin: 0 }} className="sm:text-2xl">
+                {result.predicted_outcome?.prediction.split('—')[0]
+                  .replace(/\w\S*/g, (txt: string) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase())
+                }
+              </h3>
+            </div>
 
-          {/* Metrics */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
-            <div>
-              <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Confidence Level</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
-                {result.predicted_outcome?.confidence_category || "Weak"}
-              </p>
+            {/* Main Probability Section */}
+            <div style={{ textAlign: "center", marginBottom: showOutcomeReasoning ? "24px" : "0" }}>
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{
+                  fontSize: "48px",
+                  fontWeight: "bold",
+                  color: "#d4a500",
+                  margin: "10px 0",
+                }} className="sm:text-6xl">
+                  {result.predicted_outcome?.prediction.split('—')[1].split('%')[0] || 0}%
+                </div>
+                <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
+                  {result.predicted_outcome?.prediction.split('—')[1].split('%')[1]}
+                </p>
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
+                  {result.predicted_outcome?.estimated_range?.description}
+                </p>
+              </div>
+
+              {/* Progress Bar */}
+              <div style={{
+                width: "100%",
+                height: "20px",
+                background: "#e0e0e0",
+                borderRadius: "10px",
+                overflow: "hidden",
+                marginBottom: "25px",
+              }}>
+                <div style={{
+                  height: "100%",
+                  width: `${successProb}%`,
+                  background: "linear-gradient(90deg, #4a90e2 0%, #357abd 100%)",
+                  transition: "width 0.5s ease-out",
+                }}></div>
+              </div>
+
+              {/* Metrics */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+                <div>
+                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Confidence Level</p>
+                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                    {result.predicted_outcome?.confidence_category || "Weak"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Analysis Depth</p>
+                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                    {result.predicted_outcome?.analysis_depth || "Detailed"}
+                  </p>
+                </div>
+                <div>
+                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Risk Level</p>
+                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                    {result.predicted_outcome?.risk_assessment?.level || "Unknown"}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Analysis Depth</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
-                {result.predicted_outcome?.analysis_depth || "Detailed"}
-              </p>
-            </div>
-            <div>
-              <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Risk Assessment</p>
-              <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
-                {successProb > 70 ? "Low" : successProb > 50 ? "Moderate" : "High"}
-              </p>
-            </div>
+
+            {/* Detailed Reasoning Section - Inside Same Box */}
+            {showOutcomeReasoning && (
+              <div style={{
+                marginTop: "24px",
+                paddingTop: "24px",
+                borderTop: "2px solid rgba(243, 156, 18, 0.3)",
+              }}>
+                {/* Main Prediction Reasoning */}
+                {result.predicted_outcome?.reasoning && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "18px" }}>🔍</span>
+                      <h4 style={{ fontSize: "15px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                        Prediction Reasoning
+                      </h4>
+                    </div>
+                    <div style={{
+                      background: "rgba(255, 251, 245, 0.6)",
+                      border: "1px solid #ffe0b2",
+                      borderRadius: "8px",
+                      padding: "14px",
+                      fontSize: "13px",
+                      color: "#555",
+                      lineHeight: "1.6",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}>
+                      {result.predicted_outcome.reasoning}
+                    </div>
+                  </div>
+                )}
+
+                {/* Confidence Level Reasoning */}
+                {result.predicted_outcome?.confidence_level_reasoning && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "18px" }}>📊</span>
+                      <h4 style={{ fontSize: "15px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                        Confidence Level Reasoning
+                      </h4>
+                      <span style={{
+                        background: "#2c5aa0",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.predicted_outcome?.confidence_level * 100 || 0}%
+                      </span>
+                    </div>
+                    <div style={{
+                      background: "rgba(240, 247, 255, 0.6)",
+                      border: "1px solid #d4e6f1",
+                      borderRadius: "8px",
+                      padding: "14px",
+                      fontSize: "13px",
+                      color: "#555",
+                      lineHeight: "1.6",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}>
+                      {result.predicted_outcome.confidence_level_reasoning}
+                    </div>
+                  </div>
+                )}
+
+                {/* Analysis Depth Reasoning */}
+                {result.predicted_outcome?.analysis_depth_reasoning && (
+                  <div style={{ marginBottom: "20px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                      <span style={{ fontSize: "18px" }}>📈</span>
+                      <h4 style={{ fontSize: "15px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                        Analysis Depth Reasoning
+                      </h4>
+                      <span style={{
+                        background: "#27ae60",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.predicted_outcome?.analysis_depth || "N/A"}
+                      </span>
+                    </div>
+                    <div style={{
+                      background: "rgba(240, 253, 244, 0.6)",
+                      border: "1px solid #c6f6d5",
+                      borderRadius: "8px",
+                      padding: "14px",
+                      fontSize: "13px",
+                      color: "#555",
+                      lineHeight: "1.6",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}>
+                      {result.predicted_outcome.analysis_depth_reasoning}
+                    </div>
+                  </div>
+                )}
+
+                {/* Risk Assessment */}
+                {result.predicted_outcome?.risk_assessment && (
+                  <div style={{ marginBottom: "0" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px", flexWrap: "wrap" }}>
+                      <span style={{ fontSize: "18px" }}>⚠️</span>
+                      <h4 style={{ fontSize: "15px", fontWeight: "bold", color: "#333", margin: 0 }}>
+                        Risk Assessment
+                      </h4>
+                      <span style={{
+                        background: result.predicted_outcome.risk_assessment.level === "High"
+                          ? "#e74c3c"
+                          : result.predicted_outcome.risk_assessment.level === "Moderate"
+                            ? "#f39c12"
+                            : "#27ae60",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "bold",
+                      }}>
+                        {result.predicted_outcome.risk_assessment.level}
+                      </span>
+                      {result.predicted_outcome.risk_assessment.type && (
+                        <span style={{
+                          background: "#ecf0f1",
+                          color: "#333",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          fontSize: "11px",
+                          fontWeight: "500",
+                        }}>
+                          {result.predicted_outcome.risk_assessment.type}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Risk Description */}
+                    {result.predicted_outcome.risk_assessment.description && (
+                      <div style={{
+                        background: "rgba(255, 230, 230, 0.6)",
+                        border: "1px solid #ffc6c6",
+                        borderRadius: "8px",
+                        padding: "14px",
+                        marginBottom: "12px",
+                        fontSize: "13px",
+                        color: "#555",
+                        lineHeight: "1.6",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                      }}>
+                        <p style={{ margin: "0 0 8px 0", fontWeight: "600", color: "#c0392b" }}>
+                          Overview:
+                        </p>
+                        {result.predicted_outcome.risk_assessment.description}
+                      </div>
+                    )}
+
+                    {/* Risk Reasoning */}
+                    {result.predicted_outcome.risk_assessment.reasoning && (
+                      <div style={{
+                        background: "rgba(255, 243, 205, 0.6)",
+                        border: "1px solid #ffc107",
+                        borderRadius: "8px",
+                        padding: "14px",
+                        fontSize: "13px",
+                        color: "#555",
+                        lineHeight: "1.6",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                      }}>
+                        <p style={{ margin: "0 0 8px 0", fontWeight: "600", color: "#856404" }}>
+                          Detailed Analysis:
+                        </p>
+                        {result.predicted_outcome.risk_assessment.reasoning}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Toggle Button - Bottom Center */}
+            {(result.predicted_outcome?.reasoning || result.predicted_outcome?.confidence_level_reasoning || result.predicted_outcome?.analysis_depth_reasoning || result.predicted_outcome?.risk_assessment) && (
+              <div style={{ marginTop: "24px", paddingTop: "20px", borderTop: "1px solid rgba(243, 156, 18, 0.3)", textAlign: "center" }}>
+                <button
+                  onClick={() => setShowOutcomeReasoning(!showOutcomeReasoning)}
+                  style={{
+                    background: showOutcomeReasoning ? "#f39c12" : "transparent",
+                    color: showOutcomeReasoning ? "white" : "#f39c12",
+                    border: "2px solid #f39c12",
+                    padding: "8px 20px",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                  }}
+                  onMouseOver={(e) => {
+                    if (!showOutcomeReasoning) {
+                      (e.currentTarget as HTMLElement).style.background = "#f39c12";
+                      (e.currentTarget as HTMLElement).style.color = "white";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (!showOutcomeReasoning) {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.color = "#f39c12";
+                    }
+                  }}
+                >
+                  {showOutcomeReasoning ? "Hide Analysis Reasoning ▲" : "Show Analysis Reasoning ▼"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

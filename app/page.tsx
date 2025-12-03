@@ -5,8 +5,10 @@ import Navbar from "./components/Navbar";
 import HeroSection from "./components/dashboard/HeroSection";
 import StatsCards from "./components/dashboard/StatsCards";
 import CasePortfolio from "./components/dashboard/CasePortfolio";
+import ConfidentialByDesign from "./components/dashboard/ConfidentialByDesign";
 import Footer from "./components/Footer";
 import PretrialProcess from "./components/PretrialProcess";
+import UseCases from "./components/UseCases";
 
 export default function Dashboard() {
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
@@ -26,6 +28,11 @@ export default function Dashboard() {
         {/* Case Portfolio */}
         <CasePortfolio />
       </main>
+
+      {/* Confidential by Design Section */}
+      <ConfidentialByDesign />
+      {/* Who are you? Section */}
+      <UseCases />
 
       {/* Footer */}
       <Footer />

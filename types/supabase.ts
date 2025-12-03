@@ -20,6 +20,7 @@ export type Database = {
           case_type: string | null
           charges: Json | null
           created_at: string
+          game_plan: Json | null
           id: string
           judge: string | null
           jurisdiction: Json | null
@@ -28,12 +29,14 @@ export type Database = {
           result: Json | null
           role: string | null
           status: string | null
+          verdict: Json | null
         }
         Insert: {
           case_details?: Json | null
           case_type?: string | null
           charges?: Json | null
           created_at?: string
+          game_plan?: Json | null
           id?: string
           judge?: string | null
           jurisdiction?: Json | null
@@ -42,12 +45,14 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          verdict?: Json | null
         }
         Update: {
           case_details?: Json | null
           case_type?: string | null
           charges?: Json | null
           created_at?: string
+          game_plan?: Json | null
           id?: string
           judge?: string | null
           jurisdiction?: Json | null
@@ -56,6 +61,7 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          verdict?: Json | null
         }
         Relationships: []
       }

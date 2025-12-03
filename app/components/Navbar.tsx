@@ -75,24 +75,18 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
-            <div className="flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 bg-gradient-to-br from-primary-700 to-primary-500 rounded-lg sm:rounded-xl shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105">
               <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-white"
-                fill="none"
+                className="w-8 h-8 sm:w-9 sm:h-9 text-ink-900"
+                fill="currentColor"
                 viewBox="0 0 24 24"
-                stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"
-                />
+                <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-md sm:text-lg lg:text-xl font-bold bg-gradient-to-r from-primary-900 to-primary-600 bg-clip-text text-transparent leading-tight">
-                Legal Case Analysis
+              <span className="text-md sm:text-lg lg:text-xl font-bold text-ink-900 leading-tight">
+                TheLawThing
               </span>
             </div>
           </Link>
@@ -200,7 +194,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                   href="/auth/signin"
                   className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
-                  <span className="relative z-10">Sign In</span>
+                  <span className="relative z-10 cursor-pointer">Sign In</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
                 </Link>
 
@@ -319,7 +313,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               <div className="space-y-2 border-t border-border-200 mt-2 pt-2">
                 <Link
                   href="/auth/signin"
-                  className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
+                  className="cursor-pointer block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Sign In

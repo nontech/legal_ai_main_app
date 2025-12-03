@@ -25,11 +25,10 @@ export default function HorizontalStepper({
             disabled={!onStepClick}
           >
             <div
-              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border transition-all ${
-                currentStep >= step.number
-                  ? "bg-primary-500 border-primary-500 text-white group-hover:bg-primary-600"
-                  : "bg-surface-000 border-border-200 text-ink-400 group-hover:border-border-300"
-              }`}
+              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border transition-all ${currentStep >= step.number
+                ? "bg-primary-500 border-primary-500 text-white group-hover:bg-primary-600"
+                : "bg-surface-000 border-border-200 text-ink-400 group-hover:border-border-300"
+                }`}
             >
               {currentStep > step.number ? (
                 <svg
@@ -52,25 +51,23 @@ export default function HorizontalStepper({
               )}
             </div>
             <span
-              className={`mt-2 text-xs sm:text-sm font-medium whitespace-nowrap ${
-                currentStep >= step.number
-                  ? "text-primary-600 group-hover:text-primary-700"
-                  : "text-ink-500 group-hover:text-ink-600"
-              }`}
+              className={`mt-2 text-xs sm:text-sm font-medium whitespace-nowrap ${currentStep >= step.number
+                ? "text-primary-600 group-hover:text-primary-700"
+                : "text-ink-500 group-hover:text-ink-600"
+                }`}
             >
-                {step.label}
-              </span>
+              {step.label}
+            </span>
           </button>
 
           {/* Connecting Line */}
           {index < steps.length - 1 && (
             <div className="w-12 sm:w-20 h-0.5 mx-1 sm:mx-3 mb-4">
               <div
-                className={`h-full transition-all ${
-                  currentStep > step.number
-                    ? "bg-primary-500"
-                    : "bg-surface-200"
-                }`}
+                className={`h-full transition-all ${currentStep > step.number
+                  ? "bg-primary-500"
+                  : "bg-surface-200"
+                  }`}
               ></div>
             </div>
           )}
