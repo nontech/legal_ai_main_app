@@ -12,6 +12,56 @@ interface CaseType {
   standardOfProof: string;
 }
 
+// Map icon names to emoji characters
+const ICON_MAP: { [key: string]: string } = {
+  // Lucide icon names to emoji
+  "dollar-sign": "💰",
+  DollarSign: "💰",
+  scale: "⚖️",
+  Scale: "⚖️",
+  briefcase: "👔",
+  Briefcase: "👔",
+  users: "👥",
+  Users: "👥",
+  shield: "🛡️",
+  Shield: "🛡️",
+  heart: "❤️",
+  Heart: "❤️",
+  leaf: "🌱",
+  Leaf: "🌱",
+  globe: "🌍",
+  Globe: "🌍",
+  home: "🏠",
+  Home: "🏠",
+  building: "🏢",
+  Building: "🏢",
+  gavel: "⚔️",
+  Gavel: "⚔️",
+  anchor: "⚓",
+  Anchor: "⚓",
+  "hard-hat": "👷",
+  HardHat: "👷",
+  lightbulb: "💡",
+  Lightbulb: "💡",
+  book: "📚",
+  Book: "📚",
+  "file-text": "📄",
+  FileText: "📄",
+  ship: "🚢",
+  Ship: "🚢",
+  plane: "✈️",
+  Plane: "✈️",
+  badge: "🎖️",
+  Badge: "🎖️",
+  // Add default fallback
+  default: "⚖️",
+};
+
+const getEmojiIcon = (iconName: string | undefined): string => {
+  if (!iconName) return ICON_MAP["default"];
+  return ICON_MAP[iconName] || ICON_MAP["default"];
+};
+
 interface CaseTypeSelectorProps {
   caseId?: string;
   countryId?: string;
@@ -252,6 +302,8 @@ export default function CaseTypeSelector({
       return;
     }
 
+    let isMounted = true;
+
     const fetchCaseTypesFromAPI = async () => {
       try {
         setIsFetchingCaseTypes(true);
@@ -260,25 +312,48 @@ export default function CaseTypeSelector({
         );
         const json = await res.json();
 
-        if (json.ok && json.data) {
+        if (!isMounted) return;
+
+        if (
+          json.ok &&
+          json.data &&
+          Object.keys(json.data).length > 0
+        ) {
           // Transform API response (JSONB object) to array format
           const apiCaseTypes = Object.entries(json.data).map(
-            ([key, value]: [string, any]) => ({
-              id: key,
-              title: value.name || value.title || key,
-              subtitle: value.description || value.subtitle || "",
-              icon: value.icon || "⚖️",
-              typicalCases:
-                value.typical_cases || value.typicalCases || [],
-              standardOfProof:
-                value.standard_of_proof ||
-                value.standardOfProof ||
-                "",
-            })
+            ([key, value]: [string, any]) => {
+              // Get icon from API and convert to emoji, or find from default case types
+              let icon = value.icon;
+              if (icon) {
+                // Convert icon name to emoji
+                icon = getEmojiIcon(icon);
+              } else {
+                const defaultCaseType = defaultCaseTypes.find(
+                  (ct) => ct.id === key
+                );
+                icon = defaultCaseType?.icon || "⚖️";
+              }
+              return {
+                id: key,
+                title: value.name || value.title || key,
+                subtitle: value.description || value.subtitle || "",
+                icon: icon,
+                typicalCases:
+                  value.typical_cases || value.typicalCases || [],
+                standardOfProof:
+                  value.standard_of_proof ||
+                  value.standardOfProof ||
+                  "",
+              };
+            }
           );
           setCaseTypes(apiCaseTypes);
         } else {
+          // No API data found, use default case types
           setCaseTypes(defaultCaseTypes);
+        }
+
+        if (!json.ok) {
           setError(json.error || "Failed to fetch case types");
         }
       } catch (err) {
@@ -286,11 +361,17 @@ export default function CaseTypeSelector({
         setCaseTypes(defaultCaseTypes);
         setError("Failed to fetch case types");
       } finally {
-        setIsFetchingCaseTypes(false);
+        if (isMounted) {
+          setIsFetchingCaseTypes(false);
+        }
       }
     };
 
     fetchCaseTypesFromAPI();
+
+    return () => {
+      isMounted = false;
+    };
   }, [countryId]);
 
   useEffect(() => {
@@ -302,22 +383,39 @@ export default function CaseTypeSelector({
 
           if (json.ok && json.data?.case_type) {
             const caseTypeId = json.data.case_type;
-            const foundCaseType = caseTypes.find(
+            let foundCaseType = caseTypes.find(
               (ct) => ct.id === caseTypeId
             );
+
+            // Ensure the case type has an icon
+            if (foundCaseType && !foundCaseType.icon) {
+              const defaultCaseType = defaultCaseTypes.find(
+                (ct) => ct.id === caseTypeId
+              );
+              if (defaultCaseType?.icon) {
+                foundCaseType = {
+                  ...foundCaseType,
+                  icon: defaultCaseType.icon,
+                };
+              } else {
+                foundCaseType = { ...foundCaseType, icon: "⚖️" };
+              }
+            }
+
             if (foundCaseType) {
               setSelectedCaseType(foundCaseType);
             } else {
-              setSelectedCaseType(
-                caseTypes[1] || defaultCaseTypes[1]
-              ); // Civil Law default
+              const fallback = caseTypes[1] || defaultCaseTypes[1];
+              setSelectedCaseType(fallback);
             }
           } else {
-            setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default
+            const fallback = caseTypes[1] || defaultCaseTypes[1];
+            setSelectedCaseType(fallback);
           }
         } catch (error) {
           console.error("Failed to fetch case type data:", error);
-          setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default on error
+          const fallback = caseTypes[1] || defaultCaseTypes[1];
+          setSelectedCaseType(fallback);
         } finally {
           setIsLoading(false);
         }
@@ -325,7 +423,8 @@ export default function CaseTypeSelector({
 
       fetchCaseTypeData();
     } else {
-      setSelectedCaseType(caseTypes[1] || defaultCaseTypes[1]); // Civil Law default
+      const fallback = caseTypes[1] || defaultCaseTypes[1];
+      setSelectedCaseType(fallback);
       setIsLoading(false);
     }
   }, [caseId, caseTypes]);
@@ -481,11 +580,10 @@ export default function CaseTypeSelector({
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
-                        selectedCaseType?.id === caseType.id
+                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
                           ? "border-primary-500 bg-primary-100"
                           : "border-border-200 hover:border-primary-300"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start mb-2">
                         <div className="text-3xl mr-3">

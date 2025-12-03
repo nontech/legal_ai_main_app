@@ -207,14 +207,14 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                         : "bg-surface-200 text-ink-500"
                         }`}
                     >
-                      {roles.defendant.icon}
+                      {effectiveRoles.defendant?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {roles.defendant.title}
+                        {effectiveRoles.defendant?.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {roles.defendant.subtitle}
+                        {effectiveRoles.defendant?.subtitle}
                       </p>
                     </div>
                   </div>
@@ -224,7 +224,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
-                      {roles.defendant.responsibilities.map(
+                      {effectiveRoles.defendant?.responsibilities?.map(
                         (resp, index) => (
                           <li
                             key={index}
@@ -245,7 +245,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
-                      {roles.defendant.strategicFocus}
+                      {effectiveRoles.defendant?.strategicFocus}
                     </p>
                   </div>
                 </button>
@@ -265,14 +265,14 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                         : "bg-surface-200 text-ink-500"
                         }`}
                     >
-                      {roles.plaintiff.icon}
+                      {effectiveRoles.plaintiff?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {roles.plaintiff.title}
+                        {effectiveRoles.plaintiff?.title}
                       </h3>
                       <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {roles.plaintiff.subtitle}
+                        {effectiveRoles.plaintiff?.subtitle}
                       </p>
                     </div>
                   </div>
@@ -282,7 +282,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                       Key Responsibilities:
                     </h4>
                     <ul className="space-y-1">
-                      {roles.plaintiff.responsibilities.map(
+                      {effectiveRoles.plaintiff?.responsibilities?.map(
                         (resp, index) => (
                           <li
                             key={index}
@@ -303,7 +303,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
                       <span className="font-semibold">
                         Strategic Focus:
                       </span>{" "}
-                      {roles.plaintiff.strategicFocus}
+                      {effectiveRoles.plaintiff?.strategicFocus}
                     </p>
                   </div>
                 </button>

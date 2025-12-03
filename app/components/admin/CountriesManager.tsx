@@ -79,7 +79,7 @@ const CountriesManager = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -288,11 +288,10 @@ const CountriesManager = () => {
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        country.is_active
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${country.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
-                      }`}
+                        }`}
                     >
                       {country.is_active ? "Active" : "Inactive"}
                     </span>

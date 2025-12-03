@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
       .from("jury")
       .select("demographics, characteristics")
       .eq("country_id", country_id)
-      .eq("is_active", true)
-      .single();
+      .eq("is_active", true);
 
     if (error) {
       return NextResponse.json(
@@ -29,11 +28,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ 
-      ok: true, 
+    // Return the first matching record's data, or empty objects if none found
+    const juryData = data && data.length > 0 ? data[0] : {};
+
+    return NextResponse.json({
+      ok: true,
       data: {
-        demographics: data?.demographics || {},
-        characteristics: data?.characteristics || {}
+        demographics: juryData?.demographics || {},
+        characteristics: juryData?.characteristics || {}
       }
     });
   } catch (err: any) {

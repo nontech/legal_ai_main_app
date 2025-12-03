@@ -27,6 +27,7 @@ function DetailedCaseAnalysisContent() {
     initialStep ? parseInt(initialStep) : 0
   );
   const [countryId, setCountryId] = useState<string>("");
+  const [jurisdictionId, setJurisdictionId] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
@@ -57,17 +58,17 @@ function DetailedCaseAnalysisContent() {
 
       if (json.ok && json.data) {
         const data = json.data;
-      const newCompletionData: { [key: number]: number } = {
-        0: 0,
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-        5: 0,
-        6: 0,
-        7: 0,
-        8: 0,
-      };
+        const newCompletionData: { [key: number]: number } = {
+          0: 0,
+          1: 0,
+          2: 0,
+          3: 0,
+          4: 0,
+          5: 0,
+          6: 0,
+          7: 0,
+          8: 0,
+        };
 
         // Check jurisdiction (step 0)
         if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.state && data.jurisdiction.city && data.jurisdiction.court) {
@@ -156,7 +157,7 @@ function DetailedCaseAnalysisContent() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} />;
+        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} onJurisdictionChange={setJurisdictionId} />;
       case 1:
         return <CaseTypeSelector caseId={caseId} countryId={countryId} />;
       case 2:
@@ -166,7 +167,7 @@ function DetailedCaseAnalysisContent() {
       case 4:
         return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} />;
+        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} jurisdictionId={jurisdictionId} />;
       case 6:
         return <JuryComposition caseId={caseId} countryId={countryId} onSaveSuccess={fetchCaseCompletion} />;
       case 7:
@@ -183,7 +184,7 @@ function DetailedCaseAnalysisContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar onPretrialClick={() => setIsPretrialOpen(true)} showPretrialButton={true} />
-      
+
       {/* Mobile Progress Bar - Shown on mobile only */}
       <MobileProgressBar
         currentStep={currentStep}
@@ -191,7 +192,7 @@ function DetailedCaseAnalysisContent() {
         onStepChange={setCurrentStep}
         completionData={completionData}
       />
-      
+
       {/* Main content area */}
       <main className="pt-20 md:pt-32 pb-32 px-3 sm:px-4 lg:px-8">
         <div className="flex gap-6">

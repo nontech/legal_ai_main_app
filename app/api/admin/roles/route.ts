@@ -9,7 +9,10 @@ export async function GET(request: NextRequest) {
 
     if (!country_id) {
       return NextResponse.json(
-        { ok: false, error: "country_id query parameter is required" },
+        {
+          ok: false,
+          error: "country_id query parameter is required",
+        },
         { status: 400 }
       );
     }
@@ -18,8 +21,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase
       .from("role")
       .select("role_types")
-      .eq("country_id", country_id)
-      .single();
+      .eq("country_id", country_id);
 
     if (error) {
       return NextResponse.json(
@@ -28,7 +30,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ ok: true, data: data?.role_types || {} });
+    // Return the first matching record's role_types, or empty object if none found
+    const roleTypeData =
+      data && data.length > 0 ? data[0].role_types : {};
+
+    return NextResponse.json({ ok: true, data: roleTypeData || {} });
   } catch (err: any) {
     return NextResponse.json(
       { ok: false, error: err.message },
@@ -36,4 +42,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
