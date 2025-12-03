@@ -10,37 +10,19 @@ interface JuryCharacteristic {
   description: string;
 }
 
-export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
+export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { caseId?: string; onSaveSuccess?: () => void; countryId?: string }) {
+  const [demographics, setDemographics] = useState<JuryCharacteristic[]>([]);
+  const [psychological, setPsychological] = useState<JuryCharacteristic[]>([]);
   const [selectedDemographics, setSelectedDemographics] = useState<
     string[]
   >([]);
   const [selectedPsychological, setSelectedPsychological] = useState<
     string[]
   >([]);
+  const [isFetchingJury, setIsFetchingJury] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadSavedJury = async () => {
-      if (caseId) {
-        try {
-          const response = await fetch(`/api/cases/${caseId}`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const json = await response.json();
-          if (json.ok && json.data?.jury) {
-            setSelectedDemographics(json.data.jury.demographics || []);
-            setSelectedPsychological(json.data.jury.psychological || []);
-          }
-        } catch (error) {
-          console.error("Failed to load saved jury data:", error);
-        }
-      }
-    };
-
-    loadSavedJury();
-  }, [caseId]);
-
-  const demographics: JuryCharacteristic[] = [
+  const defaultDemographics: JuryCharacteristic[] = [
     {
       id: "young-adults",
       label: "Young Adults (18-35)",
@@ -103,7 +85,7 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
     },
   ];
 
-  const psychological: JuryCharacteristic[] = [
+  const defaultPsychological: JuryCharacteristic[] = [
     {
       id: "analytical",
       label: "Analytical Thinkers",
@@ -154,6 +136,87 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
     },
   ];
 
+  // Fetch jury data from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setDemographics(defaultDemographics);
+      setPsychological(defaultPsychological);
+      return;
+    }
+
+    const fetchJuryData = async () => {
+      try {
+        setIsFetchingJury(true);
+        const res = await fetch(`/api/admin/jury?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          const apiData = json.data;
+          
+          // Transform demographics
+          if (apiData.demographics && typeof apiData.demographics === 'object') {
+            const demoArray = Object.entries(apiData.demographics).map(([key, value]: [string, any]) => ({
+              id: key,
+              label: value.label || value.name || key,
+              description: value.description || "",
+            }));
+            setDemographics(demoArray);
+          } else {
+            setDemographics(defaultDemographics);
+          }
+
+          // Transform characteristics (psychological)
+          if (apiData.characteristics && typeof apiData.characteristics === 'object') {
+            const psychArray = Object.entries(apiData.characteristics).map(([key, value]: [string, any]) => ({
+              id: key,
+              label: value.label || value.name || key,
+              description: value.description || "",
+            }));
+            setPsychological(psychArray);
+          } else {
+            setPsychological(defaultPsychological);
+          }
+        } else {
+          setDemographics(defaultDemographics);
+          setPsychological(defaultPsychological);
+          setError(json.error || "Failed to fetch jury data");
+        }
+      } catch (err) {
+        console.error("Failed to fetch jury data:", err);
+        setDemographics(defaultDemographics);
+        setPsychological(defaultPsychological);
+        setError("Failed to fetch jury data");
+      } finally {
+        setIsFetchingJury(false);
+      }
+    };
+
+    fetchJuryData();
+  }, [countryId]);
+
+  // Load saved jury data
+  useEffect(() => {
+    const loadSavedJury = async () => {
+      if (caseId) {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const json = await response.json();
+          if (json.ok && json.data?.jury) {
+            setSelectedDemographics(json.data.jury.demographics || []);
+            setSelectedPsychological(json.data.jury.psychological || []);
+          }
+        } catch (error) {
+          console.error("Failed to load saved jury data:", error);
+        }
+      }
+    };
+
+    loadSavedJury();
+  }, [caseId]);
+
   const toggleDemographic = (id: string) => {
     setSelectedDemographics((prev) =>
       prev.includes(id)
@@ -185,6 +248,12 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
           </p>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-red-50 rounded-lg p-4 border border-red-200">
+          <div className="text-red-700 text-sm">{error}</div>
+        </div>
+      )}
 
       {/* Selection Summary */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
@@ -249,7 +318,7 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
           </div>
 
           <div className="space-y-3">
-            {demographics.map((item) => (
+            {demographics && demographics.length > 0 ? demographics.map((item) => (
               <label
                 key={item.id}
                 className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedDemographics.includes(item.id)
@@ -272,7 +341,9 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
                   </div>
                 </div>
               </label>
-            ))}
+            )) : (
+              <div className="text-gray-500 text-sm">No demographics available</div>
+            )}
           </div>
         </div>
 
@@ -300,7 +371,7 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
           </div>
 
           <div className="space-y-3">
-            {psychological.map((item) => (
+            {psychological && psychological.length > 0 ? psychological.map((item) => (
               <label
                 key={item.id}
                 className={`flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all ${selectedPsychological.includes(item.id)
@@ -323,7 +394,9 @@ export default function JuryComposition({ caseId, onSaveSuccess }: { caseId?: st
                   </div>
                 </div>
               </label>
-            ))}
+            )) : (
+              <div className="text-gray-500 text-sm">No psychological characteristics available</div>
+            )}
           </div>
         </div>
       </div>

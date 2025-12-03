@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import CompactJurisdiction from "./CompactJurisdiction";
+import JurisdictionSection from "../JurisdictionSection";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
@@ -29,7 +29,20 @@ type RoleType = "defendant" | "plaintiff";
 interface QuickAnalysisFormProps {
   initialDocuments?: File[];
   onCalculateResults?: (data: any) => void;
-  uploadedMetadata?: any;
+  uploadedMetadata?: {
+    caseName?: string;
+    caseDescription?: string;
+    jurisdiction?: {
+      country?: string;
+      state?: string;
+      city?: string;
+      court?: string;
+      country_id?: string;
+    };
+    caseType?: string;
+    role?: string;
+    charges?: any[];
+  };
   caseInformationFiles?: File[];
   caseId?: string | null;
 }
@@ -42,8 +55,10 @@ export default function QuickAnalysisForm({
   caseId,
 }: QuickAnalysisFormProps) {
   const router = useRouter();
-  const [caseName, setCaseName] = useState(uploadedMetadata?.caseName || "");
-  const [caseDescription, setCaseDescription] = useState(uploadedMetadata?.caseDescription || "");
+  
+  const [countryId, setCountryId] = useState<string>("");
+  const [caseName, setCaseName] = useState<string>("");
+  const [caseDescription, setCaseDescription] = useState<string>("");
   const [classifiedFiles, setClassifiedFiles] = useState<ClassifiedFile[]>(
     initialDocuments.map(file => ({
       file,
@@ -52,17 +67,29 @@ export default function QuickAnalysisForm({
     }))
   );
   // Initialize with metadata from documents or empty
-  const [jurisdiction, setJurisdiction] = useState<any>(
-    uploadedMetadata?.jurisdiction || {
-      country: "",
-      state: "",
-      city: "",
-      court: "",
-    }
-  );
+  const [jurisdiction, setJurisdiction] = useState<any>({
+    country: "",
+    state: "",
+    city: "",
+    court: "",
+    country_id: "",
+  });
   // Store the case type as its string id that API expects
-  const [caseTypeId, setCaseTypeId] = useState<string>(uploadedMetadata?.caseType?.toLowerCase() || "");
-  const [role, setRole] = useState<string>(uploadedMetadata?.role?.toLowerCase() || "plaintiff" as RoleType);
+  const [caseTypeId, setCaseTypeId] = useState<string>("");
+  const [role, setRole] = useState<string>("plaintiff" as RoleType);
+  
+  // Update state when metadata arrives from document upload
+  useEffect(() => {
+    if (uploadedMetadata && Object.keys(uploadedMetadata).length > 0) {
+      console.log("📊 QuickAnalysisForm received metadata:", uploadedMetadata);
+      
+      if (uploadedMetadata.caseName) setCaseName(uploadedMetadata.caseName);
+      if (uploadedMetadata.caseDescription) setCaseDescription(uploadedMetadata.caseDescription);
+      if (uploadedMetadata.jurisdiction) setJurisdiction(uploadedMetadata.jurisdiction);
+      if (uploadedMetadata.caseType) setCaseTypeId(uploadedMetadata.caseType.toLowerCase());
+      if (uploadedMetadata.role) setRole(uploadedMetadata.role.toLowerCase());
+    }
+  }, [uploadedMetadata]);
 
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
@@ -453,16 +480,31 @@ export default function QuickAnalysisForm({
         {/* Form Sections */}
         <div className="space-y-6">
           {/* Jurisdiction */}
-          <CompactJurisdiction onUpdate={setJurisdiction} initialValues={jurisdiction} />
+          <JurisdictionSection
+            variant="compact"
+            onUpdate={(data) => {
+              setJurisdiction(data);
+              if (data.country_id) {
+                setCountryId(data.country_id);
+              }
+            }}
+            initialValues={jurisdiction}
+            hideSaveButton={true}
+          />
 
           {/* Case Type */}
           <CompactCaseType
             initialCaseTypeId={caseTypeId || undefined}
+            countryId={countryId}
             onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
           />
 
           {/* Role */}
-          <CompactRole onUpdate={(r: any) => setRole(r)} initialValue={role as any} />
+          <CompactRole 
+            countryId={countryId}
+            onUpdate={(r: any) => setRole(r)} 
+            initialValue={role as any} 
+          />
 
           {/* Basic Case Information */}
           <div className="bg-surface-000 rounded-lg border border-border-200 p-6">

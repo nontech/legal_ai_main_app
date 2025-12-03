@@ -14,9 +14,61 @@ interface CaseType {
 interface CompactCaseTypeProps {
   onUpdate?: (caseType: CaseType) => void;
   initialCaseTypeId?: string;
+  countryId?: string;
 }
 
-const CASE_TYPES: CaseType[] = [
+// Map icon names to emoji characters
+const ICON_MAP: { [key: string]: string } = {
+  "dollar-sign": "💰",
+  DollarSign: "💰",
+  scale: "⚖️",
+  Scale: "⚖️",
+  briefcase: "💼",
+  Briefcase: "💼",
+  users: "👥",
+  Users: "👥",
+  shield: "🛡️",
+  Shield: "🛡️",
+  heart: "❤️",
+  Heart: "❤️",
+  leaf: "🌱",
+  Leaf: "🌱",
+  globe: "🌍",
+  Globe: "🌍",
+  home: "🏠",
+  Home: "🏠",
+  building: "🏢",
+  Building: "🏢",
+  gavel: "⚔️",
+  Gavel: "⚔️",
+  anchor: "⚓",
+  Anchor: "⚓",
+  "hard-hat": "👷",
+  HardHat: "👷",
+  lightbulb: "💡",
+  Lightbulb: "💡",
+  book: "📚",
+  Book: "📚",
+  "file-text": "📄",
+  FileText: "📄",
+  ship: "🚢",
+  Ship: "🚢",
+  plane: "✈️",
+  Plane: "✈️",
+  badge: "🎖️",
+  Badge: "🎖️",
+  default: "⚖️",
+};
+
+const getEmojiIcon = (iconName: string | undefined): string => {
+  if (!iconName) return ICON_MAP["default"];
+  // If it's already an emoji, return it
+  if (iconName.match(/[\u{1F300}-\u{1F9FF}]/u)) return iconName;
+  // Otherwise, look it up in the map
+  return ICON_MAP[iconName] || ICON_MAP["default"];
+};
+
+const DEFAULT_CASE_TYPES: CaseType[] = [
     {
       id: "tax",
       title: "Tax Law",
@@ -190,31 +242,87 @@ const CASE_TYPES: CaseType[] = [
 
 const DEFAULT_CASE_TYPE_ID = "civil";
 const DEFAULT_CASE_TYPE =
-  CASE_TYPES.find((caseType) => caseType.id === DEFAULT_CASE_TYPE_ID) ??
-  CASE_TYPES[0]!;
+  DEFAULT_CASE_TYPES.find((caseType) => caseType.id === DEFAULT_CASE_TYPE_ID) ??
+  DEFAULT_CASE_TYPES[0]!;
 
-function getCaseTypeById(id?: string | null) {
+function getCaseTypeById(id?: string | null, caseTypes?: CaseType[]) {
   if (!id) return undefined;
-  return CASE_TYPES.find((caseType) => caseType.id === id);
+  return (caseTypes || DEFAULT_CASE_TYPES).find((caseType) => caseType.id === id);
 }
 
 export default function CompactCaseType({
   onUpdate,
   initialCaseTypeId,
+  countryId,
 }: CompactCaseTypeProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [caseTypes, setCaseTypes] = useState<CaseType[]>(DEFAULT_CASE_TYPES);
   const [selectedCaseType, setSelectedCaseType] = useState<CaseType>(() => {
-    const initialSelection = getCaseTypeById(initialCaseTypeId);
+    const initialSelection = getCaseTypeById(initialCaseTypeId, DEFAULT_CASE_TYPES);
     return initialSelection ?? DEFAULT_CASE_TYPE;
   });
+  const [isFetchingCaseTypes, setIsFetchingCaseTypes] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch case types from API when country changes
+  useEffect(() => {
+    if (!countryId) {
+      setCaseTypes(DEFAULT_CASE_TYPES);
+      return;
+    }
+
+    const fetchCaseTypesFromAPI = async () => {
+      try {
+        setIsFetchingCaseTypes(true);
+        const res = await fetch(`/api/admin/case-types?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          // Transform API response (JSONB object) to array format
+          const apiCaseTypes = Object.entries(json.data).map(([key, value]: [string, any]) => {
+            // Get icon and convert to emoji
+            let icon = value.icon;
+            if (icon) {
+              icon = getEmojiIcon(icon);
+            } else {
+              // Try to find from default case types
+              const defaultCaseType = DEFAULT_CASE_TYPES.find((ct) => ct.id === key);
+              icon = defaultCaseType?.icon || "⚖️";
+            }
+            
+            return {
+              id: key,
+              title: value.name || value.title || key,
+              subtitle: value.description || value.subtitle || "",
+              icon: icon,
+              typicalCases: value.typical_cases || value.typicalCases || [],
+              standardOfProof: value.standard_of_proof || value.standardOfProof || "",
+            };
+          });
+          setCaseTypes(apiCaseTypes);
+        } else {
+          setCaseTypes(DEFAULT_CASE_TYPES);
+          setError(json.error || "Failed to fetch case types");
+        }
+      } catch (err) {
+        console.error("Failed to fetch case types:", err);
+        setCaseTypes(DEFAULT_CASE_TYPES);
+        setError("Failed to fetch case types");
+      } finally {
+        setIsFetchingCaseTypes(false);
+      }
+    };
+
+    fetchCaseTypesFromAPI();
+  }, [countryId]);
 
   useEffect(() => {
     const targetSelection =
-      getCaseTypeById(initialCaseTypeId) ?? DEFAULT_CASE_TYPE;
+      getCaseTypeById(initialCaseTypeId, caseTypes) ?? DEFAULT_CASE_TYPE;
     setSelectedCaseType((current) =>
       current.id === targetSelection.id ? current : targetSelection
     );
-  }, [initialCaseTypeId]);
+  }, [initialCaseTypeId, caseTypes]);
 
   useEffect(() => {
     onUpdate?.(selectedCaseType);
@@ -232,7 +340,7 @@ export default function CompactCaseType({
           <div className="flex items-start sm:items-center flex-1">
             <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
               <span className="text-xl sm:text-2xl text-primary-600">
-                {selectedCaseType.icon}
+                {selectedCaseType?.icon || "⚖️"}
               </span>
             </div>
             <div className="min-w-0">
@@ -249,7 +357,7 @@ export default function CompactCaseType({
           {/* Centered Case Type Name - Hidden on mobile */}
           <div className="hidden sm:flex flex-1 justify-center">
             <span className="text-lg font-semibold text-ink-900">
-              {selectedCaseType.title}
+              {selectedCaseType?.title || "Select Case Type"}
             </span>
           </div>
 
@@ -310,8 +418,13 @@ export default function CompactCaseType({
 
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {CASE_TYPES.map((caseType) => (
+                  {caseTypes.map((caseType) => (
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}

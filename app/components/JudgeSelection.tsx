@@ -25,7 +25,7 @@ interface Judge {
   notablePatterns: string[];
 }
 
-const judges: Judge[] = [
+const DEFAULT_JUDGES: Judge[] = [
   {
     id: "1",
     name: "Judge Patricia Anderson",
@@ -106,9 +106,57 @@ const judges: Judge[] = [
   },
 ];
 
-export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: string; onSaveSuccess?: () => void }) {
+export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }: { caseId?: string; onSaveSuccess?: () => void; jurisdictionId?: string }) {
+  const [judges, setJudges] = useState<Judge[]>(DEFAULT_JUDGES);
   const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFetchingJudges, setIsFetchingJudges] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch judges when jurisdiction changes
+  useEffect(() => {
+    if (!jurisdictionId) {
+      setJudges(DEFAULT_JUDGES);
+      return;
+    }
+
+    const fetchJudgesFromAPI = async () => {
+      try {
+        setIsFetchingJudges(true);
+        const res = await fetch(`/api/admin/judges?jurisdiction_id=${jurisdictionId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data && Array.isArray(json.data)) {
+          // Transform API response to Judge format
+          const apiJudges = json.data.map((judgeInfo: any, index: number) => ({
+            id: judgeInfo.id || `judge-${index}`,
+            name: judgeInfo.name || "",
+            experience: judgeInfo.experience || 0,
+            background: judgeInfo.background || "",
+            leaningLabel: judgeInfo.leaningLabel || judgeInfo.leaning_label || "Moderate",
+            leaningColor: judgeInfo.leaningColor || judgeInfo.leaning_color || "yellow",
+            temperament: judgeInfo.temperament || "",
+            temperamentDetails: judgeInfo.temperamentDetails || judgeInfo.temperament_details || [],
+            criminalCases: judgeInfo.criminalCases || judgeInfo.criminal_cases || { conviction: 0, dismissal: 0, pleaDeals: 0 },
+            civilCases: judgeInfo.civilCases || judgeInfo.civil_cases || { plaintiffWins: 0, defendantWins: 0 },
+            notablePatterns: judgeInfo.notablePatterns || judgeInfo.notable_patterns || [],
+          }));
+          setJudges(apiJudges);
+        } else {
+          setJudges(DEFAULT_JUDGES);
+          setError(json.error || "Failed to fetch judges");
+        }
+      } catch (err) {
+        console.error("Failed to fetch judges:", err);
+        setJudges(DEFAULT_JUDGES);
+        setError("Failed to fetch judges");
+      } finally {
+        setIsFetchingJudges(false);
+      }
+    };
+
+    fetchJudgesFromAPI();
+  }, [jurisdictionId]);
 
   useEffect(() => {
     const loadSavedJudge = async () => {
@@ -344,6 +392,11 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
                 {/* Judge Cards in Modal */}
                 <div className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 bg-surface-000">
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                      {error}
+                    </div>
+                  )}
                   {judges.map((judge) => (
                     <div
                       key={judge.id}
@@ -395,97 +448,97 @@ export default function JudgeSelection({ caseId, onSaveSuccess }: { caseId?: str
 
                         {/* Three Column Layout */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-6 hidden sm:grid">
-                      {/* Historical Ruling Patterns */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Historical Ruling Patterns
-                        </h4>
+                          {/* Historical Ruling Patterns */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Historical Ruling Patterns
+                            </h4>
 
-                        <div>
-                          <p className="font-semibold text-ink-800 mb-2">
-                            Criminal Cases:
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-ink-600">
-                              Conviction:{" "}
-                              {judge.criminalCases.conviction}%
-                            </p>
-                            <p className="text-ink-600">
-                              Dismissal:{" "}
-                              {judge.criminalCases.dismissal}%
-                            </p>
-                            <p className="text-ink-600">
-                              Plea Deals:{" "}
-                              {judge.criminalCases.pleaDeals}%
-                            </p>
+                            <div>
+                              <p className="font-semibold text-ink-800 mb-2">
+                                Criminal Cases:
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <p className="text-ink-600">
+                                  Conviction:{" "}
+                                  {judge.criminalCases.conviction}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Dismissal:{" "}
+                                  {judge.criminalCases.dismissal}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Plea Deals:{" "}
+                                  {judge.criminalCases.pleaDeals}%
+                                </p>
+                              </div>
+                            </div>
+
+                            <div>
+                              <p className="font-semibold text-ink-800 mb-2">
+                                Civil Cases:
+                              </p>
+                              <div className="space-y-1 text-sm">
+                                <p className="text-ink-600">
+                                  Plaintiff Wins:{" "}
+                                  {judge.civilCases.plaintiffWins}%
+                                </p>
+                                <p className="text-ink-600">
+                                  Defendant Wins:{" "}
+                                  {judge.civilCases.defendantWins}%
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
 
-                        <div>
-                          <p className="font-semibold text-ink-800 mb-2">
-                            Civil Cases:
-                          </p>
-                          <div className="space-y-1 text-sm">
-                            <p className="text-ink-600">
-                              Plaintiff Wins:{" "}
-                              {judge.civilCases.plaintiffWins}%
-                            </p>
-                            <p className="text-ink-600">
-                              Defendant Wins:{" "}
-                              {judge.civilCases.defendantWins}%
-                            </p>
+                          {/* Notable Decision Patterns */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Notable Decision Patterns
+                            </h4>
+                            <ul className="space-y-2">
+                              {judge.notablePatterns.map(
+                                (pattern, index) => (
+                                  <li
+                                    key={index}
+                                    className="flex items-start gap-2 text-sm text-ink-600"
+                                  >
+                                    <span className="text-primary-500 mt-0.5">
+                                      •
+                                    </span>
+                                    <span>{pattern}</span>
+                                  </li>
+                                )
+                              )}
+                            </ul>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Notable Decision Patterns */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Notable Decision Patterns
-                        </h4>
-                        <ul className="space-y-2">
-                          {judge.notablePatterns.map(
-                            (pattern, index) => (
-                              <li
-                                key={index}
-                                className="flex items-start gap-2 text-sm text-ink-600"
-                              >
-                                <span className="text-primary-500 mt-0.5">
-                                  •
-                                </span>
-                                <span>{pattern}</span>
-                              </li>
-                            )
-                          )}
-                        </ul>
-                      </div>
-
-                      {/* Judicial Temperament */}
-                      <div className="space-y-4">
-                        <h4 className="font-bold text-ink-900 text-lg">
-                          Judicial Temperament
-                        </h4>
-                        <p className="text-ink-600 text-sm">
-                          {judge.temperament}
-                        </p>
-                        <div className="pt-2">
-                          <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
-                            <p className="text-sm font-semibold text-ink-900">
-                              {judge.experience} years experience
+                          {/* Judicial Temperament */}
+                          <div className="space-y-4">
+                            <h4 className="font-bold text-ink-900 text-lg">
+                              Judicial Temperament
+                            </h4>
+                            <p className="text-ink-600 text-sm">
+                              {judge.temperament}
                             </p>
+                            <div className="pt-2">
+                              <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
+                                <p className="text-sm font-semibold text-ink-900">
+                                  {judge.experience} years experience
+                                </p>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  )}
+      )}
       <SaveCaseButton
         caseId={caseId}
         field="judge"

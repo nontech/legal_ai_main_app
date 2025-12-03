@@ -1,6 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface Country {
+  id: string;
+  name: string;
+}
+
+interface Jurisdiction {
+  id: string;
+  country_id: string;
+  state_province: string | null;
+  city: string | null;
+  court: string | null;
+}
 
 interface CompactJurisdictionProps {
   onUpdate?: (data: {
@@ -8,12 +21,14 @@ interface CompactJurisdictionProps {
     state: string;
     city: string;
     court: string;
+    country_id?: string;
   }) => void;
   initialValues?: {
     country?: string;
     state?: string;
     city?: string;
     court?: string;
+    country_id?: string;
   };
 }
 
@@ -21,99 +36,121 @@ export default function CompactJurisdiction({
   onUpdate,
   initialValues = {},
 }: CompactJurisdictionProps) {
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
   const [country, setCountry] = useState(initialValues.country || "");
+  const [countryId, setCountryId] = useState(initialValues.country_id || "");
   const [state, setState] = useState(initialValues.state || "");
   const [city, setCity] = useState(initialValues.city || "");
   const [court, setCourt] = useState(initialValues.court || "");
+  const [isLoadingCountries, setIsLoadingCountries] = useState(true);
+  const [isLoadingJurisdictions, setIsLoadingJurisdictions] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const countryOptions = [
-    "United States of America",
-    "Canada",
-    "United Kingdom",
-  ];
+  // Fetch countries on mount
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        setIsLoadingCountries(true);
+        const res = await fetch("/api/admin/countries");
+        const json = await res.json();
 
-  const stateOptions = [
-    "Alabama",
-    "Alaska",
-    "Arizona",
-    "California",
-    "Florida",
-    "New York",
-    "Texas",
-  ];
+        if (json.ok && json.data) {
+          setCountries(json.data);
+        } else {
+          setError(json.error || "Failed to fetch countries");
+        }
+      } catch (err) {
+        console.error("Failed to fetch countries:", err);
+        setError("Failed to fetch countries");
+      } finally {
+        setIsLoadingCountries(false);
+      }
+    };
 
-  const cityOptions = [
-    "Mobile",
-    "Birmingham",
-    "Montgomery",
-    "Huntsville",
-  ];
+    fetchCountries();
+  }, []);
 
-  const courtOptions = [
-    "Southern District of Alabama",
-    "Northern District of Alabama",
-    "Middle District of Alabama",
-  ];
+  // Fetch jurisdictions when country is selected
+  useEffect(() => {
+    if (!countryId) {
+      setJurisdictions([]);
+      return;
+    }
 
-  const [isCountryManual, setIsCountryManual] = useState(
-    () =>
-      !!initialValues.country &&
-      !countryOptions.includes(initialValues.country ?? ""),
-  );
-  const [isStateManual, setIsStateManual] = useState(
-    () =>
-      !!initialValues.state &&
-      !stateOptions.includes(initialValues.state ?? ""),
-  );
-  const [isCityManual, setIsCityManual] = useState(
-    () =>
-      !!initialValues.city &&
-      !cityOptions.includes(initialValues.city ?? ""),
-  );
-  const [isCourtManual, setIsCourtManual] = useState(
-    () =>
-      !!initialValues.court &&
-      !courtOptions.includes(initialValues.court ?? ""),
-  );
+    const fetchJurisdictions = async () => {
+      try {
+        setIsLoadingJurisdictions(true);
+        const res = await fetch(`/api/admin/jurisdictions?country_id=${countryId}`);
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          setJurisdictions(json.data);
+        } else {
+          setError(json.error || "Failed to fetch jurisdictions");
+        }
+      } catch (err) {
+        console.error("Failed to fetch jurisdictions:", err);
+        setError("Failed to fetch jurisdictions");
+      } finally {
+        setIsLoadingJurisdictions(false);
+      }
+    };
+
+    fetchJurisdictions();
+  }, [countryId]);
+
+  const handleCountryChange = (selectedCountryName: string) => {
+    setCountry(selectedCountryName);
+    const selected = countries.find(c => c.name === selectedCountryName);
+    if (selected) {
+      setCountryId(selected.id);
+      // Notify parent with country_id
+      if (onUpdate) {
+        onUpdate({
+          country: selectedCountryName,
+          state,
+          city,
+          court,
+          country_id: selected.id,
+        });
+      }
+    }
+  };
 
   const handleChange = (field: string, value: string) => {
-    const updates = { country, state, city, court };
+    const updates = { 
+      country, 
+      state, 
+      city, 
+      court,
+      country_id: countryId,
+    };
     updates[field as keyof typeof updates] = value;
 
-    if (field === "country") setCountry(value);
+    if (field === "country") setState(value);
     if (field === "state") setState(value);
     if (field === "city") setCity(value);
     if (field === "court") setCourt(value);
 
     if (onUpdate) {
-      onUpdate(updates);
+      onUpdate({
+        country,
+        state: field === "state" ? value : state,
+        city: field === "city" ? value : city,
+        court: field === "court" ? value : court,
+        country_id: countryId,
+      });
     }
-  };
-
-  const handleSelectChange = (
-    field: "country" | "state" | "city" | "court",
-    value: string,
-  ) => {
-    const isManualSelection = value === "Other";
-
-    if (field === "country") {
-      setIsCountryManual(isManualSelection);
-    }
-    if (field === "state") {
-      setIsStateManual(isManualSelection);
-    }
-    if (field === "city") {
-      setIsCityManual(isManualSelection);
-    }
-    if (field === "court") {
-      setIsCourtManual(isManualSelection);
-    }
-
-    handleChange(field, isManualSelection ? "" : value);
   };
 
   return (
     <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
+      {error && (
+        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+          {error}
+        </div>
+      )}
       <div className="flex items-start mb-3 sm:mb-4">
         <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
           <svg
@@ -157,29 +194,18 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="country"
-            value={isCountryManual ? "Other" : country}
-            onChange={(e) => handleSelectChange("country", e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            value={country}
+            onChange={(e) => handleCountryChange(e.target.value)}
+            disabled={isLoadingCountries}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">Select country</option>
-            {countryOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
+            {countries.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
               </option>
             ))}
-            <option value="Other">Other (enter manually)</option>
           </select>
-          {(isCountryManual ||
-            (country && !countryOptions.includes(country))) && (
-            <input
-              type="text"
-              value={country}
-              onChange={(e) => handleChange("country", e.target.value)}
-              placeholder="Enter country"
-              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
-              autoComplete="off"
-            />
-          )}
         </div>
 
         <div>
@@ -191,29 +217,24 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="state"
-            value={isStateManual ? "Other" : state}
-            onChange={(e) => handleSelectChange("state", e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            value={state}
+            onChange={(e) => handleChange("state", e.target.value)}
+            disabled={isLoadingJurisdictions || !countryId}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
-            <option value="">Select state</option>
-            {stateOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-            <option value="Other">Other (enter manually)</option>
+            <option value="">Select state/province</option>
+            {jurisdictions && jurisdictions.length > 0 ? (
+              [...new Set(jurisdictions.map(j => j.state_province))].map((state_prov) => (
+                state_prov && (
+                  <option key={state_prov} value={state_prov}>
+                    {state_prov}
+                  </option>
+                )
+              ))
+            ) : (
+              <option disabled>No states available</option>
+            )}
           </select>
-          {(isStateManual ||
-            (state && !stateOptions.includes(state))) && (
-            <input
-              type="text"
-              value={state}
-              onChange={(e) => handleChange("state", e.target.value)}
-              placeholder="Enter state"
-              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
-              autoComplete="off"
-            />
-          )}
         </div>
 
         <div>
@@ -225,27 +246,26 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="city"
-            value={isCityManual ? "Other" : city}
-            onChange={(e) => handleSelectChange("city", e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            value={city}
+            onChange={(e) => handleChange("city", e.target.value)}
+            disabled={isLoadingJurisdictions || !countryId}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">Select city</option>
-            {cityOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-            <option value="Other">Other (enter manually)</option>
+            {jurisdictions && jurisdictions.length > 0 ? (
+              jurisdictions
+                .filter(j => !state || j.state_province === state)
+                .map((j) => (
+                  j.city && (
+                    <option key={j.id} value={j.city}>
+                      {j.city}
+                    </option>
+                  )
+                ))
+            ) : (
+              <option disabled>No cities available</option>
+            )}
           </select>
-          {(isCityManual || (city && !cityOptions.includes(city))) && (
-            <input
-              type="text"
-              value={city}
-              onChange={(e) => handleChange("city", e.target.value)}
-              placeholder="Enter city"
-              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
-            />
-          )}
         </div>
 
         <div>
@@ -257,27 +277,26 @@ export default function CompactJurisdiction({
           </label>
           <select
             id="court"
-            value={isCourtManual ? "Other" : court}
-            onChange={(e) => handleSelectChange("court", e.target.value)}
-            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
+            value={court}
+            onChange={(e) => handleChange("court", e.target.value)}
+            disabled={isLoadingJurisdictions || !countryId}
+            className="w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
           >
             <option value="">Select court</option>
-            {courtOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-            <option value="Other">Other (enter manually)</option>
+            {jurisdictions && jurisdictions.length > 0 ? (
+              jurisdictions
+                .filter(j => (!state || j.state_province === state) && (!city || j.city === city))
+                .map((j) => (
+                  j.court && (
+                    <option key={j.id} value={j.court}>
+                      {j.court}
+                    </option>
+                  )
+                ))
+            ) : (
+              <option disabled>No courts available</option>
+            )}
           </select>
-          {(isCourtManual || (court && !courtOptions.includes(court))) && (
-            <input
-              type="text"
-              value={court}
-              onChange={(e) => handleChange("court", e.target.value)}
-              placeholder="Enter court"
-              className="mt-2 w-full px-3 py-2 text-sm border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-surface-000 text-ink-900"
-            />
-          )}
         </div>
       </div>
     </div>

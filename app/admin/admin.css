@@ -1,0 +1,171 @@
+/* Admin panel - Simple, direct CSS fixes */
+
+.admin-panel {
+  color-scheme: light;
+  background-color: #f8fafc;
+}
+
+/* Force all text to be dark, but tabs will override */
+.admin-panel,
+.admin-panel *:not([role="tab"]) {
+  color: #111827;
+}
+
+/* Headings */
+.admin-panel h1,
+.admin-panel h2,
+.admin-panel h3 {
+  color: #0f172a !important;
+}
+
+/* Cards */
+.admin-panel [class*="card"] {
+  background-color: white !important;
+  color: #111827 !important;
+}
+
+/* Tables */
+.admin-panel table,
+.admin-panel td,
+.admin-panel th {
+  color: #111827 !important;
+}
+
+/* Inputs */
+.admin-panel input,
+.admin-panel textarea,
+.admin-panel select {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+.admin-panel input::placeholder {
+  color: #9ca3af !important;
+}
+
+/* BUTTONS - Simple and direct (but tabs override this) */
+.admin-panel button:not([role="tab"]) {
+  color: #111827 !important;
+}
+
+/* Default buttons (no variant) - dark background, white text */
+/* BUT exclude tabs from this rule */
+.admin-panel button:not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):not([role="tab"]) {
+  background-color: #0f172a !important;
+  color: white !important;
+}
+
+.admin-panel button:not([class*="outline"]):not([class*="ghost"]):not([class*="link"]):not([role="tab"]) svg {
+  color: white !important;
+}
+
+/* Outline buttons - white background, dark text */
+.admin-panel button[class*="outline"] {
+  background-color: white !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+}
+
+.admin-panel button[class*="outline"] svg {
+  color: #111827 !important;
+}
+
+/* Ghost buttons - transparent, dark text */
+.admin-panel button[class*="ghost"] {
+  background-color: transparent !important;
+  color: #111827 !important;
+}
+
+.admin-panel button[class*="ghost"] svg {
+  color: #111827 !important;
+}
+
+/* Tabs - Fix active tab visibility with highest specificity */
+.admin-panel [role="tab"],
+.admin-panel button[role="tab"] {
+  color: #475569 !important;
+  background-color: transparent !important;
+}
+
+/* Inactive tabs */
+.admin-panel [role="tab"]:not([data-state="active"]),
+.admin-panel button[role="tab"]:not([data-state="active"]) {
+  color: #475569 !important;
+  background-color: transparent !important;
+}
+
+/* Active tabs - MUST override everything */
+.admin-panel [role="tab"][data-state="active"],
+.admin-panel button[role="tab"][data-state="active"],
+.admin-panel [data-state="active"][role="tab"],
+.admin-panel button[data-state="active"][role="tab"] {
+  background-color: #0f172a !important;
+  color: white !important;
+}
+
+/* Active tab children - all must be white */
+.admin-panel [role="tab"][data-state="active"] *,
+.admin-panel button[role="tab"][data-state="active"] *,
+.admin-panel [data-state="active"][role="tab"] *,
+.admin-panel button[data-state="active"][role="tab"] * {
+  color: white !important;
+}
+
+/* Active tab SVGs */
+.admin-panel [role="tab"][data-state="active"] svg,
+.admin-panel button[role="tab"][data-state="active"] svg,
+.admin-panel [data-state="active"][role="tab"] svg,
+.admin-panel button[data-state="active"][role="tab"] svg {
+  color: white !important;
+}
+
+/* Also target by class names used by TabsTrigger - highest priority */
+.admin-panel [class*="TabsTrigger"][data-state="active"],
+.admin-panel button[class*="TabsTrigger"][data-state="active"] {
+  background-color: #0f172a !important;
+  color: white !important;
+}
+
+.admin-panel [class*="TabsTrigger"][data-state="active"] *,
+.admin-panel button[class*="TabsTrigger"][data-state="active"] * {
+  color: white !important;
+}
+
+.admin-panel [class*="TabsTrigger"][data-state="active"] svg,
+.admin-panel button[class*="TabsTrigger"][data-state="active"] svg {
+  color: white !important;
+}
+
+/* TOAST - Make it visible with high specificity */
+.admin-panel [data-radix-toast-viewport] > div,
+.admin-panel [role="status"],
+.admin-panel [class*="toast"] {
+  background-color: #0f172a !important;
+  color: white !important;
+  border: 1px solid #334155 !important;
+}
+
+.admin-panel [data-radix-toast-viewport] > div *,
+.admin-panel [role="status"] *,
+.admin-panel [class*="toast"] * {
+  color: white !important;
+}
+
+/* Toast specific elements */
+.admin-panel [data-radix-toast-viewport] h5,
+.admin-panel [data-radix-toast-viewport] p,
+.admin-panel [data-radix-toast-viewport] span,
+.admin-panel [data-radix-toast-viewport] div {
+  color: white !important;
+}
+
+/* Toast close button */
+.admin-panel [data-radix-toast-viewport] button {
+  background-color: transparent !important;
+  color: white !important;
+}
+
+.admin-panel [data-radix-toast-viewport] button svg {
+  color: white !important;
+}
