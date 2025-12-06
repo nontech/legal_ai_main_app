@@ -15,12 +15,12 @@ type DocumentCategory =
 interface ClassifiedFile {
   id: string; // Unique identifier for the file
   file: File;
-  category: DocumentCategory;
-  isClassifying: boolean;
+  category?: DocumentCategory; // Category assigned after upload
+  isUploading?: boolean; // Whether file is currently being uploaded
 }
 
 interface DocumentUploadStepProps {
-  onContinue: (files: File[], metadata?: any, caseInfoFiles?: File[], caseId?: string) => void;
+  onContinue: (files: File[], metadata?: any, caseInfoFiles?: File[], caseId?: string, uploadedDocuments?: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>) => void;
   caseId?: string | null;
 }
 
@@ -33,6 +33,7 @@ export default function DocumentUploadStep({
   const [caseId, setCaseId] = useState<string | null>(initialCaseId || null);
   const [isCreatingCase, setIsCreatingCase] = useState(!initialCaseId);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [uploadedDocuments, setUploadedDocuments] = useState<Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>>({});
   const caseCreationAttempted = useRef(false);
 
   // Create a case on mount if caseId is not provided
@@ -72,36 +73,54 @@ export default function DocumentUploadStep({
     potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
   };
 
-  const [isClassifyingOpen, setIsClassifyingOpen] = useState(false);
-  const [filesToClassify, setFilesToClassify] = useState<Array<{ file: File; fileId: string }>>([]);
   const [isUploadingOpen, setIsUploadingOpen] = useState(false);
   const [filesToUpload, setFilesToUpload] = useState<Array<{ file: File; fileId: string }>>([]);
-  const [currentUploadCategory, setCurrentUploadCategory] = useState<string>("");
   const uploadCompleteRef = useRef(false);
   const uploadResultRef = useRef<any>(null);
-
-  const handleClassificationComplete = (results: Array<{ fileId: string; result: any }>) => {
-    // Update all files with their classifications
-    results.forEach(({ fileId, result }) => {
-      const classifiedCategory = (result.file_category || "case_information") as DocumentCategory;
-
-      setClassifiedFiles((prev) =>
-        prev.map((cf) =>
-          cf.id === fileId
-            ? { ...cf, category: classifiedCategory, isClassifying: false }
-            : cf
-        )
-      );
-    });
-
-    setIsClassifyingOpen(false);
-    setFilesToClassify([]);
-  };
 
   const handleUploadComplete = (result: any) => {
     console.log("Upload completed:", result);
     uploadResultRef.current = result;
     uploadCompleteRef.current = true;
+
+    // Process uploaded documents by category
+    if (result?.category_results && Array.isArray(result.category_results)) {
+      const documentsByCategory: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+
+      result.category_results.forEach((categoryResult: any) => {
+        const category = categoryResult.file_category || categoryResult.category;
+        if (category && categoryResult.file_names && categoryResult.file_addresses) {
+          documentsByCategory[category] = {
+            files: categoryResult.file_names.map((name: string, index: number) => ({
+              name,
+              address: categoryResult.file_addresses[index] || "",
+            })),
+            summary: categoryResult.summary,
+          };
+        }
+      });
+      console.log("Documents by category in upload stage:", documentsByCategory);
+
+      setUploadedDocuments(documentsByCategory);
+
+      // Update classifiedFiles with categories from upload result
+      setClassifiedFiles((prev) => {
+        const fileMap = new Map<string, DocumentCategory>();
+
+        // Build map of file names to categories from upload result
+        result.category_results?.forEach((categoryResult: any) => {
+          const category = (categoryResult.file_category || categoryResult.category) as DocumentCategory;
+          categoryResult.file_names?.forEach((fileName: string) => {
+            fileMap.set(fileName, category);
+          });
+        });
+
+        return prev.map((cf) => {
+          const category = fileMap.get(cf.file.name);
+          return category ? { ...cf, category } : cf;
+        });
+      });
+    }
   };
 
   const processIncomingFiles = (incomingFiles: File[]) => {
@@ -113,22 +132,10 @@ export default function DocumentUploadStep({
     const newClassifiedFiles = incomingFiles.map((file, index) => ({
       id: `${timestamp}-${index}-${Math.random()}`, // Generate unique ID
       file,
-      category: "case_information" as DocumentCategory,
-      isClassifying: true,
+      // No category assigned yet - will be assigned after upload
     }));
 
     setClassifiedFiles((prev) => [...prev, ...newClassifiedFiles]);
-
-    // Immediately show classification UI with the new files
-    const filesToClassify = newClassifiedFiles.map((cf) => ({
-      file: cf.file,
-      fileId: cf.id,
-    }));
-
-    if (filesToClassify.length > 0) {
-      setFilesToClassify(filesToClassify);
-      setIsClassifyingOpen(true);
-    }
   };
 
   const handleFileUpload = (
@@ -212,95 +219,98 @@ export default function DocumentUploadStep({
 
   const handleContinue = async () => {
     if (classifiedFiles.length === 0) {
-      onContinue([]);
-      return;
-    }
-
-    // Check if any files are still classifying
-    const isAnyClassifying = classifiedFiles.some((cf) => cf.isClassifying);
-    if (isAnyClassifying) {
-      alert("Please wait for all files to be classified before continuing.");
+      onContinue([], {}, [], caseId || "test-case");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // Group files by category
-      const groupedByCategory = classifiedFiles.reduce(
-        (acc, { file, category }) => {
-          if (!acc[category]) {
-            acc[category] = [];
-          }
-          acc[category].push(file);
-          return acc;
-        },
-        {} as Record<DocumentCategory, File[]>
-      );
-
       const userId = "test-user";
       let collectedMetadata: any = {};
       const caseInformationFiles: File[] = [];
+      let finalUploadedDocuments: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
 
-      // Check if we have any files to upload
-      if (Object.keys(groupedByCategory).length > 0) {
-        // Prepare all files for upload in a single batch
-        const allFilesToUpload: Array<{ file: File; fileId: string; category: string }> = [];
+      // Prepare all files for upload in a single batch (no category grouping needed)
+      if (classifiedFiles.length > 0) {
+        // Reset upload complete flag and result
+        uploadCompleteRef.current = false;
+        uploadResultRef.current = null;
 
-        for (const [category, files] of Object.entries(groupedByCategory)) {
-          const filesToUploadForCategory = classifiedFiles
-            .filter((cf) => {
-              const classifiedCategory = cf.category as string;
-              return classifiedCategory === category;
-            })
-            .map((cf) => ({
-              file: cf.file,
-              fileId: cf.id,
-              category: category,
-            }));
+        // Prepare files for upload
+        const allFilesToUpload = classifiedFiles.map((cf) => ({
+          file: cf.file,
+          fileId: cf.id,
+        }));
 
-          allFilesToUpload.push(...filesToUploadForCategory);
-        }
+        // Show upload modal
+        setFilesToUpload(allFilesToUpload);
+        setIsUploadingOpen(true);
 
-        if (allFilesToUpload.length > 0) {
-          // Reset upload complete flag and result
-          uploadCompleteRef.current = false;
-          uploadResultRef.current = null;
+        // Wait for all uploads to complete
+        await new Promise<void>((resolve) => {
+          const checkComplete = setInterval(async () => {
+            if (uploadCompleteRef.current) {
+              clearInterval(checkComplete);
+              setIsUploadingOpen(false);
 
-          // Show single modal for all uploads
-          setCurrentUploadCategory("multiple");
-          setFilesToUpload(allFilesToUpload);
-          setIsUploadingOpen(true);
+              // Extract metadata from upload result if available
+              if (uploadResultRef.current) {
+                const result = uploadResultRef.current;
 
-          // Wait for all uploads to complete
-          await new Promise<void>((resolve) => {
-            const checkComplete = setInterval(async () => {
-              if (uploadCompleteRef.current) {
-                clearInterval(checkComplete);
-                setIsUploadingOpen(false);
+                // Process MultiCategoryUploadResponse format
+                // Handle both snake_case (category_results) and camelCase (categoryResults) formats
+                const categoryResults = result.category_results || result.categoryResults;
 
-                // Extract metadata from upload result if available
-                if (uploadResultRef.current) {
-                  const result = uploadResultRef.current;
+                if (categoryResults && Array.isArray(categoryResults)) {
+                  console.log("Processing category_results:", categoryResults);
 
-                  // Extract case information metadata
-                  if (result.case_title) {
-                    collectedMetadata.caseName = result.case_title;
-                    collectedMetadata.caseDescription = result.case_description || "";
-                    collectedMetadata.caseType = result.case_type || "";
+                  // Find case_information category result
+                  const caseInfoResult = categoryResults.find(
+                    (catResult: any) => catResult.file_category === "case_information" || catResult.category === "case_information"
+                  );
 
-                    if (result.case_metadata) {
+                  if (caseInfoResult) {
+                    collectedMetadata.caseName = caseInfoResult.case_title || "";
+                    collectedMetadata.caseDescription = caseInfoResult.case_description || "";
+
+                    // Track which fields were extracted
+                    collectedMetadata.extractedFields = {
+                      caseName: !!caseInfoResult.case_title,
+                      caseDescription: !!caseInfoResult.case_description,
+                      jurisdiction: false,
+                      role: false,
+                      caseType: false,
+                    };
+
+                    if (caseInfoResult.case_metadata) {
                       collectedMetadata.jurisdiction = {
-                        country: result.case_metadata.country || "",
-                        state: result.case_metadata.state || "",
-                        city: result.case_metadata.city || "",
-                        court: result.case_metadata.court || "",
+                        country: caseInfoResult.case_metadata.country || "",
+                        state: caseInfoResult.case_metadata.state || "",
+                        city: caseInfoResult.case_metadata.city || "",
+                        court: caseInfoResult.case_metadata.court || "",
                       };
-                      collectedMetadata.role = result.case_metadata.role || "plaintiff";
+                      collectedMetadata.role = caseInfoResult.case_metadata.role || "plaintiff";
+
+                      // Extract case type - check both case_metadata.case_type and case_type at root level
+                      const extractedCaseType = caseInfoResult.case_metadata.case_type || caseInfoResult.case_type || "";
+                      if (extractedCaseType) {
+                        collectedMetadata.caseType = extractedCaseType.toLowerCase();
+                      }
+
+                      // Track extracted fields
+                      collectedMetadata.extractedFields.jurisdiction = !!(
+                        caseInfoResult.case_metadata.country ||
+                        caseInfoResult.case_metadata.state ||
+                        caseInfoResult.case_metadata.city ||
+                        caseInfoResult.case_metadata.court
+                      );
+                      collectedMetadata.extractedFields.role = !!caseInfoResult.case_metadata.role;
+                      collectedMetadata.extractedFields.caseType = !!extractedCaseType;
 
                       // Extract charges if available
-                      if (result.case_metadata.charges && Array.isArray(result.case_metadata.charges)) {
-                        collectedMetadata.charges = result.case_metadata.charges.map((charge: any, index: number) => ({
+                      if (caseInfoResult.case_metadata.charges && Array.isArray(caseInfoResult.case_metadata.charges)) {
+                        collectedMetadata.charges = caseInfoResult.case_metadata.charges.map((charge: any, index: number) => ({
                           id: `charge-${Date.now()}-${index}`,
                           statuteNumber: charge.statute_number || "",
                           chargeDescription: charge.charge_description || "",
@@ -311,55 +321,63 @@ export default function DocumentUploadStep({
                     }
                   }
 
+                  // Build uploaded documents by category for passing to QuickAnalysisForm
+                  const documentsByCategory: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+
+                  categoryResults.forEach((categoryResult: any) => {
+                    const category = categoryResult.file_category || categoryResult.category;
+                    const fileNames = categoryResult.file_names || categoryResult.fileNames;
+                    const fileAddresses = categoryResult.file_addresses || categoryResult.fileAddresses;
+
+                    if (category && fileNames && fileAddresses) {
+                      documentsByCategory[category] = {
+                        files: fileNames.map((name: string, index: number) => ({
+                          name,
+                          address: fileAddresses[index] || "",
+                        })),
+                        summary: categoryResult.summary,
+                      };
+                    }
+                  });
+
+                  console.log("Built documentsByCategory:", documentsByCategory);
+                  console.log("Number of categories:", Object.keys(documentsByCategory).length);
+
+                  // Store in local variable to pass to onContinue
+                  finalUploadedDocuments = documentsByCategory;
+
+                  // Update state for display in upload step
+                  setUploadedDocuments(documentsByCategory);
+
                   // Save file info and summaries to case_details
-                  if (caseId && result) {
+                  if (caseId) {
                     try {
                       console.log("Upload result:", result);
-                      console.log("Files to upload with categories:", allFilesToUpload);
 
                       // Build case details update with file info for each category
                       const caseDetailsUpdate: Record<string, any> = {};
                       let completionCount = 0;
 
-                      // If we have categoryResults from multiple uploads
-                      if (result.categoryResults && Object.keys(result.categoryResults).length > 0) {
-                        for (const [category, categoryResult] of Object.entries(result.categoryResults)) {
-                          const catResult = categoryResult as any;
-                          if (catResult.file_addresses && catResult.file_names) {
-                            const files = catResult.file_names.map((name: string, index: number) => ({
-                              name,
-                              address: catResult.file_addresses?.[index] || "",
-                            }));
+                      categoryResults.forEach((categoryResult: any) => {
+                        const category = categoryResult.file_category || categoryResult.category;
+                        const fileNames = categoryResult.file_names || categoryResult.fileNames;
+                        const fileAddresses = categoryResult.file_addresses || categoryResult.fileAddresses;
 
-                            caseDetailsUpdate[category] = {
-                              files,
-                              summary: catResult.summary || "",
-                              summaryGenerated: !!catResult.summary,
-                            };
-                            completionCount++;
-                          }
+                        if (category && fileNames && fileAddresses) {
+                          const files = fileNames.map((name: string, index: number) => ({
+                            name,
+                            address: fileAddresses[index] || "",
+                          }));
+
+                          caseDetailsUpdate[category] = {
+                            files,
+                            summary: categoryResult.summary || "",
+                            summaryGenerated: !!categoryResult.summary,
+                          };
+                          completionCount++;
                         }
-                      } else {
-                        // Fallback: single category result
-                        if (result.file_addresses && result.file_names) {
-                          // Get categories from allFilesToUpload
-                          const categories = new Set(allFilesToUpload.map(item => item.category));
+                      });
 
-                          for (const category of categories) {
-                            const files = result.file_names.map((name: string, index: number) => ({
-                              name,
-                              address: result.file_addresses?.[index] || "",
-                            }));
-
-                            caseDetailsUpdate[category] = {
-                              files,
-                              summary: result.summary || "",
-                              summaryGenerated: !!result.summary,
-                            };
-                            completionCount++;
-                          }
-                        }
-                      }
                       const completionPercentage = Math.round((completionCount / 6) * 100);
 
                       // Also update case_information with case name and description
@@ -396,27 +414,31 @@ export default function DocumentUploadStep({
                     }
                   }
                 }
-
-                resolve();
               }
-            }, 100);
 
-            // Timeout after 5 minutes
-            setTimeout(() => {
-              clearInterval(checkComplete);
-              setIsUploadingOpen(false);
               resolve();
-            }, 300000);
-          });
-        }
+            }
+          }, 100);
+
+          // Timeout after 5 minutes
+          setTimeout(() => {
+            clearInterval(checkComplete);
+            setIsUploadingOpen(false);
+            resolve();
+          }, 300000);
+        });
       }
 
-      // Continue with all files, passing metadata and caseInformationFiles
+      // Continue with all files, passing metadata, caseInformationFiles, and uploaded documents
+      console.log("Passing uploaded documents to QuickAnalysisForm:", finalUploadedDocuments);
+      console.log("Number of categories:", Object.keys(finalUploadedDocuments).length);
+
       onContinue(
         classifiedFiles.map((cf) => cf.file),
         collectedMetadata,
         caseInformationFiles,
-        caseId || "test-case"
+        caseId || "test-case",
+        finalUploadedDocuments
       );
     } finally {
       setIsUploading(false);
@@ -442,7 +464,7 @@ export default function DocumentUploadStep({
             </p>
           </div>
 
-          <div className="bg-surface-000 rounded-2xl border-2 border-border-200 p-8 mb-6">
+          <div className="bg-surface-000 p-8 mb-6">
             <div
               className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
                 ? "border-border-200"
@@ -509,8 +531,9 @@ export default function DocumentUploadStep({
                 </div>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {classifiedFiles.map((classifiedFile) => {
-                    const categoryInfo =
-                      categoryLabels[classifiedFile.category];
+                    const categoryInfo = classifiedFile.category
+                      ? categoryLabels[classifiedFile.category]
+                      : null;
                     return (
                       <div
                         key={classifiedFile.id}
@@ -537,12 +560,12 @@ export default function DocumentUploadStep({
                               <p className="text-sm font-medium text-ink-900 truncate">
                                 {classifiedFile.file.name}
                               </p>
-                              {classifiedFile.isClassifying ? (
+                              {classifiedFile.isUploading ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-surface-200 text-ink-600">
                                   <span className="inline-block w-2 h-2 bg-ink-400 rounded-full animate-pulse"></span>
-                                  Classifying...
+                                  Uploading...
                                 </span>
-                              ) : (
+                              ) : categoryInfo ? (
                                 <span
                                   className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(
                                     categoryInfo.color
@@ -550,7 +573,7 @@ export default function DocumentUploadStep({
                                 >
                                   {categoryInfo.icon} {categoryInfo.label}
                                 </span>
-                              )}
+                              ) : null}
                             </div>
                             <p className="text-xs text-ink-500">
                               {formatFileSize(classifiedFile.file.size)}
@@ -591,8 +614,7 @@ export default function DocumentUploadStep({
               onClick={handleContinue}
               disabled={
                 classifiedFiles.length === 0 ||
-                isUploading ||
-                classifiedFiles.some((cf) => cf.isClassifying)
+                isUploading
               }
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 cursor-pointer"
             >
@@ -601,14 +623,9 @@ export default function DocumentUploadStep({
                   <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                   <span>Uploading...</span>
                 </>
-              ) : classifiedFiles.some((cf) => cf.isClassifying) ? (
-                <>
-                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  <span className="text-sm sm:text-base">Classifying...</span>
-                </>
               ) : (
                 <>
-                  <span>Next</span>
+                  <span>Upload & Continue</span>
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
@@ -630,9 +647,7 @@ export default function DocumentUploadStep({
                 setClassifiedFiles([]);
                 onContinue([], {}, [], caseId || "test-case");
               }}
-              disabled={
-                isUploading || classifiedFiles.some((cf) => cf.isClassifying)
-              }
+              disabled={isUploading}
               className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium underline disabled:opacity-50"
             >
               Skip and continue without documents
@@ -641,20 +656,11 @@ export default function DocumentUploadStep({
         </>
       )}
 
-      <StreamingClassificationDisplay
-        isOpen={isClassifyingOpen}
-        files={filesToClassify}
-        onComplete={handleClassificationComplete}
-        onClose={() => {
-          setIsClassifyingOpen(false);
-          setFilesToClassify([]);
-        }}
-      />
-
       <StreamingUploadDisplay
         isOpen={isUploadingOpen}
         files={filesToUpload}
-        fileCategory={currentUploadCategory}
+        fileCategory="multiple"
+        caseId={caseId || undefined}
         onComplete={(result) => {
           // Upload complete - signal to handleContinue
           handleUploadComplete(result);

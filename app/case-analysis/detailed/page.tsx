@@ -30,6 +30,7 @@ function DetailedCaseAnalysisContent() {
   const [jurisdictionId, setJurisdictionId] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
+  const [caseType, setCaseType] = useState<string>("");
   const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
 
   // Track completion data for each step (percentage)
@@ -78,6 +79,7 @@ function DetailedCaseAnalysisContent() {
         // Check case type (step 1)
         if (data.case_type) {
           newCompletionData[1] = 100;
+          setCaseType(data.case_type);
         }
 
         // Check role (step 2)
@@ -211,6 +213,7 @@ function DetailedCaseAnalysisContent() {
                 onStepChange={setCurrentStep}
                 completionData={completionData}
                 caseId={caseId || undefined}
+                caseType={caseType}
               />
             </div>
           </div>

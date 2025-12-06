@@ -484,48 +484,60 @@ export default function CaseTypeSelector({
         </div>
 
         {/* Selected Case Type Display */}
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-            <div className="flex items-start sm:items-center gap-2 sm:gap-4 flex-1">
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary-100 rounded-lg flex-shrink-0">
+        <div className="bg-surface-000 p-3 sm:p-6">
+          {(isLoading || isFetchingCaseTypes) ? (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center flex-1 min-w-0">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-surface-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0 animate-pulse">
+                  <div className="w-4 h-4 sm:w-6 sm:h-6 bg-surface-200 rounded"></div>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="h-5 sm:h-6 bg-surface-100 rounded w-32 mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-surface-100 rounded w-24 animate-pulse"></div>
+                </div>
+              </div>
+              <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2">
+                <div className="h-5 sm:h-6 bg-surface-100 rounded w-32 animate-pulse"></div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center flex-1 min-w-0">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
+                  <span className="text-xl sm:text-2xl text-primary-600">
+                    {selectedCaseType?.icon ? getEmojiIcon(selectedCaseType.icon) : "⚖️"}
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
+                    Step 2: Case Type{" "}
+                    <span className="text-red-500">*</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-ink-600 truncate">
+                    {selectedCaseType?.subtitle || "Select a case type"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Clickable Case Type Name */}
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-100 transition-colors group cursor-pointer"
+              >
+                <span className="text-base sm:text-lg font-semibold text-ink-900 group-hover:text-primary-600 transition-colors">
+                  {selectedCaseType?.title || "Select Case Type"}
+                </span>
                 <svg
-                  className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600"
+                  className="w-4 h-4 text-ink-400 group-hover:text-primary-600 transition-colors"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-base sm:text-xl font-bold text-ink-900">
-                  Case Type
-                </h3>
-                <p className="text-xs sm:text-sm text-ink-600 truncate">
-                  {selectedCaseType?.subtitle || "N/A"}
-                </p>
-              </div>
+              </button>
             </div>
-
-            {/* Centered Case Type Name - Hidden on mobile */}
-            <div className="hidden sm:flex flex-1 justify-center">
-              <span className="text-lg font-semibold text-ink-900">
-                {selectedCaseType?.title || "N/A"}
-              </span>
-            </div>
-
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
-            >
-              Change Type
-            </button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -575,8 +587,28 @@ export default function CaseTypeSelector({
 
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {caseTypes.map((caseType) => (
+                {isFetchingCaseTypes ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="p-4 rounded-lg border-2 border-border-200 animate-pulse">
+                        <div className="flex items-start mb-2">
+                          <div className="w-8 h-8 bg-surface-200 rounded mr-3"></div>
+                          <div className="flex-1">
+                            <div className="h-4 bg-surface-200 rounded w-24 mb-2"></div>
+                            <div className="h-3 bg-surface-200 rounded w-32"></div>
+                          </div>
+                        </div>
+                        <div className="space-y-2 mb-2">
+                          <div className="h-3 bg-surface-200 rounded w-full"></div>
+                          <div className="h-3 bg-surface-200 rounded w-3/4"></div>
+                        </div>
+                        <div className="h-3 bg-surface-200 rounded w-20 mt-2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {caseTypes.map((caseType) => (
                     <button
                       key={caseType.id}
                       onClick={() => handleSelectCaseType(caseType)}
@@ -638,7 +670,8 @@ export default function CaseTypeSelector({
                       </div>
                     </button>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Modal Footer */}

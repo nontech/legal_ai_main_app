@@ -16,6 +16,7 @@ function CaseAnalysisContent() {
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
   const [uploadedMetadata, setUploadedMetadata] = useState<any>({});
   const [caseInformationFiles, setCaseInformationFiles] = useState<File[]>([]);
+  const [uploadedDocumentsByCategory, setUploadedDocumentsByCategory] = useState<Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>>({});
   const [hasVisitedForm, setHasVisitedForm] = useState(false);
   const [caseId, setCaseId] = useState<string | null>(null);
 
@@ -34,10 +35,11 @@ function CaseAnalysisContent() {
     }
   }, [searchParams]);
 
-  const handleDocumentsUploaded = (files: File[], metadata?: any, caseInfoFiles?: File[], newCaseId?: string) => {
+  const handleDocumentsUploaded = (files: File[], metadata?: any, caseInfoFiles?: File[], newCaseId?: string, uploadedDocsByCategory?: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>) => {
     setUploadedDocuments(files);
     setUploadedMetadata(metadata || {});
     setCaseInformationFiles(caseInfoFiles || []);
+    setUploadedDocumentsByCategory(uploadedDocsByCategory || {});
     if (newCaseId) {
       setCaseId(newCaseId);
     }
@@ -98,6 +100,7 @@ function CaseAnalysisContent() {
                 uploadedMetadata={uploadedMetadata}
                 caseInformationFiles={caseInformationFiles}
                 caseId={caseId}
+                uploadedDocuments={uploadedDocumentsByCategory}
               />
             )}
 

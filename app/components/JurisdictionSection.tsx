@@ -39,6 +39,7 @@ interface JurisdictionSectionProps {
     country_id?: string;
   };
   hideSaveButton?: boolean;
+  showExtractedBadge?: boolean;
 }
 
 export default function JurisdictionSection({
@@ -50,6 +51,7 @@ export default function JurisdictionSection({
   onUpdate,
   initialValues,
   hideSaveButton = false,
+  showExtractedBadge = false,
 }: JurisdictionSectionProps) {
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
@@ -575,22 +577,19 @@ export default function JurisdictionSection({
 
   return (
     <div
-      className={`bg-white rounded-lg border border-gray-200 ${
-        isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
-      }`}
+      className={`bg-white ${isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
+        }`}
     >
       {/* Section Header */}
       {isCompact ? (
         <div className="flex items-start mb-3 sm:mb-4">
           <div
-            className={`flex items-center justify-center ${
-              isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
-            } bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0`}
+            className={`flex items-center justify-center ${isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
+              } bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}
           >
             <svg
-              className={`${
-                isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
-              } text-primary-600`}
+              className={`${isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
+                } text-primary-600`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -610,9 +609,26 @@ export default function JurisdictionSection({
             </svg>
           </div>
           <div className="min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-ink-900">
+            <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap">
               Step 1: Jurisdiction{" "}
               <span className="text-red-500">*</span>
+              {showExtractedBadge && (
+                <div className="relative group">
+                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
+                    <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-medium text-primary-700">Extracted</span>
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
+                    Extracted from case information documents
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                      <div className="border-4 border-transparent border-t-ink-900"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </h3>
             <p className="text-xs sm:text-sm text-ink-600">
               Where your case will be heard
@@ -662,11 +678,10 @@ export default function JurisdictionSection({
 
       {isLoading || isLoadingCountries ? (
         <div
-          className={`grid grid-cols-1 ${
-            isCompact
-              ? "md:grid-cols-4 gap-3"
-              : "md:grid-cols-2 gap-6"
-          } ${isCompact ? "mb-0" : "mb-8"}`}
+          className={`grid grid-cols-1 ${isCompact
+            ? "md:grid-cols-4 gap-3"
+            : "md:grid-cols-2 gap-6"
+            } ${isCompact ? "mb-0" : "mb-8"}`}
         >
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">

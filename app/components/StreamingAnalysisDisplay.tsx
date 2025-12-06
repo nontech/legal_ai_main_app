@@ -247,10 +247,16 @@ export default function StreamingAnalysisDisplay({
     const [error, setError] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
+    const [autoClickCountdown, setAutoClickCountdown] = useState<number | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const hasStartedRef = useRef(false);
     const lastResultRef = useRef<any>(null);
     const onCompleteRef = useRef(onComplete);
+    const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const lastActivityRef = useRef<number>(Date.now());
+    const viewResultsButtonRef = useRef<HTMLButtonElement>(null);
+    const isProgrammaticScrollRef = useRef<boolean>(false);
 
     // Track order of steps for consistent display
     const stepOrderRef = useRef<string[]>([]);
@@ -259,6 +265,120 @@ export default function StreamingAnalysisDisplay({
     useEffect(() => {
         onCompleteRef.current = onComplete;
     }, [onComplete]);
+
+    // Track user activity and handle auto-click after inactivity
+    useEffect(() => {
+        // Check if executive summary is completed
+        const executiveSummaryStep = groupedSteps.get("executive_summary");
+        const isExecutiveSummaryComplete = executiveSummaryStep?.status === "completed";
+        
+        // Only start timer if analysis is complete AND executive summary is completed
+        const shouldStartTimer = isComplete && isExecutiveSummaryComplete;
+        
+        if (!shouldStartTimer) {
+            // Clear any existing timers when not ready
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+                inactivityTimerRef.current = null;
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+                countdownIntervalRef.current = null;
+            }
+            setAutoClickCountdown(null);
+            return;
+        }
+
+        // Reset activity tracking when both completion and executive summary are done
+        lastActivityRef.current = Date.now();
+        setAutoClickCountdown(7);
+
+        // Activity handler - cancels the timer completely when activity is detected
+        // But ignore programmatic scrolls
+        const handleActivity = (event?: Event) => {
+            // Ignore scroll events that are programmatic
+            if (event?.type === 'scroll' && isProgrammaticScrollRef.current) {
+                return;
+            }
+            
+            lastActivityRef.current = Date.now();
+            // Cancel timer completely when activity detected
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+                inactivityTimerRef.current = null;
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+                countdownIntervalRef.current = null;
+            }
+            setAutoClickCountdown(null);
+        };
+
+        const startInactivityTimer = () => {
+            // Clear existing timer
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+            }
+
+            // Start countdown
+            let countdown = 7;
+            setAutoClickCountdown(7);
+            countdownIntervalRef.current = setInterval(() => {
+                countdown--;
+                setAutoClickCountdown(countdown);
+                if (countdown <= 0) {
+                    clearInterval(countdownIntervalRef.current!);
+                    countdownIntervalRef.current = null;
+                }
+            }, 1000);
+
+            // Set inactivity timer
+            inactivityTimerRef.current = setTimeout(() => {
+                // Check if 7 seconds have passed since last activity
+                const timeSinceActivity = Date.now() - lastActivityRef.current;
+                if (timeSinceActivity >= 7000) {
+                    // Auto-click the View Results button
+                    if (viewResultsButtonRef.current) {
+                        viewResultsButtonRef.current.click();
+                    }
+                }
+            }, 7000);
+        };
+
+        // Add event listeners for user activity on window
+        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+        events.forEach(event => {
+            window.addEventListener(event, handleActivity, { passive: true });
+        });
+
+        // Also listen to scroll events on the scroll container
+        const scrollContainer = scrollContainerRef.current;
+        if (scrollContainer) {
+            scrollContainer.addEventListener('scroll', handleActivity, { passive: true });
+        }
+
+        // Start the inactivity timer
+        startInactivityTimer();
+
+        // Cleanup
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, handleActivity);
+            });
+            if (scrollContainer) {
+                scrollContainer.removeEventListener('scroll', handleActivity);
+            }
+            if (inactivityTimerRef.current) {
+                clearTimeout(inactivityTimerRef.current);
+            }
+            if (countdownIntervalRef.current) {
+                clearInterval(countdownIntervalRef.current);
+            }
+        };
+    }, [isComplete, groupedSteps]);
 
     useEffect(() => {
         if (!isOpen || !caseId) {
@@ -505,8 +625,14 @@ export default function StreamingAnalysisDisplay({
     // Auto-scroll to latest event
     useEffect(() => {
         if (scrollContainerRef.current) {
+            // Mark scroll as programmatic before scrolling
+            isProgrammaticScrollRef.current = true;
             scrollContainerRef.current.scrollTop =
                 scrollContainerRef.current.scrollHeight;
+            // Reset flag after a short delay to allow scroll event to fire
+            setTimeout(() => {
+                isProgrammaticScrollRef.current = false;
+            }, 100);
         }
     }, [groupedSteps]);
 
@@ -575,7 +701,9 @@ export default function StreamingAnalysisDisplay({
                                     </h2>
                                     <p className="text-primary-100 text-xs sm:text-sm truncate">
                                         {isComplete
-                                            ? "Click 'View Results' to see your analysis"
+                                            ? autoClickCountdown !== null && autoClickCountdown > 0
+                                                ? `Opening results automatically in ${autoClickCountdown}s...`
+                                                : "Click 'View Results' to see your analysis"
                                             : "Analyzing your case in real-time..."}
                                     </p>
                                 </div>
@@ -692,18 +820,41 @@ export default function StreamingAnalysisDisplay({
 
                     {/* Footer with View Results button */}
                     {isComplete && (
-                        <div className="bg-surface-100 border-t border-border-200 px-4 sm:px-8 py-4 sm:py-6 flex justify-end">
-                            <button
-                                onClick={() => {
-                                    if (lastResultRef.current) {
-                                        onCompleteRef.current?.(lastResultRef.current);
-                                    }
-                                    // onClose() is NOT called here to prevent dialog closing before navigation
-                                }}
-                                className="cursor-pointer px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
-                            >
-                                View Results →
-                            </button>
+                        <div className="bg-surface-100 border-t border-border-200 px-4 sm:px-8 py-4 sm:py-6">
+                            <div className="flex items-center justify-between gap-4">
+                                {autoClickCountdown !== null && autoClickCountdown > 0 && (
+                                    <div className="flex items-center gap-2 text-sm text-ink-600">
+                                        <svg className="w-4 h-4 text-primary-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span>Opening automatically in {autoClickCountdown}s...</span>
+                                    </div>
+                                )}
+                                {(!autoClickCountdown || autoClickCountdown === 0) && <div></div>}
+                                <button
+                                    ref={viewResultsButtonRef}
+                                    onClick={() => {
+                                        // Clear timers when manually clicked
+                                        if (inactivityTimerRef.current) {
+                                            clearTimeout(inactivityTimerRef.current);
+                                            inactivityTimerRef.current = null;
+                                        }
+                                        if (countdownIntervalRef.current) {
+                                            clearInterval(countdownIntervalRef.current);
+                                            countdownIntervalRef.current = null;
+                                        }
+                                        setAutoClickCountdown(null);
+                                        
+                                        if (lastResultRef.current) {
+                                            onCompleteRef.current?.(lastResultRef.current);
+                                        }
+                                        // onClose() is NOT called here to prevent dialog closing before navigation
+                                    }}
+                                    className="cursor-pointer px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
+                                >
+                                    View Results →
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>

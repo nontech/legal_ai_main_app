@@ -10,6 +10,8 @@ interface UploadEvent {
   file_index?: number;
   total_files?: number;
   char_count?: number;
+  category?: string;
+  confidence?: number;
   result?: any;
 }
 
@@ -17,6 +19,7 @@ interface StreamingUploadDisplayProps {
   isOpen: boolean;
   files?: Array<{ file: File; fileId: string; category?: string }>;
   fileCategory: string;
+  caseId?: string;
   onComplete: (result: any) => void;
   onClose: () => void;
 }
@@ -29,6 +32,11 @@ const stepIcons: Record<string, string> = {
   blob_upload_complete: "✅",
   text_extraction: "📄",
   text_extraction_complete: "📝",
+  classification: "🏷️",
+  classification_complete: "✅",
+  grouping: "📁",
+  grouping_complete: "✅",
+  category_processing: "⚙️",
   database_save: "💾",
   file_complete: "🎯",
   case_metadata_extraction: "🔍",
@@ -46,6 +54,11 @@ const stepLabels: Record<string, string> = {
   blob_upload_complete: "Storage Upload Complete",
   text_extraction: "Extracting Text",
   text_extraction_complete: "Text Extracted",
+  classification: "Classifying Document",
+  classification_complete: "Classification Complete",
+  grouping: "Grouping Files by Category",
+  grouping_complete: "Grouping Complete",
+  category_processing: "Processing Category",
   database_save: "Saving to Database",
   file_complete: "File Complete",
   case_metadata_extraction: "Extracting Metadata",
@@ -59,6 +72,7 @@ export default function StreamingUploadDisplay({
   isOpen,
   files = [],
   fileCategory,
+  caseId,
   onComplete,
   onClose,
 }: StreamingUploadDisplayProps) {
@@ -88,144 +102,126 @@ export default function StreamingUploadDisplay({
 
   const startUploadForAllFiles = async (filesToUpload: Array<{ file: File; fileId: string; category?: string }>) => {
     try {
-      // Group files by category
-      const filesByCategory = new Map<string, File[]>();
-
-      filesToUpload.forEach(({ file, category }) => {
-        const cat = category || fileCategory;
-        if (!filesByCategory.has(cat)) {
-          filesByCategory.set(cat, []);
-        }
-        filesByCategory.get(cat)!.push(file);
+      // Upload all files at once (classification happens automatically in backend)
+      const formData = new FormData();
+      filesToUpload.forEach(({ file }) => {
+        formData.append("files", file);
       });
+      formData.append("user_id", "test-user");
+      formData.append("case_id", caseId || "test-case");
+      formData.append("tenant_id", "default-tenant");
 
       const decoder = new TextDecoder();
-      let processedFilesCount = 0;
       const globalTotalFiles = filesToUpload.length;
 
-      // Upload each category sequentially
-      for (const [category, categoryFiles] of filesByCategory.entries()) {
-        const formData = new FormData();
-        categoryFiles.forEach((file) => {
-          formData.append("files", file);
-        });
-        formData.append("file_category", category);
-        formData.append("user_id", "test-user");
-        formData.append("case_id", "test-case");
+      const response = await fetch("/api/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-        const response = await fetch("/api/documents/upload", {
-          method: "POST",
-          body: formData,
-        });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error("No response body");
+      }
 
-        const reader = response.body?.getReader();
-        if (!reader) {
-          throw new Error("No response body");
-        }
+      let buffer = "";
 
-        let buffer = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream ended");
+            break;
+          }
 
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              console.log("Stream ended for category:", category);
-              break;
-            }
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines[lines.length - 1];
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines[lines.length - 1];
+          for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i];
+            if (line.startsWith("data: ")) {
+              const dataStr = line.slice(6);
+              try {
+                const event: UploadEvent = JSON.parse(dataStr);
 
-            for (let i = 0; i < lines.length - 1; i++) {
-              const line = lines[i];
-              if (line.startsWith("data: ")) {
-                const dataStr = line.slice(6);
-                try {
-                  const event: UploadEvent = JSON.parse(dataStr);
+                // Add event to display stream
+                setEvents((prev) => [...prev, event]);
 
-                  // Add event to display stream
-                  setEvents((prev) => [...prev, event]);
+                // Calculate progress based on current file processing
+                if (event.file_index && event.total_files) {
+                  const stepProgressMap: Record<string, number> = {
+                    file_processing: 5,
+                    reading_file: 15,
+                    text_extraction: 30,
+                    text_extraction_complete: 45,
+                    classification: 60,
+                    classification_complete: 70,
+                    grouping: 75,
+                    grouping_complete: 80,
+                    category_processing: 85,
+                    blob_upload: 90,
+                    file_complete: 95,
+                  };
 
-                  // Calculate progress based on current file processing
-                  if (event.file_index) {
-                    const stepProgressMap: Record<string, number> = {
-                      file_processing: 5,
-                      reading_file: 15,
-                      blob_upload: 25,
-                      blob_upload_complete: 35,
-                      text_extraction: 50,
-                      text_extraction_complete: 65,
-                      database_save: 80,
-                      file_complete: 95,
-                    };
+                  // Calculate progress based on file index and step
+                  const currentFileIndex = event.file_index - 1; // 0-based
+                  const progressPerFile = 100 / globalTotalFiles;
 
-                    // Calculate progress
-                    // event.file_index is 1-based within the current batch
-                    // processedFilesCount is the count of files in previous batches
-                    // globalTotalFiles is the total number of files across all batches
+                  // Progress from fully completed files
+                  const completedFilesProgress = currentFileIndex * progressPerFile;
 
-                    const currentGlobalIndex = processedFilesCount + event.file_index - 1; // 0-based global index
-                    const progressPerFile = 100 / globalTotalFiles;
+                  // Progress within current file
+                  const currentStepProgress = stepProgressMap[event.step || ""] || 0;
+                  const currentFileProgressContribution = (currentStepProgress / 100) * progressPerFile;
 
-                    // Progress from fully completed files
-                    const completedFilesProgress = currentGlobalIndex * progressPerFile;
+                  const totalProgress = completedFilesProgress + currentFileProgressContribution;
 
-                    // Progress within current file
-                    const currentStepProgress = stepProgressMap[event.step || ""] || 0;
-                    const currentFileProgressContribution = (currentStepProgress / 100) * progressPerFile;
-
-                    const totalProgress = completedFilesProgress + currentFileProgressContribution;
-
-                    setProgress(Math.min(Math.round(totalProgress), 99));
-                  } else if (event.step === "case_metadata_extraction" || event.step === "case_description_generation" || event.step === "summary_generation") {
-                    // Final processing steps
-                    const finalStepMap: Record<string, number> = {
-                      case_metadata_extraction: 92,
-                      case_description_generation: 94,
-                      summary_generation: 96,
-                    };
-                    const stepProgress = finalStepMap[event.step] || 92;
-                    setProgress(Math.min(Math.round(stepProgress), 99));
-                  } else if (event.step === "initialization") {
-                    setProgress(2);
-                  }
-
-                  // Handle final complete event with all results
-                  if (event.type === "complete" && event.result) {
-                    console.log("Upload complete for category:", category);
-                    const result = event.result as any;
-
-                    // Store result by category
-                    categoryResultsRef.current[category] = result;
-                    lastResultRef.current = result; // Keep last for backward compatibility
-                  }
-                } catch (e) {
-                  console.error("Failed to parse event:", dataStr, e);
+                  setProgress(Math.min(Math.round(totalProgress), 99));
+                } else if (event.step === "case_metadata_extraction" || event.step === "case_description_generation" || event.step === "summary_generation" || event.step === "summary_complete") {
+                  // Final processing steps
+                  const finalStepMap: Record<string, number> = {
+                    case_metadata_extraction: 92,
+                    case_metadata_complete: 94,
+                    case_description_generation: 95,
+                    summary_generation: 97,
+                    summary_complete: 99,
+                  };
+                  const stepProgress = finalStepMap[event.step] || 92;
+                  setProgress(Math.min(Math.round(stepProgress), 99));
+                } else if (event.step === "initialization") {
+                  setProgress(2);
+                } else if (event.step === "grouping_complete" || event.step === "category_processing") {
+                  setProgress(85);
                 }
+
+                // Handle final complete event with MultiCategoryUploadResponse
+                if (event.type === "complete" && event.result) {
+                  console.log("Upload complete:", event.result);
+                  const result = event.result as any;
+
+                  // Store the complete result (MultiCategoryUploadResponse format)
+                  lastResultRef.current = result;
+
+                  setProgress(100);
+                  setAllComplete(true);
+                }
+              } catch (e) {
+                console.error("Failed to parse event:", dataStr, e);
               }
             }
           }
-        } finally {
-          reader.releaseLock();
         }
-
-        // Update processed count after category is complete
-        processedFilesCount += categoryFiles.length;
+      } finally {
+        reader.releaseLock();
       }
 
-      // Combine all category results before completing
-      if (Object.keys(categoryResultsRef.current).length > 0) {
-        const combinedResult = {
-          ...lastResultRef.current,
-          categoryResults: categoryResultsRef.current,
-        };
-        lastResultRef.current = combinedResult;
-
+      // If we didn't get a complete event, check if we have a result
+      if (!allComplete && lastResultRef.current) {
         setProgress(100);
         setAllComplete(true);
       }
@@ -396,6 +392,12 @@ export default function StreamingUploadDisplay({
                     {event.file_name && (
                       <p className="text-xs text-ink-600 mb-1">
                         <span className="font-medium">File:</span> {event.file_name}
+                      </p>
+                    )}
+                    {event.category && (
+                      <p className="text-xs text-ink-600 mb-1">
+                        <span className="font-medium">Category:</span> {event.category}
+                        {event.confidence && ` (${(event.confidence * 100).toFixed(0)}% confidence)`}
                       </p>
                     )}
                     {event.message && event.message !== (stepLabels[event.step || event.type] || event.message) && (

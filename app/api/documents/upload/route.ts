@@ -56,9 +56,9 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const files = formData.getAll("files") as File[];
-    const fileCategory = formData.get("file_category") as string;
     const userId = formData.get("user_id") as string || "test-user";
     const caseId = formData.get("case_id") as string || "test-case";
+    const tenantId = formData.get("tenant_id") as string || "default-tenant";
 
     // Validate inputs
     if (!files || files.length === 0) {
@@ -68,19 +68,12 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!fileCategory) {
-      return Response.json(
-        { error: "File category is required" },
-        { status: 400 }
-      );
-    }
-
-    // Create FormData for external API
+    // Create FormData for external API (no file_category needed - classification happens automatically)
     const externalFormData = new FormData();
     files.forEach((file) => externalFormData.append("files", file));
-    externalFormData.append("file_category", fileCategory);
     externalFormData.append("user_id", userId);
     externalFormData.append("case_id", caseId);
+    externalFormData.append("tenant_id", tenantId);
 
     // Call external upload API
     const response = await fetch(

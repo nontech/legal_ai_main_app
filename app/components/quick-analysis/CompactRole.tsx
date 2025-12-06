@@ -112,48 +112,69 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
           {error}
         </div>
       )}
-      <div className="bg-surface-000 rounded-lg border border-border-200 p-3 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
-          <div className="flex items-start sm:items-center flex-1">
-            <div
-              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${(selectedRole && selectedRoleData)
-                ? "bg-primary-100 text-primary-600"
-                : "bg-surface-100 text-ink-500"
-                }`}
+      <div className="bg-surface-000 p-3 sm:p-6">
+        {isFetchingRoles ? (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-start sm:items-center flex-1 min-w-0">
+              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-surface-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0 animate-pulse">
+                <div className="w-4 h-4 sm:w-5 sm:h-5 bg-surface-200 rounded"></div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="h-5 sm:h-6 bg-surface-100 rounded w-32 mb-2 animate-pulse"></div>
+                <div className="h-4 bg-surface-100 rounded w-24 animate-pulse"></div>
+              </div>
+            </div>
+            <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2">
+              <div className="h-5 sm:h-6 bg-surface-100 rounded w-28 animate-pulse"></div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+            <div className="flex items-start sm:items-center flex-1 min-w-0">
+              <div
+                className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${(selectedRole && selectedRoleData)
+                  ? "bg-primary-100 text-primary-600"
+                  : "bg-surface-100 text-ink-500"
+                  }`}
+              >
+                {selectedRole && selectedRoleData ? (
+                  <span className="text-base sm:text-lg flex items-center justify-center">
+                    {selectedRoleData.icon}
+                  </span>
+                ) : (
+                  <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
+                  Step 3: Your Role{" "}
+                  <span className="text-red-500">*</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-ink-600">
+                  Your position in this case
+                </p>
+              </div>
+            </div>
+
+            {/* Clickable Role Name */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-100 transition-colors group cursor-pointer"
             >
-              {selectedRole && selectedRoleData ? (
-                <span className="text-base sm:text-lg flex items-center justify-center">
-                  {selectedRoleData.icon}
-                </span>
-              ) : (
-                <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-base sm:text-lg font-bold text-ink-900">
-                Step 3: Your Role{" "}
-                <span className="text-red-500">*</span>
-              </h3>
-              <p className="text-xs sm:text-sm text-ink-600">
-                Your position in this case
-              </p>
-            </div>
+              <span className="text-base sm:text-lg font-semibold text-ink-900 group-hover:text-primary-600 transition-colors">
+                {selectedRoleData?.title || "Select Role"}
+              </span>
+              <svg
+                className="w-4 h-4 text-ink-400 group-hover:text-primary-600 transition-colors"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+            </button>
           </div>
-
-          {/* Centered Role Name - Hidden on mobile */}
-          <div className="hidden sm:flex flex-1 justify-center">
-            <span className="text-lg font-semibold text-ink-900">
-              {selectedRoleData?.title}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
-          >
-            {selectedRole ? "Change Role" : "Select Role"}
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -191,123 +212,149 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
               </p>
 
               {/* Role Selection Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
-                {/* Defendant Card */}
-                <button
-                  onClick={() => handleRoleChange("defendant")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
-                    ? "border-primary-500 bg-primary-100"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
-                >
-                  <div className="flex items-start mb-3 sm:mb-4">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "defendant"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
-                        }`}
-                    >
-                      {effectiveRoles.defendant?.icon}
+              {isFetchingRoles ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="p-3 sm:p-6 rounded-lg border-2 border-border-200 animate-pulse">
+                      <div className="flex items-start mb-3 sm:mb-4">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-surface-200 rounded-full mr-3 sm:mr-4"></div>
+                        <div className="flex-1">
+                          <div className="h-5 sm:h-6 bg-surface-200 rounded w-32 mb-2"></div>
+                          <div className="h-4 bg-surface-200 rounded w-24"></div>
+                        </div>
+                      </div>
+                      <div className="mb-3 sm:mb-4 hidden sm:block">
+                        <div className="h-4 bg-surface-200 rounded w-40 mb-2"></div>
+                        <div className="space-y-2">
+                          <div className="h-3 bg-surface-200 rounded w-full"></div>
+                          <div className="h-3 bg-surface-200 rounded w-5/6"></div>
+                        </div>
+                      </div>
+                      <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
+                        <div className="h-4 bg-surface-200 rounded w-3/4"></div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {effectiveRoles.defendant?.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {effectiveRoles.defendant?.subtitle}
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+                  {/* Defendant Card */}
+                  <button
+                    onClick={() => handleRoleChange("defendant")}
+                    className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
+                      ? "border-primary-500 bg-primary-100"
+                      : "border-border-200 bg-surface-000 hover:border-primary-300"
+                      }`}
+                  >
+                    <div className="flex items-start mb-3 sm:mb-4">
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "defendant"
+                          ? "bg-primary-600 text-white"
+                          : "bg-surface-200 text-ink-500"
+                          }`}
+                      >
+                        {effectiveRoles.defendant?.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
+                          {effectiveRoles.defendant?.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-ink-600 truncate">
+                          {effectiveRoles.defendant?.subtitle}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mb-3 sm:mb-4 hidden sm:block">
+                      <h4 className="text-sm font-semibold text-ink-900 mb-2">
+                        Key Responsibilities:
+                      </h4>
+                      <ul className="space-y-1">
+                        {effectiveRoles.defendant?.responsibilities?.map(
+                          (resp: string, index: number) => (
+                            <li
+                              key={index}
+                              className="text-sm text-ink-600 flex items-start"
+                            >
+                              <span className="text-primary-600 mr-2">
+                                •
+                              </span>
+                              <span>{resp}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
+                      <p className="text-sm text-ink-600">
+                        <span className="font-semibold">
+                          Strategic Focus:
+                        </span>{" "}
+                        {effectiveRoles.defendant?.strategicFocus}
                       </p>
                     </div>
-                  </div>
+                  </button>
 
-                  <div className="mb-3 sm:mb-4 hidden sm:block">
-                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
-                      Key Responsibilities:
-                    </h4>
-                    <ul className="space-y-1">
-                      {effectiveRoles.defendant?.responsibilities?.map(
-                        (resp: string, index: number) => (
-                          <li
-                            key={index}
-                            className="text-sm text-ink-600 flex items-start"
-                          >
-                            <span className="text-primary-600 mr-2">
-                              •
-                            </span>
-                            <span>{resp}</span>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-
-                  <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
-                    <p className="text-sm text-ink-600">
-                      <span className="font-semibold">
-                        Strategic Focus:
-                      </span>{" "}
-                      {effectiveRoles.defendant?.strategicFocus}
-                    </p>
-                  </div>
-                </button>
-
-                {/* Plaintiff Card */}
-                <button
-                  onClick={() => handleRoleChange("plaintiff")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
-                    ? "border-primary-500 bg-primary-100"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
-                >
-                  <div className="flex items-start mb-3 sm:mb-4">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
-                        }`}
-                    >
-                      {effectiveRoles.plaintiff?.icon}
+                  {/* Plaintiff Card */}
+                  <button
+                    onClick={() => handleRoleChange("plaintiff")}
+                    className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
+                      ? "border-primary-500 bg-primary-100"
+                      : "border-border-200 bg-surface-000 hover:border-primary-300"
+                      }`}
+                  >
+                    <div className="flex items-start mb-3 sm:mb-4">
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
+                          ? "bg-primary-600 text-white"
+                          : "bg-surface-200 text-ink-500"
+                          }`}
+                      >
+                        {effectiveRoles.plaintiff?.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
+                          {effectiveRoles.plaintiff?.title}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-ink-600 truncate">
+                          {effectiveRoles.plaintiff?.subtitle}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {effectiveRoles.plaintiff?.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {effectiveRoles.plaintiff?.subtitle}
+
+                    <div className="mb-3 sm:mb-4 hidden sm:block">
+                      <h4 className="text-sm font-semibold text-ink-900 mb-2">
+                        Key Responsibilities:
+                      </h4>
+                      <ul className="space-y-1">
+                        {effectiveRoles.plaintiff?.responsibilities?.map(
+                          (resp: string, index: number) => (
+                            <li
+                              key={index}
+                              className="text-sm text-ink-600 flex items-start"
+                            >
+                              <span className="text-primary-600 mr-2">
+                                •
+                              </span>
+                              <span>{resp}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
+                      <p className="text-sm text-ink-600">
+                        <span className="font-semibold">
+                          Strategic Focus:
+                        </span>{" "}
+                        {effectiveRoles.plaintiff?.strategicFocus}
                       </p>
                     </div>
-                  </div>
-
-                  <div className="mb-3 sm:mb-4 hidden sm:block">
-                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
-                      Key Responsibilities:
-                    </h4>
-                    <ul className="space-y-1">
-                      {effectiveRoles.plaintiff?.responsibilities?.map(
-                        (resp: string, index: number) => (
-                          <li
-                            key={index}
-                            className="text-sm text-ink-600 flex items-start"
-                          >
-                            <span className="text-primary-600 mr-2">
-                              •
-                            </span>
-                            <span>{resp}</span>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-
-                  <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
-                    <p className="text-sm text-ink-600">
-                      <span className="font-semibold">
-                        Strategic Focus:
-                      </span>{" "}
-                      {effectiveRoles.plaintiff?.strategicFocus}
-                    </p>
-                  </div>
-                </button>
-              </div>
+                  </button>
+                </div>
+              )}
 
               {/* Selected Role Summary */}
               {selectedRoleData && (

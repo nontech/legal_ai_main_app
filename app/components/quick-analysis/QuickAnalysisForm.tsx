@@ -42,9 +42,17 @@ interface QuickAnalysisFormProps {
     caseType?: string;
     role?: string;
     charges?: any[];
+    extractedFields?: {
+      caseName?: boolean;
+      caseDescription?: boolean;
+      jurisdiction?: boolean;
+      role?: boolean;
+      caseType?: boolean;
+    };
   };
   caseInformationFiles?: File[];
   caseId?: string | null;
+  uploadedDocuments?: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>;
 }
 
 export default function QuickAnalysisForm({
@@ -53,9 +61,10 @@ export default function QuickAnalysisForm({
   uploadedMetadata = {},
   caseInformationFiles = [],
   caseId,
+  uploadedDocuments = {},
 }: QuickAnalysisFormProps) {
   const router = useRouter();
-  
+
   const [countryId, setCountryId] = useState<string>("");
   const [caseName, setCaseName] = useState<string>("");
   const [caseDescription, setCaseDescription] = useState<string>("");
@@ -77,12 +86,12 @@ export default function QuickAnalysisForm({
   // Store the case type as its string id that API expects
   const [caseTypeId, setCaseTypeId] = useState<string>("");
   const [role, setRole] = useState<string>("plaintiff" as RoleType);
-  
+
   // Update state when metadata arrives from document upload
   useEffect(() => {
     if (uploadedMetadata && Object.keys(uploadedMetadata).length > 0) {
       console.log("📊 QuickAnalysisForm received metadata:", uploadedMetadata);
-      
+
       if (uploadedMetadata.caseName) setCaseName(uploadedMetadata.caseName);
       if (uploadedMetadata.caseDescription) setCaseDescription(uploadedMetadata.caseDescription);
       if (uploadedMetadata.jurisdiction) setJurisdiction(uploadedMetadata.jurisdiction);
@@ -95,6 +104,54 @@ export default function QuickAnalysisForm({
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
   const [streamingCaseId, setStreamingCaseId] = useState<string | null>(null);
   const [streamingResult, setStreamingResult] = useState<any>(null);
+  const [documentsByCategory, setDocumentsByCategory] = useState<Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>>(uploadedDocuments);
+
+  // Fetch uploaded documents from case if caseId is provided, or use prop if available
+  useEffect(() => {
+    console.log("QuickAnalysisForm useEffect - uploadedDocuments prop:", uploadedDocuments);
+    console.log("QuickAnalysisForm useEffect - caseId:", caseId);
+    console.log("QuickAnalysisForm useEffect - Object.keys(uploadedDocuments):", Object.keys(uploadedDocuments || {}));
+
+    // If uploadedDocuments prop has data, use it (prioritize prop over fetch)
+    const propKeys = Object.keys(uploadedDocuments || {});
+    if (propKeys.length > 0) {
+      console.log("Setting documents from prop - categories:", propKeys);
+      console.log("Setting documents from prop - full data:", uploadedDocuments);
+      setDocumentsByCategory(uploadedDocuments);
+      return;
+    }
+
+    // Otherwise, fetch from case if caseId is provided and we don't have documents yet
+    const currentKeys = Object.keys(documentsByCategory || {});
+    if (caseId && currentKeys.length === 0 && propKeys.length === 0) {
+      const fetchCaseDetails = async () => {
+        try {
+          const response = await fetch(`/api/cases/${caseId}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.case_details) {
+              const docs: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+              Object.keys(data.case_details).forEach((key) => {
+                if (key !== "_completion_status" && data.case_details[key]?.files) {
+                  docs[key] = {
+                    files: data.case_details[key].files || [],
+                    summary: data.case_details[key].summary,
+                  };
+                }
+              });
+              console.log("Setting documents from case fetch:", docs);
+              if (Object.keys(docs).length > 0) {
+                setDocumentsByCategory(docs);
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch case details:", error);
+        }
+      };
+      fetchCaseDetails();
+    }
+  }, [caseId, uploadedDocuments]);
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "primary", icon: "📋" },
@@ -116,57 +173,6 @@ export default function QuickAnalysisForm({
     return colorMap[color] || colorMap.primary;
   };
 
-  const [isClassifyingOpen, setIsClassifyingOpen] = useState(false);
-  const [filesToClassify, setFilesToClassify] = useState<Array<{ file: File; fileId: string }>>([]);
-
-  const handleClassificationComplete = (results: Array<{ fileId: string; result: any }>) => {
-    // Update all files with their classifications
-    results.forEach(({ fileId, result }) => {
-      const index = parseInt(fileId);
-      const category = (result.file_category || "case_information") as DocumentCategory;
-
-      setClassifiedFiles((prev) =>
-        prev.map((cf, i) =>
-          i === index
-            ? { ...cf, category, isClassifying: false }
-            : cf
-        )
-      );
-    });
-
-    setIsClassifyingOpen(false);
-    setFilesToClassify([]);
-  };
-
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const newClassifiedFiles = newFiles.map(file => ({
-        file,
-        category: "case_information" as DocumentCategory,
-        isClassifying: true,
-      }));
-
-      setClassifiedFiles(prev => [...prev, ...newClassifiedFiles]);
-
-      // Immediately show classification UI with all files
-      const filesToClassify = newClassifiedFiles.map((cf, idx) => ({
-        file: cf.file,
-        fileId: `${classifiedFiles.length + idx}`,
-      }));
-
-      if (filesToClassify.length > 0) {
-        setFilesToClassify(filesToClassify);
-        setIsClassifyingOpen(true);
-      }
-    }
-  };
-
-  const handleRemoveFile = (index: number) => {
-    setClassifiedFiles(classifiedFiles.filter((_, i) => i !== index));
-  };
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -490,6 +496,7 @@ export default function QuickAnalysisForm({
             }}
             initialValues={jurisdiction}
             hideSaveButton={true}
+            showExtractedBadge={!!uploadedMetadata?.extractedFields?.jurisdiction}
           />
 
           {/* Case Type */}
@@ -497,17 +504,39 @@ export default function QuickAnalysisForm({
             initialCaseTypeId={caseTypeId || undefined}
             countryId={countryId}
             onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
+            showExtractedBadge={!!uploadedMetadata?.extractedFields?.caseType}
           />
 
           {/* Role */}
-          <CompactRole 
-            countryId={countryId}
-            onUpdate={(r: any) => setRole(r)} 
-            initialValue={role as any} 
-          />
+          <div className="relative">
+            {uploadedMetadata?.extractedFields?.role && (
+              <div className="absolute -top-2 right-0 z-10">
+                <div className="relative group">
+                  <div className="flex items-center gap-1.5 px-2 py-1 bg-primary-50 border border-primary-200 rounded-md shadow-sm cursor-help">
+                    <svg className="w-3.5 h-3.5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs font-medium text-primary-700">Extracted from case information</span>
+                  </div>
+                  {/* Tooltip */}
+                  <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
+                    Extracted from case information documents
+                    <div className="absolute top-full right-4 -mt-1">
+                      <div className="border-4 border-transparent border-t-ink-900"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <CompactRole
+              countryId={countryId}
+              onUpdate={(r: any) => setRole(r)}
+              initialValue={role as any}
+            />
+          </div>
 
           {/* Basic Case Information */}
-          <div className="bg-surface-000 rounded-lg border border-border-200 p-6">
+          <div className="bg-surface-000 p-6">
             <div className="flex items-center mb-6">
               <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-lg mr-3">
                 <svg
@@ -537,13 +566,32 @@ export default function QuickAnalysisForm({
             <div className="space-y-4">
               {/* Case Title/Name */}
               <div>
-                <label
-                  htmlFor="caseName"
-                  className="block text-sm font-semibold text-ink-600 mb-2"
-                >
-                  Case Title/Name{" "}
-                  <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label
+                    htmlFor="caseName"
+                    className="block text-sm font-semibold text-ink-600"
+                  >
+                    Case Title/Name{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  {uploadedMetadata?.extractedFields?.caseName && (
+                    <div className="relative group">
+                      <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
+                        <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs font-medium text-primary-700">Extracted</span>
+                      </div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
+                        Extracted from case information documents
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                          <div className="border-4 border-transparent border-t-ink-900"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <input
                   type="text"
                   id="caseName"
@@ -557,13 +605,32 @@ export default function QuickAnalysisForm({
               {/* Case Description */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label
-                    htmlFor="caseDescription"
-                    className="block text-sm font-semibold text-ink-600"
-                  >
-                    Comprehensive Case Description{" "}
-                    <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor="caseDescription"
+                      className="block text-sm font-semibold text-ink-600"
+                    >
+                      Comprehensive Case Description{" "}
+                      <span className="text-red-500">*</span>
+                    </label>
+                    {uploadedMetadata?.extractedFields?.caseDescription && (
+                      <div className="relative group">
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
+                          <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-xs font-medium text-primary-700">Extracted</span>
+                        </div>
+                        {/* Tooltip */}
+                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
+                          Extracted from case information documents
+                          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-ink-900"></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                   {caseDescription && (
                     <button
                       type="button"
@@ -601,6 +668,77 @@ export default function QuickAnalysisForm({
               </div>
             </div>
           </div>
+
+          {/* Uploaded Documents Section */}
+          {Object.keys(documentsByCategory).length > 0 && (() => {
+            // Flatten all files with their categories
+            const allFiles: Array<{ name: string; address: string; category: string }> = [];
+            Object.entries(documentsByCategory).forEach(([category, docData]) => {
+              if (docData.files && docData.files.length > 0) {
+                docData.files.forEach((file) => {
+                  allFiles.push({
+                    name: file.name,
+                    address: file.address,
+                    category,
+                  });
+                });
+              }
+            });
+
+            return (
+              <div className="bg-surface-000 p-6">
+                <div className="flex items-center mb-6">
+                  <div className="flex items-center justify-center w-10 h-10 bg-accent-100 rounded-lg mr-3">
+                    <svg
+                      className="w-5 h-5 text-accent-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-ink-900">
+                      Uploaded Documents
+                    </h3>
+                    <p className="text-sm text-ink-600">
+                      {allFiles.length} file{allFiles.length !== 1 ? "s" : ""} uploaded
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {allFiles.map((file, idx) => {
+                    const categoryInfo = categoryLabels[file.category as DocumentCategory];
+                    if (!categoryInfo) return null;
+
+                    return (
+                      <div key={idx} className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors">
+                        <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
+                          <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                        </div>
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo.color)}`}>
+                            <span>{categoryInfo.icon}</span>
+                            <span>{categoryInfo.label}</span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -651,15 +789,6 @@ export default function QuickAnalysisForm({
         </div>
       </div>
 
-      <StreamingClassificationDisplay
-        isOpen={isClassifyingOpen}
-        files={filesToClassify}
-        onComplete={handleClassificationComplete}
-        onClose={() => {
-          setIsClassifyingOpen(false);
-          setFilesToClassify([]);
-        }}
-      />
     </div>
   );
 }
