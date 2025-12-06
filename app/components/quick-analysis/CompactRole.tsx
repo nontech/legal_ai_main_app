@@ -159,7 +159,7 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
             {/* Clickable Role Name */}
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-100 transition-colors group cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg border px-2 py-1 hover:bg-surface-100 transition-colors group cursor-pointer"
             >
               <span className="text-base sm:text-lg font-semibold text-ink-900 group-hover:text-primary-600 transition-colors">
                 {selectedRoleData?.title || "Select Role"}

@@ -205,6 +205,48 @@ export default function DocumentUploadStep({
     );
   };
 
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return (
+          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z" fill="#DC2626" />
+            <path d="M14,2V8H20" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <text x="12" y="15" fontSize="7" fontWeight="bold" fill="white" textAnchor="middle" fontFamily="Arial, sans-serif">PDF</text>
+          </svg>
+        );
+      case 'doc':
+      case 'docx':
+        return (
+          <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
+          </svg>
+        );
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+        return (
+          <svg className="w-5 h-5 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        );
+      case 'txt':
+        return (
+          <svg className="w-5 h-5 text-ink-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className="w-5 h-5 text-ink-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        );
+    }
+  };
+
   const getCategoryColor = (color: string) => {
     const colorMap: Record<string, string> = {
       primary: "bg-primary-100 text-primary-600 border-primary-200",
@@ -453,95 +495,151 @@ export default function DocumentUploadStep({
         </div>
       ) : (
         <>
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-ink-900 mb-3">
-              Upload Your Case Documents
-            </h1>
-            <p className="text-ink-600 text-lg">
-              Upload case briefs, complaints, legal memos, evidence, and
-              related documents to begin your analysis
-            </p>
-          </div>
-
           <div className="bg-surface-000 p-8 mb-6">
-            <div
-              className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
-                ? "border-border-200"
-                : isDragActive
-                  ? "border-primary-400 bg-primary-50"
-                  : "border-border-200 hover:border-primary-300"
-                }`}
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input
-                type="file"
-                id="fileUpload"
-                multiple
-                accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                onChange={handleFileUpload}
-                disabled={isUploading}
-                className="hidden"
-              />
-              <label
-                htmlFor="fileUpload"
-                className={`cursor-pointer flex flex-col items-center ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+            {classifiedFiles.length === 0 ? (
+              <div
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
+                  ? "border-border-200"
+                  : isDragActive
+                    ? "border-primary-400 bg-primary-50"
+                    : "border-border-200 hover:border-primary-300"
                   }`}
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
-                <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
-                  <svg
-                    className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                </div>
-                <p className="text-base sm:text-lg font-semibold text-ink-900 mb-2">
-                  Drop files here or click
-                </p>
-                <p className="text-xs sm:text-sm text-ink-500 text-center px-2">
-                  Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB
-                </p>
-              </label>
-            </div>
-
-            {classifiedFiles.length > 0 && (
-              <div className="mt-4 sm:mt-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
-                  <h3 className="text-base sm:text-lg font-semibold text-ink-900">
-                    Selected Files ({classifiedFiles.length})
-                  </h3>
-                  <button
-                    onClick={() => setClassifiedFiles([])}
-                    disabled={isUploading}
-                    className="text-xs sm:text-sm text-critical-500 hover:text-critical-600 font-medium disabled:opacity-50"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {classifiedFiles.map((classifiedFile) => {
-                    const categoryInfo = classifiedFile.category
-                      ? categoryLabels[classifiedFile.category]
-                      : null;
-                    return (
-                      <div
-                        key={classifiedFile.id}
-                        className="flex items-center justify-between p-2 sm:p-4 bg-surface-100 rounded-lg border border-border-200 hover:bg-surface-200 transition-colors gap-2"
+                <input
+                  type="file"
+                  id="fileUpload"
+                  multiple
+                  accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                  onChange={handleFileUpload}
+                  disabled={isUploading}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="fileUpload"
+                  className={`cursor-pointer flex flex-col items-center ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                >
+                  <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
+                    <svg
+                      className="w-6 h-6 sm:w-8 sm:h-8 text-primary-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                  </div>
+                  <p className="text-base sm:text-lg font-semibold text-ink-900 mb-2">
+                    Drop files here or click
+                  </p>
+                  <p className="text-xs sm:text-sm text-ink-500 text-center px-2">
+                    PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB
+                  </p>
+                </label>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="border border-border-200 rounded-lg p-5 bg-white">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <svg
+                        className="w-5 h-5 text-ink-500"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                       >
-                        <div className="flex items-center flex-1 min-w-0">
-                          <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span className="text-base text-ink-600 font-medium">
+                        {classifiedFiles.length} {classifiedFiles.length === 1 ? "file" : "files"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const input = document.getElementById("fileUpload") as HTMLInputElement;
+                          if (input) input.click();
+                        }}
+                        disabled={isUploading}
+                        className="flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 4v16m8-8H4"
+                          />
+                        </svg>
+                        Add
+                      </button>
+                      <span className="text-border-300">•</span>
+                      <button
+                        onClick={() => setClassifiedFiles([])}
+                        disabled={isUploading}
+                        className="flex items-center gap-1.5 text-sm text-ink-500 hover:text-ink-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {classifiedFiles.map((classifiedFile) => {
+                      return (
+                        <div
+                          key={classifiedFile.id}
+                          className="flex items-center justify-between p-4 rounded hover:bg-surface-50 transition-colors group"
+                        >
+                          <div className="flex items-center flex-1 min-w-0 gap-3">
+                            <div className="flex-shrink-0">
+                              {getFileIcon(classifiedFile.file.name)}
+                            </div>
+                            <p className="text-base text-ink-900 truncate flex-1">
+                              {classifiedFile.file.name}
+                            </p>
+                            <p className="text-sm text-ink-400 flex-shrink-0">
+                              {formatFileSize(classifiedFile.file.size)}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleRemoveFile(classifiedFile.id)}
+                            disabled={isUploading}
+                            className="ml-3 p-1.5 text-ink-400 hover:text-ink-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer opacity-0 group-hover:opacity-100"
+                          >
                             <svg
-                              className="w-5 h-5 text-primary-600"
+                              className="w-5 h-5"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -550,59 +648,56 @@ export default function DocumentUploadStep({
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 strokeWidth={2}
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                d="M6 18L18 6M6 6l12 12"
                               />
                             </svg>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm font-medium text-ink-900 truncate">
-                                {classifiedFile.file.name}
-                              </p>
-                              {classifiedFile.isUploading ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-surface-200 text-ink-600">
-                                  <span className="inline-block w-2 h-2 bg-ink-400 rounded-full animate-pulse"></span>
-                                  Uploading...
-                                </span>
-                              ) : categoryInfo ? (
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${getCategoryColor(
-                                    categoryInfo.color
-                                  )}`}
-                                >
-                                  {categoryInfo.icon} {categoryInfo.label}
-                                </span>
-                              ) : null}
-                            </div>
-                            <p className="text-xs text-ink-500">
-                              {formatFileSize(classifiedFile.file.size)}
-                            </p>
-                          </div>
+                          </button>
                         </div>
-                        <button
-                          onClick={() =>
-                            handleRemoveFile(classifiedFile.id)
-                          }
-                          disabled={isUploading}
-                          className="ml-4 text-critical-500 hover:text-critical-600 flex-shrink-0 disabled:opacity-50"
-                        >
-                          <svg
-                            className="w-5 h-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
+                </div>
+                <div
+                  className={`border border-dashed rounded-lg p-4 text-center transition-colors ${isUploading
+                    ? "border-border-200"
+                    : isDragActive
+                      ? "border-primary-400 bg-primary-50"
+                      : "border-border-200 hover:border-primary-300"
+                    }`}
+                  onDragEnter={handleDragEnter}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    multiple
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="fileUpload"
+                    className={`cursor-pointer flex items-center justify-center gap-2 text-sm text-ink-600 hover:text-ink-900 ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    Add more files
+                  </label>
                 </div>
               </div>
             )}
@@ -647,7 +742,7 @@ export default function DocumentUploadStep({
                 onContinue([], {}, [], caseId || "test-case");
               }}
               disabled={isUploading}
-              className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium underline disabled:opacity-50"
+              className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               Skip and continue without documents
             </button>
