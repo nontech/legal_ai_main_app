@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import StreamingClassificationDisplay from "../StreamingClassificationDisplay";
 import StreamingUploadDisplay from "../StreamingUploadDisplay";
 
 type DocumentCategory =

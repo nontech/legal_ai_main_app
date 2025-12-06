@@ -7,7 +7,6 @@ import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
 import StreamingAnalysisDisplay from "../StreamingAnalysisDisplay";
-import StreamingClassificationDisplay from "../StreamingClassificationDisplay";
 import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, Users } from "lucide-react";
 
 type DocumentCategory =
