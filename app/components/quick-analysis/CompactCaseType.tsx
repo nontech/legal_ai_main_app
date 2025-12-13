@@ -258,13 +258,11 @@ export default function CompactCaseType({
   showExtractedBadge = false,
 }: CompactCaseTypeProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [caseTypes, setCaseTypes] = useState<CaseType[]>(DEFAULT_CASE_TYPES);
+  const caseTypes = DEFAULT_CASE_TYPES;
   const [selectedCaseType, setSelectedCaseType] = useState<CaseType>(() => {
     const initialSelection = getCaseTypeById(initialCaseTypeId, DEFAULT_CASE_TYPES);
     return initialSelection ?? DEFAULT_CASE_TYPE;
   });
-  const [isFetchingCaseTypes, setIsFetchingCaseTypes] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const lastInitialCaseTypeIdRef = useRef<string | undefined>(initialCaseTypeId);
   const onUpdateRef = useRef(onUpdate);
 
@@ -272,58 +270,6 @@ export default function CompactCaseType({
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
-
-  // Fetch case types from API when country changes
-  useEffect(() => {
-    if (!countryId) {
-      setCaseTypes(DEFAULT_CASE_TYPES);
-      return;
-    }
-
-    const fetchCaseTypesFromAPI = async () => {
-      try {
-        setIsFetchingCaseTypes(true);
-        const res = await fetch(`/api/admin/case-types?country_id=${countryId}`);
-        const json = await res.json();
-
-        if (json.ok && json.data) {
-          // Transform API response (JSONB object) to array format
-          const apiCaseTypes = Object.entries(json.data).map(([key, value]: [string, any]) => {
-            // Get icon and convert to emoji
-            let icon = value.icon;
-            if (icon) {
-              icon = getEmojiIcon(icon);
-            } else {
-              // Try to find from default case types
-              const defaultCaseType = DEFAULT_CASE_TYPES.find((ct) => ct.id === key);
-              icon = defaultCaseType?.icon || "⚖️";
-            }
-
-            return {
-              id: key,
-              title: value.name || value.title || key,
-              subtitle: value.description || value.subtitle || "",
-              icon: icon,
-              typicalCases: value.typical_cases || value.typicalCases || [],
-              standardOfProof: value.standard_of_proof || value.standardOfProof || "",
-            };
-          });
-          setCaseTypes(apiCaseTypes);
-        } else {
-          setCaseTypes(DEFAULT_CASE_TYPES);
-          setError(json.error || "Failed to fetch case types");
-        }
-      } catch (err) {
-        console.error("Failed to fetch case types:", err);
-        setCaseTypes(DEFAULT_CASE_TYPES);
-        setError("Failed to fetch case types");
-      } finally {
-        setIsFetchingCaseTypes(false);
-      }
-    };
-
-    fetchCaseTypesFromAPI();
-  }, [countryId]);
 
   useEffect(() => {
     // Prevent infinite loops by checking if initialCaseTypeId actually changed
@@ -382,23 +328,7 @@ export default function CompactCaseType({
   return (
     <>
       <div className="bg-surface-000 p-3 sm:p-6">
-        {isFetchingCaseTypes ? (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <div className="flex items-start sm:items-center flex-1 min-w-0">
-              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-surface-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0 animate-pulse">
-                <div className="w-4 h-4 sm:w-6 sm:h-6 bg-surface-200 rounded"></div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="h-5 sm:h-6 bg-surface-100 rounded w-32 mb-2 animate-pulse"></div>
-                <div className="h-4 bg-surface-100 rounded w-24 animate-pulse"></div>
-              </div>
-            </div>
-            <div className="flex-1 flex items-center justify-center gap-2 px-4 py-2">
-              <div className="h-5 sm:h-6 bg-surface-100 rounded w-32 animate-pulse"></div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-start sm:items-center flex-1 min-w-0">
               <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
                 <span className="text-xl sm:text-2xl text-primary-600">
@@ -451,7 +381,6 @@ export default function CompactCaseType({
               </svg>
             </button>
           </div>
-        )}
       </div>
 
       {/* Modal */}
@@ -502,32 +431,7 @@ export default function CompactCaseType({
 
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-                    {error}
-                  </div>
-                )}
-                {isFetchingCaseTypes ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="p-4 rounded-lg border-2 border-border-200 animate-pulse">
-                        <div className="flex items-start mb-2">
-                          <div className="w-8 h-8 bg-surface-200 rounded mr-3"></div>
-                          <div className="flex-1">
-                            <div className="h-4 bg-surface-200 rounded w-24 mb-2"></div>
-                            <div className="h-3 bg-surface-200 rounded w-32"></div>
-                          </div>
-                        </div>
-                        <div className="space-y-2 mb-2">
-                          <div className="h-3 bg-surface-200 rounded w-full"></div>
-                          <div className="h-3 bg-surface-200 rounded w-3/4"></div>
-                        </div>
-                        <div className="h-3 bg-surface-200 rounded w-20 mt-2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {caseTypes.map((caseType) => (
                       <button
                         key={caseType.id}
@@ -591,7 +495,6 @@ export default function CompactCaseType({
                       </button>
                     ))}
                   </div>
-                )}
               </div>
 
               {/* Modal Footer */}
