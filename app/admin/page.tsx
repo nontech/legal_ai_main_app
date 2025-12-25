@@ -25,6 +25,8 @@ import {
   UsersRound,
   Lock,
   LogOut,
+  Landmark,
+  Building2,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -37,6 +39,8 @@ import RolesManager from "../components/admin/RolesManager";
 import ChargesManager from "../components/admin/ChargesManager";
 import JudgesManager from "../components/admin/JudgesManager";
 import JuryManager from "../components/admin/JuryManager";
+import CourtLevelsManager from "../components/admin/CourtLevelsManager";
+import CourtsManager from "../components/admin/CourtsManager";
 
 // Simple credentials (In production, this should be in environment variables)
 const ADMIN_USERNAME = "admin";
@@ -195,7 +199,7 @@ const Admin = () => {
         {/* Main Content */}
         <Card className="p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid grid-cols-7 gap-2 h-auto p-1 bg-slate-100">
+            <TabsList className="grid grid-cols-9 gap-2 h-auto p-1 bg-slate-100">
               <TabsTrigger
                 value="countries"
                 className="flex items-center gap-2 py-3"
@@ -211,6 +215,20 @@ const Admin = () => {
                 <span className="hidden sm:inline">
                   Jurisdictions
                 </span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="court-levels"
+                className="flex items-center gap-2 py-3"
+              >
+                <Landmark className="w-4 h-4" />
+                <span className="hidden sm:inline">Court Levels</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="courts"
+                className="flex items-center gap-2 py-3"
+              >
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">Courts</span>
               </TabsTrigger>
               <TabsTrigger
                 value="case-types"
@@ -256,6 +274,14 @@ const Admin = () => {
 
               <TabsContent value="jurisdictions" className="m-0">
                 <JurisdictionsManager />
+              </TabsContent>
+
+              <TabsContent value="court-levels" className="m-0">
+                <CourtLevelsManager />
+              </TabsContent>
+
+              <TabsContent value="courts" className="m-0">
+                <CourtsManager />
               </TabsContent>
 
               <TabsContent value="case-types" className="m-0">

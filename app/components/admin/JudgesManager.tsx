@@ -54,9 +54,9 @@ interface Country {
 
 interface Jurisdiction {
   id: string;
-  state_province: string | null;
-  city: string | null;
-  court: string | null;
+  name: string | null;
+  type: string | null;
+  code: string | null;
 }
 
 interface Judge {
@@ -133,10 +133,9 @@ const JudgesManager = () => {
     try {
       const { data, error } = await supabase
         .from("jurisdiction")
-        .select("id, state_province, city, court")
+        .select("id, name, type, code")
         .eq("country_id", countryId)
-        .order("state_province")
-        .order("city");
+        .order("name");
 
       if (error) throw error;
       setJurisdictions(data || []);
@@ -188,7 +187,9 @@ const JudgesManager = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -424,8 +425,11 @@ const JudgesManager = () => {
                           key={jurisdiction.id}
                           value={jurisdiction.id}
                         >
-                          {jurisdiction.state_province || "N/A"} -{" "}
-                          {jurisdiction.city || "N/A"} - {jurisdiction.court || "N/A"}
+                          {jurisdiction.name || "N/A"}
+                          {jurisdiction.type &&
+                            ` (${jurisdiction.type})`}
+                          {jurisdiction.code &&
+                            ` [${jurisdiction.code}]`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -514,8 +518,9 @@ const JudgesManager = () => {
                   <TableCell>
                     {judge.jurisdiction ? (
                       <span className="text-sm">
-                        {judge.jurisdiction.state_province || "N/A"} -{" "}
-                        {judge.jurisdiction.city || "N/A"}
+                        {judge.jurisdiction.name || "N/A"}
+                        {judge.jurisdiction.type &&
+                          ` (${judge.jurisdiction.type})`}
                       </span>
                     ) : (
                       <span className="text-slate-500 italic">
@@ -528,10 +533,11 @@ const JudgesManager = () => {
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${judge.jurisdiction_id
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-purple-100 text-purple-800"
-                        }`}
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        judge.jurisdiction_id
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-purple-100 text-purple-800"
+                      }`}
                     >
                       {judge.jurisdiction_id ? "Specific" : "Default"}
                     </span>

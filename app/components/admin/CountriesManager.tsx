@@ -36,6 +36,7 @@ interface Country {
   id: string;
   name: string;
   is_active: boolean | null;
+  iso_code: string | null;
   created_at: string | null;
   updated_at?: string | null;
 }
@@ -51,6 +52,7 @@ const CountriesManager = () => {
   >(null);
   const [formData, setFormData] = useState({
     name: "",
+    iso_code: "",
     is_active: true,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +82,9 @@ const CountriesManager = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     setSubmitting(true);
 
@@ -90,6 +94,7 @@ const CountriesManager = () => {
           .from("countries")
           .update({
             name: formData.name,
+            iso_code: formData.iso_code || null,
             is_active: formData.is_active,
           })
           .eq("id", editingCountry.id);
@@ -104,6 +109,7 @@ const CountriesManager = () => {
         const { error } = await supabase.from("countries").insert([
           {
             name: formData.name,
+            iso_code: formData.iso_code || null,
             is_active: formData.is_active,
           },
         ]);
@@ -118,7 +124,7 @@ const CountriesManager = () => {
 
       setIsDialogOpen(false);
       setEditingCountry(null);
-      setFormData({ name: "", is_active: true });
+      setFormData({ name: "", iso_code: "", is_active: true });
       fetchCountries();
     } catch (error: any) {
       toast({
@@ -135,6 +141,7 @@ const CountriesManager = () => {
     setEditingCountry(country);
     setFormData({
       name: country.name,
+      iso_code: country.iso_code || "",
       is_active: country.is_active ?? true,
     });
     setIsDialogOpen(true);
@@ -170,7 +177,7 @@ const CountriesManager = () => {
 
   const openCreateDialog = () => {
     setEditingCountry(null);
-    setFormData({ name: "", is_active: true });
+    setFormData({ name: "", iso_code: "", is_active: true });
     setIsDialogOpen(true);
   };
 
@@ -222,6 +229,21 @@ const CountriesManager = () => {
                   required
                 />
               </div>
+              <div>
+                <Label htmlFor="iso_code">ISO Code (Optional)</Label>
+                <Input
+                  id="iso_code"
+                  value={formData.iso_code}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      iso_code: e.target.value,
+                    })
+                  }
+                  placeholder="e.g., US"
+                  maxLength={3}
+                />
+              </div>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -265,6 +287,7 @@ const CountriesManager = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Country Name</TableHead>
+              <TableHead>ISO Code</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -288,18 +311,30 @@ const CountriesManager = () => {
                     {country.name}
                   </TableCell>
                   <TableCell>
+                    {country.iso_code ? (
+                      <span className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">
+                        {country.iso_code}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${country.is_active
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        country.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
-                        }`}
+                      }`}
                     >
                       {country.is_active ? "Active" : "Inactive"}
                     </span>
                   </TableCell>
                   <TableCell>
                     {country.created_at
-                      ? new Date(country.created_at).toLocaleDateString()
+                      ? new Date(
+                          country.created_at
+                        ).toLocaleDateString()
                       : "N/A"}
                   </TableCell>
                   <TableCell className="text-right">
