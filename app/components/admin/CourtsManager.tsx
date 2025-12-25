@@ -1,4 +1,10 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { supabase } from "../../admin/supabase/client";
 import { useToast } from "../../../hooks/use-toast";
 import { Button } from "../ui/button";
@@ -79,7 +85,6 @@ interface Court {
 }
 
 const CourtsManager = () => {
-  const [courts, setCourts] = useState<Court[]>([]);
   const [allCourts, setAllCourts] = useState<Court[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
@@ -118,10 +123,15 @@ const CourtsManager = () => {
   const [bulkJsonError, setBulkJsonError] = useState("");
   const [selectedCourts, setSelectedCourts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] =
+    useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50); // Default to 50 items per page
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] =
     useState(false);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetchCountries();
@@ -133,25 +143,56 @@ const CourtsManager = () => {
     setSelectedCourts([]);
   }, [filterCountry, filterJurisdiction, filterCourtLevel]);
 
+  // Debounce search query
   useEffect(() => {
-    // Filter courts based on search query
-    if (!searchQuery.trim()) {
-      setCourts(allCourts);
-    } else {
-      const query = searchQuery.toLowerCase();
-      const filtered = allCourts.filter(
-        (court) =>
-          court.name?.toLowerCase().includes(query) ||
-          court.official_name?.toLowerCase().includes(query) ||
-          court.countries?.name.toLowerCase().includes(query) ||
-          court.jurisdiction?.name?.toLowerCase().includes(query) ||
-          court.court_levels?.name?.toLowerCase().includes(query)
-      );
-      setCourts(filtered);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
     }
-    // Clear selections when search changes
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1); // Reset to first page when search changes
+    }, 300); // 300ms debounce
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
+
+  // Memoized filtered courts based on search
+  const filteredCourts = useMemo(() => {
+    if (!debouncedSearchQuery.trim()) {
+      return allCourts;
+    }
+    const query = debouncedSearchQuery.toLowerCase();
+    return allCourts.filter(
+      (court) =>
+        court.name?.toLowerCase().includes(query) ||
+        court.official_name?.toLowerCase().includes(query) ||
+        court.countries?.name.toLowerCase().includes(query) ||
+        court.jurisdiction?.name?.toLowerCase().includes(query) ||
+        court.court_levels?.name?.toLowerCase().includes(query)
+    );
+  }, [allCourts, debouncedSearchQuery]);
+
+  // Memoized paginated courts
+  const paginatedCourts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredCourts.slice(startIndex, endIndex);
+  }, [filteredCourts, currentPage, itemsPerPage]);
+
+  // Total pages calculation
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredCourts.length / itemsPerPage);
+  }, [filteredCourts.length, itemsPerPage]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
     setSelectedCourts([]);
-  }, [searchQuery, allCourts]);
+  }, [filterCountry, filterJurisdiction, filterCourtLevel]);
 
   useEffect(() => {
     // Update filter dropdowns when country filter changes
@@ -455,23 +496,30 @@ const CourtsManager = () => {
     }
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedCourts(courts.map((court) => court.id));
-    } else {
-      setSelectedCourts([]);
-    }
-  };
+  const handleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        // Select all filtered courts, not just current page
+        setSelectedCourts(filteredCourts.map((court) => court.id));
+      } else {
+        setSelectedCourts([]);
+      }
+    },
+    [filteredCourts]
+  );
 
-  const handleSelectCourt = (courtId: string, checked: boolean) => {
-    if (checked) {
-      setSelectedCourts([...selectedCourts, courtId]);
-    } else {
-      setSelectedCourts(
-        selectedCourts.filter((id) => id !== courtId)
-      );
-    }
-  };
+  const handleSelectCourt = useCallback(
+    (courtId: string, checked: boolean) => {
+      setSelectedCourts((prev) => {
+        if (checked) {
+          return prev.includes(courtId) ? prev : [...prev, courtId];
+        } else {
+          return prev.filter((id) => id !== courtId);
+        }
+      });
+    },
+    []
+  );
 
   const handleBulkDelete = async () => {
     if (selectedCourts.length === 0) return;
@@ -721,8 +769,13 @@ const CourtsManager = () => {
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-semibold">Courts</h2>
           <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
-            {courts.length}{" "}
-            {courts.length === 1 ? "record" : "records"}
+            {filteredCourts.length}{" "}
+            {filteredCourts.length === 1 ? "record" : "records"}
+            {filteredCourts.length !== allCourts.length && (
+              <span className="text-slate-500 ml-1">
+                (of {allCourts.length} total)
+              </span>
+            )}
           </span>
         </div>
       </div>
@@ -992,8 +1045,10 @@ const CourtsManager = () => {
                 <input
                   type="checkbox"
                   checked={
-                    courts.length > 0 &&
-                    selectedCourts.length === courts.length
+                    filteredCourts.length > 0 &&
+                    filteredCourts.every((court) =>
+                      selectedCourts.includes(court.id)
+                    )
                   }
                   onChange={(e) => handleSelectAll(e.target.checked)}
                   className="w-4 h-4 rounded border-slate-300"
@@ -1008,18 +1063,19 @@ const CourtsManager = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {courts.length === 0 ? (
+            {paginatedCourts.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={7}
                   className="text-center text-slate-500 py-8"
                 >
-                  No courts found. Add your first court to get
-                  started.
+                  {filteredCourts.length === 0
+                    ? "No courts found. Add your first court to get started."
+                    : "No courts on this page."}
                 </TableCell>
               </TableRow>
             ) : (
-              courts.map((court) => (
+              paginatedCourts.map((court) => (
                 <TableRow key={court.id}>
                   <TableCell>
                     <input
@@ -1070,6 +1126,85 @@ const CourtsManager = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination Controls */}
+      {filteredCourts.length > 0 && (
+        <div className="flex items-center justify-between px-2 py-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600">
+              Items per page:
+            </span>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-20 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="200">200</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-slate-600">
+              Showing {(currentPage - 1) * itemsPerPage + 1}-
+              {Math.min(
+                currentPage * itemsPerPage,
+                filteredCourts.length
+              )}{" "}
+              of {filteredCourts.length}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(1)}
+              disabled={currentPage === 1}
+            >
+              First
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentPage((prev) => Math.max(1, prev - 1))
+              }
+              disabled={currentPage === 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm text-slate-600 px-2">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                setCurrentPage((prev) =>
+                  Math.min(totalPages, prev + 1)
+                )
+              }
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(totalPages)}
+              disabled={currentPage === totalPages}
+            >
+              Last
+            </Button>
+          </div>
+        </div>
+      )}
 
       <AlertDialog
         open={!!deleteCourtId}
