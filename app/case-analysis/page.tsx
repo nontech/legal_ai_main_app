@@ -13,10 +13,25 @@ type Step = "upload" | "form" | "verdict";
 function CaseAnalysisContent() {
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>("upload");
-  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>(
+    []
+  );
   const [uploadedMetadata, setUploadedMetadata] = useState<any>({});
-  const [caseInformationFiles, setCaseInformationFiles] = useState<File[]>([]);
-  const [uploadedDocumentsByCategory, setUploadedDocumentsByCategory] = useState<Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>>({});
+  const [caseInformationFiles, setCaseInformationFiles] = useState<
+    File[]
+  >([]);
+  const [
+    uploadedDocumentsByCategory,
+    setUploadedDocumentsByCategory,
+  ] = useState<
+    Record<
+      string,
+      {
+        files: Array<{ name: string; address: string }>;
+        summary?: string;
+      }
+    >
+  >({});
   const [hasVisitedForm, setHasVisitedForm] = useState(false);
   const [caseId, setCaseId] = useState<string | null>(null);
 
@@ -35,7 +50,19 @@ function CaseAnalysisContent() {
     }
   }, [searchParams]);
 
-  const handleDocumentsUploaded = (files: File[], metadata?: any, caseInfoFiles?: File[], newCaseId?: string, uploadedDocsByCategory?: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>) => {
+  const handleDocumentsUploaded = (
+    files: File[],
+    metadata?: any,
+    caseInfoFiles?: File[],
+    newCaseId?: string,
+    uploadedDocsByCategory?: Record<
+      string,
+      {
+        files: Array<{ name: string; address: string }>;
+        summary?: string;
+      }
+    >
+  ) => {
     setUploadedDocuments(files);
     setUploadedMetadata(metadata || {});
     setCaseInformationFiles(caseInfoFiles || []);
@@ -69,7 +96,7 @@ function CaseAnalysisContent() {
     <div className="min-h-screen bg-surface-100">
       <Navbar />
 
-      <main className="pt-16 sm:pt-20 pb-16 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
+      <main className="pt-20 sm:pt-24 pb-16 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 flex flex-col gap-3 sm:gap-4">
           <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-4">
             <div className="text-center">
@@ -104,9 +131,7 @@ function CaseAnalysisContent() {
               />
             )}
 
-            {currentStep === "verdict" && (
-              <VerdictStep />
-            )}
+            {currentStep === "verdict" && <VerdictStep />}
           </section>
         </div>
       </main>
