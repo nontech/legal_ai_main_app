@@ -49,7 +49,7 @@ interface ChargesData {
   charge_sheets: any;
   created_at: string | null;
   updated_at?: string | null;
-  countries?: { name: string };
+  countries?: { name: string } | null;
 }
 
 const ChargesManager = () => {
@@ -152,7 +152,9 @@ const ChargesManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     if (!dialogCountryId) {

@@ -62,7 +62,7 @@ interface Jurisdiction {
   code: string | null;
   created_at: string | null;
   updated_at?: string | null;
-  countries?: { name: string };
+  countries?: { name: string } | null;
 }
 
 const JurisdictionsManager = () => {

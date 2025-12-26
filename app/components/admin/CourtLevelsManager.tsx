@@ -61,7 +61,7 @@ interface CourtLevel {
   normalized_level: string | null;
   branch: string | null;
   created_at: string;
-  countries?: { name: string };
+  countries?: { name: string } | null;
 }
 
 const CourtLevelsManager = () => {

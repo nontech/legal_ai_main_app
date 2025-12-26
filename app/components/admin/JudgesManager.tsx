@@ -67,7 +67,7 @@ interface Judge {
   created_at: string | null;
   updated_at?: string | null;
   is_active?: boolean | null;
-  countries?: { name: string };
+  countries?: { name: string } | null;
   jurisdiction?: Jurisdiction | null;
 }
 
@@ -153,7 +153,7 @@ const JudgesManager = () => {
       let query = supabase
         .from("judge")
         .select(
-          "*, countries(name), jurisdiction(id, state_province, city, court)"
+          "*, countries(name), jurisdiction(id, name, type, code)"
         )
         .order("created_at", { ascending: false });
 

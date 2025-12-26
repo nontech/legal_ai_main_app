@@ -79,9 +79,9 @@ interface Court {
   name: string | null;
   official_name: string | null;
   created_at: string;
-  countries?: { name: string };
-  jurisdiction?: Jurisdiction;
-  court_levels?: CourtLevel;
+  countries?: { name: string } | null;
+  jurisdiction?: Jurisdiction | null;
+  court_levels?: CourtLevel | null;
 }
 
 const CourtsManager = () => {
