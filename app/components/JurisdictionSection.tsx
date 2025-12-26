@@ -12,9 +12,18 @@ interface Country {
 interface Jurisdiction {
   id: string;
   country_id: string;
-  state_province: string | null;
-  city: string | null;
-  court: string | null;
+  name: string | null;
+  type: string | null;
+  code: string | null;
+}
+
+interface Court {
+  id: string;
+  country_id: string | null;
+  jurisdiction_id: string | null;
+  court_level_id: string | null;
+  name: string | null;
+  official_name: string | null;
 }
 
 interface JurisdictionSectionProps {
@@ -26,17 +35,17 @@ interface JurisdictionSectionProps {
   variant?: "full" | "compact";
   onUpdate?: (data: {
     country: string;
-    state: string;
-    city: string;
+    jurisdiction: string;
     court: string;
     country_id: string;
+    jurisdiction_id: string;
   }) => void;
   initialValues?: {
     country?: string;
-    state?: string;
-    city?: string;
+    jurisdiction?: string;
     court?: string;
     country_id?: string;
+    jurisdiction_id?: string;
   };
   hideSaveButton?: boolean;
   showExtractedBadge?: boolean;
@@ -57,22 +66,24 @@ export default function JurisdictionSection({
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
     []
   );
+  const [courts, setCourts] = useState<Court[]>([]);
   const [country, setCountry] = useState<string>("");
   const [countryId, setCountryId] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [city, setCity] = useState<string>("");
+  const [jurisdiction, setJurisdiction] = useState<string>("");
+  const [jurisdictionId, setJurisdictionId] = useState<string>("");
   const [court, setCourt] = useState<string>("");
 
   // Custom "Other" values
   const [customCountry, setCustomCountry] = useState<string>("");
-  const [customState, setCustomState] = useState<string>("");
-  const [customCity, setCustomCity] = useState<string>("");
+  const [customJurisdiction, setCustomJurisdiction] =
+    useState<string>("");
   const [customCourt, setCustomCourt] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(!!caseId);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
   const [isLoadingJurisdictions, setIsLoadingJurisdictions] =
     useState(false);
+  const [isLoadingCourts, setIsLoadingCourts] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Use refs to store callbacks to prevent infinite loops
@@ -137,13 +148,50 @@ export default function JurisdictionSection({
     fetchJurisdictions();
   }, [countryId]);
 
+  // Fetch courts when jurisdiction is selected
+  useEffect(() => {
+    if (!countryId || !jurisdictionId) {
+      setCourts([]);
+      return;
+    }
+
+    const fetchCourts = async () => {
+      try {
+        setIsLoadingCourts(true);
+        const res = await fetch(
+          `/api/admin/courts?country_id=${countryId}&jurisdiction_id=${jurisdictionId}`
+        );
+        const json = await res.json();
+
+        if (json.ok && json.data) {
+          setCourts(json.data);
+        } else {
+          setError(json.error || "Failed to fetch courts");
+        }
+      } catch (err) {
+        console.error("Failed to fetch courts:", err);
+        setError("Failed to fetch courts");
+      } finally {
+        setIsLoadingCourts(false);
+      }
+    };
+
+    fetchCourts();
+  }, [countryId, jurisdictionId]);
+
   // Initialize from initialValues if provided (for Quick Analysis)
   // Only initialize when we have actual data, not empty objects
   useEffect(() => {
     if (!initialValues || !countries.length || caseId) return;
 
-    const { country, state, city, court, country_id } = initialValues;
-    const hasActualData = Boolean(country || state || city || court);
+    const {
+      country,
+      jurisdiction,
+      court,
+      country_id,
+      jurisdiction_id,
+    } = initialValues;
+    const hasActualData = Boolean(country || jurisdiction || court);
 
     // Debug logging
     console.log("🔍 JurisdictionSection initialValues:", {
@@ -169,21 +217,16 @@ export default function JurisdictionSection({
         if (selectedCountry) {
           setCountry(country);
           setCountryId(selectedCountry.id);
-          // Set state/city/court - they will be validated when jurisdictions load
-          if (state) setState(state);
-          if (city) setCity(city);
+          // Set jurisdiction/court - they will be validated when jurisdictions load
+          if (jurisdiction) setJurisdiction(jurisdiction);
           if (court) setCourt(court);
         } else {
           setCountry("__other__");
           setCustomCountry(country);
           // If country is "Other", move dependent fields to "Other" too
-          if (state) {
-            setState("__other__");
-            setCustomState(state);
-          }
-          if (city) {
-            setCity("__other__");
-            setCustomCity(city);
+          if (jurisdiction) {
+            setJurisdiction("__other__");
+            setCustomJurisdiction(jurisdiction);
           }
           if (court) {
             setCourt("__other__");
@@ -193,8 +236,8 @@ export default function JurisdictionSection({
       } else if (country_id) {
         // If we have country_id but no country name, set it directly
         setCountryId(country_id);
-        if (state) setState(state);
-        if (city) setCity(city);
+        if (jurisdiction_id) setJurisdictionId(jurisdiction_id);
+        if (jurisdiction) setJurisdiction(jurisdiction);
         if (court) setCourt(court);
       }
     }
@@ -209,7 +252,7 @@ export default function JurisdictionSection({
           const json = await res.json();
 
           if (json.ok && json.data?.jurisdiction) {
-            const { country, state, city, court } =
+            const { country, jurisdiction, court } =
               json.data.jurisdiction;
 
             // Handle country - check if it exists in predefined list
@@ -220,23 +263,18 @@ export default function JurisdictionSection({
               if (selectedCountry) {
                 setCountry(country);
                 setCountryId(selectedCountry.id);
-                // Will check state/city/court against jurisdictions when they load
-                setState(state || "");
-                setCity(city || "");
+                // Will check jurisdiction/court against jurisdictions when they load
+                setJurisdiction(jurisdiction || "");
                 setCourt(court || "");
               } else {
                 // Country not in list - use "Other"
-                // Also move state/city/court to custom fields immediately
+                // Also move jurisdiction/court to custom fields immediately
                 setCountry("__other__");
                 setCustomCountry(country);
 
-                if (state) {
-                  setState("__other__");
-                  setCustomState(state);
-                }
-                if (city) {
-                  setCity("__other__");
-                  setCustomCity(city);
+                if (jurisdiction) {
+                  setJurisdiction("__other__");
+                  setCustomJurisdiction(jurisdiction);
                 }
                 if (court) {
                   setCourt("__other__");
@@ -281,101 +319,37 @@ export default function JurisdictionSection({
     };
 
     let needsUpdate = false;
-    let newState = state;
-    let newCity = city;
-    let newCourt = court;
-    let newCustomState = customState;
-    let newCustomCity = customCity;
-    let newCustomCourt = customCourt;
+    let newJurisdiction = jurisdiction;
+    let newCustomJurisdiction = customJurisdiction;
 
-    // Check state
-    if (state && state !== "__other__") {
-      const stateExists = jurisdictions.some((j) =>
-        matches(state, j.state_province)
+    // Check jurisdiction
+    if (jurisdiction && jurisdiction !== "__other__") {
+      const jurisdictionExists = jurisdictions.some((j) =>
+        matches(jurisdiction, j.name)
       );
-      if (!stateExists) {
+      if (!jurisdictionExists) {
         console.log(
-          `⚠️ State "${state}" not found in jurisdictions, moving to "Other"`
+          `⚠️ Jurisdiction "${jurisdiction}" not found in jurisdictions, moving to "Other"`
         );
-        newCustomState = state;
-        newState = "__other__";
+        newCustomJurisdiction = jurisdiction;
+        newJurisdiction = "__other__";
         needsUpdate = true;
       } else {
         // Find the exact match to use the database value (handles case/whitespace differences)
         const matchedJurisdiction = jurisdictions.find((j) =>
-          matches(state, j.state_province)
+          matches(jurisdiction, j.name)
         );
         if (
           matchedJurisdiction &&
-          matchedJurisdiction.state_province &&
-          matchedJurisdiction.state_province !== state
+          matchedJurisdiction.name &&
+          matchedJurisdiction.name !== jurisdiction
         ) {
           console.log(
-            `🔄 Normalizing state: "${state}" → "${matchedJurisdiction.state_province}"`
+            `🔄 Normalizing jurisdiction: "${jurisdiction}" → "${matchedJurisdiction.name}"`
           );
-          newState = matchedJurisdiction.state_province;
-          needsUpdate = true;
-        }
-      }
-    }
-
-    // Check city
-    if (city && city !== "__other__") {
-      const cityExists = jurisdictions.some((j) =>
-        matches(city, j.city)
-      );
-      if (!cityExists) {
-        console.log(
-          `⚠️ City "${city}" not found in jurisdictions, moving to "Other"`
-        );
-        newCustomCity = city;
-        newCity = "__other__";
-        needsUpdate = true;
-      } else {
-        // Find the exact match to use the database value
-        const matchedJurisdiction = jurisdictions.find((j) =>
-          matches(city, j.city)
-        );
-        if (
-          matchedJurisdiction &&
-          matchedJurisdiction.city &&
-          matchedJurisdiction.city !== city
-        ) {
-          console.log(
-            `🔄 Normalizing city: "${city}" → "${matchedJurisdiction.city}"`
-          );
-          newCity = matchedJurisdiction.city;
-          needsUpdate = true;
-        }
-      }
-    }
-
-    // Check court
-    if (court && court !== "__other__") {
-      const courtExists = jurisdictions.some((j) =>
-        matches(court, j.court)
-      );
-      if (!courtExists) {
-        console.log(
-          `⚠️ Court "${court}" not found in jurisdictions, moving to "Other"`
-        );
-        newCustomCourt = court;
-        newCourt = "__other__";
-        needsUpdate = true;
-      } else {
-        // Find the exact match to use the database value
-        const matchedJurisdiction = jurisdictions.find((j) =>
-          matches(court, j.court)
-        );
-        if (
-          matchedJurisdiction &&
-          matchedJurisdiction.court &&
-          matchedJurisdiction.court !== court
-        ) {
-          console.log(
-            `🔄 Normalizing court: "${court}" → "${matchedJurisdiction.court}"`
-          );
-          newCourt = matchedJurisdiction.court;
+          newJurisdiction = matchedJurisdiction.name;
+          // Also set jurisdiction ID
+          setJurisdictionId(matchedJurisdiction.id);
           needsUpdate = true;
         }
       }
@@ -383,14 +357,10 @@ export default function JurisdictionSection({
 
     // Apply updates in a single batch to avoid multiple re-renders
     if (needsUpdate) {
-      if (newState !== state) setState(newState);
-      if (newCity !== city) setCity(newCity);
-      if (newCourt !== court) setCourt(newCourt);
-      if (newCustomState !== customState)
-        setCustomState(newCustomState);
-      if (newCustomCity !== customCity) setCustomCity(newCustomCity);
-      if (newCustomCourt !== customCourt)
-        setCustomCourt(newCustomCourt);
+      if (newJurisdiction !== jurisdiction)
+        setJurisdiction(newJurisdiction);
+      if (newCustomJurisdiction !== customJurisdiction)
+        setCustomJurisdiction(newCustomJurisdiction);
     }
 
     // Mark as checked
@@ -407,11 +377,13 @@ export default function JurisdictionSection({
   useEffect(() => {
     const countryValue =
       country === "__other__" ? customCountry : country;
-    const stateValue = state === "__other__" ? customState : state;
-    const cityValue = city === "__other__" ? customCity : city;
+    const jurisdictionValue =
+      jurisdiction === "__other__"
+        ? customJurisdiction
+        : jurisdiction;
     const courtValue = court === "__other__" ? customCourt : court;
     const isComplete =
-      countryValue && stateValue && cityValue && courtValue;
+      countryValue && jurisdictionValue && courtValue;
 
     if (onCompletionChangeRef.current) {
       onCompletionChangeRef.current(!!isComplete);
@@ -421,10 +393,10 @@ export default function JurisdictionSection({
     if (onUpdateRef.current) {
       const currentValues = JSON.stringify({
         country: countryValue,
-        state: stateValue,
-        city: cityValue,
+        jurisdiction: jurisdictionValue,
         court: courtValue,
         country_id: countryId,
+        jurisdiction_id: jurisdictionId,
       });
 
       // Only call onUpdate if values actually changed
@@ -432,23 +404,22 @@ export default function JurisdictionSection({
         lastUpdateRef.current = currentValues;
         onUpdateRef.current({
           country: countryValue,
-          state: stateValue,
-          city: cityValue,
+          jurisdiction: jurisdictionValue,
           court: courtValue,
           country_id: countryId,
+          jurisdiction_id: jurisdictionId,
         });
       }
     }
   }, [
     country,
-    state,
-    city,
+    jurisdiction,
     court,
     customCountry,
-    customState,
-    customCity,
+    customJurisdiction,
     customCourt,
     countryId,
+    jurisdictionId,
   ]);
 
   // Notify parent of country change
@@ -458,50 +429,16 @@ export default function JurisdictionSection({
     }
   }, [countryId, onCountryChange]);
 
-  // Notify parent of jurisdiction change
-  useEffect(() => {
-    if (
-      onJurisdictionChange &&
-      state &&
-      city &&
-      court &&
-      jurisdictions.length > 0
-    ) {
-      // Find the jurisdiction that matches the selected state, city, and court
-      const stateValue = state === "__other__" ? customState : state;
-      const cityValue = city === "__other__" ? customCity : city;
-      const courtValue = court === "__other__" ? customCourt : court;
-
-      const matchingJurisdiction = jurisdictions.find(
-        (j) =>
-          j.state_province === stateValue &&
-          j.city === cityValue &&
-          j.court === courtValue
-      );
-      if (matchingJurisdiction) {
-        onJurisdictionChange(matchingJurisdiction.id);
-      }
-    }
-  }, [
-    state,
-    city,
-    court,
-    customState,
-    customCity,
-    customCourt,
-    jurisdictions,
-    onJurisdictionChange,
-  ]);
+  // Jurisdiction change is now handled in handleJurisdictionChange
 
   const handleCountryChange = (selectedCountryName: string) => {
     setCountry(selectedCountryName);
 
     // Always clear dependent fields when country changes
-    setState("");
-    setCity("");
+    setJurisdiction("");
+    setJurisdictionId("");
     setCourt("");
-    setCustomState("");
-    setCustomCity("");
+    setCustomJurisdiction("");
     setCustomCourt("");
 
     // Reset the check flag so we re-check values when new jurisdictions load
@@ -522,6 +459,34 @@ export default function JurisdictionSection({
     }
   };
 
+  const handleJurisdictionChange = (
+    selectedJurisdictionName: string
+  ) => {
+    setJurisdiction(selectedJurisdictionName);
+
+    // Clear court when jurisdiction changes
+    setCourt("");
+    setCustomCourt("");
+
+    if (selectedJurisdictionName === "__other__") {
+      setJurisdictionId("");
+      setCustomJurisdiction("");
+    } else {
+      const selected = jurisdictions.find(
+        (j) => j.name === selectedJurisdictionName
+      );
+      if (selected) {
+        setJurisdictionId(selected.id);
+        // Notify parent of jurisdiction change
+        if (onJurisdictionChange) {
+          onJurisdictionChange(selected.id);
+        }
+      }
+      // Clear custom jurisdiction value when switching to predefined jurisdiction
+      setCustomJurisdiction("");
+    }
+  };
+
   // Get final values for saving
   const getFinalValue = (
     selectedValue: string,
@@ -538,58 +503,34 @@ export default function JurisdictionSection({
     label: c.name,
   }));
 
-  const stateOptions = Array.from(
-    new Set(
-      jurisdictions.map((j) => j.state_province).filter(Boolean)
-    )
-  ).map((s) => ({ value: s!, label: s! }));
-
-  const cityOptions = Array.from(
-    new Set(
-      jurisdictions
-        .filter(
-          (j) =>
-            !state ||
-            state === "__other__" ||
-            j.state_province === state
-        )
-        .map((j) => j.city)
-        .filter(Boolean)
-    )
-  ).map((c) => ({ value: c!, label: c! }));
+  const jurisdictionOptions = Array.from(
+    new Set(jurisdictions.map((j) => j.name).filter(Boolean))
+  ).map((name) => ({ value: name!, label: name! }));
 
   const courtOptions = Array.from(
-    new Set(
-      jurisdictions
-        .filter(
-          (j) =>
-            (!state ||
-              state === "__other__" ||
-              j.state_province === state) &&
-            (!city || city === "__other__" || j.city === city)
-        )
-        .map((j) => j.court)
-        .filter(Boolean)
-    )
-  ).map((c) => ({ value: c!, label: c! }));
+    new Set(courts.map((c) => c.name).filter(Boolean))
+  ).map((name) => ({ value: name!, label: name! }));
 
   const isCompact = variant === "compact";
 
   return (
     <div
-      className={`bg-white ${isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
-        }`}
+      className={`bg-white ${
+        isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
+      }`}
     >
       {/* Section Header */}
       {isCompact ? (
         <div className="flex items-start mb-3 sm:mb-4">
           <div
-            className={`flex items-center justify-center ${isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
-              } bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}
+            className={`flex items-center justify-center ${
+              isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
+            } bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}
           >
             <svg
-              className={`${isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
-                } text-primary-600`}
+              className={`${
+                isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
+              } text-primary-600`}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -615,10 +556,22 @@ export default function JurisdictionSection({
               {showExtractedBadge && (
                 <div className="relative group">
                   <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
-                    <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-3 h-3 text-primary-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
-                    <span className="text-xs font-medium text-primary-700">Extracted</span>
+                    <span className="text-xs font-medium text-primary-700">
+                      Extracted
+                    </span>
                   </div>
                   {/* Tooltip */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
@@ -678,10 +631,11 @@ export default function JurisdictionSection({
 
       {isLoading || isLoadingCountries ? (
         <div
-          className={`grid grid-cols-1 ${isCompact
-            ? "md:grid-cols-4 gap-3"
-            : "md:grid-cols-2 gap-6"
-            } ${isCompact ? "mb-0" : "mb-8"}`}
+          className={`grid grid-cols-1 ${
+            isCompact
+              ? "md:grid-cols-4 gap-3"
+              : "md:grid-cols-2 gap-6"
+          } ${isCompact ? "mb-0" : "mb-8"}`}
         >
           {[...Array(4)].map((_, i) => (
             <div key={i} className="animate-pulse">
@@ -717,13 +671,13 @@ export default function JurisdictionSection({
                 )}
               </div>
 
-              {/* State/Province Field */}
+              {/* Jurisdiction Field */}
               <div>
                 <SearchableSelect
-                  options={stateOptions}
-                  value={state}
-                  onChange={setState}
-                  placeholder="Select state/province"
+                  options={jurisdictionOptions}
+                  value={jurisdiction}
+                  onChange={handleJurisdictionChange}
+                  placeholder="Select jurisdiction"
                   disabled={
                     isLoadingJurisdictions ||
                     (!countryId && country !== "__other__")
@@ -731,37 +685,14 @@ export default function JurisdictionSection({
                   allowOther={true}
                   otherLabel="Other (specify)"
                 />
-                {state === "__other__" && (
+                {jurisdiction === "__other__" && (
                   <input
                     type="text"
-                    value={customState}
-                    onChange={(e) => setCustomState(e.target.value)}
-                    placeholder="Enter state/province"
-                    className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                  />
-                )}
-              </div>
-
-              {/* City Field */}
-              <div>
-                <SearchableSelect
-                  options={cityOptions}
-                  value={city}
-                  onChange={setCity}
-                  placeholder="Select city"
-                  disabled={
-                    isLoadingJurisdictions ||
-                    (!countryId && country !== "__other__")
-                  }
-                  allowOther={true}
-                  otherLabel="Other (specify)"
-                />
-                {city === "__other__" && (
-                  <input
-                    type="text"
-                    value={customCity}
-                    onChange={(e) => setCustomCity(e.target.value)}
-                    placeholder="Enter city name"
+                    value={customJurisdiction}
+                    onChange={(e) =>
+                      setCustomJurisdiction(e.target.value)
+                    }
+                    placeholder="Enter jurisdiction"
                     className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                   />
                 )}
@@ -775,8 +706,8 @@ export default function JurisdictionSection({
                   onChange={setCourt}
                   placeholder="Select court"
                   disabled={
-                    isLoadingJurisdictions ||
-                    (!countryId && country !== "__other__")
+                    isLoadingCourts ||
+                    (!jurisdictionId && jurisdiction !== "__other__")
                   }
                   allowOther={true}
                   otherLabel="Other (specify)"
@@ -826,19 +757,19 @@ export default function JurisdictionSection({
                   )}
                 </div>
 
-                {/* State/Province Field */}
+                {/* Jurisdiction Field */}
                 <div>
                   <label
-                    htmlFor="state"
+                    htmlFor="jurisdiction"
                     className="block text-sm font-semibold text-gray-700 mb-2"
                   >
-                    State/Province
+                    Jurisdiction
                   </label>
                   <SearchableSelect
-                    options={stateOptions}
-                    value={state}
-                    onChange={setState}
-                    placeholder="Select a state/province"
+                    options={jurisdictionOptions}
+                    value={jurisdiction}
+                    onChange={handleJurisdictionChange}
+                    placeholder="Select a jurisdiction"
                     disabled={
                       isLoadingJurisdictions ||
                       (!countryId && country !== "__other__")
@@ -846,12 +777,14 @@ export default function JurisdictionSection({
                     allowOther={true}
                     otherLabel="Other (specify)"
                   />
-                  {state === "__other__" && (
+                  {jurisdiction === "__other__" && (
                     <input
                       type="text"
-                      value={customState}
-                      onChange={(e) => setCustomState(e.target.value)}
-                      placeholder="Enter state/province"
+                      value={customJurisdiction}
+                      onChange={(e) =>
+                        setCustomJurisdiction(e.target.value)
+                      }
+                      placeholder="Enter jurisdiction"
                       className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
                     />
                   )}
@@ -860,37 +793,6 @@ export default function JurisdictionSection({
 
               {/* Second Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* City Field */}
-                <div>
-                  <label
-                    htmlFor="city"
-                    className="block text-sm font-semibold text-gray-700 mb-2"
-                  >
-                    City
-                  </label>
-                  <SearchableSelect
-                    options={cityOptions}
-                    value={city}
-                    onChange={setCity}
-                    placeholder="Select a city"
-                    disabled={
-                      isLoadingJurisdictions ||
-                      (!countryId && country !== "__other__")
-                    }
-                    allowOther={true}
-                    otherLabel="Other (specify)"
-                  />
-                  {city === "__other__" && (
-                    <input
-                      type="text"
-                      value={customCity}
-                      onChange={(e) => setCustomCity(e.target.value)}
-                      placeholder="Enter city name"
-                      className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
-                    />
-                  )}
-                </div>
-
                 {/* Court Field */}
                 <div>
                   <label
@@ -905,8 +807,9 @@ export default function JurisdictionSection({
                     onChange={setCourt}
                     placeholder="Select a court"
                     disabled={
-                      isLoadingJurisdictions ||
-                      (!countryId && country !== "__other__")
+                      isLoadingCourts ||
+                      (!jurisdictionId &&
+                        jurisdiction !== "__other__")
                     }
                     allowOther={true}
                     otherLabel="Other (specify)"
@@ -930,8 +833,10 @@ export default function JurisdictionSection({
               field="jurisdiction"
               value={{
                 country: getFinalValue(country, customCountry),
-                state: getFinalValue(state, customState),
-                city: getFinalValue(city, customCity),
+                jurisdiction: getFinalValue(
+                  jurisdiction,
+                  customJurisdiction
+                ),
                 court: getFinalValue(court, customCourt),
               }}
             />

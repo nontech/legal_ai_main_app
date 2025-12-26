@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const country_id = searchParams.get("country_id");
+    const jurisdiction_id = searchParams.get("jurisdiction_id");
 
     if (!country_id) {
       return NextResponse.json(
@@ -17,11 +18,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (!jurisdiction_id) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "jurisdiction_id query parameter is required",
+        },
+        { status: 400 }
+      );
+    }
+
     const supabase = getSupabaseCMSClient();
     const { data, error } = await supabase
-      .from("jurisdiction")
-      .select("id, country_id, name, type, code")
+      .from("courts")
+      .select(
+        "id, country_id, jurisdiction_id, court_level_id, name, official_name"
+      )
       .eq("country_id", country_id)
+      .eq("jurisdiction_id", jurisdiction_id)
       .order("name");
 
     if (error) {
