@@ -6,7 +6,7 @@ export async function GET() {
     const supabase = getSupabaseCMSClient();
     const { data, error } = await supabase
       .from("countries")
-      .select("id, name")
+      .select("id, name, iso_code")
       .eq("is_active", true)
       .order("name");
 

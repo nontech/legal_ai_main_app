@@ -54,36 +54,33 @@ interface Country {
   name: string;
 }
 
-interface Jurisdiction {
+interface CourtLevel {
   id: string;
-  country_id: string;
+  country_id: string | null;
   name: string | null;
-  type: string | null;
-  code: string | null;
-  created_at: string | null;
-  updated_at?: string | null;
+  normalized_level: string | null;
+  branch: string | null;
+  created_at: string;
   countries?: { name: string } | null;
 }
 
-const JurisdictionsManager = () => {
-  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
-    []
-  );
+const CourtLevelsManager = () => {
+  const [courtLevels, setCourtLevels] = useState<CourtLevel[]>([]);
   const [countries, setCountries] = useState<Country[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
-  const [editingJurisdiction, setEditingJurisdiction] =
-    useState<Jurisdiction | null>(null);
-  const [deleteJurisdictionId, setDeleteJurisdictionId] = useState<
+  const [editingCourtLevel, setEditingCourtLevel] =
+    useState<CourtLevel | null>(null);
+  const [deleteCourtLevelId, setDeleteCourtLevelId] = useState<
     string | null
   >(null);
   const [filterCountry, setFilterCountry] = useState<string>("all");
   const [formData, setFormData] = useState({
     country_id: "",
     name: "",
-    type: "",
-    code: "",
+    normalized_level: "",
+    branch: "",
   });
   const [bulkJsonInput, setBulkJsonInput] = useState("");
   const [bulkCountryId, setBulkCountryId] = useState("");
@@ -93,11 +90,11 @@ const JurisdictionsManager = () => {
 
   useEffect(() => {
     fetchCountries();
-    fetchJurisdictions();
+    fetchCourtLevels();
   }, []);
 
   useEffect(() => {
-    fetchJurisdictions();
+    fetchCourtLevels();
   }, [filterCountry]);
 
   const fetchCountries = async () => {
@@ -119,14 +116,12 @@ const JurisdictionsManager = () => {
     }
   };
 
-  const fetchJurisdictions = async () => {
+  const fetchCourtLevels = async () => {
     try {
       let query = supabase
-        .from("jurisdiction")
+        .from("court_levels")
         .select("*, countries(name)")
-        .order("name")
-        .order("type")
-        .order("code");
+        .order("created_at", { ascending: false });
 
       if (filterCountry !== "all") {
         query = query.eq("country_id", filterCountry);
@@ -135,7 +130,7 @@ const JurisdictionsManager = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setJurisdictions(data || []);
+      setCourtLevels(data || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -154,30 +149,30 @@ const JurisdictionsManager = () => {
     setSubmitting(true);
 
     try {
-      if (editingJurisdiction) {
+      if (editingCourtLevel) {
         const { error } = await supabase
-          .from("jurisdiction")
+          .from("court_levels")
           .update({
-            country_id: formData.country_id,
+            country_id: formData.country_id || null,
             name: formData.name || null,
-            type: formData.type || null,
-            code: formData.code || null,
+            normalized_level: formData.normalized_level || null,
+            branch: formData.branch || null,
           })
-          .eq("id", editingJurisdiction.id);
+          .eq("id", editingCourtLevel.id);
 
         if (error) throw error;
 
         toast({
           title: "Success",
-          description: "Jurisdiction updated successfully",
+          description: "Court level updated successfully",
         });
       } else {
-        const { error } = await supabase.from("jurisdiction").insert([
+        const { error } = await supabase.from("court_levels").insert([
           {
-            country_id: formData.country_id,
+            country_id: formData.country_id || null,
             name: formData.name || null,
-            type: formData.type || null,
-            code: formData.code || null,
+            normalized_level: formData.normalized_level || null,
+            branch: formData.branch || null,
           },
         ]);
 
@@ -185,14 +180,19 @@ const JurisdictionsManager = () => {
 
         toast({
           title: "Success",
-          description: "Jurisdiction created successfully",
+          description: "Court level created successfully",
         });
       }
 
       setIsDialogOpen(false);
-      setEditingJurisdiction(null);
-      setFormData({ country_id: "", name: "", type: "", code: "" });
-      fetchJurisdictions();
+      setEditingCourtLevel(null);
+      setFormData({
+        country_id: "",
+        name: "",
+        normalized_level: "",
+        branch: "",
+      });
+      fetchCourtLevels();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -204,34 +204,34 @@ const JurisdictionsManager = () => {
     }
   };
 
-  const handleEdit = (jurisdiction: Jurisdiction) => {
-    setEditingJurisdiction(jurisdiction);
+  const handleEdit = (courtLevel: CourtLevel) => {
+    setEditingCourtLevel(courtLevel);
     setFormData({
-      country_id: jurisdiction.country_id,
-      name: jurisdiction.name || "",
-      type: jurisdiction.type || "",
-      code: jurisdiction.code || "",
+      country_id: courtLevel.country_id || "",
+      name: courtLevel.name || "",
+      normalized_level: courtLevel.normalized_level || "",
+      branch: courtLevel.branch || "",
     });
     setIsDialogOpen(true);
   };
 
   const handleDelete = async () => {
-    if (!deleteJurisdictionId) return;
+    if (!deleteCourtLevelId) return;
 
     try {
       const { error } = await supabase
-        .from("jurisdiction")
+        .from("court_levels")
         .delete()
-        .eq("id", deleteJurisdictionId);
+        .eq("id", deleteCourtLevelId);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Jurisdiction deleted successfully",
+        description: "Court level deleted successfully",
       });
 
-      fetchJurisdictions();
+      fetchCourtLevels();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -239,13 +239,18 @@ const JurisdictionsManager = () => {
         variant: "destructive",
       });
     } finally {
-      setDeleteJurisdictionId(null);
+      setDeleteCourtLevelId(null);
     }
   };
 
   const openCreateDialog = () => {
-    setEditingJurisdiction(null);
-    setFormData({ country_id: "", name: "", type: "", code: "" });
+    setEditingCourtLevel(null);
+    setFormData({
+      country_id: "",
+      name: "",
+      normalized_level: "",
+      branch: "",
+    });
     setIsDialogOpen(true);
   };
 
@@ -254,15 +259,15 @@ const JurisdictionsManager = () => {
       const parsed = JSON.parse(value);
       if (!Array.isArray(parsed)) {
         setBulkJsonError(
-          "JSON must be an array of jurisdiction objects"
+          "JSON must be an array of court level objects"
         );
         return false;
       }
-      // Valid keys for jurisdictions
-      const validKeys = ["name", "type", "code"];
+      // Valid keys for court levels
+      const validKeys = ["name", "normalized_level", "branch"];
       const invalidKeys = [
-        "normalized_level",
-        "branch",
+        "type",
+        "code",
         "country_id",
         "jurisdiction_id",
       ];
@@ -274,14 +279,12 @@ const JurisdictionsManager = () => {
         // Check required field
         if (!item.name) {
           setBulkJsonError(
-            `Item ${
-              i + 1
-            }: Each jurisdiction must have a 'name' field`
+            `Item ${i + 1}: Each court level must have a 'name' field`
           );
           return false;
         }
 
-        // Check for invalid keys (court_levels keys)
+        // Check for invalid keys (jurisdiction keys)
         const itemKeys = Object.keys(item);
         const foundInvalidKeys = itemKeys.filter((key) =>
           invalidKeys.includes(key)
@@ -337,32 +340,32 @@ const JurisdictionsManager = () => {
 
     setSubmitting(true);
     try {
-      const jurisdictionsData = JSON.parse(bulkJsonInput);
-      const jurisdictionsToInsert = jurisdictionsData.map(
+      const courtLevelsData = JSON.parse(bulkJsonInput);
+      const courtLevelsToInsert = courtLevelsData.map(
         (item: any) => ({
           country_id: bulkCountryId,
           name: item.name || null,
-          type: item.type || null,
-          code: item.code || null,
+          normalized_level: item.normalized_level || null,
+          branch: item.branch || null,
         })
       );
 
       const { error } = await supabase
-        .from("jurisdiction")
-        .insert(jurisdictionsToInsert);
+        .from("court_levels")
+        .insert(courtLevelsToInsert);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: `Successfully imported ${jurisdictionsToInsert.length} jurisdiction(s)`,
+        description: `Successfully imported ${courtLevelsToInsert.length} court level(s)`,
       });
 
       setIsBulkDialogOpen(false);
       setBulkJsonInput("");
       setBulkCountryId("");
       setBulkJsonError("");
-      fetchJurisdictions();
+      fetchCourtLevels();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -377,14 +380,14 @@ const JurisdictionsManager = () => {
   const openBulkImportDialog = () => {
     setBulkJsonInput(`[
   {
-    "name": "New York",
-    "type": "State",
-    "code": "NY"
+    "name": "Trial Court",
+    "normalized_level": "Level 1",
+    "branch": "Criminal"
   },
   {
-    "name": "California",
-    "type": "State",
-    "code": "CA"
+    "name": "Appellate Court",
+    "normalized_level": "Level 2",
+    "branch": "Civil"
   }
 ]`);
     setBulkCountryId("");
@@ -404,9 +407,9 @@ const JurisdictionsManager = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-semibold">Jurisdictions</h2>
+          <h2 className="text-2xl font-semibold">Court Levels</h2>
           <p className="text-sm text-slate-600 mt-1">
-            Manage jurisdictions with name, type, and code
+            Manage court hierarchy levels and branches
           </p>
         </div>
         <div className="flex gap-2">
@@ -436,31 +439,38 @@ const JurisdictionsManager = () => {
             <DialogTrigger asChild>
               <Button onClick={openCreateDialog}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Jurisdiction
+                Add Court Level
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
-                  {editingJurisdiction
-                    ? "Edit Jurisdiction"
-                    : "Add New Jurisdiction"}
+                  {editingCourtLevel
+                    ? "Edit Court Level"
+                    : "Add New Court Level"}
                 </DialogTitle>
                 <DialogDescription>
-                  {editingJurisdiction
-                    ? "Update jurisdiction information"
-                    : "Create a new jurisdiction entry"}
+                  {editingCourtLevel
+                    ? "Update court level information"
+                    : "Create a new court level entry"}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="country">
+                    Country{" "}
+                    {formData.country_id === "" && (
+                      <span className="text-red-500">*</span>
+                    )}
+                  </Label>
                   <Select
                     value={formData.country_id}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, country_id: value })
+                      setFormData({
+                        ...formData,
+                        country_id: value,
+                      })
                     }
-                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a country" />
@@ -477,6 +487,7 @@ const JurisdictionsManager = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
                 <div>
                   <Label htmlFor="name">Name</Label>
                   <Input
@@ -488,38 +499,42 @@ const JurisdictionsManager = () => {
                         name: e.target.value,
                       })
                     }
-                    placeholder="e.g., New York"
-                    required
+                    placeholder="e.g., Trial Court, Appellate Court"
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="type">Type (Optional)</Label>
+                  <Label htmlFor="normalized_level">
+                    Normalized Level (Optional)
+                  </Label>
                   <Input
-                    id="type"
-                    value={formData.type}
+                    id="normalized_level"
+                    value={formData.normalized_level}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        type: e.target.value,
+                        normalized_level: e.target.value,
                       })
                     }
-                    placeholder="e.g., State, Province, Region"
+                    placeholder="e.g., Level 1, Level 2"
                   />
                 </div>
+
                 <div>
-                  <Label htmlFor="code">Code (Optional)</Label>
+                  <Label htmlFor="branch">Branch (Optional)</Label>
                   <Input
-                    id="code"
-                    value={formData.code}
+                    id="branch"
+                    value={formData.branch}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        code: e.target.value,
+                        branch: e.target.value,
                       })
                     }
-                    placeholder="e.g., NY, CA"
+                    placeholder="e.g., Criminal, Civil, Family"
                   />
                 </div>
+
                 <div className="flex justify-end gap-2">
                   <Button
                     type="button"
@@ -529,11 +544,14 @@ const JurisdictionsManager = () => {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={submitting}>
+                  <Button
+                    type="submit"
+                    disabled={submitting || !formData.country_id}
+                  >
                     {submitting && (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     )}
-                    {editingJurisdiction ? "Update" : "Create"}
+                    {editingCourtLevel ? "Update" : "Create"}
                   </Button>
                 </div>
               </form>
@@ -548,47 +566,41 @@ const JurisdictionsManager = () => {
             <TableRow>
               <TableHead>Country</TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Code</TableHead>
+              <TableHead>Normalized Level</TableHead>
+              <TableHead>Branch</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {jurisdictions.length === 0 ? (
+            {courtLevels.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={5}
                   className="text-center text-slate-500 py-8"
                 >
-                  No jurisdictions found. Add your first jurisdiction
-                  to get started.
+                  No court levels found. Add your first court level to
+                  get started.
                 </TableCell>
               </TableRow>
             ) : (
-              jurisdictions.map((jurisdiction) => (
-                <TableRow key={jurisdiction.id}>
+              courtLevels.map((courtLevel) => (
+                <TableRow key={courtLevel.id}>
                   <TableCell>
-                    {jurisdiction.countries?.name}
+                    {courtLevel.countries?.name || "N/A"}
                   </TableCell>
                   <TableCell className="font-medium">
-                    {jurisdiction.name || "N/A"}
+                    {courtLevel.name || "N/A"}
                   </TableCell>
-                  <TableCell>{jurisdiction.type || "N/A"}</TableCell>
                   <TableCell>
-                    {jurisdiction.code ? (
-                      <span className="font-mono text-sm bg-slate-100 px-2 py-1 rounded">
-                        {jurisdiction.code}
-                      </span>
-                    ) : (
-                      <span className="text-slate-400">—</span>
-                    )}
+                    {courtLevel.normalized_level || "—"}
                   </TableCell>
+                  <TableCell>{courtLevel.branch || "—"}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEdit(jurisdiction)}
+                        onClick={() => handleEdit(courtLevel)}
                       >
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -596,7 +608,7 @@ const JurisdictionsManager = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          setDeleteJurisdictionId(jurisdiction.id)
+                          setDeleteCourtLevelId(courtLevel.id)
                         }
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
@@ -611,15 +623,16 @@ const JurisdictionsManager = () => {
       </div>
 
       <AlertDialog
-        open={!!deleteJurisdictionId}
-        onOpenChange={() => setDeleteJurisdictionId(null)}
+        open={!!deleteCourtLevelId}
+        onOpenChange={() => setDeleteCourtLevelId(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this jurisdiction. This
-              action cannot be undone.
+              This will permanently delete this court level. Any
+              courts assigned to this level will also be affected.
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -641,10 +654,10 @@ const JurisdictionsManager = () => {
       >
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Bulk Import Jurisdictions</DialogTitle>
+            <DialogTitle>Bulk Import Court Levels</DialogTitle>
             <DialogDescription>
-              Import multiple jurisdictions at once using JSON format.
-              Each jurisdiction must have a name field.
+              Import multiple court levels at once using JSON format.
+              Each court level must have a name field.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleBulkImport} className="space-y-4">
@@ -656,7 +669,7 @@ const JurisdictionsManager = () => {
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a country for these jurisdictions" />
+                  <SelectValue placeholder="Select a country for these court levels" />
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map((country) => (
@@ -668,9 +681,9 @@ const JurisdictionsManager = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="bulk-json">Jurisdictions JSON</Label>
+              <Label htmlFor="bulk-json">Court Levels JSON</Label>
               <p className="text-xs text-slate-500 mb-2">
-                Paste or edit JSON array with jurisdiction objects
+                Paste or edit JSON array with court level objects
               </p>
               <Textarea
                 id="bulk-json"
@@ -680,7 +693,7 @@ const JurisdictionsManager = () => {
                   validateBulkJson(e.target.value);
                 }}
                 className="font-mono text-sm min-h-[400px]"
-                placeholder='[{"name": "New York", "type": "State", "code": "NY"}]'
+                placeholder='[{"name": "Trial Court", "normalized_level": "Level 1", "branch": "Criminal"}]'
                 required
               />
               {bulkJsonError && (
@@ -694,9 +707,9 @@ const JurisdictionsManager = () => {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <strong>Format:</strong> Each object must contain a
-                "name" field. "type" and "code" fields are optional.
-                All jurisdictions will be assigned to the selected
-                country.
+                "name" field. "normalized_level" and "branch" fields
+                are optional. All court levels will be assigned to the
+                selected country.
               </AlertDescription>
             </Alert>
             <div className="flex justify-end gap-2">
@@ -718,7 +731,7 @@ const JurisdictionsManager = () => {
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 )}
                 <Upload className="w-4 h-4 mr-2" />
-                Import Jurisdictions
+                Import Court Levels
               </Button>
             </div>
           </form>
@@ -728,4 +741,4 @@ const JurisdictionsManager = () => {
   );
 };
 
-export default JurisdictionsManager;
+export default CourtLevelsManager;

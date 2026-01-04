@@ -19,7 +19,19 @@ interface ClassifiedFile {
 }
 
 interface DocumentUploadStepProps {
-  onContinue: (files: File[], metadata?: any, caseInfoFiles?: File[], caseId?: string, uploadedDocuments?: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>) => void;
+  onContinue: (
+    files: File[],
+    metadata?: any,
+    caseInfoFiles?: File[],
+    caseId?: string,
+    uploadedDocuments?: Record<
+      string,
+      {
+        files: Array<{ name: string; address: string }>;
+        summary?: string;
+      }
+    >
+  ) => void;
   caseId?: string | null;
 }
 
@@ -27,12 +39,26 @@ export default function DocumentUploadStep({
   onContinue,
   caseId: initialCaseId,
 }: DocumentUploadStepProps) {
-  const [classifiedFiles, setClassifiedFiles] = useState<ClassifiedFile[]>([]);
+  const [classifiedFiles, setClassifiedFiles] = useState<
+    ClassifiedFile[]
+  >([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [caseId, setCaseId] = useState<string | null>(initialCaseId || null);
-  const [isCreatingCase, setIsCreatingCase] = useState(!initialCaseId);
+  const [caseId, setCaseId] = useState<string | null>(
+    initialCaseId || null
+  );
+  const [isCreatingCase, setIsCreatingCase] = useState(
+    !initialCaseId
+  );
   const [isDragActive, setIsDragActive] = useState(false);
-  const [uploadedDocuments, setUploadedDocuments] = useState<Record<string, { files: Array<{ name: string; address: string }>; summary?: string }>>({});
+  const [uploadedDocuments, setUploadedDocuments] = useState<
+    Record<
+      string,
+      {
+        files: Array<{ name: string; address: string }>;
+        summary?: string;
+      }
+    >
+  >({});
   const caseCreationAttempted = useRef(false);
 
   // Create a case on mount if caseId is not provided
@@ -63,17 +89,46 @@ export default function DocumentUploadStep({
     }
   }, [initialCaseId]);
 
-  const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
-    case_information: { label: "Case Information", color: "primary", icon: "📋" },
-    evidence_and_supporting_materials: { label: "Evidence & Materials", color: "accent", icon: "🔍" },
-    relevant_legal_precedents: { label: "Legal Precedents", color: "success", icon: "⚖️" },
-    key_witness_and_testimony: { label: "Witness & Testimony", color: "highlight", icon: "👤" },
-    police_report: { label: "Police Report", color: "critical", icon: "🚔" },
-    potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
+  const categoryLabels: Record<
+    DocumentCategory,
+    { label: string; color: string; icon: string }
+  > = {
+    case_information: {
+      label: "Case Information",
+      color: "primary",
+      icon: "📋",
+    },
+    evidence_and_supporting_materials: {
+      label: "Evidence & Materials",
+      color: "accent",
+      icon: "🔍",
+    },
+    relevant_legal_precedents: {
+      label: "Legal Precedents",
+      color: "success",
+      icon: "⚖️",
+    },
+    key_witness_and_testimony: {
+      label: "Witness & Testimony",
+      color: "highlight",
+      icon: "👤",
+    },
+    police_report: {
+      label: "Police Report",
+      color: "critical",
+      icon: "🚔",
+    },
+    potential_challenges_and_weaknesses: {
+      label: "Challenges & Weaknesses",
+      color: "highlight",
+      icon: "⚠️",
+    },
   };
 
   const [isUploadingOpen, setIsUploadingOpen] = useState(false);
-  const [filesToUpload, setFilesToUpload] = useState<Array<{ file: File; fileId: string }>>([]);
+  const [filesToUpload, setFilesToUpload] = useState<
+    Array<{ file: File; fileId: string }>
+  >([]);
   const uploadCompleteRef = useRef(false);
   const uploadResultRef = useRef<any>(null);
 
@@ -83,22 +138,41 @@ export default function DocumentUploadStep({
     uploadCompleteRef.current = true;
 
     // Process uploaded documents by category
-    if (result?.category_results && Array.isArray(result.category_results)) {
-      const documentsByCategory: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+    if (
+      result?.category_results &&
+      Array.isArray(result.category_results)
+    ) {
+      const documentsByCategory: Record<
+        string,
+        {
+          files: Array<{ name: string; address: string }>;
+          summary?: string;
+        }
+      > = {};
 
       result.category_results.forEach((categoryResult: any) => {
-        const category = categoryResult.file_category || categoryResult.category;
-        if (category && categoryResult.file_names && categoryResult.file_addresses) {
+        const category =
+          categoryResult.file_category || categoryResult.category;
+        if (
+          category &&
+          categoryResult.file_names &&
+          categoryResult.file_addresses
+        ) {
           documentsByCategory[category] = {
-            files: categoryResult.file_names.map((name: string, index: number) => ({
-              name,
-              address: categoryResult.file_addresses[index] || "",
-            })),
+            files: categoryResult.file_names.map(
+              (name: string, index: number) => ({
+                name,
+                address: categoryResult.file_addresses[index] || "",
+              })
+            ),
             summary: categoryResult.summary,
           };
         }
       });
-      console.log("Documents by category in upload stage:", documentsByCategory);
+      console.log(
+        "Documents by category in upload stage:",
+        documentsByCategory
+      );
 
       setUploadedDocuments(documentsByCategory);
 
@@ -108,7 +182,8 @@ export default function DocumentUploadStep({
 
         // Build map of file names to categories from upload result
         result.category_results?.forEach((categoryResult: any) => {
-          const category = (categoryResult.file_category || categoryResult.category) as DocumentCategory;
+          const category = (categoryResult.file_category ||
+            categoryResult.category) as DocumentCategory;
           categoryResult.file_names?.forEach((fileName: string) => {
             fileMap.set(fileName, category);
           });
@@ -156,7 +231,9 @@ export default function DocumentUploadStep({
     event.dataTransfer.dropEffect = "copy";
   };
 
-  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragEnter = (
+    event: React.DragEvent<HTMLDivElement>
+  ) => {
     event.preventDefault();
     event.stopPropagation();
     if (isUploading) return;
@@ -165,7 +242,9 @@ export default function DocumentUploadStep({
     }
   };
 
-  const handleDragLeave = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleDragLeave = (
+    event: React.DragEvent<HTMLDivElement>
+  ) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -190,7 +269,9 @@ export default function DocumentUploadStep({
   };
 
   const handleRemoveFile = (fileId: string) => {
-    setClassifiedFiles((prev) => prev.filter((cf) => cf.id !== fileId));
+    setClassifiedFiles((prev) =>
+      prev.filter((cf) => cf.id !== fileId)
+    );
   };
 
   const formatFileSize = (bytes: number) => {
@@ -206,42 +287,100 @@ export default function DocumentUploadStep({
   };
 
   const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
+    const extension = fileName.split(".").pop()?.toLowerCase();
     switch (extension) {
-      case 'pdf':
+      case "pdf":
         return (
-          <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="none">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z" fill="#DC2626" />
-            <path d="M14,2V8H20" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            <text x="12" y="15" fontSize="7" fontWeight="bold" fill="white" textAnchor="middle" fontFamily="Arial, sans-serif">PDF</text>
+          <svg
+            className="w-5 h-5 flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <path
+              d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2Z"
+              fill="#DC2626"
+            />
+            <path
+              d="M14,2V8H20"
+              stroke="white"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+            <text
+              x="12"
+              y="15"
+              fontSize="7"
+              fontWeight="bold"
+              fill="white"
+              textAnchor="middle"
+              fontFamily="Arial, sans-serif"
+            >
+              PDF
+            </text>
           </svg>
         );
-      case 'doc':
-      case 'docx':
+      case "doc":
+      case "docx":
         return (
-          <svg className="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <svg
+            className="w-5 h-5 text-blue-500 flex-shrink-0"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
           </svg>
         );
-      case 'jpg':
-      case 'jpeg':
-      case 'png':
-      case 'gif':
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
         return (
-          <svg className="w-5 h-5 text-purple-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <svg
+            className="w-5 h-5 text-purple-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
           </svg>
         );
-      case 'txt':
+      case "txt":
         return (
-          <svg className="w-5 h-5 text-ink-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-5 h-5 text-ink-500 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         );
       default:
         return (
-          <svg className="w-5 h-5 text-ink-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-5 h-5 text-ink-400 flex-shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         );
     }
@@ -252,8 +391,10 @@ export default function DocumentUploadStep({
       primary: "bg-primary-100 text-primary-600 border-primary-200",
       accent: "bg-accent-100 text-accent-600 border-accent-500",
       success: "bg-success-100 text-success-600 border-success-500",
-      highlight: "bg-highlight-200 text-highlight-600 border-highlight-500",
-      critical: "bg-critical-100 text-critical-600 border-critical-500",
+      highlight:
+        "bg-highlight-200 text-highlight-600 border-highlight-500",
+      critical:
+        "bg-critical-100 text-critical-600 border-critical-500",
     };
     return colorMap[color] || colorMap.primary;
   };
@@ -270,7 +411,13 @@ export default function DocumentUploadStep({
       const userId = "test-user";
       let collectedMetadata: any = {};
       const caseInformationFiles: File[] = [];
-      let finalUploadedDocuments: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+      let finalUploadedDocuments: Record<
+        string,
+        {
+          files: Array<{ name: string; address: string }>;
+          summary?: string;
+        }
+      > = {};
 
       // Prepare all files for upload in a single batch (no category grouping needed)
       if (classifiedFiles.length > 0) {
@@ -301,24 +448,37 @@ export default function DocumentUploadStep({
 
                 // Process MultiCategoryUploadResponse format
                 // Handle both snake_case (category_results) and camelCase (categoryResults) formats
-                const categoryResults = result.category_results || result.categoryResults;
+                const categoryResults =
+                  result.category_results || result.categoryResults;
 
-                if (categoryResults && Array.isArray(categoryResults)) {
-                  console.log("Processing category_results:", categoryResults);
+                if (
+                  categoryResults &&
+                  Array.isArray(categoryResults)
+                ) {
+                  console.log(
+                    "Processing category_results:",
+                    categoryResults
+                  );
 
                   // Find case_information category result
                   const caseInfoResult = categoryResults.find(
-                    (catResult: any) => catResult.file_category === "case_information" || catResult.category === "case_information"
+                    (catResult: any) =>
+                      catResult.file_category ===
+                      "case_information" ||
+                      catResult.category === "case_information"
                   );
 
                   if (caseInfoResult) {
-                    collectedMetadata.caseName = caseInfoResult.case_title || "";
-                    collectedMetadata.caseDescription = caseInfoResult.case_description || "";
+                    collectedMetadata.caseName =
+                      caseInfoResult.case_title || "";
+                    collectedMetadata.caseDescription =
+                      caseInfoResult.case_description || "";
 
                     // Track which fields were extracted
                     collectedMetadata.extractedFields = {
                       caseName: !!caseInfoResult.case_title,
-                      caseDescription: !!caseInfoResult.case_description,
+                      caseDescription:
+                        !!caseInfoResult.case_description,
                       jurisdiction: false,
                       role: false,
                       caseType: false,
@@ -326,63 +486,104 @@ export default function DocumentUploadStep({
 
                     if (caseInfoResult.case_metadata) {
                       collectedMetadata.jurisdiction = {
-                        country: caseInfoResult.case_metadata.country || "",
-                        state: caseInfoResult.case_metadata.state || "",
-                        city: caseInfoResult.case_metadata.city || "",
-                        court: caseInfoResult.case_metadata.court || "",
+                        country:
+                          caseInfoResult.case_metadata.country || "",
+                        country_code:
+                          caseInfoResult.case_metadata.country_code || "",
+                        jurisdiction:
+                          caseInfoResult.case_metadata.jurisdiction || "",
+                        jurisdiction_code:
+                          caseInfoResult.case_metadata.jurisdiction_code || "",
+                        court_name:
+                          caseInfoResult.case_metadata.court_name || "",
                       };
-                      collectedMetadata.role = caseInfoResult.case_metadata.role || "plaintiff";
+                      collectedMetadata.role =
+                        caseInfoResult.case_metadata.role ||
+                        "plaintiff";
 
                       // Extract case type - check both case_metadata.case_type and case_type at root level
-                      const extractedCaseType = caseInfoResult.case_metadata.case_type || caseInfoResult.case_type || "";
+                      const extractedCaseType =
+                        caseInfoResult.case_metadata.case_type ||
+                        caseInfoResult.case_type ||
+                        "";
                       if (extractedCaseType) {
-                        collectedMetadata.caseType = extractedCaseType.toLowerCase();
+                        collectedMetadata.caseType =
+                          extractedCaseType.toLowerCase();
                       }
 
                       // Track extracted fields
-                      collectedMetadata.extractedFields.jurisdiction = !!(
-                        caseInfoResult.case_metadata.country ||
-                        caseInfoResult.case_metadata.state ||
-                        caseInfoResult.case_metadata.city ||
-                        caseInfoResult.case_metadata.court
-                      );
+                      collectedMetadata.extractedFields.jurisdiction =
+                        !!(
+                          caseInfoResult.case_metadata.country ||
+                          caseInfoResult.case_metadata.country_code ||
+                          caseInfoResult.case_metadata.jurisdiction ||
+                          caseInfoResult.case_metadata.jurisdiction_code ||
+                          caseInfoResult.case_metadata.court_name);
                       collectedMetadata.extractedFields.role = !!caseInfoResult.case_metadata.role;
                       collectedMetadata.extractedFields.caseType = !!extractedCaseType;
 
                       // Extract charges if available
                       if (caseInfoResult.case_metadata.charges && Array.isArray(caseInfoResult.case_metadata.charges)) {
-                        collectedMetadata.charges = caseInfoResult.case_metadata.charges.map((charge: any, index: number) => ({
-                          id: `charge-${Date.now()}-${index}`,
-                          statuteNumber: charge.statute_number || "",
-                          chargeDescription: charge.charge_description || "",
-                          essentialFacts: charge.essential_facts || "",
-                          defendantPlea: charge.defendants_plea || "not-guilty",
-                        }));
+                        collectedMetadata.charges =
+                          caseInfoResult.case_metadata.charges.map(
+                            (charge: any, index: number) => ({
+                              id: `charge-${Date.now()}-${index}`,
+                              statuteNumber:
+                                charge.statute_number || "",
+                              chargeDescription:
+                                charge.charge_description || "",
+                              essentialFacts:
+                                charge.essential_facts || "",
+                              defendantPlea:
+                                charge.defendants_plea ||
+                                "not-guilty",
+                            })
+                          );
                       }
                     }
                   }
 
                   // Build uploaded documents by category for passing to QuickAnalysisForm
-                  const documentsByCategory: Record<string, { files: Array<{ name: string; address: string }>; summary?: string }> = {};
+                  const documentsByCategory: Record<
+                    string,
+                    {
+                      files: Array<{ name: string; address: string }>;
+                      summary?: string;
+                    }
+                  > = {};
 
                   categoryResults.forEach((categoryResult: any) => {
-                    const category = categoryResult.file_category || categoryResult.category;
-                    const fileNames = categoryResult.file_names || categoryResult.fileNames;
-                    const fileAddresses = categoryResult.file_addresses || categoryResult.fileAddresses;
+                    const category =
+                      categoryResult.file_category ||
+                      categoryResult.category;
+                    const fileNames =
+                      categoryResult.file_names ||
+                      categoryResult.fileNames;
+                    const fileAddresses =
+                      categoryResult.file_addresses ||
+                      categoryResult.fileAddresses;
 
                     if (category && fileNames && fileAddresses) {
                       documentsByCategory[category] = {
-                        files: fileNames.map((name: string, index: number) => ({
-                          name,
-                          address: fileAddresses[index] || "",
-                        })),
+                        files: fileNames.map(
+                          (name: string, index: number) => ({
+                            name,
+                            address: fileAddresses[index] || "",
+                          })
+                        ),
                         summary: categoryResult.summary,
                       };
                     }
                   });
 
-                  console.log("Built documentsByCategory:", documentsByCategory);
-                  console.log("Number of categories:", Object.keys(documentsByCategory).length);
+                  console.log(
+                    "Built documentsByCategory:",
+                    documentsByCategory
+                  );
+                  console.log(
+                    "Number of categories:",
+                    Object.keys(documentsByCategory).length
+                  );
 
                   // Store in local variable to pass to onContinue
                   finalUploadedDocuments = documentsByCategory;
@@ -396,62 +597,108 @@ export default function DocumentUploadStep({
                       console.log("Upload result:", result);
 
                       // Build case details update with file info for each category
-                      const caseDetailsUpdate: Record<string, any> = {};
+                      const caseDetailsUpdate: Record<string, any> =
+                        {};
                       let completionCount = 0;
 
-                      categoryResults.forEach((categoryResult: any) => {
-                        const category = categoryResult.file_category || categoryResult.category;
-                        const fileNames = categoryResult.file_names || categoryResult.fileNames;
-                        const fileAddresses = categoryResult.file_addresses || categoryResult.fileAddresses;
+                      categoryResults.forEach(
+                        (categoryResult: any) => {
+                          const category =
+                            categoryResult.file_category ||
+                            categoryResult.category;
+                          const fileNames =
+                            categoryResult.file_names ||
+                            categoryResult.fileNames;
+                          const fileAddresses =
+                            categoryResult.file_addresses ||
+                            categoryResult.fileAddresses;
 
-                        if (category && fileNames && fileAddresses) {
-                          const files = fileNames.map((name: string, index: number) => ({
-                            name,
-                            address: fileAddresses[index] || "",
-                          }));
+                          if (
+                            category &&
+                            fileNames &&
+                            fileAddresses
+                          ) {
+                            const files = fileNames.map(
+                              (name: string, index: number) => ({
+                                name,
+                                address: fileAddresses[index] || "",
+                              })
+                            );
 
-                          caseDetailsUpdate[category] = {
-                            files,
-                            summary: categoryResult.summary || "",
-                            summaryGenerated: !!categoryResult.summary,
-                          };
-                          completionCount++;
+                            caseDetailsUpdate[category] = {
+                              files,
+                              summary: categoryResult.summary || "",
+                              summaryGenerated:
+                                !!categoryResult.summary,
+                            };
+                            completionCount++;
+                          }
                         }
-                      });
+                      );
 
-                      const completionPercentage = Math.round((completionCount / 6) * 100);
+                      const completionPercentage = Math.round(
+                        (completionCount / 6) * 100
+                      );
 
                       // Also update case_information with case name and description
-                      if (collectedMetadata.caseName || collectedMetadata.caseDescription) {
+                      if (
+                        collectedMetadata.caseName ||
+                        collectedMetadata.caseDescription
+                      ) {
                         if (!caseDetailsUpdate["case_information"]) {
                           caseDetailsUpdate["case_information"] = {};
                         }
-                        caseDetailsUpdate["case_information"].caseName = collectedMetadata.caseName || "";
-                        caseDetailsUpdate["case_information"].caseDescription = collectedMetadata.caseDescription || "";
+                        caseDetailsUpdate[
+                          "case_information"
+                        ].caseName = collectedMetadata.caseName || "";
+                        caseDetailsUpdate[
+                          "case_information"
+                        ].caseDescription =
+                          collectedMetadata.caseDescription || "";
                       }
-                      caseDetailsUpdate._completion_status = completionPercentage;
+                      caseDetailsUpdate._completion_status =
+                        completionPercentage;
 
-                      console.log("Files grouped by category:", caseDetailsUpdate);
-                      console.log("Case details update:", caseDetailsUpdate);
+                      console.log(
+                        "Files grouped by category:",
+                        caseDetailsUpdate
+                      );
+                      console.log(
+                        "Case details update:",
+                        caseDetailsUpdate
+                      );
 
                       // Save to database
-                      const updateResponse = await fetch(`/api/cases/update`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          caseId,
-                          field: "case_details",
-                          value: caseDetailsUpdate,
-                        }),
-                      });
+                      const updateResponse = await fetch(
+                        `/api/cases/update`,
+                        {
+                          method: "PATCH",
+                          headers: {
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({
+                            caseId,
+                            field: "case_details",
+                            value: caseDetailsUpdate,
+                          }),
+                        }
+                      );
 
                       if (!updateResponse.ok) {
-                        console.error("Failed to save file info:", await updateResponse.text());
+                        console.error(
+                          "Failed to save file info:",
+                          await updateResponse.text()
+                        );
                       } else {
-                        console.log("Successfully saved file info to database");
+                        console.log(
+                          "Successfully saved file info to database"
+                        );
                       }
                     } catch (error) {
-                      console.error("Failed to save file info to database:", error);
+                      console.error(
+                        "Failed to save file info to database:",
+                        error
+                      );
                     }
                   }
                 }
@@ -471,8 +718,14 @@ export default function DocumentUploadStep({
       }
 
       // Continue with all files, passing metadata, caseInformationFiles, and uploaded documents
-      console.log("Passing uploaded documents to QuickAnalysisForm:", finalUploadedDocuments);
-      console.log("Number of categories:", Object.keys(finalUploadedDocuments).length);
+      console.log(
+        "Passing uploaded documents to QuickAnalysisForm:",
+        finalUploadedDocuments
+      );
+      console.log(
+        "Number of categories:",
+        Object.keys(finalUploadedDocuments).length
+      );
 
       onContinue(
         classifiedFiles.map((cf) => cf.file),
@@ -491,7 +744,9 @@ export default function DocumentUploadStep({
       {isCreatingCase ? (
         <div className="flex flex-col items-center justify-center py-16">
           <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full mb-4"></div>
-          <p className="text-lg text-ink-600">Creating your case...</p>
+          <p className="text-lg text-ink-600">
+            Creating your case...
+          </p>
         </div>
       ) : (
         <>
@@ -565,13 +820,18 @@ export default function DocumentUploadStep({
                         />
                       </svg>
                       <span className="text-base text-ink-600 font-medium">
-                        {classifiedFiles.length} {classifiedFiles.length === 1 ? "file" : "files"}
+                        {classifiedFiles.length}{" "}
+                        {classifiedFiles.length === 1
+                          ? "file"
+                          : "files"}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
-                          const input = document.getElementById("fileUpload") as HTMLInputElement;
+                          const input = document.getElementById(
+                            "fileUpload"
+                          ) as HTMLInputElement;
                           if (input) input.click();
                         }}
                         disabled={isUploading}
@@ -630,11 +890,15 @@ export default function DocumentUploadStep({
                               {classifiedFile.file.name}
                             </p>
                             <p className="text-sm text-ink-400 flex-shrink-0">
-                              {formatFileSize(classifiedFile.file.size)}
+                              {formatFileSize(
+                                classifiedFile.file.size
+                              )}
                             </p>
                           </div>
                           <button
-                            onClick={() => handleRemoveFile(classifiedFile.id)}
+                            onClick={() =>
+                              handleRemoveFile(classifiedFile.id)
+                            }
                             disabled={isUploading}
                             className="ml-3 p-1.5 text-ink-400 hover:text-ink-600 transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer opacity-0 group-hover:opacity-100"
                           >
@@ -680,7 +944,9 @@ export default function DocumentUploadStep({
                   />
                   <label
                     htmlFor="fileUpload"
-                    className={`cursor-pointer flex items-center justify-center gap-2 text-sm text-ink-600 hover:text-ink-900 ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                    className={`cursor-pointer flex items-center justify-center gap-2 text-sm text-ink-600 hover:text-ink-900 ${isUploading
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                       }`}
                   >
                     <svg
@@ -706,10 +972,7 @@ export default function DocumentUploadStep({
           <div className="flex flex-col items-center gap-2">
             <button
               onClick={handleContinue}
-              disabled={
-                classifiedFiles.length === 0 ||
-                isUploading
-              }
+              disabled={classifiedFiles.length === 0 || isUploading}
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 sm:gap-3 cursor-pointer"
             >
               {isUploading ? (
@@ -719,7 +982,7 @@ export default function DocumentUploadStep({
                 </>
               ) : (
                 <>
-                  <span>Upload & Continue</span>
+                  <span>Process Documents & Auto-Fill</span>
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
@@ -744,7 +1007,7 @@ export default function DocumentUploadStep({
               disabled={isUploading}
               className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              Skip and continue without documents
+              Skip and enter case details manually
             </button>
           </div>
         </>

@@ -34,12 +34,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 interface Country {
   id: string;
@@ -54,7 +49,7 @@ interface JuryData {
   is_active: boolean | null;
   created_at: string | null;
   updated_at?: string | null;
-  countries?: { name: string };
+  countries?: { name: string } | null;
 }
 
 const JuryManager = () => {
@@ -157,7 +152,9 @@ const JuryManager = () => {
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     if (!dialogCountryId) {
@@ -461,10 +458,11 @@ const JuryManager = () => {
                   </div>
                   <div className="flex gap-2 items-center">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${data.is_active
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        data.is_active
                           ? "bg-green-100 text-green-800"
                           : "bg-gray-100 text-gray-800"
-                        }`}
+                      }`}
                     >
                       {data.is_active ? "Active" : "Inactive"}
                     </span>
