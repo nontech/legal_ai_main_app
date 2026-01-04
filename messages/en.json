@@ -1,26 +1,229 @@
 {
-    "navigation": {
-        "home": "Home",
-        "documents": "Documents Library",
-        "pretrialProcess": "Pretrial Process",
-        "signIn": "Sign In",
-        "signUp": "Sign Up",
-        "signOut": "Sign Out",
-        "dashboard": "Dashboard",
-        "account": "Account"
+  "navigation": {
+    "home": "Home",
+    "documents": "Documents Library",
+    "pretrialProcess": "Pretrial Process",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "dashboard": "Dashboard",
+    "account": "Account"
+  },
+  "countries": {
+    "de": "Germany",
+    "uk": "United Kingdom",
+    "us": "United States",
+    "ca": "Canada"
+  },
+  "languages": {
+    "en": "English",
+    "de": "Deutsch"
+  },
+  "selector": {
+    "country": "Country",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Predict Legal Case Outcomes",
+    "description": "Our app ingests your case facts and documents, compares them against patterns in past cases, and produces structured scenario analyses you can actually use: likely outcomes, key uncertainties, and the evidence that moves the needle.",
+    "cta": "Start New Analysis",
+    "setupTime": "Setup takes less than 3 minutes",
+    "feature1Title": "Clear viability assessment",
+    "feature1Item1": "Concise view of strengths & weaknesses",
+    "feature1Item2": "At-a-glance risk assessment",
+    "feature1Item3": "Claim-by-claim viability check",
+    "feature2Title": "Scenario breakdowns",
+    "feature2Item1": "Best, base, and worst-case outcomes",
+    "feature2Item2": "Detailed qualitative reasoning",
+    "feature2Item3": "Explainable logic for stakeholders",
+    "feature3Title": "Actionable next steps",
+    "feature3Item1": "Checklists for missing documents",
+    "feature3Item2": "Suggested lines of research",
+    "feature3Item3": "Client clarification questions"
+  },
+  "stats": {
+    "totalCases": "Total Cases",
+    "allTimeCases": "All time cases",
+    "activeCases": "Active Cases",
+    "currentlyActive": "Currently active",
+    "underReview": "Under Review",
+    "pendingReview": "Pending review",
+    "completed": "Completed",
+    "successfullyClosed": "Successfully closed",
+    "signInViewStats": "Sign in to view your stats",
+    "signInViewStatsDesc": "Please sign in to access your case statistics"
+  },
+  "casePortfolio": {
+    "title": "Case Portfolio",
+    "description": "Manage and track all your legal cases with comprehensive insights",
+    "newCase": "New Case",
+    "searchPlaceholder": "Search by case title or ID...",
+    "allStatuses": "All Statuses",
+    "allTypes": "All Types",
+    "active": "Active",
+    "underReview": "Under Review",
+    "completed": "Completed",
+    "criminal": "Criminal",
+    "civil": "Civil",
+    "signInViewCases": "Sign in to view your cases",
+    "signInViewCasesDesc": "Please sign in to access your case portfolio",
+    "loading": "Loading your cases...",
+    "noCases": "No cases found. Create a new case to get started.",
+    "caseId": "Case ID",
+    "caseTitle": "Case Title",
+    "type": "Type",
+    "status": "Status",
+    "yourRole": "Your Role",
+    "lastUpdated": "Last Updated",
+    "actions": "Actions",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this case?"
+  },
+  "useCases": {
+    "heading": "Find Your Legal Edge",
+    "description": "TheLawThing provides tailored solutions for your legal needs. Discover how our intelligent analysis can work for you.",
+    "professionals": {
+      "title": "Assess Case for Legal Professionals",
+      "feature1": "Quickly analyze new client's case viability",
+      "feature2": "Estimate win probability & settlement ranges",
+      "feature3": "Identify missing documents & risk factors"
     },
-    "countries": {
-        "de": "Germany",
-        "uk": "United Kingdom",
-        "us": "United States",
-        "ca": "Canada"
+    "individuals": {
+      "title": "Understand Rights for Individuals",
+      "feature1": "Understand \"Do I have a case?\"",
+      "feature2": "Know \"What are my next steps?\"",
+      "feature3": "Learn likely outcomes before consultation"
     },
-    "languages": {
-        "en": "English",
-        "de": "Deutsch"
+    "operations": {
+      "title": "Optimize Workflows for Legal Operations",
+      "feature1": "Assess legal risk before escalating to a lawyer",
+      "feature2": "Prepare internal documentation & recommended steps",
+      "feature3": "Understand expected outcomes before going to court"
     },
-    "selector": {
-        "country": "Country",
-        "language": "Language"
-    }
+    "students": {
+      "title": "Accelerate Learning for Law Students & Paralegals",
+      "feature1": "Accelerate research",
+      "feature2": "Summarize large case documents",
+      "feature3": "Draft memos and identify legal arguments"
+    },
+    "insurers": {
+      "title": "Enhance Risk Analysis for Insurers",
+      "feature1": "Predict litigation outcome",
+      "feature2": "Estimate settlement and risk exposure",
+      "feature3": "Decide whether to fight or settle claims"
+    },
+    "learnMore": "Learn More",
+    "comingSoon": "Coming Soon"
+  },
+  "footer": {
+    "tagline": "AI-powered scenario engine for legal case analysis and strategic decision-making.",
+    "notLawFirm": "TheLawThing is not a law firm and does not provide legal advice.",
+    "product": "Product",
+    "features": "Features",
+    "pricing": "Pricing",
+    "documentManagement": "Document Management",
+    "useCases": "Use Cases",
+    "resources": "Resources",
+    "security": "Security",
+    "documentation": "Documentation",
+    "support": "Support",
+    "legal": "Legal",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "cookiePolicy": "Cookie Policy",
+    "acceptableUse": "Acceptable Use",
+    "imprint": "Imprint",
+    "allRightsReserved": "© {year} TheLawThing. All rights reserved."
+  },
+  "contact": {
+    "title": "Contact & Support",
+    "description": "Get in touch with the TheLawThing team. We're here to help with questions, support, and inquiries.",
+    "support": {
+      "title": "Support",
+      "description": "For technical support, account issues, or questions about using the platform.",
+      "email": "support@TheLawThing.dev",
+      "responseTime": "Response time: 24-48 hours"
+    },
+    "generalInquiries": {
+      "title": "General Inquiries",
+      "description": "For business inquiries, partnerships, or general questions.",
+      "email": "contact@TheLawThing.dev",
+      "responseTime": "Response time: 2-3 business days"
+    },
+    "security": {
+      "title": "Security",
+      "description": "Report security vulnerabilities or incidents.",
+      "email": "security@TheLawThing.dev",
+      "responseTime": "For responsible disclosure of security issues"
+    },
+    "legal": {
+      "title": "Legal & Privacy",
+      "description": "For legal questions, privacy requests, or compliance inquiries.",
+      "email": "legal@TheLawThing.dev",
+      "responseTime": "For GDPR requests, data processing agreements, etc."
+    },
+    "officeHours": "Office Hours",
+    "officeHoursDesc": "Our support team is available Monday through Friday, 9:00 AM - 6:00 PM EST. For urgent security issues, please use the security email above and mark your message as \"URGENT\".",
+    "backToHome": "← Back to Home"
+  },
+  "pricing": {
+    "title": "Pricing",
+    "description": "Choose the plan that fits your legal practice needs.",
+    "flexiblePlans": "Flexible Plans",
+    "flexiblePlansDesc": "TheLawThing offers flexible pricing options designed to scale with your practice. All plans include access to our core scenario engine features.",
+    "contactForPricing": "Contact Us for Pricing",
+    "contactForPricingDesc": "As an early-stage platform, we work directly with legal practices to create custom pricing that fits your specific needs. Our pricing is based on:",
+    "pricingBased": [
+      "Number of users",
+      "Volume of case analyses",
+      "Document storage requirements",
+      "Required security and compliance features"
+    ],
+    "whatsIncluded": "What's Included",
+    "whatsIncludedDesc": "All plans include:",
+    "included": [
+      "AI-powered scenario analysis",
+      "Viability assessments for claims and issues",
+      "Best-case, base-case, and worst-case scenario breakdowns",
+      "Actionable next steps and research suggestions",
+      "Document management and classification",
+      "Secure data storage and encryption",
+      "Email support"
+    ],
+    "enterpriseOptions": "Enterprise Options",
+    "enterpriseOptionsDesc": "For larger firms or organizations with specific requirements, we offer enterprise plans with:",
+    "enterprise": [
+      "Custom integrations",
+      "Dedicated support and account management",
+      "Enhanced security and compliance features",
+      "Custom data processing agreements (DPAs)",
+      "On-premise deployment options (where applicable)"
+    ],
+    "getStarted": "Get Started",
+    "getStartedDesc": "Ready to learn more about pricing? Contact us to discuss your needs:",
+    "email": "Email:",
+    "backToHome": "← Back to Home"
+  },
+  "auth": {
+    "signInRequired": "Sign in required",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out"
+  },
+  "pretrial": {
+    "title": "Pretrial Process & Motions",
+    "description": "Manage all pretrial procedures, discovery, and motions"
+  },
+  "common": {
+    "error": "Error",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort"
+  }
 }

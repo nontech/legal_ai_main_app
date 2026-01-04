@@ -1,23 +1,22 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function HeroSection() {
+  const t = useTranslations("hero");
+
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/40 text-gray-900 pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
         <div className="max-w-4xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             <span className="text-gray-900">
-              Predict Legal Case Outcomes
+              {t("title")}
             </span>
           </h1>
           <p className="text-xl text-gray-700 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Our app ingests your case facts and documents, compares
-            them against patterns in past cases, and produces
-            structured scenario analyses you can actually use: likely
-            outcomes, key uncertainties, and the evidence that moves
-            the needle.
+            {t("description")}
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4">
@@ -25,7 +24,7 @@ export default function HeroSection() {
               href="/case-analysis"
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-accent-600 to-accent-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-accent-500 hover:to-accent-400 transition-all duration-300 shadow-lg hover:shadow-accent-500/25 hover:-translate-y-0.5"
             >
-              <span>Start New Analysis</span>
+              <span>{t("cta")}</span>
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -54,7 +53,7 @@ export default function HeroSection() {
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span>Setup takes less than 3 minutes</span>
+              <span>{t("setupTime")}</span>
             </div>
           </div>
         </div>
@@ -79,12 +78,12 @@ export default function HeroSection() {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Clear viability assessment
+              {t("feature1Title")}
             </h3>
             <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
-              <li>Concise view of strengths & weaknesses</li>
-              <li>At-a-glance risk assessment</li>
-              <li>Claim-by-claim viability check</li>
+              <li>{t("feature1Item1")}</li>
+              <li>{t("feature1Item2")}</li>
+              <li>{t("feature1Item3")}</li>
             </ul>
           </div>
 
@@ -106,12 +105,12 @@ export default function HeroSection() {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Scenario breakdowns
+              {t("feature2Title")}
             </h3>
             <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
-              <li>Best, base, and worst-case outcomes</li>
-              <li>Detailed qualitative reasoning</li>
-              <li>Explainable logic for stakeholders</li>
+              <li>{t("feature2Item1")}</li>
+              <li>{t("feature2Item2")}</li>
+              <li>{t("feature2Item3")}</li>
             </ul>
           </div>
 
@@ -133,12 +132,12 @@ export default function HeroSection() {
               </svg>
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              Actionable next steps
+              {t("feature3Title")}
             </h3>
             <ul className="text-gray-700 leading-relaxed text-sm space-y-2 list-disc list-inside text-left">
-              <li>Checklists for missing documents</li>
-              <li>Suggested lines of research</li>
-              <li>Client clarification questions</li>
+              <li>{t("feature3Item1")}</li>
+              <li>{t("feature3Item2")}</li>
+              <li>{t("feature3Item3")}</li>
             </ul>
           </div>
         </div>

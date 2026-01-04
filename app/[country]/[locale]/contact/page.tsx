@@ -1,20 +1,27 @@
 import Link from "next/link";
-import Navbar from "../components/Navbar";
+import Navbar from "@/app/components/Navbar";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-export const metadata = {
-  title: "Contact - TheLawThing",
-  description: "Contact TheLawThing for support and inquiries",
-};
+export async function generateMetadata() {
+  const t = await getTranslations("contact");
+  return {
+    title: `${t("title")} - TheLawThing`,
+    description: t("description"),
+  };
+}
 
-export default function Contact() {
+export default async function Contact() {
+  const t = await getTranslations("contact");
+  
   return (
     <div className="min-h-screen bg-surface-100">
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-          <h1 className="text-4xl font-bold text-ink-900 mb-4">Contact & Support</h1>
+          <h1 className="text-4xl font-bold text-ink-900 mb-4">{t("title")}</h1>
           <p className="text-lg text-ink-600 mb-8">
-            Get in touch with the TheLawThing team. We're here to help with questions, support, and inquiries.
+            {t("description")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-8 mt-8">
@@ -23,18 +30,18 @@ export default function Contact() {
                 <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                Support
+                {t("support.title")}
               </h2>
               <p className="text-ink-700 mb-3">
-                For technical support, account issues, or questions about using the platform.
+                {t("support.description")}
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:support@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  support@TheLawThing.dev
+                <a href={`mailto:${t("support.email")}`} className="text-primary-600 hover:text-primary-700 hover:underline">
+                  {t("support.email")}
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
-                Response time: 24-48 hours
+                {t("support.responseTime")}
               </p>
             </div>
 
@@ -43,18 +50,18 @@ export default function Contact() {
                 <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                General Inquiries
+                {t("generalInquiries.title")}
               </h2>
               <p className="text-ink-700 mb-3">
-                For business inquiries, partnerships, or general questions.
+                {t("generalInquiries.description")}
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:contact@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  contact@TheLawThing.dev
+                <a href={`mailto:${t("generalInquiries.email")}`} className="text-primary-600 hover:text-primary-700 hover:underline">
+                  {t("generalInquiries.email")}
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
-                Response time: 2-3 business days
+                {t("generalInquiries.responseTime")}
               </p>
             </div>
 
@@ -63,18 +70,18 @@ export default function Contact() {
                 <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                Security
+                {t("security.title")}
               </h2>
               <p className="text-ink-700 mb-3">
-                Report security vulnerabilities or incidents.
+                {t("security.description")}
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  security@TheLawThing.dev
+                <a href={`mailto:${t("security.email")}`} className="text-primary-600 hover:text-primary-700 hover:underline">
+                  {t("security.email")}
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
-                For responsible disclosure of security issues
+                {t("security.responseTime")}
               </p>
             </div>
 
@@ -83,33 +90,32 @@ export default function Contact() {
                 <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Legal & Privacy
+                {t("legal.title")}
               </h2>
               <p className="text-ink-700 mb-3">
-                For legal questions, privacy requests, or compliance inquiries.
+                {t("legal.description")}
               </p>
               <p className="text-ink-900 font-semibold mb-1">
-                <a href="mailto:legal@TheLawThing.dev" className="text-primary-600 hover:text-primary-700 hover:underline">
-                  legal@TheLawThing.dev
+                <a href={`mailto:${t("legal.email")}`} className="text-primary-600 hover:text-primary-700 hover:underline">
+                  {t("legal.email")}
                 </a>
               </p>
               <p className="text-sm text-ink-600 mt-2">
-                For GDPR requests, data processing agreements, etc.
+                {t("legal.responseTime")}
               </p>
             </div>
           </div>
 
           <div className="mt-12 p-6 bg-primary-50 rounded-xl border border-primary-200">
-            <h2 className="text-xl font-bold text-ink-900 mb-3">Office Hours</h2>
+            <h2 className="text-xl font-bold text-ink-900 mb-3">{t("officeHours")}</h2>
             <p className="text-ink-700">
-              Our support team is available Monday through Friday, 9:00 AM - 6:00 PM EST.
-              For urgent security issues, please use the security email above and mark your message as "URGENT".
+              {t("officeHoursDesc")}
             </p>
           </div>
 
           <div className="mt-12 pt-8 border-t border-border-200">
             <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium">
-              ← Back to Home
+              {t("backToHome")}
             </Link>
           </div>
         </div>

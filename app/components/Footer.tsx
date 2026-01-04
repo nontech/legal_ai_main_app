@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const t = useTranslations("footer");
 
   return (
     <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white">
@@ -26,7 +28,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-white/70 mb-6 leading-relaxed">
-              AI-powered scenario engine for legal case analysis and strategic decision-making.
+              {t("tagline")}
             </p>
             <div className="flex space-x-4">
               <a
@@ -50,7 +52,7 @@ export default function Footer() {
           {/* Product Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Product
+              {t("product")}
             </h4>
             <ul className="space-y-3">
               <li>
@@ -58,7 +60,7 @@ export default function Footer() {
                   href="/"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Features
+                  {t("features")}
                 </Link>
               </li>
               <li>
@@ -66,7 +68,7 @@ export default function Footer() {
                   href="/pricing"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Pricing
+                  {t("pricing")}
                 </Link>
               </li>
               <li>
@@ -74,7 +76,7 @@ export default function Footer() {
                   href="/documents"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Document Management
+                  {t("documentManagement")}
                 </Link>
               </li>
               <li>
@@ -82,7 +84,7 @@ export default function Footer() {
                   href="/use-cases"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Use Cases
+                  {t("useCases")}
                 </Link>
               </li>
             </ul>
@@ -91,7 +93,7 @@ export default function Footer() {
           {/* Resources Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Resources
+              {t("resources")}
             </h4>
             <ul className="space-y-3">
               <li>
@@ -99,7 +101,7 @@ export default function Footer() {
                   href="/security"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Security
+                  {t("security")}
                 </Link>
               </li>
               <li>
@@ -107,7 +109,7 @@ export default function Footer() {
                   href="/documentation"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Documentation
+                  {t("documentation")}
                 </Link>
               </li>
               <li>
@@ -115,7 +117,7 @@ export default function Footer() {
                   href="/contact"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Support
+                  {t("support")}
                 </Link>
               </li>
             </ul>
@@ -124,7 +126,7 @@ export default function Footer() {
           {/* Legal Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Legal
+              {t("legal")}
             </h4>
             <ul className="space-y-3">
               <li>
@@ -132,7 +134,7 @@ export default function Footer() {
                   href="/privacy"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Privacy Policy
+                  {t("privacyPolicy")}
                 </Link>
               </li>
               <li>
@@ -140,7 +142,7 @@ export default function Footer() {
                   href="/terms"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Terms of Service
+                  {t("termsOfService")}
                 </Link>
               </li>
               <li>
@@ -148,7 +150,7 @@ export default function Footer() {
                   href="/cookies"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Cookie Policy
+                  {t("cookiePolicy")}
                 </Link>
               </li>
               <li>
@@ -156,7 +158,7 @@ export default function Footer() {
                   href="/acceptable-use"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Acceptable Use
+                  {t("acceptableUse")}
                 </Link>
               </li>
               <li>
@@ -164,7 +166,7 @@ export default function Footer() {
                   href="/imprint"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Imprint
+                  {t("imprint")}
                 </Link>
               </li>
             </ul>
@@ -175,10 +177,10 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-white/70">
-              © {currentYear} TheLawThing. All rights reserved.
+              {t("allRightsReserved", { year: currentYear })}
             </p>
             <p className="text-sm text-white/60">
-              TheLawThing is not a law firm and does not provide legal advice.
+              {t("notLawFirm")}
             </p>
           </div>
         </div>

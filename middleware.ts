@@ -26,6 +26,11 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // Skip auth and admin routes (they don't need localization)
+    if (pathname.startsWith('/auth') || pathname.startsWith('/admin')) {
+        return NextResponse.next();
+    }
+
     // Check if pathname already has country/locale pattern
     const pathnameHasCountryLocale = countries.some(
         (country) => locales.some(
@@ -39,8 +44,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // ONLY redirect root path to default country/locale
-    // Leave all other existing routes untouched
+    // Redirect root path to default country/locale
     if (pathname === '/') {
         const defaultLocale = (countryDefaults as Record<string, string>)[DEFAULT_COUNTRY] || 'en';
         request.nextUrl.pathname = `/${DEFAULT_COUNTRY}/${defaultLocale}`;
@@ -56,8 +60,10 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(request.nextUrl);
     }
 
-    // Let all other routes pass through unchanged
-    return NextResponse.next();
+    // Redirect all other routes to include default country/locale prefix
+    const defaultLocale = (countryDefaults as Record<string, string>)[DEFAULT_COUNTRY] || 'en';
+    request.nextUrl.pathname = `/${DEFAULT_COUNTRY}/${defaultLocale}${pathname}`;
+    return NextResponse.redirect(request.nextUrl);
 }
 
 export const config = {

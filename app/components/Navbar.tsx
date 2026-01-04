@@ -3,6 +3,7 @@
 import { useState, useEffect, memo, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { CountryLanguageSelector } from "./CountryLanguageSelector";
 
 interface NavbarProps {
@@ -13,6 +14,7 @@ interface NavbarProps {
 export default function Navbar({ onPretrialClick, showPretrialButton = false }: NavbarProps) {
   const router = useRouter();
   const params = useParams();
+  const t = useTranslations("navigation");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +115,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                   />
                 </svg>
-                <span>Pretrial Process</span>
+                <span>{t("pretrialProcess")}</span>
               </button>
             )}
 
@@ -122,7 +124,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 href="/documents"
                 className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
               >
-                <span className="relative z-10">Documents Library</span>
+                <span className="relative z-10">{t("documents")}</span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
             )}
@@ -157,7 +159,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                       />
                     </svg>
                   </div>
-                  <span className="text-sm">{userEmail || "Account"}</span>
+                  <span className="text-sm">{userEmail || t("account")}</span>
                   <svg
                     className={`w-4 h-4 transition-transform ${isUserMenuOpen ? "rotate-180" : ""
                       }`}
@@ -182,13 +184,13 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                       className="block px-4 py-2 text-sm text-ink-600 hover:bg-surface-100 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
-                      Dashboard
+                      {t("dashboard")}
                     </Link>
                     <button
                       onClick={handleSignOut}
                       className="w-full text-left px-4 py-2 text-sm text-critical-500 cursor-pointer hover:bg-critical-100 transition-colors border-t border-border-200"
                     >
-                      Sign Out
+                      {t("signOut")}
                     </button>
                   </div>
                 )}
@@ -200,7 +202,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                   href="/auth/signin"
                   className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
-                  <span className="relative z-10 cursor-pointer">Sign In</span>
+                  <span className="relative z-10 cursor-pointer">{t("signIn")}</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
                 </Link>
 
@@ -209,7 +211,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     href="/auth/signup"
                     className="px-6 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 inline-block"
                   >
-                    Sign Up
+                    {t("signUp")}
                   </Link>
                 </div>
               </>
@@ -266,7 +268,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                   />
                 </svg>
-                <span>Pretrial Process</span>
+                <span>{t("pretrialProcess")}</span>
               </button>
             )}
 
@@ -276,7 +278,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Documents Library
+                {t("documents")}
               </Link>
             )}
 
@@ -299,14 +301,14 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                         />
                       </svg>
                     </div>
-                    <span className="text-sm text-ink-600 truncate">{userEmail || "Account"}</span>
+                    <span className="text-sm text-ink-600 truncate">{userEmail || t("account")}</span>
                   </div>
                   <Link
                     href="/"
                     className="block px-3 py-2 text-sm text-ink-600 hover:bg-surface-100 rounded transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Dashboard
+                    {t("dashboard")}
                   </Link>
                   <button
                     onClick={() => {
@@ -315,7 +317,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     }}
                     className="w-full text-left px-3 py-2 text-sm text-critical-500 hover:bg-critical-100 rounded transition-colors"
                   >
-                    Sign Out
+                    {t("signOut")}
                   </button>
                 </div>
               </>
@@ -327,14 +329,14 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                   className="cursor-pointer block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign In
+                  {t("signIn")}
                 </Link>
                 <Link
                   href="/auth/signup"
                   className="block px-4 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign Up
+                  {t("signUp")}
                 </Link>
               </div>
             ) : null}

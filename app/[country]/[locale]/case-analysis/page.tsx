@@ -2,11 +2,11 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import Navbar from "../components/Navbar";
-import HorizontalStepper from "../components/quick-analysis/HorizontalStepper";
-import DocumentUploadStep from "../components/quick-analysis/DocumentUploadStep";
-import QuickAnalysisForm from "../components/quick-analysis/QuickAnalysisForm";
-import VerdictStep from "../components/VerdictStep";
+import Navbar from "@/app/components/Navbar";
+import HorizontalStepper from "@/app/components/quick-analysis/HorizontalStepper";
+import DocumentUploadStep from "@/app/components/quick-analysis/DocumentUploadStep";
+import QuickAnalysisForm from "@/app/components/quick-analysis/QuickAnalysisForm";
+import VerdictStep from "@/app/components/VerdictStep";
 
 type Step = "upload" | "form" | "verdict";
 

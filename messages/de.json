@@ -22,5 +22,208 @@
     "selector": {
         "country": "Land",
         "language": "Sprache"
+    },
+    "hero": {
+        "title": "Vorhersage von Ergebnissen in Rechtsfällen",
+        "description": "Unsere Anwendung erfasst Ihre Falldetails und Dokumente, vergleicht sie mit Mustern aus früheren Fällen und erstellt strukturierte Szenarioanalysen, die Sie tatsächlich nutzen können: wahrscheinliche Ergebnisse, Schlüsselrisiken und die entscheidenden Faktoren.",
+        "cta": "Neue Analyse starten",
+        "setupTime": "Die Einrichtung dauert weniger als 3 Minuten",
+        "feature1Title": "Klare Machbarkeitsbewertung",
+        "feature1Item1": "Übersichtlicher Blick auf Stärken & Schwächen",
+        "feature1Item2": "Auf einen Blick Risikobewertung",
+        "feature1Item3": "Machbarkeitscheck für jeden Anspruch",
+        "feature2Title": "Szenarioanalysen",
+        "feature2Item1": "Best-Case, Base-Case und Worst-Case-Szenarien",
+        "feature2Item2": "Detaillierte qualitative Begründung",
+        "feature2Item3": "Verständliche Logik für Stakeholder",
+        "feature3Title": "Umsetzbare nächste Schritte",
+        "feature3Item1": "Checklisten für fehlende Dokumente",
+        "feature3Item2": "Empfohlene Forschungspfade",
+        "feature3Item3": "Klärungsfragen für Mandanten"
+    },
+    "stats": {
+        "totalCases": "Gesamtfälle",
+        "allTimeCases": "Alle bisherigen Fälle",
+        "activeCases": "Aktive Fälle",
+        "currentlyActive": "Derzeit aktiv",
+        "underReview": "In Überprüfung",
+        "pendingReview": "Ausstehende Überprüfung",
+        "completed": "Abgeschlossen",
+        "successfullyClosed": "Erfolgreich abgeschlossen",
+        "signInViewStats": "Melden Sie sich an, um Ihre Statistiken anzusehen",
+        "signInViewStatsDesc": "Bitte melden Sie sich an, um auf Ihre Fallstatistiken zuzugreifen"
+    },
+    "casePortfolio": {
+        "title": "Fallportfolio",
+        "description": "Verwalten und verfolgen Sie alle Ihre Rechtsfälle mit umfassenden Einblicken",
+        "newCase": "Neuer Fall",
+        "searchPlaceholder": "Nach Falltitel oder ID suchen...",
+        "allStatuses": "Alle Status",
+        "allTypes": "Alle Typen",
+        "active": "Aktiv",
+        "underReview": "In Überprüfung",
+        "completed": "Abgeschlossen",
+        "criminal": "Strafrechtlich",
+        "civil": "Zivilrechtlich",
+        "signInViewCases": "Melden Sie sich an, um Ihre Fälle anzusehen",
+        "signInViewCasesDesc": "Bitte melden Sie sich an, um auf Ihr Fallportfolio zuzugreifen",
+        "loading": "Ihre Fälle werden geladen...",
+        "noCases": "Keine Fälle gefunden. Erstellen Sie einen neuen Fall, um zu beginnen.",
+        "caseId": "Fall-ID",
+        "caseTitle": "Falltitel",
+        "type": "Typ",
+        "status": "Status",
+        "yourRole": "Ihre Rolle",
+        "lastUpdated": "Zuletzt aktualisiert",
+        "actions": "Aktionen",
+        "delete": "Löschen",
+        "deleteConfirm": "Sind Sie sicher, dass Sie diesen Fall löschen möchten?"
+    },
+    "useCases": {
+        "heading": "Finden Sie Ihren rechtlichen Vorteil",
+        "description": "TheLawThing bietet maßgeschneiderte Lösungen für Ihre rechtlichen Anforderungen. Entdecken Sie, wie unsere intelligente Analyse für Sie funktioniert.",
+        "professionals": {
+            "title": "Fallbewertung für Rechtsprofis",
+            "feature1": "Schnelle Analyse der Machbarkeit eines neuen Mandantenfalls",
+            "feature2": "Schätzung der Gewinnwahrscheinlichkeit & Vergleichsspannen",
+            "feature3": "Identifikation fehlender Dokumente & Risikofaktoren"
+        },
+        "individuals": {
+            "title": "Verständnis der Rechte für Privatpersonen",
+            "feature1": "Verstehen Sie \"Habe ich einen Fall?\"",
+            "feature2": "Kennen Sie \"Was sind meine nächsten Schritte?\"",
+            "feature3": "Lernen Sie wahrscheinliche Ergebnisse vor der Beratung"
+        },
+        "operations": {
+            "title": "Optimierung von Arbeitsabläufen für Legal Operations",
+            "feature1": "Bewertung des rechtlichen Risikos vor der Eskalation an einen Anwalt",
+            "feature2": "Vorbereitung interner Dokumentation & empfohlener Schritte",
+            "feature3": "Verständnis der erwarteten Ergebnisse vor Gericht"
+        },
+        "students": {
+            "title": "Beschleunigung des Lernens für Jurastudenten & Paralegals",
+            "feature1": "Beschleunigen Sie die Forschung",
+            "feature2": "Fassen Sie große Falldokumente zusammen",
+            "feature3": "Erstellen Sie Memos und identifizieren Sie rechtliche Argumente"
+        },
+        "insurers": {
+            "title": "Verbesserung der Risikoanalyse für Versicherer",
+            "feature1": "Vorhersage des Prozessausgangs",
+            "feature2": "Schätzung der Vergleichsleistung und des Risikopotenzials",
+            "feature3": "Entscheiden Sie, ob Sie einen Anspruch abwehren oder vergleichen"
+        },
+        "learnMore": "Mehr erfahren",
+        "comingSoon": "Demnächst verfügbar"
+    },
+    "footer": {
+        "tagline": "KI-gesteuerte Szenario-Engine für Fallanalyse und strategische Entscheidungsfindung.",
+        "notLawFirm": "TheLawThing ist keine Kanzlei und bietet keine Rechtsberatung.",
+        "product": "Produkt",
+        "features": "Funktionen",
+        "pricing": "Preisgestaltung",
+        "documentManagement": "Dokumentenverwaltung",
+        "useCases": "Use Cases",
+        "resources": "Ressourcen",
+        "security": "Sicherheit",
+        "documentation": "Dokumentation",
+        "support": "Support",
+        "legal": "Recht",
+        "privacyPolicy": "Datenschutzrichtlinie",
+        "termsOfService": "Nutzungsbedingungen",
+        "cookiePolicy": "Cookie-Richtlinie",
+        "acceptableUse": "Akzeptable Nutzung",
+        "imprint": "Impressum",
+        "allRightsReserved": "© {year} TheLawThing. Alle Rechte vorbehalten."
+    },
+    "contact": {
+        "title": "Kontakt & Support",
+        "description": "Kontaktieren Sie das TheLawThing-Team. Wir helfen Ihnen gerne bei Fragen, Support und Anfragen.",
+        "support": {
+            "title": "Support",
+            "description": "Für technischen Support, Kontoprobleme oder Fragen zur Plattformnutzung.",
+            "email": "support@TheLawThing.dev",
+            "responseTime": "Antwortzeit: 24-48 Stunden"
+        },
+        "generalInquiries": {
+            "title": "Allgemeine Anfragen",
+            "description": "Für geschäftliche Anfragen, Partnerschaften oder allgemeine Fragen.",
+            "email": "contact@TheLawThing.dev",
+            "responseTime": "Antwortzeit: 2-3 Geschäftstage"
+        },
+        "security": {
+            "title": "Sicherheit",
+            "description": "Melden Sie Sicherheitslücken oder Sicherheitsvorfälle.",
+            "email": "security@TheLawThing.dev",
+            "responseTime": "Für verantwortungsvolle Offenlegung von Sicherheitsproblemen"
+        },
+        "legal": {
+            "title": "Recht & Datenschutz",
+            "description": "Für rechtliche Fragen, Datenschutzanfragen oder Compliance-Anfragen.",
+            "email": "legal@TheLawThing.dev",
+            "responseTime": "Für GDPR-Anfragen, Datenverarbeitungsvereinbarungen, etc."
+        },
+        "officeHours": "Bürozeiten",
+        "officeHoursDesc": "Unser Support-Team ist Montag bis Freitag, 9:00 - 18:00 Uhr EST erreichbar. Für dringende Sicherheitsprobleme bitte die oben angegebene Sicherheits-E-Mail verwenden und Ihre Nachricht als \"DRINGEND\" kennzeichnen.",
+        "backToHome": "← Zurück zur Startseite"
+    },
+    "pricing": {
+        "title": "Preisgestaltung",
+        "description": "Wählen Sie den Plan, der zu Ihren Anforderungen an die Anwaltskanzlei passt.",
+        "flexiblePlans": "Flexible Pläne",
+        "flexiblePlansDesc": "TheLawThing bietet flexible Preisoptionen, die mit Ihrer Kanzlei skalieren. Alle Pläne beinhalten Zugriff auf unsere Kernfunktionen des Szenario-Engines.",
+        "contactForPricing": "Kontaktieren Sie uns für Preisgestaltung",
+        "contactForPricingDesc": "Als frühe Plattform arbeiten wir direkt mit Anwaltskanzleien zusammen, um maßgeschneiderte Preise zu erstellen, die Ihre spezifischen Anforderungen erfüllen. Unsere Preisgestaltung basiert auf:",
+        "pricingBased": [
+            "Anzahl der Benutzer",
+            "Volumen der Fallanalysen",
+            "Anforderungen an den Dokumentenspeicher",
+            "Erforderliche Sicherheits- und Compliance-Funktionen"
+        ],
+        "whatsIncluded": "Was ist enthalten",
+        "whatsIncludedDesc": "Alle Pläne beinhalten:",
+        "included": [
+            "KI-gestützte Szenarioanalyse",
+            "Machbarkeitsbewertungen für Ansprüche und Probleme",
+            "Best-Case-, Base-Case- und Worst-Case-Szenarioaufschlüsselungen",
+            "Umsetzbare nächste Schritte und Forschungsvorschläge",
+            "Dokumentenverwaltung und -klassifizierung",
+            "Sicherer Datenspeicher und Verschlüsselung",
+            "E-Mail-Support"
+        ],
+        "enterpriseOptions": "Enterprise-Optionen",
+        "enterpriseOptionsDesc": "Für größere Kanzleien oder Organisationen mit spezifischen Anforderungen bieten wir Enterprise-Pläne mit:",
+        "enterprise": [
+            "Benutzerdefinierte Integrationen",
+            "Dedizierter Support und Kontobetreuung",
+            "Verbesserte Sicherheits- und Compliance-Funktionen",
+            "Benutzerdefinierte Datenverarbeitungsvereinbarungen (DPAs)",
+            "On-Premise-Deployment-Optionen (falls zutreffend)"
+        ],
+        "getStarted": "Erste Schritte",
+        "getStartedDesc": "Möchten Sie mehr über die Preisgestaltung erfahren? Kontaktieren Sie uns, um Ihre Anforderungen zu besprechen:",
+        "email": "E-Mail:",
+        "backToHome": "← Zurück zur Startseite"
+    },
+    "auth": {
+        "signInRequired": "Anmelden erforderlich",
+        "signIn": "Anmelden",
+        "signUp": "Registrieren",
+        "signOut": "Abmelden"
+    },
+    "pretrial": {
+        "title": "Vorverfahren & Anträge",
+        "description": "Verwalten Sie alle Vorverfahrensverfahren, Beweise und Anträge"
+    },
+    "common": {
+        "error": "Fehler",
+        "loading": "Wird geladen...",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "close": "Schließen",
+        "search": "Suchen",
+        "filter": "Filter",
+        "sort": "Sortieren"
     }
 }
