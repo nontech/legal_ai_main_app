@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { CountryLanguageSelector } from "./CountryLanguageSelector";
 
 interface NavbarProps {
   onPretrialClick?: () => void;
@@ -11,6 +12,7 @@ interface NavbarProps {
 
 export default function Navbar({ onPretrialClick, showPretrialButton = false }: NavbarProps) {
   const router = useRouter();
+  const params = useParams();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -41,7 +43,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
     checkAuth();
   }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       // Call server-side sign-out endpoint
       await fetch("/api/auth/signout", {
@@ -67,7 +69,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
       // Still redirect even if sign-out fails
       window.location.href = "/";
     }
-  };
+  }, []);
 
   return (
     <nav className="bg-surface-000/90 backdrop-blur-md border-b border-border-200 shadow-lg fixed top-0 left-0 right-0 z-50">
@@ -124,6 +126,10 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
               </Link>
             )}
+
+            <div className="px-3">
+              <CountryLanguageSelector />
+            </div>
 
             {isLoading ? (
               <div className="px-4 py-2.5 text-ink-600">
@@ -234,6 +240,11 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border-200 py-3 space-y-2">
+            {/* Country/Language Selector - Mobile */}
+            <div className="px-4 pb-3 border-b border-border-200">
+              <CountryLanguageSelector />
+            </div>
+
             {isAuthenticated && showPretrialButton && (
               <button
                 onClick={() => {

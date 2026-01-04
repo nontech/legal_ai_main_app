@@ -1,0 +1,26 @@
+{
+    "navigation": {
+        "home": "Startseite",
+        "documents": "Dokumentenbibliothek",
+        "pretrialProcess": "Vorverfahren",
+        "signIn": "Anmelden",
+        "signUp": "Registrieren",
+        "signOut": "Abmelden",
+        "dashboard": "Dashboard",
+        "account": "Konto"
+    },
+    "countries": {
+        "de": "Deutschland",
+        "uk": "Vereinigtes Königreich",
+        "us": "Vereinigte Staaten",
+        "ca": "Kanada"
+    },
+    "languages": {
+        "en": "English",
+        "de": "Deutsch"
+    },
+    "selector": {
+        "country": "Land",
+        "language": "Sprache"
+    }
+}

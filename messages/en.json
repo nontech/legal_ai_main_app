@@ -1,0 +1,26 @@
+{
+    "navigation": {
+        "home": "Home",
+        "documents": "Documents Library",
+        "pretrialProcess": "Pretrial Process",
+        "signIn": "Sign In",
+        "signUp": "Sign Up",
+        "signOut": "Sign Out",
+        "dashboard": "Dashboard",
+        "account": "Account"
+    },
+    "countries": {
+        "de": "Germany",
+        "uk": "United Kingdom",
+        "us": "United States",
+        "ca": "Canada"
+    },
+    "languages": {
+        "en": "English",
+        "de": "Deutsch"
+    },
+    "selector": {
+        "country": "Country",
+        "language": "Language"
+    }
+}
