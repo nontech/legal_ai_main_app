@@ -464,7 +464,7 @@ export default function DocumentUploadStep({
                   const caseInfoResult = categoryResults.find(
                     (catResult: any) =>
                       catResult.file_category ===
-                        "case_information" ||
+                      "case_information" ||
                       catResult.category === "case_information"
                   );
 
@@ -488,11 +488,14 @@ export default function DocumentUploadStep({
                       collectedMetadata.jurisdiction = {
                         country:
                           caseInfoResult.case_metadata.country || "",
-                        state:
-                          caseInfoResult.case_metadata.state || "",
-                        city: caseInfoResult.case_metadata.city || "",
-                        court:
-                          caseInfoResult.case_metadata.court || "",
+                        country_code:
+                          caseInfoResult.case_metadata.country_code || "",
+                        jurisdiction:
+                          caseInfoResult.case_metadata.jurisdiction || "",
+                        jurisdiction_code:
+                          caseInfoResult.case_metadata.jurisdiction_code || "",
+                        court_name:
+                          caseInfoResult.case_metadata.court_name || "",
                       };
                       collectedMetadata.role =
                         caseInfoResult.case_metadata.role ||
@@ -512,22 +515,15 @@ export default function DocumentUploadStep({
                       collectedMetadata.extractedFields.jurisdiction =
                         !!(
                           caseInfoResult.case_metadata.country ||
-                          caseInfoResult.case_metadata.state ||
-                          caseInfoResult.case_metadata.city ||
-                          caseInfoResult.case_metadata.court
-                        );
-                      collectedMetadata.extractedFields.role =
-                        !!caseInfoResult.case_metadata.role;
-                      collectedMetadata.extractedFields.caseType =
-                        !!extractedCaseType;
+                          caseInfoResult.case_metadata.country_code ||
+                          caseInfoResult.case_metadata.jurisdiction ||
+                          caseInfoResult.case_metadata.jurisdiction_code ||
+                          caseInfoResult.case_metadata.court_name);
+                      collectedMetadata.extractedFields.role = !!caseInfoResult.case_metadata.role;
+                      collectedMetadata.extractedFields.caseType = !!extractedCaseType;
 
                       // Extract charges if available
-                      if (
-                        caseInfoResult.case_metadata.charges &&
-                        Array.isArray(
-                          caseInfoResult.case_metadata.charges
-                        )
-                      ) {
+                      if (caseInfoResult.case_metadata.charges && Array.isArray(caseInfoResult.case_metadata.charges)) {
                         collectedMetadata.charges =
                           caseInfoResult.case_metadata.charges.map(
                             (charge: any, index: number) => ({
@@ -757,13 +753,12 @@ export default function DocumentUploadStep({
           <div className="bg-surface-000 p-8 mb-6">
             {classifiedFiles.length === 0 ? (
               <div
-                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-                  isUploading
-                    ? "border-border-200"
-                    : isDragActive
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
+                  ? "border-border-200"
+                  : isDragActive
                     ? "border-primary-400 bg-primary-50"
                     : "border-border-200 hover:border-primary-300"
-                }`}
+                  }`}
                 onDragEnter={handleDragEnter}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -780,9 +775,8 @@ export default function DocumentUploadStep({
                 />
                 <label
                   htmlFor="fileUpload"
-                  className={`cursor-pointer flex flex-col items-center ${
-                    isUploading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`cursor-pointer flex flex-col items-center ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
                   <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-primary-100 rounded-full mb-3 sm:mb-4">
                     <svg
@@ -928,13 +922,12 @@ export default function DocumentUploadStep({
                   </div>
                 </div>
                 <div
-                  className={`border border-dashed rounded-lg p-4 text-center transition-colors ${
-                    isUploading
-                      ? "border-border-200"
-                      : isDragActive
+                  className={`border border-dashed rounded-lg p-4 text-center transition-colors ${isUploading
+                    ? "border-border-200"
+                    : isDragActive
                       ? "border-primary-400 bg-primary-50"
                       : "border-border-200 hover:border-primary-300"
-                  }`}
+                    }`}
                   onDragEnter={handleDragEnter}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
@@ -951,11 +944,10 @@ export default function DocumentUploadStep({
                   />
                   <label
                     htmlFor="fileUpload"
-                    className={`cursor-pointer flex items-center justify-center gap-2 text-sm text-ink-600 hover:text-ink-900 ${
-                      isUploading
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }`}
+                    className={`cursor-pointer flex items-center justify-center gap-2 text-sm text-ink-600 hover:text-ink-900 ${isUploading
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                      }`}
                   >
                     <svg
                       className="w-4 h-4"

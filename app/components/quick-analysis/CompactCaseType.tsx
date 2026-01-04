@@ -328,7 +328,7 @@ export default function CompactCaseType({
   return (
     <>
       <div className="bg-surface-000 p-3 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
             <div className="flex items-start sm:items-center flex-1 min-w-0">
               <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
                 <span className="text-xl sm:text-2xl text-primary-600">
@@ -431,7 +431,7 @@ export default function CompactCaseType({
 
               {/* Modal Content */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {caseTypes.map((caseType) => (
                       <button
                         key={caseType.id}

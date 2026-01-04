@@ -33,10 +33,10 @@ interface QuickAnalysisFormProps {
     caseDescription?: string;
     jurisdiction?: {
       country?: string;
-      state?: string;
-      city?: string;
-      court?: string;
-      country_id?: string;
+      country_code?: string;
+      jurisdiction?: string;
+      jurisdiction_code?: string;
+      court_name?: string;
     };
     caseType?: string;
     role?: string;
@@ -77,10 +77,10 @@ export default function QuickAnalysisForm({
   // Initialize with metadata from documents or empty
   const [jurisdiction, setJurisdiction] = useState<any>({
     country: "",
-    state: "",
-    city: "",
-    court: "",
-    country_id: "",
+    country_code: "",
+    jurisdiction: "",
+    jurisdiction_code: "",
+    court_name: "",
   });
   // Store the case type as its string id that API expects
   const [caseTypeId, setCaseTypeId] = useState<string>("");
@@ -298,8 +298,8 @@ export default function QuickAnalysisForm({
       alert("Comprehensive Case Description is required.");
       return false;
     }
-    if (!jurisdiction?.country?.trim() || !jurisdiction?.state?.trim() || !jurisdiction?.city?.trim() || !jurisdiction?.court?.trim()) {
-      alert("All jurisdiction fields (Country, State, City, Court) are required.");
+    if (!jurisdiction?.country?.trim() || !jurisdiction?.jurisdiction?.trim() || !jurisdiction?.court_name?.trim()) {
+      alert("All jurisdiction fields (Country, Jurisdiction, Court) are required.");
       return false;
     }
     if (!caseTypeId?.trim()) {
@@ -488,10 +488,8 @@ export default function QuickAnalysisForm({
           <JurisdictionSection
             variant="compact"
             onUpdate={(data) => {
-              setJurisdiction(data);
-              if (data.country_id) {
-                setCountryId(data.country_id);
-              }
+              setJurisdiction((prev: any) => ({ ...prev, ...data }));
+              setCountryId(data.country_code || "");
             }}
             initialValues={jurisdiction}
             hideSaveButton={true}
@@ -750,9 +748,8 @@ export default function QuickAnalysisForm({
               disabled={isStreamingOpen || !caseName?.trim() ||
                 !caseDescription?.trim() ||
                 !jurisdiction?.country?.trim() ||
-                !jurisdiction?.state?.trim() ||
-                !jurisdiction?.city?.trim() ||
-                !jurisdiction?.court?.trim() ||
+                !jurisdiction?.jurisdiction?.trim() ||
+                !jurisdiction?.court_name?.trim() ||
                 !caseTypeId?.trim() ||
                 !role?.trim()}
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center justify-center gap-2 sm:gap-3"
@@ -775,9 +772,8 @@ export default function QuickAnalysisForm({
             {(!caseName?.trim() ||
               !caseDescription?.trim() ||
               !jurisdiction?.country?.trim() ||
-              !jurisdiction?.state?.trim() ||
-              !jurisdiction?.city?.trim() ||
-              !jurisdiction?.court?.trim() ||
+              !jurisdiction?.jurisdiction?.trim() ||
+              !jurisdiction?.court_name?.trim() ||
               !caseTypeId?.trim() ||
               !role?.trim()) && (
                 <p className="text-center text-sm text-ink-500 mt-2">
