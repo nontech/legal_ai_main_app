@@ -73,15 +73,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/documents"
-                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
-                >
-                  {t("documentManagement")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/use-cases"
+                  href="/#use-cases"
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("useCases")}

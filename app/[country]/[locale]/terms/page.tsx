@@ -10,11 +10,19 @@ export default function TermsOfService() {
   return (
     <div className="min-h-screen bg-surface-100">
       <Navbar />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="bg-white rounded-2xl shadow-lg p-8 md:p-12">
-          <h1 className="text-4xl font-bold text-ink-900 mb-4">Terms of Service</h1>
-          <p className="text-sm text-ink-500 mb-8">Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      
+      {/* Hero Header */}
+      <div className="bg-primary-900 text-white pt-32 pb-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Terms of Service</h1>
+          <p className="text-primary-100 text-lg">
+            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        </div>
+      </div>
 
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 pb-20 relative z-10">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-border-200">
           <div className="prose prose-lg max-w-none space-y-8 text-ink-700">
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">1. Acceptance of Terms</h2>
@@ -25,7 +33,7 @@ export default function TermsOfService() {
 
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">2. Important Disclaimer</h2>
-              <div className="bg-warning-100 border-l-4 border-warning-500 p-4 my-4">
+              <div className="bg-warning-100 border-l-4 border-warning-500 p-4 my-4 rounded-r">
                 <p className="font-semibold text-ink-900 mb-2">TheLawThing is not a law firm and does not provide legal advice.</p>
                 <p>
                   The Service provides AI-generated analysis, predictions, and insights based on patterns in legal data. All outputs are assistive tools intended to support professional judgment, not replace it. Results are non-deterministic and should be reviewed by qualified legal counsel. You are solely responsible for all legal decisions and actions taken based on the Service.
@@ -127,8 +135,8 @@ export default function TermsOfService() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border-200">
-            <Link href="/" className="text-primary-600 hover:text-primary-700 font-medium">
-              ← Back to Home
+            <Link href="/" className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group">
+              <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Home
             </Link>
           </div>
         </div>
@@ -136,4 +144,3 @@ export default function TermsOfService() {
     </div>
   );
 }
-

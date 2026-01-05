@@ -1,7 +1,6 @@
 {
   "navigation": {
     "home": "Home",
-    "documents": "Documents Library",
     "pretrialProcess": "Pretrial Process",
     "signIn": "Sign In",
     "signUp": "Sign Up",
@@ -121,7 +120,6 @@
     "product": "Product",
     "features": "Features",
     "pricing": "Pricing",
-    "documentManagement": "Document Management",
     "useCases": "Use Cases",
     "resources": "Resources",
     "security": "Security",

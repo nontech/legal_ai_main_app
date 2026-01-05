@@ -1,7 +1,6 @@
 {
     "navigation": {
         "home": "Startseite",
-        "documents": "Dokumentenbibliothek",
         "pretrialProcess": "Vorverfahren",
         "signIn": "Anmelden",
         "signUp": "Registrieren",
@@ -121,7 +120,6 @@
         "product": "Produkt",
         "features": "Funktionen",
         "pricing": "Preisgestaltung",
-        "documentManagement": "Dokumentenverwaltung",
         "useCases": "Use Cases",
         "resources": "Ressourcen",
         "security": "Sicherheit",

@@ -5,7 +5,7 @@ import HeroSection from "@/app/components/dashboard/HeroSection";
 import StatsCards from "@/app/components/dashboard/StatsCards";
 import CasePortfolio from "@/app/components/dashboard/CasePortfolio";
 import ConfidentialByDesign from "@/app/components/dashboard/ConfidentialByDesign";
-import Footer from "@/app/components/Footer";
+
 import PretrialProcess from "@/app/components/PretrialProcess";
 import UseCases from "@/app/components/UseCases";
 
@@ -31,8 +31,6 @@ export default function Dashboard() {
             {/* Who are you? Section */}
             <UseCases />
 
-            {/* Footer */}
-            <Footer />
 
             {/* Pretrial Process Modal */}
             {isPretrialOpen && (

@@ -119,16 +119,6 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               </button>
             )}
 
-            {isAuthenticated && (
-              <Link
-                href="/documents"
-                className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
-              >
-                <span className="relative z-10">{t("documents")}</span>
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
-              </Link>
-            )}
-
             <div className="px-3">
               <CountryLanguageSelector />
             </div>
@@ -270,16 +260,6 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 </svg>
                 <span>{t("pretrialProcess")}</span>
               </button>
-            )}
-
-            {isAuthenticated && (
-              <Link
-                href="/documents"
-                className="block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {t("documents")}
-              </Link>
             )}
 
             {!isLoading && isAuthenticated ? (
