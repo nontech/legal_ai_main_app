@@ -1,10 +1,20 @@
-import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
+import BackToHome from "@/app/components/BackToHome";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export const metadata = {
-  title: "Cookie Policy - TheLawThing",
-  description: "Cookie Policy for TheLawThing legal AI platform",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ country: string; locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("cookies");
+  return {
+    title: `${t("title")} - TheLawThing`,
+    description: t("description"),
+  };
+}
 
 export default async function CookiePolicy({
   params,
@@ -12,6 +22,8 @@ export default async function CookiePolicy({
   params: Promise<{ country: string; locale: string }>;
 }) {
   const { country, locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("cookies");
 
   return (
     <div className="min-h-screen bg-surface-100">
@@ -20,9 +32,9 @@ export default async function CookiePolicy({
       {/* Hero Header */}
       <div className="bg-primary-900 text-white pt-32 pb-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Cookie Policy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("title")}</h1>
           <p className="text-primary-100 text-lg">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {t("lastUpdated")} {new Date().toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </div>
@@ -31,83 +43,90 @@ export default async function CookiePolicy({
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-border-200">
           <div className="prose prose-lg max-w-none space-y-8 text-ink-700">
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">1. What Are Cookies?</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("whatAreCookies")}</h2>
               <p>
-                Cookies are small text files that are placed on your device when you visit a website. They are widely used to make websites work more efficiently and provide information to website owners.
+                {t("cookiesDefinition")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">2. Types of Cookies We Use</h2>
-
-              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.1 Strictly Necessary Cookies</h3>
-              <p>
-                These cookies are essential for the Service to function properly. They enable core functionality such as authentication, security, and load balancing. You cannot opt out of these cookies.
-              </p>
-
-              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.2 Functional Cookies</h3>
-              <p>
-                These cookies allow the Service to remember choices you make (such as language preferences) and provide enhanced, personalized features.
-              </p>
-
-              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.3 Analytics Cookies</h3>
-              <p>
-                These cookies help us understand how visitors interact with the Service by collecting and reporting information anonymously. This helps us improve the Service's performance and user experience.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">3. Your Cookie Choices</h2>
-              <p>
-                You can control and manage cookies through:
-              </p>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("whyWeUse")}</h2>
+              <p>{t("whyWeUseDesc")}</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Cookie Settings:</strong> Use the "Cookie Settings" link in the footer to accept, reject, or fine-tune cookie categories at any time.</li>
-                <li><strong>Browser Settings:</strong> Most browsers allow you to refuse or delete cookies. However, this may impact your ability to use the Service.</li>
+                <li>{t("improveExperience")}</li>
+                <li>{t("rememberPreferences")}</li>
+                <li>{t("analyzeUsage")}</li>
+                <li>{t("preventFraud")}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">4. Cookie Duration</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("typesOfCookies")}</h2>
+
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("essentialCookies")}</h3>
+              <p>
+                {t("essentialDesc")}
+              </p>
+
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("performanceCookies")}</h3>
+              <p>
+                {t("performanceDesc")}
+              </p>
+
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("functionalCookies")}</h3>
+              <p>
+                {t("functionalDesc")}
+              </p>
+
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("marketingCookies")}</h3>
+              <p>
+                {t("marketingDesc")}
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("yourCookieChoices")}</h2>
+              <p>
+                {t("cookieChoicesDesc")}
+              </p>
               <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Session Cookies:</strong> Expire when you close your browser</li>
-                <li><strong>Persistent Cookies:</strong> Remain on your device until their set expiry date or until you delete them</li>
+                <li>{t("refuseCookies")}</li>
+                <li>{t("deleteCookies")}</li>
+                <li>{t("blockCookies")}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">5. Third-Party Cookies</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("note")}</h2>
               <p>
-                Some cookies are set by third-party providers integrated into the Service (e.g., analytics services). We contractually require these providers to maintain appropriate privacy protections.
+                {t("noteText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">6. Do Not Track</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("thirdPartyCookies")}</h2>
               <p>
-                Our Service currently does not respond to "Do Not Track" (DNT) signals from browsers.
+                {t("thirdPartyDesc")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">7. Updates to This Policy</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("doNotTrack")}</h2>
               <p>
-                We may update this Cookie Policy from time to time. We will notify you of any material changes by posting the updated policy on this page.
+                {t("doNotTrackDesc")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">8. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("changesToPolicy")}</h2>
               <p>
-                If you have questions about our use of cookies, please contact us at <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
+                {t("changesDesc")}
               </p>
             </section>
           </div>
 
           <div className="mt-12 pt-8 border-t border-border-200">
-            <Link href={`/${country}/${locale}`} className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group">
-              <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Home
-            </Link>
+            <BackToHome country={country} locale={locale} />
           </div>
         </div>
       </div>

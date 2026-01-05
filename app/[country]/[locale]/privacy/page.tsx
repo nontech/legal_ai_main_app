@@ -1,10 +1,20 @@
-import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
+import BackToHome from "@/app/components/BackToHome";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export const metadata = {
-  title: "Privacy Policy - TheLawThing",
-  description: "Privacy Policy for TheLawThing legal AI platform",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ country: string; locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("privacy");
+  return {
+    title: `${t("title")} - TheLawThing`,
+    description: t("description"),
+  };
+}
 
 export default async function PrivacyPolicy({
   params,
@@ -12,6 +22,8 @@ export default async function PrivacyPolicy({
   params: Promise<{ country: string; locale: string }>;
 }) {
   const { country, locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("privacy");
 
   return (
     <div className="min-h-screen bg-surface-100">
@@ -20,9 +32,9 @@ export default async function PrivacyPolicy({
       {/* Hero Header */}
       <div className="bg-primary-900 text-white pt-32 pb-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{t("title")}</h1>
           <p className="text-primary-100 text-lg">
-            Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {t("lastUpdated")} {new Date().toLocaleDateString(locale === 'de' ? 'de-DE' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </div>
       </div>
@@ -31,110 +43,110 @@ export default async function PrivacyPolicy({
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border border-border-200">
           <div className="prose prose-lg max-w-none space-y-8 text-ink-700">
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">1. Introduction</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("introduction")}</h2>
               <p>
-                TheLawThing ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered legal case analysis platform (the "Service").
+                {t("introductionText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">2. Information We Collect</h2>
-              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.1 Information You Provide</h3>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("informationWeCollect")}</h2>
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("informationYouProvide")}</h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Account information (name, email address, password)</li>
-                <li>Case facts, documents, and other content you upload</li>
-                <li>Communication data when you contact us</li>
+                <li>{t("accountInfo")}</li>
+                <li>{t("caseData")}</li>
+                <li>{t("communicationData")}</li>
               </ul>
 
-              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">2.2 Automatically Collected Information</h3>
+              <h3 className="text-xl font-semibold text-ink-900 mt-6 mb-3">{t("automaticallyCollected")}</h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Usage data and analytics</li>
-                <li>Device information and IP addresses</li>
-                <li>Cookies and similar tracking technologies</li>
+                <li>{t("usageData")}</li>
+                <li>{t("deviceInfo")}</li>
+                <li>{t("cookies")}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">3. How We Use Your Information</h2>
-              <p>We use your information to:</p>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("howWeUse")}</h2>
+              <p>{t("howWeUseDesc")}</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Provide, maintain, and improve the Service</li>
-                <li>Process your case analyses and generate insights</li>
-                <li>Communicate with you about the Service</li>
-                <li>Ensure security and prevent fraud</li>
-                <li>Comply with legal obligations</li>
+                <li>{t("provideService")}</li>
+                <li>{t("processAnalyses")}</li>
+                <li>{t("communicateService")}</li>
+                <li>{t("ensureSecurity")}</li>
+                <li>{t("complylegal")}</li>
               </ul>
               <p className="mt-4 font-semibold">
-                <strong>Important:</strong> We do not use your case data or documents to train public AI models. Your data is isolated to your account and used solely to provide the Service.
+                <strong>{t("importantNote")}:</strong> {t("importantNoteText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">4. Data Sharing and Disclosure</h2>
-              <p>We do not sell your personal information. We may share your information only:</p>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("dataSharing")}</h2>
+              <p>{t("dataSharingDesc")}</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>With service providers who assist in operating the Service (under strict confidentiality agreements)</li>
-                <li>When required by law or to protect our rights</li>
-                <li>In connection with a business transfer (merger, acquisition, etc.)</li>
-                <li>With your explicit consent</li>
+                <li>{t("serviceProviders")}</li>
+                <li>{t("requiredByLaw")}</li>
+                <li>{t("businessTransfer")}</li>
+                <li>{t("yourConsent")}</li>
               </ul>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">5. Data Security</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("dataSecurity")}</h2>
               <p>
-                We implement industry-standard security measures including encryption, access controls, and regular security assessments. However, no method of transmission over the Internet is 100% secure.
+                {t("dataSecurityText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">6. Your Rights</h2>
-              <p>Depending on your location, you may have the right to:</p>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("yourRights")}</h2>
+              <p>{t("yourRightsDesc")}</p>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Access your personal information</li>
-                <li>Correct inaccurate data</li>
-                <li>Request deletion of your data</li>
-                <li>Object to processing of your data</li>
-                <li>Data portability</li>
-                <li>Withdraw consent</li>
+                <li>{t("accessData")}</li>
+                <li>{t("correctData")}</li>
+                <li>{t("deleteData")}</li>
+                <li>{t("objectProcessing")}</li>
+                <li>{t("dataPortability")}</li>
+                <li>{t("withdrawConsent")}</li>
               </ul>
               <p className="mt-4">
-                To exercise these rights, please contact us at <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
+                {t("exerciseRights")} <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">7. Data Retention</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("dataRetention")}</h2>
               <p>
-                We retain your information for as long as necessary to provide the Service and comply with legal obligations. You may delete your account and data at any time through the Service settings.
+                {t("dataRetentionText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">8. International Data Transfers</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("internationalTransfers")}</h2>
               <p>
-                Your information may be transferred to and processed in countries other than your own. We ensure appropriate safeguards are in place, including Standard Contractual Clauses (SCCs) where applicable.
+                {t("internationalTransfersText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">9. Children's Privacy</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("childrenPrivacy")}</h2>
               <p>
-                Our Service is not intended for individuals under 18 years of age. We do not knowingly collect personal information from children.
+                {t("childrenPrivacyText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">10. Changes to This Policy</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("changesPolicy")}</h2>
               <p>
-                We may update this Privacy Policy from time to time. We will notify you of any material changes by posting the new policy on this page and updating the "Last updated" date.
+                {t("changesPolicyText")}
               </p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">11. Contact Us</h2>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("contactUs")}</h2>
               <p>
-                If you have questions about this Privacy Policy, please contact us at:
+                {t("contactUsText")}
               </p>
               <p className="mt-2">
                 <strong>Email:</strong> <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>
@@ -143,9 +155,7 @@ export default async function PrivacyPolicy({
           </div>
 
           <div className="mt-12 pt-8 border-t border-border-200">
-            <Link href={`/${country}/${locale}`} className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group">
-              <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Home
-            </Link>
+            <BackToHome country={country} locale={locale} />
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   Check,
   Mail,
@@ -9,7 +9,13 @@ import {
   Scale,
 } from "lucide-react";
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ country: string; locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("pricing");
   return {
     title: `${t("title")} - TheLawThing`,
@@ -23,6 +29,7 @@ export default async function Pricing({
   params: Promise<{ country: string; locale: string }>;
 }) {
   const { country, locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("pricing");
 
   return (
