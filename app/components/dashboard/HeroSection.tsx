@@ -2,9 +2,13 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 export default function HeroSection() {
   const t = useTranslations("hero");
+  const params = useParams();
+  const country = params.country as string;
+  const locale = params.locale as string;
 
   return (
     <div className="bg-gradient-to-br from-gray-50 via-white to-blue-50/40 text-gray-900 pt-20">
@@ -21,7 +25,7 @@ export default function HeroSection() {
 
           <div className="flex flex-col items-center justify-center gap-4">
             <Link
-              href="/case-analysis"
+              href={`/${country}/${locale}/case-analysis`}
               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-accent-600 to-accent-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-accent-500 hover:to-accent-400 transition-all duration-300 shadow-lg hover:shadow-accent-500/25 hover:-translate-y-0.5"
             >
               <span>{t("cta")}</span>

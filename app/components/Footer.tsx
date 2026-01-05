@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const t = useTranslations("footer");
+  const params = useParams();
+  const country = params.country as string;
+  const locale = params.locale as string;
 
   return (
     <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white">
@@ -57,7 +61,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/"
+                  href={`/${country}/${locale}`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("features")}
@@ -65,7 +69,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/pricing"
+                  href={`/${country}/${locale}/pricing`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("pricing")}
@@ -73,7 +77,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/#use-cases"
+                  href={`/${country}/${locale}/#use-cases`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("useCases")}
@@ -90,7 +94,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/security"
+                  href={`/${country}/${locale}/security`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("security")}
@@ -98,7 +102,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/documentation"
+                  href={`/${country}/${locale}/documentation`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("documentation")}
@@ -106,7 +110,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href={`/${country}/${locale}/contact`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("support")}
@@ -123,7 +127,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/privacy"
+                  href={`/${country}/${locale}/privacy`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("privacyPolicy")}
@@ -131,7 +135,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href={`/${country}/${locale}/terms`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("termsOfService")}
@@ -139,7 +143,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/cookies"
+                  href={`/${country}/${locale}/cookies`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("cookiePolicy")}
@@ -147,7 +151,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/acceptable-use"
+                  href={`/${country}/${locale}/acceptable-use`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("acceptableUse")}
@@ -155,7 +159,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/imprint"
+                  href={`/${country}/${locale}/imprint`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("imprint")}

@@ -17,7 +17,12 @@ export async function generateMetadata() {
   };
 }
 
-export default async function Pricing() {
+export default async function Pricing({
+  params,
+}: {
+  params: Promise<{ country: string; locale: string }>;
+}) {
+  const { country, locale } = await params;
   const t = await getTranslations("pricing");
 
   return (
@@ -157,7 +162,7 @@ export default async function Pricing() {
 
         <div className="mt-16 text-center">
           <Link
-            href="/"
+            href={`/${country}/${locale}`}
             className="inline-flex items-center text-ink-500 hover:text-primary-600 font-medium transition-colors"
           >
             {t("backToHome")}

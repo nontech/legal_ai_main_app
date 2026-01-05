@@ -6,7 +6,13 @@ export const metadata = {
   description: "Privacy Policy for TheLawThing legal AI platform",
 };
 
-export default function PrivacyPolicy() {
+export default async function PrivacyPolicy({
+  params,
+}: {
+  params: Promise<{ country: string; locale: string }>;
+}) {
+  const { country, locale } = await params;
+
   return (
     <div className="min-h-screen bg-surface-100">
       <Navbar />
@@ -137,7 +143,7 @@ export default function PrivacyPolicy() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-border-200">
-            <Link href="/" className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group">
+            <Link href={`/${country}/${locale}`} className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group">
               <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Home
             </Link>
           </div>

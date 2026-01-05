@@ -14,6 +14,8 @@ interface NavbarProps {
 export default function Navbar({ onPretrialClick, showPretrialButton = false }: NavbarProps) {
   const router = useRouter();
   const params = useParams();
+  const country = params.country as string;
+  const locale = params.locale as string;
   const t = useTranslations("navigation");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -78,7 +80,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo Section */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
+          <Link href={`/${country}/${locale}`} className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
             <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105">
               <svg
                 className="w-8 h-8 sm:w-9 sm:h-9 text-ink-900"
@@ -170,7 +172,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-2 z-50">
                     <Link
-                      href="/"
+                      href={`/${country}/${locale}`}
                       className="block px-4 py-2 text-sm text-ink-600 hover:bg-surface-100 transition-colors"
                       onClick={() => setIsUserMenuOpen(false)}
                     >
@@ -189,7 +191,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               // Auth Buttons - Not Authenticated
               <>
                 <Link
-                  href="/auth/signin"
+                  href={`/${country}/${locale}/auth/signin`}
                   className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
                   <span className="relative z-10 cursor-pointer">{t("signIn")}</span>
@@ -198,7 +200,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
 
                 <div className="ml-2 pl-2 border-l border-border-200">
                   <Link
-                    href="/auth/signup"
+                    href={`/${country}/${locale}/auth/signup`}
                     className="px-6 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 inline-block"
                   >
                     {t("signUp")}
@@ -284,7 +286,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     <span className="text-sm text-ink-600 truncate">{userEmail || t("account")}</span>
                   </div>
                   <Link
-                    href="/"
+                    href={`/${country}/${locale}`}
                     className="block px-3 py-2 text-sm text-ink-600 hover:bg-surface-100 rounded transition-colors"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -305,14 +307,14 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
               // Mobile Auth Buttons
               <div className="space-y-2 border-t border-border-200 mt-2 pt-2">
                 <Link
-                  href="/auth/signin"
+                  href={`/${country}/${locale}/auth/signin`}
                   className="cursor-pointer block px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {t("signIn")}
                 </Link>
                 <Link
-                  href="/auth/signup"
+                  href={`/${country}/${locale}/auth/signup`}
                   className="block px-4 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
