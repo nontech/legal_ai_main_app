@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import {
   Briefcase,
   User,
@@ -78,6 +79,9 @@ function ProfileCard({ title, features, icon, href, learnMoreText, comingSoonTex
 
 export default function UseCases() {
   const t = useTranslations("useCases");
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
 
   const profiles = [
     {
@@ -88,7 +92,7 @@ export default function UseCases() {
         t("professionals.feature3"),
       ],
       icon: <Briefcase className="w-6 h-6" />,
-      href: "/legal-professionals",
+      href: `/${country}/${locale}/legal-professionals`,
     },
     {
       title: t("individuals.title"),
@@ -98,7 +102,7 @@ export default function UseCases() {
         t("individuals.feature3"),
       ],
       icon: <User className="w-6 h-6" />,
-      href: "/individuals",
+      href: `/${country}/${locale}/individuals`,
     },
     {
       title: t("operations.title"),

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import JurisdictionSection from "../JurisdictionSection";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
@@ -63,6 +63,9 @@ export default function QuickAnalysisForm({
   uploadedDocuments = {},
 }: QuickAnalysisFormProps) {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
 
   const [countryId, setCountryId] = useState<string>("");
   const [caseName, setCaseName] = useState<string>("");
@@ -469,7 +472,7 @@ export default function QuickAnalysisForm({
     // Navigate to results page after a brief delay (modal will show completion state)
     setTimeout(() => {
       setIsStreamingOpen(false);
-      router.push(`/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
+      router.push(`/${country}/${locale}/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
     }, 2000);
   };
 

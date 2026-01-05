@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface StatCardProps {
@@ -60,6 +60,9 @@ function resolveCaseStatus(dbCase: any): string {
 
 export default function StatsCards() {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   const t = useTranslations("stats");
   const tNav = useTranslations("navigation");
   const [stats, setStats] = useState<StatCardProps[]>([]);
@@ -213,7 +216,7 @@ export default function StatsCards() {
             <h3 className="text-lg font-bold text-ink-900 mb-2">{t("signInViewStats")}</h3>
             <p className="text-sm text-ink-600 mb-4">{t("signInViewStatsDesc")}</p>
             <button
-              onClick={() => router.push("/auth/signin")}
+              onClick={() => router.push(`/${country}/${locale}/auth/signin`)}
               className="bg-gradient-to-r from-primary-700 to-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-700 transition-all"
             >
               {tNav("signIn")}

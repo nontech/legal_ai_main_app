@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface DBCase {
@@ -77,6 +77,9 @@ function isValidCase(dbCase: DBCase): boolean {
 
 export default function CasePortfolio() {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   const t = useTranslations("casePortfolio");
   const tNav = useTranslations("navigation");
   const [searchQuery, setSearchQuery] = useState("");
@@ -163,7 +166,7 @@ export default function CasePortfolio() {
             <h3 className="text-lg font-bold text-gray-900 mb-2">{t("signInViewCases")}</h3>
             <p className="text-sm text-gray-600 mb-4">{t("signInViewCasesDesc")}</p>
             <button
-              onClick={() => router.push("/auth/signin")}
+              onClick={() => router.push(`/${country}/${locale}/auth/signin`)}
               className="cursor-pointer bg-gradient-to-r from-accent-400 to-accent-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-accent-500 hover:to-accent-400 transition-all"
             >
               {tNav("signIn")}
@@ -184,7 +187,7 @@ export default function CasePortfolio() {
             </p>
           </div>
           <button
-            onClick={() => router.push("/case-analysis")}
+            onClick={() => router.push(`/${country}/${locale}/case-analysis`)}
             className="cursor-pointer bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
           >
             <svg
@@ -297,7 +300,7 @@ export default function CasePortfolio() {
                 <tr
                   key={case_.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/case-analysis/detailed?step=7&caseId=${case_.id}`)}
+                  onClick={() => router.push(`/${country}/${locale}/case-analysis/detailed?step=7&caseId=${case_.id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {case_.id.substring(0, 8)}

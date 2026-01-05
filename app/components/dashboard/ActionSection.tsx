@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ActionSection() {
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   return (
     <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 border border-gray-200 shadow-sm">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -17,7 +21,7 @@ export default function ActionSection() {
         </div>
         <div className="flex gap-3 flex-shrink-0">
           <Link
-            href="/case-analysis"
+            href={`/${country}/${locale}/case-analysis`}
             className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <svg
