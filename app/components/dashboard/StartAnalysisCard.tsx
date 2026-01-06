@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function StartAnalysisCard() {
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   return (
     <div className="relative">
       <div className="absolute inset-0 bg-gradient-to-br from-amber-200 to-amber-100 rounded-3xl blur-xl opacity-50"></div>
@@ -31,7 +35,7 @@ export default function StartAnalysisCard() {
             insights and strategic recommendations
           </p>
           <Link
-            href="/case-analysis"
+            href={`/${country}/${locale}/case-analysis`}
             className="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 flex items-center justify-center gap-2"
           >
             <span>+ New Case Analysis</span>

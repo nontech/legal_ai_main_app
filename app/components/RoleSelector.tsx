@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import SaveCaseButton from "./SaveCaseButton";
+import { useTranslations } from "next-intl";
 
 type RoleType = "defendant" | "plaintiff";
 
@@ -11,6 +12,7 @@ interface RoleSelectorProps {
 }
 
 export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
+  const t = useTranslations("caseAnalysis.role");
   const [roles, setRoles] = useState<any>(null);
   const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,11 +166,10 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
         <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
           <div className="text-center">
             <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              Select Your Role
+              {t("selectTitle")}
             </h2>
             <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              Your role determines the legal strategy, burden of
-              proof, and analysis perspective for this tax case.
+              {t("selectDescription")}
             </p>
           </div>
         </div>
@@ -192,15 +193,13 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
               </svg>
               <div>
                 <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                  Role Selection Confirmed
+                  {t("selectionConfirmed")}
                 </h4>
                 <p className="text-ink-600 text-xs sm:text-sm">
-                  You have selected{" "}
-                  <span className="font-semibold">
-                    {selectedRoleData.title}
-                  </span>{" "}
-                  - The analysis will be tailored to your strategic
-                  position and legal burden in this case.
+                  {t.rich("selectionConfirmedDesc", {
+                    role: selectedRoleData.title,
+                    font: (chunks) => <span className="font-semibold">{chunks}</span>
+                  })}
                 </p>
               </div>
             </div>
@@ -245,11 +244,11 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
-                    Step 3: Your Role{" "}
+                    {t("stepTitle")}{" "}
                     <span className="text-red-500">*</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-ink-600">
-                    Your position in this case
+                    {t("positionDesc")}
                   </p>
                 </div>
               </div>
@@ -260,7 +259,7 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-100 transition-colors group cursor-pointer"
               >
                 <span className="text-base sm:text-lg font-semibold text-ink-900 group-hover:text-primary-600 transition-colors">
-                  {selectedRoleData?.title || "Select Role"}
+                  {selectedRoleData?.title || t("selectTitle")}
                 </span>
                 <svg
                   className="w-4 h-4 text-ink-400 group-hover:text-primary-600 transition-colors"
@@ -283,10 +282,10 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
             <div className="sticky top-0 bg-gradient-to-r from-primary-700 to-primary-600 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                  Select Your Role
+                  {t("selectTitle")}
                 </h2>
                 <p className="text-primary-100 text-xs sm:text-sm hidden sm:block">
-                  Choose your position in this case
+                  {t("selectDescription")}
                 </p>
               </div>
               <button
@@ -312,8 +311,7 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
             {/* Role Cards in Modal */}
             <div className="p-3 sm:p-6">
               <p className="text-center text-ink-600 mb-4 sm:mb-6 text-sm sm:text-base">
-                Your role determines the legal strategy, burden of
-                proof, and analysis perspective for this case.
+                {t("selectDescription")}
               </p>
 
               {isFetchingRoles ? (
@@ -345,120 +343,120 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                   {/* Defendant Card */}
                   {effectiveRoles.defendant && (
                     <button
-                  onClick={() => handleRoleSelect("defendant")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
-                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
-                >
-                  <div className="flex items-start mb-3 sm:mb-4">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "defendant"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
+                      onClick={() => handleRoleSelect("defendant")}
+                      className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
+                        ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                        : "border-border-200 bg-surface-000 hover:border-primary-300"
                         }`}
                     >
-                      {effectiveRoles.defendant?.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {effectiveRoles.defendant?.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {effectiveRoles.defendant?.subtitle}
-                      </p>
-                    </div>
-                  </div>
+                      <div className="flex items-start mb-3 sm:mb-4">
+                        <div
+                          className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "defendant"
+                            ? "bg-primary-600 text-white"
+                            : "bg-surface-200 text-ink-500"
+                            }`}
+                        >
+                          {effectiveRoles.defendant?.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
+                            {effectiveRoles.defendant?.title}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-ink-600 truncate">
+                            {effectiveRoles.defendant?.subtitle}
+                          </p>
+                        </div>
+                      </div>
 
-                  <div className="mb-3 sm:mb-4 hidden sm:block">
-                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
-                      Key Responsibilities:
-                    </h4>
-                    <ul className="space-y-1">
-                      {effectiveRoles.defendant?.responsibilities?.map(
-                        (resp: string, index: number) => (
-                          <li
-                            key={index}
-                            className="text-sm text-ink-600 flex items-start"
-                          >
-                            <span className="text-primary-600 mr-2">
-                              •
-                            </span>
-                            <span>{resp}</span>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
+                      <div className="mb-3 sm:mb-4 hidden sm:block">
+                        <h4 className="text-sm font-semibold text-ink-900 mb-2">
+                          Key Responsibilities:
+                        </h4>
+                        <ul className="space-y-1">
+                          {effectiveRoles.defendant?.responsibilities?.map(
+                            (resp: string, index: number) => (
+                              <li
+                                key={index}
+                                className="text-sm text-ink-600 flex items-start"
+                              >
+                                <span className="text-primary-600 mr-2">
+                                  •
+                                </span>
+                                <span>{resp}</span>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
 
-                  <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
-                    <p className="text-sm text-ink-600">
-                      <span className="font-semibold">
-                        Strategic Focus:
-                      </span>{" "}
-                      {effectiveRoles.defendant?.strategicFocus}
-                    </p>
-                  </div>
+                      <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
+                        <p className="text-sm text-ink-600">
+                          <span className="font-semibold">
+                            Strategic Focus:
+                          </span>{" "}
+                          {effectiveRoles.defendant?.strategicFocus}
+                        </p>
+                      </div>
                     </button>
                   )}
 
                   {/* Plaintiff Card */}
                   {effectiveRoles.plaintiff && (
                     <button
-                  onClick={() => handleRoleSelect("plaintiff")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
-                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
-                >
-                  <div className="flex items-start mb-3 sm:mb-4">
-                    <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
+                      onClick={() => handleRoleSelect("plaintiff")}
+                      className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
+                        ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                        : "border-border-200 bg-surface-000 hover:border-primary-300"
                         }`}
                     >
-                      {effectiveRoles.plaintiff?.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
-                        {effectiveRoles.plaintiff?.title}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-ink-600 truncate">
-                        {effectiveRoles.plaintiff?.subtitle}
-                      </p>
-                    </div>
-                  </div>
+                      <div className="flex items-start mb-3 sm:mb-4">
+                        <div
+                          className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
+                            ? "bg-primary-600 text-white"
+                            : "bg-surface-200 text-ink-500"
+                            }`}
+                        >
+                          {effectiveRoles.plaintiff?.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 truncate">
+                            {effectiveRoles.plaintiff?.title}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-ink-600 truncate">
+                            {effectiveRoles.plaintiff?.subtitle}
+                          </p>
+                        </div>
+                      </div>
 
-                  <div className="mb-3 sm:mb-4 hidden sm:block">
-                    <h4 className="text-sm font-semibold text-ink-900 mb-2">
-                      Key Responsibilities:
-                    </h4>
-                    <ul className="space-y-1">
-                      {effectiveRoles.plaintiff?.responsibilities?.map(
-                        (resp: string, index: number) => (
-                          <li
-                            key={index}
-                            className="text-sm text-ink-600 flex items-start"
-                          >
-                            <span className="text-primary-600 mr-2">
-                              •
-                            </span>
-                            <span>{resp}</span>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
+                      <div className="mb-3 sm:mb-4 hidden sm:block">
+                        <h4 className="text-sm font-semibold text-ink-900 mb-2">
+                          Key Responsibilities:
+                        </h4>
+                        <ul className="space-y-1">
+                          {effectiveRoles.plaintiff?.responsibilities?.map(
+                            (resp: string, index: number) => (
+                              <li
+                                key={index}
+                                className="text-sm text-ink-600 flex items-start"
+                              >
+                                <span className="text-primary-600 mr-2">
+                                  •
+                                </span>
+                                <span>{resp}</span>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
 
-                  <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
-                    <p className="text-sm text-ink-600">
-                      <span className="font-semibold">
-                        Strategic Focus:
-                      </span>{" "}
-                      {effectiveRoles.plaintiff?.strategicFocus}
-                    </p>
-                  </div>
+                      <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
+                        <p className="text-sm text-ink-600">
+                          <span className="font-semibold">
+                            Strategic Focus:
+                          </span>{" "}
+                          {effectiveRoles.plaintiff?.strategicFocus}
+                        </p>
+                      </div>
                     </button>
                   )}
                 </div>
@@ -468,12 +466,10 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
               {selectedRoleData && (
                 <div className="bg-highlight-200 border border-transparent rounded-lg p-4 mt-6">
                   <p className="text-sm text-ink-700">
-                    <span className="font-semibold">
-                      Selected Role:
-                    </span>{" "}
-                    {selectedRoleData.title} - The analysis will be
-                    tailored to your strategic position and legal burden
-                    in this case.
+                    {t.rich("selectionConfirmedDesc", {
+                      role: selectedRoleData.title,
+                      font: (chunks) => <span className="font-semibold">{chunks}</span>
+                    })}
                   </p>
                 </div>
               )}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import SaveCaseButton from "./SaveCaseButton";
+import { useTranslations } from "next-intl";
 
 interface JuryCharacteristic {
   id: string;
@@ -11,6 +12,7 @@ interface JuryCharacteristic {
 }
 
 export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { caseId?: string; onSaveSuccess?: () => void; countryId?: string }) {
+  const t = useTranslations("caseAnalysis.jury");
   const [demographics, setDemographics] = useState<JuryCharacteristic[]>([]);
   const [psychological, setPsychological] = useState<JuryCharacteristic[]>([]);
   const [selectedDemographics, setSelectedDemographics] = useState<
@@ -152,7 +154,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
 
         if (json.ok && json.data) {
           const apiData = json.data;
-          
+
           // Transform demographics
           if (apiData.demographics && typeof apiData.demographics === 'object') {
             const demoArray = Object.entries(apiData.demographics).map(([key, value]: [string, any]) => ({
@@ -239,12 +241,10 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <div className="text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Jury Composition
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto">
-            Select the demographic and psychological characteristics
-            that best represent your anticipated jury pool. These
-            factors significantly influence case outcomes.
+            {t("description")}
           </p>
         </div>
       </div>
@@ -260,19 +260,19 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Selection Summary
+              {t("summaryTitle")}
             </h3>
             <div className="flex items-center gap-6 text-sm">
               <div>
-                <span className="text-gray-600">Demographics:</span>
+                <span className="text-gray-600">{t("demographicsLabel")}:</span>
                 <span className="ml-2 font-bold text-blue-600">
-                  {selectedDemographics.length} selected
+                  {t("selectedCount", { count: selectedDemographics.length })}
                 </span>
               </div>
               <div>
-                <span className="text-gray-600">Psychological:</span>
+                <span className="text-gray-600">{t("psychologicalLabel")}:</span>
                 <span className="ml-2 font-bold text-blue-600">
-                  {selectedPsychological.length} selected
+                  {t("selectedCount", { count: selectedPsychological.length })}
                 </span>
               </div>
             </div>
@@ -286,7 +286,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
                 }}
                 className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-white transition-colors"
               >
-                Clear All
+                {t("clearAll")}
               </button>
             )}
         </div>
@@ -313,7 +313,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">
-              Demographics
+              {t("demographicsTitle")}
             </h3>
           </div>
 
@@ -342,7 +342,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
                 </div>
               </label>
             )) : (
-              <div className="text-gray-500 text-sm">No demographics available</div>
+              <div className="text-gray-500 text-sm">{t("noData")}</div>
             )}
           </div>
         </div>
@@ -366,7 +366,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900">
-              Psychological Characteristics
+              {t("psychologicalTitle")}
             </h3>
           </div>
 
@@ -395,7 +395,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
                 </div>
               </label>
             )) : (
-              <div className="text-gray-500 text-sm">No psychological characteristics available</div>
+              <div className="text-gray-500 text-sm">{t("noData")}</div>
             )}
           </div>
         </div>
@@ -425,14 +425,10 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
               </div>
               <div className="flex-1">
                 <h4 className="text-lg font-bold text-ink-900 mb-2">
-                  AI-Powered Jury Analysis
+                  {t("aiAnalysisTitle")}
                 </h4>
                 <p className="text-ink-600 mb-4">
-                  Based on your selections, our AI will analyze how
-                  these jury characteristics might influence your case
-                  strategy, identify potential challenges, and recommend
-                  tailored approaches for voir dire and trial
-                  presentation.
+                  {t("aiAnalysisDesc")}
                 </p>
                 <button className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium flex items-center gap-2 shadow-sm">
                   <svg
@@ -448,7 +444,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
                     />
                   </svg>
-                  Generate Jury Profile Analysis
+                  {t("generateButton")}
                 </button>
               </div>
             </div>

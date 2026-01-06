@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface StatCardProps {
   title: string;
@@ -59,6 +60,11 @@ function resolveCaseStatus(dbCase: any): string {
 
 export default function StatsCards() {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
+  const t = useTranslations("stats");
+  const tNav = useTranslations("navigation");
   const [stats, setStats] = useState<StatCardProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -87,9 +93,9 @@ export default function StatsCards() {
 
           setStats([
             {
-              title: "Total Cases",
+              title: t("totalCases"),
               value: totalCases,
-              subtitle: "All time cases",
+              subtitle: t("allTimeCases"),
               iconBg: "bg-surface-100",
               iconColor: "text-ink-700",
               icon: (
@@ -109,9 +115,9 @@ export default function StatsCards() {
               ),
             },
             {
-              title: "Active Cases",
+              title: t("activeCases"),
               value: activeCases,
-              subtitle: "Currently active",
+              subtitle: t("currentlyActive"),
               iconBg: "bg-highlight-200",
               iconColor: "text-highlight-600",
               icon: (
@@ -131,9 +137,9 @@ export default function StatsCards() {
               ),
             },
             {
-              title: "Under Review",
+              title: t("underReview"),
               value: underReview,
-              subtitle: "Pending review",
+              subtitle: t("pendingReview"),
               iconBg: "bg-primary-100",
               iconColor: "text-primary-600",
               icon: (
@@ -153,9 +159,9 @@ export default function StatsCards() {
               ),
             },
             {
-              title: "Completed",
+              title: t("completed"),
               value: completed,
-              subtitle: "Successfully closed",
+              subtitle: t("successfullyClosed"),
               iconBg: "bg-success-100",
               iconColor: "text-success-600",
               icon: (
@@ -207,13 +213,13 @@ export default function StatsCards() {
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center bg-surface-000/90 backdrop-blur-sm px-6 py-4 rounded-lg">
-            <h3 className="text-lg font-bold text-ink-900 mb-2">Sign in to view your stats</h3>
-            <p className="text-sm text-ink-600 mb-4">Please sign in to access your case statistics</p>
+            <h3 className="text-lg font-bold text-ink-900 mb-2">{t("signInViewStats")}</h3>
+            <p className="text-sm text-ink-600 mb-4">{t("signInViewStatsDesc")}</p>
             <button
-              onClick={() => router.push("/auth/signin")}
+              onClick={() => router.push(`/${country}/${locale}/auth/signin`)}
               className="bg-gradient-to-r from-primary-700 to-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-700 transition-all"
             >
-              Sign In
+              {tNav("signIn")}
             </button>
           </div>
         </div>

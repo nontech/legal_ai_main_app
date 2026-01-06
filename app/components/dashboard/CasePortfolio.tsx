@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface DBCase {
   id: string;
@@ -76,6 +77,11 @@ function isValidCase(dbCase: DBCase): boolean {
 
 export default function CasePortfolio() {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
+  const t = useTranslations("casePortfolio");
+  const tNav = useTranslations("navigation");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [typeFilter, setTypeFilter] = useState("All Types");
@@ -131,7 +137,7 @@ export default function CasePortfolio() {
 
   const handleDelete = async (caseId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Are you sure you want to delete this case?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
 
     try {
       const res = await fetch(`/api/cases?id=${caseId}`, {
@@ -157,13 +163,13 @@ export default function CasePortfolio() {
       {!isAuthenticated && (
         <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm z-10 flex items-center justify-center">
           <div className="text-center">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Sign in to view your cases</h3>
-            <p className="text-sm text-gray-600 mb-4">Please sign in to access your case portfolio</p>
+            <h3 className="text-lg font-bold text-gray-900 mb-2">{t("signInViewCases")}</h3>
+            <p className="text-sm text-gray-600 mb-4">{t("signInViewCasesDesc")}</p>
             <button
-              onClick={() => router.push("/auth/signin")}
+              onClick={() => router.push(`/${country}/${locale}/auth/signin`)}
               className="cursor-pointer bg-gradient-to-r from-accent-400 to-accent-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-accent-500 hover:to-accent-400 transition-all"
             >
-              Sign In
+              {tNav("signIn")}
             </button>
           </div>
         </div>
@@ -174,15 +180,14 @@ export default function CasePortfolio() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-1">
-              Case Portfolio
+              {t("title")}
             </h2>
             <p className="text-sm text-gray-600">
-              Manage and track all your legal cases with comprehensive
-              insights
+              {t("description")}
             </p>
           </div>
           <button
-            onClick={() => router.push("/case-analysis")}
+            onClick={() => router.push(`/${country}/${locale}/case-analysis`)}
             className="cursor-pointer bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
           >
             <svg
@@ -198,7 +203,7 @@ export default function CasePortfolio() {
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            New Case
+            {t("newCase")}
           </button>
         </div>
 
@@ -207,7 +212,7 @@ export default function CasePortfolio() {
           <div className="flex-1">
             <input
               type="text"
-              placeholder="Search by case title or ID..."
+              placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
@@ -220,10 +225,10 @@ export default function CasePortfolio() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
           >
-            <option>All Statuses</option>
-            <option>Active</option>
-            <option>Under Review</option>
-            <option>Completed</option>
+            <option>{t("allStatuses")}</option>
+            <option>{t("active")}</option>
+            <option>{t("underReview")}</option>
+            <option>{t("completed")}</option>
           </select>
 
           {/* Type Filter */}
@@ -232,9 +237,9 @@ export default function CasePortfolio() {
             onChange={(e) => setTypeFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
           >
-            <option>All Types</option>
-            <option>Criminal</option>
-            <option>Civil</option>
+            <option>{t("allTypes")}</option>
+            <option>{t("criminal")}</option>
+            <option>{t("civil")}</option>
           </select>
         </div>
       </div>
@@ -243,7 +248,7 @@ export default function CasePortfolio() {
       {isLoading && (
         <div className="p-8 text-center">
           <div className="animate-spin h-8 w-8 border-b-2 border-amber-500 rounded-full mx-auto"></div>
-          <p className="text-gray-600 mt-4">Loading your cases...</p>
+          <p className="text-gray-600 mt-4">{t("loading")}</p>
         </div>
       )}
 
@@ -257,7 +262,7 @@ export default function CasePortfolio() {
       {/* Empty State */}
       {!isLoading && !error && filteredCases.length === 0 && isAuthenticated && (
         <div className="p-8 text-center">
-          <p className="text-gray-600">No cases found. Create a new case to get started.</p>
+          <p className="text-gray-600">{t("noCases")}</p>
         </div>
       )}
 
@@ -268,25 +273,25 @@ export default function CasePortfolio() {
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Case ID
+                  {t("caseId")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Case Title
+                  {t("caseTitle")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Type
+                  {t("type")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Status
+                  {t("status")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Your Role
+                  {t("yourRole")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Last Updated
+                  {t("lastUpdated")}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Actions
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -295,7 +300,7 @@ export default function CasePortfolio() {
                 <tr
                   key={case_.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/case-analysis/detailed?step=7&caseId=${case_.id}`)}
+                  onClick={() => router.push(`/${country}/${locale}/case-analysis/detailed?step=7&caseId=${case_.id}`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {case_.id.substring(0, 8)}
@@ -329,7 +334,7 @@ export default function CasePortfolio() {
                       onClick={(e) => handleDelete(case_.id, e)}
                       className="text-red-600 hover:text-red-900 cursor-pointer"
                     >
-                      Delete
+                      {t("delete")}
                     </button>
                   </td>
                 </tr>

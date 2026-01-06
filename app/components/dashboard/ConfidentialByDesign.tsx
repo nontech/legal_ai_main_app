@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function ConfidentialByDesign() {
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   return (
     <section className="py-20 bg-gradient-to-br from-surface-050 via-surface-100 to-primary-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -156,7 +160,7 @@ export default function ConfidentialByDesign() {
 
           <div className="mt-12 text-center">
             <Link
-              href="/security"
+              href={`/${country}/${locale}/security`}
               className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors"
             >
               Learn more about security

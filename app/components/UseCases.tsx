@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 import {
   Briefcase,
   User,
@@ -14,9 +16,11 @@ interface ProfileCardProps {
   features: string[];
   icon: React.ReactNode;
   href: string;
+  learnMoreText: string;
+  comingSoonText: string;
 }
 
-function ProfileCard({ title, features, icon, href }: ProfileCardProps) {
+function ProfileCard({ title, features, icon, href, learnMoreText, comingSoonText }: ProfileCardProps) {
   const isComingSoon = href === "#";
 
   return (
@@ -59,14 +63,14 @@ function ProfileCard({ title, features, icon, href }: ProfileCardProps) {
           disabled
           className="flex items-center justify-center gap-2 bg-surface-100 border border-border-200 text-ink-400 px-6 py-3 rounded-lg mt-auto font-semibold cursor-not-allowed"
         >
-          <span>Coming Soon</span>
+          <span>{comingSoonText}</span>
         </button>
       ) : (
         <Link
           href={href}
           className="flex items-center justify-center gap-2 bg-primary-900 text-white border border-primary-900 px-6 py-3 rounded-lg hover:bg-primary-800 transition-all duration-200 mt-auto font-semibold shadow-sm"
         >
-          <span>Learn More</span>
+          <span>{learnMoreText}</span>
         </Link>
       )}
     </div>
@@ -74,53 +78,58 @@ function ProfileCard({ title, features, icon, href }: ProfileCardProps) {
 }
 
 export default function UseCases() {
+  const t = useTranslations("useCases");
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
+
   const profiles = [
     {
-      title: "Assess Case for Legal Professionals",
+      title: t("professionals.title"),
       features: [
-        "Quickly analyze new client's case viability",
-        "Estimate win probability & settlement ranges",
-        "Identify missing documents & risk factors",
+        t("professionals.feature1"),
+        t("professionals.feature2"),
+        t("professionals.feature3"),
       ],
       icon: <Briefcase className="w-6 h-6" />,
-      href: "/legal-professionals",
+      href: `/${country}/${locale}/legal-professionals`,
     },
     {
-      title: "Understand Rights for Individuals",
+      title: t("individuals.title"),
       features: [
-        'Understand "Do I have a case?"',
-        'Know "What are my next steps?"',
-        "Learn likely outcomes before consultation",
+        t("individuals.feature1"),
+        t("individuals.feature2"),
+        t("individuals.feature3"),
       ],
       icon: <User className="w-6 h-6" />,
-      href: "/individuals",
+      href: `/${country}/${locale}/individuals`,
     },
     {
-      title: "Optimize Workflows for Legal Operations",
+      title: t("operations.title"),
       features: [
-        "Assess legal risk before escalating to a lawyer",
-        "Prepare internal documentation & recommended steps",
-        "Understand expected outcomes before going to court",
+        t("operations.feature1"),
+        t("operations.feature2"),
+        t("operations.feature3"),
       ],
       icon: <Building2 className="w-6 h-6" />,
       href: "#",
     },
     {
-      title: "Accelerate Learning for Law Students & Paralegals",
+      title: t("students.title"),
       features: [
-        "Accelerate research",
-        "Summarize large case documents",
-        "Draft memos and identify legal arguments",
+        t("students.feature1"),
+        t("students.feature2"),
+        t("students.feature3"),
       ],
       icon: <GraduationCap className="w-6 h-6" />,
       href: "#",
     },
     {
-      title: "Enhance Risk Analysis for Insurers",
+      title: t("insurers.title"),
       features: [
-        "Predict litigation outcome",
-        "Estimate settlement and risk exposure",
-        "Decide whether to fight or settle claims",
+        t("insurers.feature1"),
+        t("insurers.feature2"),
+        t("insurers.feature3"),
       ],
       icon: <ShieldCheck className="w-6 h-6" />,
       href: "#",
@@ -128,14 +137,14 @@ export default function UseCases() {
   ];
 
   return (
-    <section className="bg-surface-100 py-16">
+    <section id="use-cases" className="bg-surface-100 py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-primary-700 mb-4">
-            Find Your Legal Edge
+            {t("heading")}
           </h2>
           <p className="text-lg text-ink-600 max-w-2xl mx-auto">
-            TheLawThing provides tailored solutions for your legal needs. Discover how our intelligent analysis can work for you.
+            {t("description")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -146,6 +155,8 @@ export default function UseCases() {
               features={profile.features}
               icon={profile.icon}
               href={profile.href}
+              learnMoreText={t("learnMore")}
+              comingSoonText={t("comingSoon")}
             />
           ))}
         </div>

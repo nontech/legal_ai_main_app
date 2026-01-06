@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export default function VerdictStep() {
+  const t = useTranslations("caseAnalysis.verdict");
   const searchParams = useSearchParams();
   const caseId = searchParams.get("caseId");
 
@@ -85,10 +87,10 @@ export default function VerdictStep() {
         throw new Error(data.error || "Failed to save verdicts");
       }
 
-      alert("Verdicts saved successfully!");
+      alert(t("saved"));
     } catch (error) {
       console.error("Failed to save verdicts:", error);
-      alert("Failed to save verdicts. Please try again.");
+      alert(t("failed"));
     } finally {
       setIsSavingVerdicts(false);
     }
@@ -101,7 +103,7 @@ export default function VerdictStep() {
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <p className="text-gray-600">Loading verdict step...</p>
+          <p className="text-gray-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -118,8 +120,8 @@ export default function VerdictStep() {
   if (!caseInfo?.charges || !Array.isArray(caseInfo.charges) || caseInfo.charges.length === 0) {
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">No Charges Available</h3>
-        <p className="text-blue-700">This case does not have any charges to set verdicts for.</p>
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">{t("noCharges")}</h3>
+        <p className="text-blue-700">{isCriminalCase ? "This case does not have any charges to set verdicts for." : "This case does not have any claims to set verdicts for."}</p>
       </div>
     );
   }
@@ -131,20 +133,20 @@ export default function VerdictStep() {
   };
 
   const getVerdictLabel = (status: string) => {
-    if (status === "guilty") return "Guilty";
-    if (status === "liable") return "Liable";
-    if (status === "not_guilty") return "Not Guilty";
-    if (status === "non_liable") return "Non-Liable";
-    return "Pending";
+    if (status === "guilty") return t("status.guilty");
+    if (status === "liable") return t("status.liable");
+    if (status === "not_guilty") return t("status.notGuilty");
+    if (status === "non_liable") return t("status.nonLiable");
+    return t("status.pending");
   };
 
   const getPleaLabel = (plea: string) => {
-    if (plea === "guilty") return "Guilty";
-    if (plea === "liable") return "Liable";
-    if (plea === "not-guilty") return "Not Guilty";
-    if (plea === "non-liable" || plea === "non_liable") return "Non-Liable";
-    if (plea === "nolo") return "Nolo Contendere";
-    return "Not Entered";
+    if (plea === "guilty") return t("status.guilty");
+    if (plea === "liable") return t("status.liable");
+    if (plea === "not-guilty") return t("status.notGuilty");
+    if (plea === "non-liable" || plea === "non_liable") return t("status.nonLiable");
+    if (plea === "nolo") return t("status.noloContendere");
+    return t("status.notEntered");
   };
 
   const getPleaColor = (plea: string) => {
@@ -188,10 +190,10 @@ export default function VerdictStep() {
             backgroundClip: "text",
           }}
         >
-          <h2 className="text-3xl sm:text-4xl font-bold mb-3">⚖️ Court Verdict</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-3">⚖️ {t("title")}</h2>
         </div>
         <p className="text-base sm:text-lg text-gray-600 font-medium">
-          For each {isCriminalCase ? "charge" : "claim"}, review the defendant's {isCriminalCase ? "plea" : "position"} and set the verdict decided by the court.
+          {t("description")}
         </p>
       </div>
 
@@ -223,14 +225,14 @@ export default function VerdictStep() {
                 }}
               >
                 <h3 style={{ fontSize: "14px", fontWeight: "600", margin: 0, marginBottom: "4px" }}>
-                  {isCriminalCase ? "Charge" : "Claim"} {index + 1}
+                  {isCriminalCase ? t("charge") : t("claim")} {index + 1}
                 </h3>
                 <p style={{ fontSize: "13px", margin: 0, opacity: 0.95, lineHeight: "1.4", marginBottom: "8px" }}>
-                  {charge.chargeDescription || charge.description || charge.charge_name || charge.name || `${isCriminalCase ? "Charge" : "Claim"} ${index + 1}`}
+                  {charge.chargeDescription || charge.description || charge.charge_name || charge.name || `${isCriminalCase ? t("charge") : t("claim")} ${index + 1}`}
                 </p>
                 {charge.statuteNumber && (
                   <p style={{ fontSize: "11px", margin: 0, opacity: 0.85, lineHeight: "1.3" }}>
-                    <strong>Statute:</strong> {charge.statuteNumber}
+                    <strong>{t("statute")}:</strong> {charge.statuteNumber}
                   </p>
                 )}
               </div>
@@ -249,7 +251,7 @@ export default function VerdictStep() {
                     }}
                   >
                     <p style={{ fontSize: "11px", color: "#555", fontWeight: "600", margin: "0 0 6px 0", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                      Essential Facts:
+                      {t("essentialFacts")}:
                     </p>
                     <p
                       style={{
@@ -284,7 +286,7 @@ export default function VerdictStep() {
                           (e.currentTarget as HTMLElement).style.color = "#667eea";
                         }}
                       >
-                        {expandedFacts.has(chargeId) ? "Show Less ▲" : "Show More ▼"}
+                        {expandedFacts.has(chargeId) ? `${t("showLess")} ▲` : `${t("showMore")} ▼`}
                       </button>
                     )}
                   </div>
@@ -303,7 +305,7 @@ export default function VerdictStep() {
                     }}
                   >
                     <p style={{ fontSize: "11px", color: "#666", fontWeight: "600", margin: "0 0 8px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      {isCriminalCase ? "Defendant's Plea" : "Defendant's Claim"}
+                      {isCriminalCase ? t("defendantPlea") : t("defendantClaim")}
                     </p>
                     {charge.defendantPlea ? (
                       <span
@@ -320,7 +322,7 @@ export default function VerdictStep() {
                         {getPleaLabel(charge.defendantPlea)}
                       </span>
                     ) : (
-                      <span style={{ fontSize: "12px", color: "#999" }}>Not entered</span>
+                      <span style={{ fontSize: "12px", color: "#999" }}>{t("status.notEntered")}</span>
                     )}
                   </div>
 
@@ -335,7 +337,7 @@ export default function VerdictStep() {
                     }}
                   >
                     <p style={{ fontSize: "11px", color: "#666", fontWeight: "600", margin: "0 0 8px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                      Current Status
+                      {t("currentStatus")}
                     </p>
                     <span
                       style={{
@@ -368,7 +370,7 @@ export default function VerdictStep() {
                 {/* Verdict Selection */}
                 <div>
                   <p style={{ fontSize: "11px", color: "#666", fontWeight: "600", margin: "0 0 12px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                    Set {isCriminalCase ? "Court" : "Court"} Verdict:
+                    {t("setVerdict")}:
                   </p>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(90px, 1fr))", gap: "8px" }}>
                     {/* Pending Button */}
@@ -398,7 +400,7 @@ export default function VerdictStep() {
                         }
                       }}
                     >
-                      Pending
+                      {t("status.pending")}
                     </button>
 
                     {isCriminalCase ? (
@@ -430,7 +432,7 @@ export default function VerdictStep() {
                             }
                           }}
                         >
-                          Guilty
+                          {t("status.guilty")}
                         </button>
                         {/* Not Guilty Button */}
                         <button
@@ -459,7 +461,7 @@ export default function VerdictStep() {
                             }
                           }}
                         >
-                          Not Guilty
+                          {t("status.notGuilty")}
                         </button>
                       </>
                     ) : (
@@ -491,7 +493,7 @@ export default function VerdictStep() {
                             }
                           }}
                         >
-                          Liable
+                          {t("status.liable")}
                         </button>
                         {/* Non-Liable Button */}
                         <button
@@ -520,7 +522,7 @@ export default function VerdictStep() {
                             }
                           }}
                         >
-                          Non-Liable
+                          {t("status.nonLiable")}
                         </button>
                       </>
                     )}
@@ -563,10 +565,9 @@ export default function VerdictStep() {
             }
           }}
         >
-          {isSavingVerdicts ? "Saving Verdicts..." : "💾 Save Verdicts"}
+          {isSavingVerdicts ? t("saving") : t("saveButton")}
         </button>
       </div>
     </div>
   );
 }
-

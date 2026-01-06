@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SaveCaseButton from "./SaveCaseButton";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface Judge {
   id: string;
@@ -107,6 +108,7 @@ const DEFAULT_JUDGES: Judge[] = [
 ];
 
 export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }: { caseId?: string; onSaveSuccess?: () => void; jurisdictionId?: string }) {
+  const t = useTranslations("caseAnalysis.judge");
   const [judges, setJudges] = useState<Judge[]>(DEFAULT_JUDGES);
   const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -220,12 +222,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
         <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
           <div className="text-center">
             <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              Judge Selection
+              {t("title")}
             </h2>
             <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              Select the presiding judge. Their judicial history,
-              temperament, and ruling patterns will significantly
-              influence the case analysis and outcome predictions.
+              {t("description")}
             </p>
           </div>
         </div>
@@ -249,17 +249,13 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
               </svg>
               <div>
                 <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                  Judge Selection Confirmed
+                  {t("confirmedTitle")}
                 </h4>
                 <p className="text-ink-600 text-xs sm:text-sm">
-                  You have selected{" "}
-                  <span className="font-semibold">
-                    {selectedJudgeData?.name}
-                  </span>{" "}
-                  as the presiding judge. This selection will
-                  influence case strategy recommendations, risk
-                  assessments, and outcome predictions throughout the
-                  analysis.
+                  {t.rich("confirmedDesc", {
+                    name: selectedJudgeData?.name || "",
+                    font: (chunks) => <span className="font-semibold">{chunks}</span>
+                  })}
                 </p>
               </div>
             </div>
@@ -287,16 +283,16 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                 </svg>
               </div>
               <h3 className="text-base sm:text-xl font-bold text-ink-900 mb-1 sm:mb-2">
-                No Judge Selected
+                {t("noSelectionTitle")}
               </h3>
               <p className="text-ink-600 mb-4 sm:mb-6 max-w-md mx-auto text-sm sm:text-base">
-                Select a judge to analyze their judicial history, temperament, and ruling patterns for your case.
+                {t("noSelectionDesc")}
               </p>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium shadow-sm text-sm sm:text-base"
               >
-                Select a Judge
+                {t("selectButton")}
               </button>
             </div>
           ) : (
@@ -320,7 +316,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-base sm:text-xl font-bold text-ink-900">
-                    Presiding Judge
+                    {t("presidingJudge")}
                   </h3>
                   <p className="text-xs sm:text-sm text-ink-600 truncate">
                     {selectedJudgeData.name}
@@ -335,7 +331,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                     {selectedJudgeData.name}
                   </p>
                   <p className="text-sm text-ink-600">
-                    {selectedJudgeData.experience} years experience
+                    {t("experience", { years: selectedJudgeData.experience })}
                   </p>
                 </div>
               </div>
@@ -344,7 +340,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                 onClick={() => setIsModalOpen(true)}
                 className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs sm:text-sm whitespace-nowrap shadow-sm"
               >
-                Change Judge
+                {t("changeButton")}
               </button>
             </div>
           )}
@@ -364,10 +360,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                 <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-3 sm:px-6 py-3 sm:py-5 flex items-center justify-between gap-2">
                   <div className="min-w-0">
                     <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                      Select Judge
+                      {t("modalTitle")}
                     </h2>
                     <p className="text-primary-100 text-xs sm:text-sm hidden sm:block">
-                      Choose the judge who will preside over your case
+                      {t("modalDesc")}
                     </p>
                   </div>
                   <button
@@ -430,7 +426,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                                 {judge.name}
                               </h3>
                               <p className="text-ink-600 mt-1 text-xs sm:text-sm truncate hidden sm:block">
-                                {judge.experience} years experience • {judge.background}
+                                {t("experience", { years: judge.experience })} • {judge.background}
                               </p>
                             </div>
                           </div>
@@ -451,24 +447,24 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                           {/* Historical Ruling Patterns */}
                           <div className="space-y-4">
                             <h4 className="font-bold text-ink-900 text-lg">
-                              Historical Ruling Patterns
+                              {t("historicalPatterns")}
                             </h4>
 
                             <div>
                               <p className="font-semibold text-ink-800 mb-2">
-                                Criminal Cases:
+                                {t("criminalCases")}:
                               </p>
                               <div className="space-y-1 text-sm">
                                 <p className="text-ink-600">
-                                  Conviction:{" "}
+                                  {t("conviction")}:{" "}
                                   {judge.criminalCases.conviction}%
                                 </p>
                                 <p className="text-ink-600">
-                                  Dismissal:{" "}
+                                  {t("dismissal")}:{" "}
                                   {judge.criminalCases.dismissal}%
                                 </p>
                                 <p className="text-ink-600">
-                                  Plea Deals:{" "}
+                                  {t("pleaDeals")}:{" "}
                                   {judge.criminalCases.pleaDeals}%
                                 </p>
                               </div>
@@ -476,15 +472,15 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
 
                             <div>
                               <p className="font-semibold text-ink-800 mb-2">
-                                Civil Cases:
+                                {t("civilCases")}:
                               </p>
                               <div className="space-y-1 text-sm">
                                 <p className="text-ink-600">
-                                  Plaintiff Wins:{" "}
+                                  {t("plaintiffWins")}:{" "}
                                   {judge.civilCases.plaintiffWins}%
                                 </p>
                                 <p className="text-ink-600">
-                                  Defendant Wins:{" "}
+                                  {t("defendantWins")}:{" "}
                                   {judge.civilCases.defendantWins}%
                                 </p>
                               </div>
@@ -494,7 +490,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                           {/* Notable Decision Patterns */}
                           <div className="space-y-4">
                             <h4 className="font-bold text-ink-900 text-lg">
-                              Notable Decision Patterns
+                              {t("notablePatterns")}
                             </h4>
                             <ul className="space-y-2">
                               {judge.notablePatterns.map(
@@ -516,7 +512,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                           {/* Judicial Temperament */}
                           <div className="space-y-4">
                             <h4 className="font-bold text-ink-900 text-lg">
-                              Judicial Temperament
+                              {t("temperament")}
                             </h4>
                             <p className="text-ink-600 text-sm">
                               {judge.temperament}
@@ -524,7 +520,7 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                             <div className="pt-2">
                               <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
                                 <p className="text-sm font-semibold text-ink-900">
-                                  {judge.experience} years experience
+                                  {t("experience", { years: judge.experience })}
                                 </p>
                               </div>
                             </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import FileUploadModal from "./FileUploadModal";
-import MarkdownRenderer from "./MarkdownRenderer";
+import { useTranslations } from "next-intl";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -44,56 +44,39 @@ const UI_TO_DB_MAP: Record<string, string> = Object.fromEntries(
   Object.entries(DB_TO_UI_MAP).map(([db, ui]) => [ui, db])
 );
 
-const SECTION_CONFIG = [
-  {
-    uiId: "case-info",
-    dbKey: "case_information",
-    title: "Case Information",
-    itemLabel: "documents",
-    icon: "📋",
-  },
-  {
-    uiId: "evidence",
-    dbKey: "evidence_and_supporting_materials",
-    title: "Evidence & Supporting Materials",
-    itemLabel: "documents",
-    icon: "📎",
-  },
-  {
-    uiId: "witnesses",
-    dbKey: "key_witness_and_testimony",
-    title: "Key Witness & Testimony",
-    itemLabel: "documents",
-    icon: "👥",
-  },
-  {
-    uiId: "precedents",
-    dbKey: "relevant_legal_precedents",
-    title: "Relevant Legal Precedents",
-    itemLabel: "documents",
-    icon: "⚖️",
-  },
-  {
-    uiId: "police",
-    dbKey: "police_report",
-    title: "Police Report",
-    itemLabel: "documents",
-    icon: "🚔",
-  },
-  {
-    uiId: "challenges",
-    dbKey: "potential_challenges_and_weaknesses",
-    title: "Potential Challenges & Weaknesses",
-    itemLabel: "documents",
-    icon: "⚠️",
-  },
+const SECTION_ICONS: Record<string, string> = {
+  "case_information": "📋",
+  "evidence_and_supporting_materials": "📎",
+  "key_witness_and_testimony": "👥",
+  "relevant_legal_precedents": "⚖️",
+  "police_report": "🚔",
+  "potential_challenges_and_weaknesses": "⚠️",
+};
+
+const SECTION_KEYS: string[] = [
+  "case_information",
+  "evidence_and_supporting_materials",
+  "key_witness_and_testimony",
+  "relevant_legal_precedents",
+  "police_report",
+  "potential_challenges_and_weaknesses",
 ];
+
+const DB_KEY_TO_TRANS_KEY: Record<string, string> = {
+  "case_information": "caseInformation",
+  "evidence_and_supporting_materials": "evidence",
+  "key_witness_and_testimony": "witness",
+  "relevant_legal_precedents": "legalPrecedents",
+  "police_report": "policeReport",
+  "potential_challenges_and_weaknesses": "challenges",
+};
 
 export default function CaseDetailsSection({
   onModalChange,
   caseId,
   onCompletionChange,
 }: CaseDetailsSectionProps) {
+  const t = useTranslations("caseAnalysis.caseDetails");
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [caseDescription, setCaseDescription] = useState<string>("");
@@ -104,8 +87,6 @@ export default function CaseDetailsSection({
   const [editedDescription, setEditedDescription] = useState<string>("");
   const [isSavingHeader, setIsSavingHeader] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMarkdownPreviewTitle, setIsMarkdownPreviewTitle] = useState(false);
-  const [isMarkdownPreviewDescription, setIsMarkdownPreviewDescription] = useState(false);
 
   // Store all case details keyed by database keys
   const [caseDetails, setCaseDetails] = useState<Record<string, SectionData>>({});
@@ -268,15 +249,15 @@ export default function CaseDetailsSection({
   };
 
   const getCompletedSectionsCount = () => {
-    return SECTION_CONFIG.filter(
-      (section) => getSectionStatus(section.dbKey) === "complete"
+    return SECTION_KEYS.filter(
+      (key) => getSectionStatus(key) === "complete"
     ).length;
   };
 
   // Notify parent of completion percentage and save to database
   useEffect(() => {
     const completedCount = getCompletedSectionsCount();
-    const percentage = Math.round((completedCount / SECTION_CONFIG.length) * 100);
+    const percentage = Math.round((completedCount / SECTION_KEYS.length) * 100);
 
     if (onCompletionChange) {
       onCompletionChange(percentage);
@@ -307,20 +288,16 @@ export default function CaseDetailsSection({
   }, [caseDetails, onCompletionChange, caseId]);
 
   const getModalContent = (dbKey: string) => {
-    const config = SECTION_CONFIG.find((s) => s.dbKey === dbKey);
-    const descriptions: Record<string, string> = {
-      case_information: "Add or edit the case title and comprehensive description",
-      evidence_and_supporting_materials: "Upload photos, forensic reports, expert reports, contracts, and supporting documents",
-      key_witness_and_testimony: "Upload witness statements, depositions, expert reports, and testimony transcripts",
-      relevant_legal_precedents: "Upload case law PDFs, legal research documents, and precedent analysis",
-      police_report: "Upload official police reports, incident photos, body cam transcripts, and related documentation",
-      potential_challenges_and_weaknesses: "Upload opposing counsel briefs, unfavorable evidence, and weakness analysis documents",
-    };
+    const transKey = DB_KEY_TO_TRANS_KEY[dbKey];
+
+    // Fallback descriptions if translation fails or key missing
+    const description = t(`${transKey}Desc`) || "Upload relevant documents for this section";
+    const title = t(transKey) || "Upload Documents";
 
     return {
-      title: config?.title || "Upload Documents",
-      description: descriptions[dbKey] || "Upload relevant documents for this section",
-      icon: config?.icon || "📄",
+      title: title,
+      description: description,
+      icon: SECTION_ICONS[dbKey] || "📄",
     };
   };
 
@@ -501,7 +478,7 @@ export default function CaseDetailsSection({
             <svg className="w-8 h-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <p className="text-ink-600 font-medium">Loading case details...</p>
+            <p className="text-ink-600 font-medium">{t("loading", { defaultMessage: "Loading case details..." })}</p>
           </div>
         </div>
       </div>
@@ -529,9 +506,9 @@ export default function CaseDetailsSection({
             </svg>
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-ink-900">Case Details</h2>
+            <h2 className="text-2xl font-bold text-ink-900">{t("title")}</h2>
             <p className="text-sm text-ink-600 mt-1">
-              Manage and organize all case information and supporting documents
+              {t("description")}
             </p>
           </div>
         </div>
@@ -549,16 +526,16 @@ export default function CaseDetailsSection({
                 </span>
                 <span className="text-3xl font-bold text-ink-400">/</span>
                 <span className="text-5xl font-bold text-ink-400">
-                  {SECTION_CONFIG.length}
+                  {SECTION_KEYS.length}
                 </span>
               </div>
-              <p className="text-ink-700 font-medium">Sections Completed</p>
+              <p className="text-ink-700 font-medium">{t("sectionsCompleted")}</p>
             </div>
             <div className="w-full bg-surface-200 rounded-full h-3">
               <div
                 className="bg-primary-500 h-3 rounded-full transition-all duration-500"
                 style={{
-                  width: `${(getCompletedSectionsCount() / SECTION_CONFIG.length) * 100}%`,
+                  width: `${(getCompletedSectionsCount() / SECTION_KEYS.length) * 100}%`,
                 }}
               />
             </div>
@@ -575,13 +552,13 @@ export default function CaseDetailsSection({
                 <div className="flex items-center flex-1">
                   <span className="text-2xl mr-2">📋</span>
                   <h3 className="font-semibold text-ink-900 text-sm">
-                    Case Information
+                    {t("caseInformation")}
                   </h3>
                 </div>
               </div>
 
               <p className="text-xs text-ink-600 mb-3 line-clamp-2">
-                Add the case title and comprehensive description with supporting documents
+                {t("caseInformationDesc")}
               </p>
 
               <div className="flex items-end justify-between pt-2">
@@ -597,46 +574,40 @@ export default function CaseDetailsSection({
                 )}
                 <div className="text-right ml-auto">
                   <p className="text-xs text-ink-600">
-                    {getItemCount("case_information")} {getItemCount("case_information") === 1 ? "document" : "documents"}
+                    {getItemCount("case_information")} {getItemCount("case_information") === 1 ? t("document") : t("documents")}
                   </p>
                 </div>
               </div>
             </button>
 
             {/* Document Upload Sections */}
-            {SECTION_CONFIG.map((section) => {
-              const status = getSectionStatus(section.dbKey);
-              const itemCount = getItemCount(section.dbKey);
-              if (section.dbKey === "case_information") {
+            {SECTION_KEYS.map((dbKey) => {
+              const uiId = DB_TO_UI_MAP[dbKey];
+              const status = getSectionStatus(dbKey);
+              const itemCount = getItemCount(dbKey);
+              if (dbKey === "case_information") {
                 return null;
               }
 
-              // Get section-specific description
-              const sectionDescriptions: Record<string, string> = {
-                "evidence_and_supporting_materials": "Upload photos, forensic reports, expert reports, and supporting documents",
-                "key_witness_and_testimony": "Upload witness statements, depositions, and testimony transcripts",
-                "relevant_legal_precedents": "Upload case law PDFs and legal research documents",
-                "police_report": "Upload official police reports and incident documentation",
-                "potential_challenges_and_weaknesses": "Upload opposing counsel briefs and weakness analysis",
-              };
+              const transKey = DB_KEY_TO_TRANS_KEY[dbKey];
 
               return (
                 <button
-                  key={section.dbKey}
-                  onClick={() => setOpenModal(section.uiId)}
+                  key={dbKey}
+                  onClick={() => setOpenModal(uiId)}
                   className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center flex-1">
-                      <span className="text-2xl mr-2">{section.icon}</span>
+                      <span className="text-2xl mr-2">{SECTION_ICONS[dbKey]}</span>
                       <h3 className="font-semibold text-ink-900 text-sm">
-                        {section.title}
+                        {t(transKey)}
                       </h3>
                     </div>
                   </div>
 
                   <p className="text-xs text-ink-600 mb-3 line-clamp-2">
-                    {sectionDescriptions[section.dbKey] || "Upload documents for this section"}
+                    {t(transKey + "Desc")}
                   </p>
 
                   <div className="flex items-end justify-between pt-2">
@@ -652,7 +623,7 @@ export default function CaseDetailsSection({
                     )}
                     <div className="text-right ml-auto">
                       <p className="text-xs text-ink-600">
-                        {itemCount} {itemCount === 1 ? "document" : "documents"}
+                        {itemCount} {itemCount === 1 ? t("document") : t("documents")}
                       </p>
                     </div>
                   </div>

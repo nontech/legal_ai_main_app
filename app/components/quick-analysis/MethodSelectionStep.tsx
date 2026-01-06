@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 interface MethodSelectionStepProps {
   onUploadDocuments: () => void;
@@ -10,6 +10,9 @@ export default function MethodSelectionStep({
   onUploadDocuments,
 }: MethodSelectionStepProps) {
   const router = useRouter();
+  const params = useParams();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
@@ -152,7 +155,7 @@ export default function MethodSelectionStep({
 
           {/* Enter Data Manually Card */}
           <button
-            onClick={() => router.push("/case-analysis/detailed")}
+            onClick={() => router.push(`/${country}/${locale}/case-analysis/detailed`)}
             className="group relative bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 hover:border-amber-400 rounded-2xl p-8 text-left transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
           >
             <div className="absolute top-4 right-4">

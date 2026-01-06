@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import SaveCaseButton from "./SaveCaseButton";
 import SearchableSelect from "./ui/searchable-select";
 
@@ -103,6 +104,8 @@ export default function JurisdictionSection({
   hideSaveButton = false,
   showExtractedBadge = false,
 }: JurisdictionSectionProps) {
+  const t = useTranslations("caseAnalysis.jurisdiction");
+
   // Data state
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
@@ -644,140 +647,142 @@ export default function JurisdictionSection({
 
   // Render
   return (
-    <div className={`bg-white ${isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"}`}>
-      {/* Section Header */}
-      {isCompact ? (
-        <div className="flex items-start mb-3 sm:mb-4">
-          <div className={`flex items-center justify-center ${isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"} bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}>
-            <svg className={`${isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"} text-primary-600`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap">
-              Step 1: Jurisdiction <span className="text-red-500">*</span>
-              {showExtractedBadge && (
-                <div className="relative group">
-                  <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
-                    <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-xs font-medium text-primary-700">Extracted</span>
-                  </div>
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
-                    Extracted from case information documents
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                      <div className="border-4 border-transparent border-t-ink-900"></div>
+    <>
+      <div className={`bg-white ${isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"}`}>
+        {/* Section Header */}
+        {isCompact ? (
+          <div className="flex items-start mb-3 sm:mb-4">
+            <div className={`flex items-center justify-center ${isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"} bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}>
+              <svg className={`${isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"} text-primary-600`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap">
+                {t("stepTitle")} <span className="text-red-500">*</span>
+                {showExtractedBadge && (
+                  <div className="relative group">
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
+                      <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-xs font-medium text-primary-700">{t("extracted")}</span>
+                    </div>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
+                      {t("extractedTooltip")}
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                        <div className="border-4 border-transparent border-t-ink-900"></div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </h3>
-            <p className="text-xs sm:text-sm text-ink-600">Where your case will be heard</p>
-          </div>
-        </div>
-      ) : (
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-ink-900 mb-2">Jurisdiction</h2>
-          <p className="text-ink-600">Specify where your case will be heard</p>
-        </div>
-      )}
-
-      {/* Error Display */}
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Form Fields */}
-      {isLoading || isLoadingCountries ? (
-        <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="space-y-2">
-              <div className="h-4 bg-surface-200 rounded w-24 animate-pulse"></div>
-              <div className="h-10 bg-surface-100 rounded animate-pulse"></div>
+                )}
+              </h3>
+              <p className="text-xs sm:text-sm text-ink-600">{t("whereHeard")}</p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
-          {/* Country */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">
-              Country <span className="text-red-500">*</span>
-            </label>
-            <SearchableSelect
-              options={countryOptions}
-              value={country}
-              onChange={handleCountryChange}
-              placeholder="Select country"
-              allowOther
-            />
-            {country === "__other__" && (
-              <input
-                type="text"
-                value={customCountry}
-                onChange={(e) => setCustomCountry(e.target.value)}
-                placeholder="Enter country name"
-                className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
-              />
-            )}
           </div>
-
-          {/* Jurisdiction */}
-          <div>
-            <label className="block text-sm font-medium text-ink-700 mb-2">
-              State/Province <span className="text-red-500">*</span>
-            </label>
-            <SearchableSelect
-              options={jurisdictionOptions.map((j) => ({ value: j, label: j }))}
-              value={jurisdiction}
-              onChange={handleJurisdictionChange}
-              placeholder="Select state/province"
-              disabled={!countryId || isLoadingJurisdictions}
-              allowOther
-            />
-            {jurisdiction === "__other__" && (
-              <input
-                type="text"
-                value={customJurisdiction}
-                onChange={(e) => setCustomJurisdiction(e.target.value)}
-                placeholder="Enter state/province"
-                className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
-              />
-            )}
+        ) : (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-ink-900 mb-2">{t("title")}</h2>
+            <p className="text-ink-600">{t("description")}</p>
           </div>
+        )}
 
-          {/* Court */}
-          <div className={isCompact ? "md:col-span-2" : ""}>
-            <label className="block text-sm font-medium text-ink-700 mb-2">
-              Court Name <span className="text-red-500">*</span>
-            </label>
-            <SearchableSelect
-              options={courtOptions.map((c) => ({ value: c, label: c }))}
-              value={court}
-              onChange={handleCourtChange}
-              placeholder="Select court"
-              disabled={!jurisdictionId || isLoadingCourts}
-              allowOther
-            />
-            {court === "__other__" && (
-              <input
-                type="text"
-                value={customCourt}
-                onChange={(e) => setCustomCourt(e.target.value)}
-                placeholder="Enter court name"
-                className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
-              />
-            )}
+        {/* Error Display */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            {error}
           </div>
-        </div>
-      )}
+        )}
 
+        {/* Form Fields */}
+        {isLoading || isLoadingCountries ? (
+          <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-4 bg-surface-200 rounded w-24 animate-pulse"></div>
+                <div className="h-10 bg-surface-100 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
+            {/* Country */}
+            <div>
+              <label className="block text-sm font-medium text-ink-700 mb-2">
+                {t("country")} <span className="text-red-500">*</span>
+              </label>
+              <SearchableSelect
+                options={countryOptions}
+                value={country}
+                onChange={handleCountryChange}
+                placeholder={t("selectCountry")}
+                allowOther
+              />
+              {country === "__other__" && (
+                <input
+                  type="text"
+                  value={customCountry}
+                  onChange={(e) => setCustomCountry(e.target.value)}
+                  placeholder={t("enterCountry")}
+                  className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                />
+              )}
+            </div>
+
+            {/* Jurisdiction */}
+            <div>
+              <label className="block text-sm font-medium text-ink-700 mb-2">
+                {t("stateProvince")} <span className="text-red-500">*</span>
+              </label>
+              <SearchableSelect
+                options={jurisdictionOptions.map((j) => ({ value: j, label: j }))}
+                value={jurisdiction}
+                onChange={handleJurisdictionChange}
+                placeholder={t("selectStateProvince")}
+                disabled={!countryId || isLoadingJurisdictions}
+                allowOther
+              />
+              {jurisdiction === "__other__" && (
+                <input
+                  type="text"
+                  value={customJurisdiction}
+                  onChange={(e) => setCustomJurisdiction(e.target.value)}
+                  placeholder={t("enterStateProvince")}
+                  className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                />
+              )}
+            </div>
+
+            {/* Court */}
+            <div className={isCompact ? "md:col-span-2" : ""}>
+              <label className="block text-sm font-medium text-ink-700 mb-2">
+                {t("courtName")} <span className="text-red-500">*</span>
+              </label>
+              <SearchableSelect
+                options={courtOptions.map((c) => ({ value: c, label: c }))}
+                value={court}
+                onChange={handleCourtChange}
+                placeholder={t("selectCourt")}
+                disabled={!jurisdictionId || isLoadingCourts}
+                allowOther
+              />
+              {court === "__other__" && (
+                <input
+                  type="text"
+                  value={customCourt}
+                  onChange={(e) => setCustomCourt(e.target.value)}
+                  placeholder={t("enterCourt")}
+                  className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                />
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
       {/* Save Button */}
-      {!hideSaveButton && caseId && (
-        <div className="flex justify-end">
+      {
+        !hideSaveButton && caseId && (
           <SaveCaseButton
             caseId={caseId}
             field="jurisdiction"
@@ -787,8 +792,8 @@ export default function JurisdictionSection({
               court: getFinalValue(court, customCourt),
             }}
           />
-        </div>
-      )}
-    </div>
+        )
+      }
+    </>
   );
 }

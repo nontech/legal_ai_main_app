@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const t = useTranslations("footer");
+  const params = useParams();
+  const country = params.country as string;
+  const locale = params.locale as string;
 
   return (
     <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white">
@@ -26,7 +32,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-white/70 mb-6 leading-relaxed">
-              AI-powered scenario engine for legal case analysis and strategic decision-making.
+              {t("tagline")}
             </p>
             <div className="flex space-x-4">
               <a
@@ -50,39 +56,31 @@ export default function Footer() {
           {/* Product Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Product
+              {t("product")}
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/"
+                  href={`/${country}/${locale}`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Features
+                  {t("features")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/pricing"
+                  href={`/${country}/${locale}/pricing`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Pricing
+                  {t("pricing")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/documents"
+                  href={`/${country}/${locale}/#use-cases`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Document Management
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/use-cases"
-                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
-                >
-                  Use Cases
+                  {t("useCases")}
                 </Link>
               </li>
             </ul>
@@ -91,31 +89,31 @@ export default function Footer() {
           {/* Resources Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Resources
+              {t("resources")}
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/security"
+                  href={`/${country}/${locale}/security`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Security
+                  {t("security")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/documentation"
+                  href={`/${country}/${locale}/documentation`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Documentation
+                  {t("documentation")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href={`/${country}/${locale}/contact`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Support
+                  {t("support")}
                 </Link>
               </li>
             </ul>
@@ -124,47 +122,47 @@ export default function Footer() {
           {/* Legal Column */}
           <div>
             <h4 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
-              Legal
+              {t("legal")}
             </h4>
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/privacy"
+                  href={`/${country}/${locale}/privacy`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Privacy Policy
+                  {t("privacyPolicy")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href={`/${country}/${locale}/terms`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Terms of Service
+                  {t("termsOfService")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/cookies"
+                  href={`/${country}/${locale}/cookies`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Cookie Policy
+                  {t("cookiePolicy")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/acceptable-use"
+                  href={`/${country}/${locale}/acceptable-use`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Acceptable Use
+                  {t("acceptableUse")}
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/imprint"
+                  href={`/${country}/${locale}/imprint`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  Imprint
+                  {t("imprint")}
                 </Link>
               </li>
             </ul>
@@ -175,10 +173,10 @@ export default function Footer() {
         <div className="pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-sm text-white/70">
-              © {currentYear} TheLawThing. All rights reserved.
+              {t("allRightsReserved", { year: currentYear })}
             </p>
             <p className="text-sm text-white/60">
-              TheLawThing is not a law firm and does not provide legal advice.
+              {t("notLawFirm")}
             </p>
           </div>
         </div>

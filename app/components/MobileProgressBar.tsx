@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface Step {
     id: string;
@@ -21,6 +22,7 @@ export default function MobileProgressBar({
     onStepChange,
     completionData = {},
 }: MobileProgressBarProps) {
+    const t = useTranslations("caseAnalysis.common");
     const [isExpanded, setIsExpanded] = useState(false);
 
     const getTotalCompletion = () => {
@@ -120,7 +122,7 @@ export default function MobileProgressBar({
                                             >
                                                 {step.label}
                                             </div>
-                                            {!isComplete && completion < 100 && step.id !== "results" && step.id !== "case-details" && (
+                                            {!isComplete && completion < 100 && step.id !== "results" && step.id !== "game-plan" && step.id !== "verdict" && step.id !== "case-details" && (
                                                 <div className="flex items-center gap-1 mt-0.5">
                                                     <svg className="w-3 h-3 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                                                         <path
@@ -129,7 +131,7 @@ export default function MobileProgressBar({
                                                             clipRule="evenodd"
                                                         />
                                                     </svg>
-                                                    <span className="text-xs text-amber-600 font-medium">Incomplete</span>
+                                                    <span className="text-xs text-amber-600 font-medium">{t("incomplete")}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -182,4 +184,3 @@ export default function MobileProgressBar({
         </>
     );
 }
-
