@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 
 function EmailConfirmedContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
+    const country = params.country as string;
+    const locale = params.locale as string;
     const caseId = searchParams.get("caseId");
     const email = searchParams.get("email");
 
@@ -21,7 +23,8 @@ function EmailConfirmedContent() {
                 setRedirectCountdown((prev) => {
                     if (prev <= 1) {
                         setIsRedirecting(true);
-                        router.push(`/case-analysis/detailed?step=0&caseId=${caseId}`);
+                        // Use full page reload to ensure Navbar updates
+                        window.location.href = `/${country}/${locale}/case-analysis/detailed?step=0&caseId=${caseId}`;
                         return 0;
                     }
                     return prev - 1;
@@ -30,16 +33,17 @@ function EmailConfirmedContent() {
 
             return () => clearInterval(timer);
         }
-    }, [caseId, router]);
+    }, [caseId, country, locale]);
 
     const handleContinueAnalysis = () => {
         if (caseId) {
-            router.push(`/case-analysis/detailed?step=0&caseId=${caseId}`);
+            // Use full page reload to ensure Navbar updates
+            window.location.href = `/${country}/${locale}/case-analysis/detailed?step=0&caseId=${caseId}`;
         }
     };
 
     const handleGoHome = () => {
-        router.push("/auth/signin");
+        window.location.href = `/${country}/${locale}/auth/signin`;
     };
 
     return (
@@ -166,7 +170,7 @@ function EmailConfirmedContent() {
                     <p className="text-sm text-gray-600">
                         Need help?{" "}
                         <Link
-                            href="/contact"
+                            href={`/${country}/${locale}/contact`}
                             className="text-green-600 font-semibold hover:text-green-700"
                         >
                             Contact support
@@ -178,9 +182,31 @@ function EmailConfirmedContent() {
     );
 }
 
+function SuspenseFallback() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4">
+            <div className="flex flex-col items-center justify-center">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                            className="w-6 h-6 text-primary-600"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
+                        </svg>
+                    </div>
+                </div>
+                <p className="mt-4 text-ink-500 font-medium">Loading...</p>
+            </div>
+        </div>
+    );
+}
+
 export default function EmailConfirmedPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<SuspenseFallback />}>
             <EmailConfirmedContent />
         </Suspense>
     );

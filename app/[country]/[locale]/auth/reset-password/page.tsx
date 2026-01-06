@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect, useRef, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 function ResetPasswordContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
+    const country = params.country as string;
+    const locale = params.locale as string;
     
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -140,7 +143,7 @@ function ResetPasswordContent() {
             
             // Redirect to sign in after 3 seconds
             setTimeout(() => {
-                router.push("/auth/signin");
+                router.push(`/${country}/${locale}/auth/signin`);
             }, 3000);
         } catch (e) {
             setError(e instanceof Error ? e.message : "Failed to update password");
@@ -198,7 +201,7 @@ function ResetPasswordContent() {
                             </p>
 
                             <Link
-                                href="/auth/forgot-password"
+                                href={`/${country}/${locale}/auth/forgot-password`}
                                 className="inline-block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all text-center"
                             >
                                 Request New Reset Link
@@ -208,7 +211,7 @@ function ResetPasswordContent() {
 
                     <div className="mt-6 text-center">
                         <Link
-                            href="/auth/signin"
+                            href={`/${country}/${locale}/auth/signin`}
                             className="text-sm text-gray-600 hover:text-gray-900 font-medium"
                         >
                             ← Back to Sign In
@@ -261,7 +264,7 @@ function ResetPasswordContent() {
                             </div>
 
                             <Link
-                                href="/auth/signin"
+                                href={`/${country}/${locale}/auth/signin`}
                                 className="inline-block w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all text-center"
                             >
                                 Sign In Now
@@ -353,7 +356,7 @@ function ResetPasswordContent() {
                 {/* Back to Sign In */}
                 <div className="mt-6 text-center">
                     <Link
-                        href="/auth/signin"
+                        href={`/${country}/${locale}/auth/signin`}
                         className="text-sm text-gray-600 hover:text-gray-900 font-medium"
                     >
                         ← Back to Sign In
@@ -364,9 +367,31 @@ function ResetPasswordContent() {
     );
 }
 
+function SuspenseFallback() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+            <div className="flex flex-col items-center justify-center">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                            className="w-6 h-6 text-primary-600"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
+                        </svg>
+                    </div>
+                </div>
+                <p className="mt-4 text-ink-500 font-medium">Loading...</p>
+            </div>
+        </div>
+    );
+}
+
 export default function ResetPasswordPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={<SuspenseFallback />}>
             <ResetPasswordContent />
         </Suspense>
     );

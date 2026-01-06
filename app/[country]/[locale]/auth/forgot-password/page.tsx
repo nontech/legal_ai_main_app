@@ -2,9 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabaseClient";
 
 export default function ForgotPasswordPage() {
+    const params = useParams();
+    const country = params.country as string;
+    const locale = params.locale as string;
+    
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +23,7 @@ export default function ForgotPasswordPage() {
         try {
             // Call Supabase directly from browser to ensure PKCE code_verifier is stored
             const supabase = getSupabaseBrowserClient();
-            const redirectUrl = `${window.location.origin}/auth/reset-password`;
+            const redirectUrl = `${window.location.origin}/${country}/${locale}/auth/reset-password`;
             
             const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: redirectUrl,
@@ -81,7 +86,7 @@ export default function ForgotPasswordPage() {
                             </div>
 
                             <Link
-                                href="/auth/signin"
+                                href={`/${country}/${locale}/auth/signin`}
                                 className="inline-block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all text-center"
                             >
                                 Back to Sign In
@@ -165,7 +170,7 @@ export default function ForgotPasswordPage() {
                     {/* Back to Sign In */}
                     <div className="mt-6 text-center">
                         <Link
-                            href="/auth/signin"
+                            href={`/${country}/${locale}/auth/signin`}
                             className="text-sm text-gray-600 hover:text-gray-900 font-medium inline-flex items-center gap-1"
                         >
                             <svg

@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 
 function SignInContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
+    const params = useParams();
+    const country = params.country as string;
+    const locale = params.locale as string;
     const caseId = searchParams.get("caseId");
 
     const [email, setEmail] = useState("");
@@ -38,11 +40,12 @@ function SignInContent() {
                 sessionStorage.setItem("userEmail", json.email);
             }
 
-            // Redirect to dashboard or case page
+            // Redirect to dashboard or case page using full page reload
+            // This ensures Navbar and other components re-fetch auth status
             if (caseId) {
-                router.push(`/case-analysis/detailed?step=7&caseId=${caseId}`);
+                window.location.href = `/${country}/${locale}/case-analysis/detailed?step=7&caseId=${caseId}`;
             } else {
-                router.push("/");
+                window.location.href = `/${country}/${locale}`;
             }
         } catch (e) {
             setError(e instanceof Error ? e.message : "Unknown error");
@@ -100,7 +103,7 @@ function SignInContent() {
                                     Password
                                 </label>
                                 <Link
-                                    href="/auth/forgot-password"
+                                    href={`/${country}/${locale}/auth/forgot-password`}
                                     className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                                 >
                                     Forgot password?
@@ -144,7 +147,7 @@ function SignInContent() {
                     <p className="text-center text-gray-600">
                         Don't have an account?{" "}
                         <Link
-                            href="/auth/signup"
+                            href={`/${country}/${locale}/auth/signup`}
                             className="text-blue-600 font-semibold hover:text-blue-700"
                         >
                             Create one
@@ -155,7 +158,7 @@ function SignInContent() {
                 {/* Back to home */}
                 <div className="mt-6 text-center">
                     <Link
-                        href="/"
+                        href={`/${country}/${locale}`}
                         className="text-sm text-gray-600 hover:text-gray-900 font-medium"
                     >
                         ← Back to home
@@ -166,10 +169,33 @@ function SignInContent() {
     );
 }
 
+function SuspenseFallback() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+            <div className="flex flex-col items-center justify-center">
+                <div className="relative">
+                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                            className="w-6 h-6 text-primary-600"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
+                        </svg>
+                    </div>
+                </div>
+                <p className="mt-4 text-ink-500 font-medium">Loading...</p>
+            </div>
+        </div>
+    );
+}
+
 export default function SignInPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<SuspenseFallback />}>
             <SignInContent />
         </Suspense>
     );
 }
+

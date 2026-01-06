@@ -26,8 +26,8 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Skip auth and admin routes (they don't need localization)
-    if (pathname.startsWith('/auth') || pathname.startsWith('/admin')) {
+    // Skip admin routes (they don't need localization)
+    if (pathname.startsWith('/admin')) {
         return NextResponse.next();
     }
 
