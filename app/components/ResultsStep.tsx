@@ -382,36 +382,37 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Header with Meta Info */}
       {caseInfo && (
-        <div className="flex items-center justify-between text-sm text-gray-700 bg-white shadow-sm p-5 rounded-xl border border-gray-100" style={{
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between text-sm text-gray-700 bg-white shadow-sm p-4 sm:p-5 rounded-xl border border-gray-100 mx-3 sm:mx-0 gap-4" style={{
           background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
           boxShadow: "0 2px 12px rgba(0,0,0,0.04)"
         }}>
-          <div className="flex gap-6 flex-wrap">
-            <div className="flex items-center gap-2">
+          <div className="flex gap-3 sm:gap-6 flex-wrap">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <span>⚖️</span>
               <span>Type: {caseInfo.case_type || "Unknown"}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <span>👤</span>
               <span>Role: {caseInfo.role || "Unknown"}</span>
             </div>
             {caseInfo.jurisdiction && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-xs sm:text-sm">
                 <span>📍</span>
-                <span>Jurisdiction: {`${caseInfo.jurisdiction.court || ''} - ${caseInfo.jurisdiction.state || ''}`}</span>
+                <span className="hidden sm:inline">Jurisdiction: {`${caseInfo.jurisdiction.court || ''} - ${caseInfo.jurisdiction.state || ''}`}</span>
+                <span className="sm:hidden">{caseInfo.jurisdiction.state || 'Unknown'}</span>
               </div>
             )}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <span>📅</span>
-              <span>Generated: {new Date().toLocaleDateString()}</span>
+              <span>{new Date().toLocaleDateString()}</span>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap justify-start lg:justify-end">
             {isAuthenticated && (
               <button
                 onClick={handleRegenerate}
                 disabled={isRegenerating}
-                className="cursor-pointer p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className="cursor-pointer p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs sm:text-sm"
                 title={isRegenerating ? "Regenerating..." : "Regenerate Results"}
               >
                 {isRegenerating ? (
@@ -424,25 +425,25 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 )}
-                <span className="text-xs font-medium">{isRegenerating ? "Regenerating..." : "Regenerate"}</span>
+                <span className="font-medium">{isRegenerating ? "..." : "Regenerate"}</span>
               </button>
             )}
             <button
               onClick={() => window.print()}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="p-2 hover:bg-gray-200 rounded transition-colors text-xs sm:text-sm"
               title="Print"
             >
-              🖨️ Print
+              🖨️ <span className="hidden sm:inline">Print</span>
             </button>
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 alert("Link copied to clipboard");
               }}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className="p-2 hover:bg-gray-200 rounded transition-colors text-xs sm:text-sm"
               title="Share"
             >
-              🔗 Share
+              🔗 <span className="hidden sm:inline">Share</span>
             </button>
           </div>
         </div>
@@ -464,12 +465,10 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
       {/* Predicted Outcome Probability - Featured Section */}
       {result.predicted_outcome?.win_probability !== undefined && (
         <div className="mx-3 sm:mx-0">
-          <div style={{
+          <div className="p-4 sm:p-7 text-center" style={{
             background: "linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%)",
             border: "2px solid #f39c12",
             borderRadius: "16px",
-            padding: "28px 24px",
-            textAlign: "center",
             boxShadow: "0 8px 24px rgba(243, 156, 18, 0.12)",
           }}>
             {/* Header */}
@@ -484,60 +483,46 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
             {/* Main Probability Section */}
             <div style={{ textAlign: "center", marginBottom: showOutcomeReasoning ? "24px" : "0" }}>
-              <div style={{ marginBottom: "20px" }}>
-                <div style={{
-                  fontSize: "48px",
-                  fontWeight: "bold",
-                  color: "#d4a500",
-                  margin: "10px 0",
-                }} className="sm:text-6xl">
+              <div className="mb-4 sm:mb-5">
+                <div className="text-4xl sm:text-6xl font-bold my-2" style={{ color: "#d4a500" }}>
                   {result.predicted_outcome?.prediction.split('—')[1].split('%')[0] || 0}%
                 </div>
-                <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
+                <p className="text-gray-500 my-2 text-xs sm:text-sm">
                   {result.predicted_outcome?.prediction.split('—')[1].split('%')[1]}
                 </p>
               </div>
 
-              <div style={{ marginBottom: "20px" }}>
-                <p style={{ color: "#666", margin: "8px 0", fontSize: "14px" }}>
+              <div className="mb-4 sm:mb-5">
+                <p className="text-gray-500 my-2 text-xs sm:text-sm">
                   {result.predicted_outcome?.estimated_range?.description}
                 </p>
               </div>
 
               {/* Progress Bar */}
-              <div style={{
-                width: "100%",
-                height: "20px",
-                background: "#e0e0e0",
-                borderRadius: "10px",
-                overflow: "hidden",
-                marginBottom: "25px",
-              }}>
-                <div style={{
-                  height: "100%",
+              <div className="w-full h-4 sm:h-5 bg-gray-200 rounded-full overflow-hidden mb-5 sm:mb-6">
+                <div className="h-full transition-all duration-500" style={{
                   width: `${successProb}%`,
                   background: "linear-gradient(90deg, #4a90e2 0%, #357abd 100%)",
-                  transition: "width 0.5s ease-out",
                 }}></div>
               </div>
 
               {/* Metrics */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
+              <div className="grid grid-cols-3 gap-2 sm:gap-5">
                 <div>
-                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Confidence Level</p>
-                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                  <p className="text-gray-500 text-xs sm:text-sm mb-1 sm:mb-2">Confidence Level</p>
+                  <p className="text-blue-700 font-bold text-sm sm:text-base">
                     {result.predicted_outcome?.confidence_category || "Weak"}
                   </p>
                 </div>
                 <div>
-                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Analysis Depth</p>
-                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                  <p className="text-gray-500 text-xs sm:text-sm mb-1 sm:mb-2">Analysis Depth</p>
+                  <p className="text-blue-700 font-bold text-sm sm:text-base">
                     {result.predicted_outcome?.analysis_depth || "Detailed"}
                   </p>
                 </div>
                 <div>
-                  <p style={{ color: "#666", fontSize: "13px", margin: "0 0 8px 0" }}>Risk Level</p>
-                  <p style={{ color: "#2c5aa0", fontWeight: "bold", fontSize: "16px", margin: 0 }}>
+                  <p className="text-gray-500 text-xs sm:text-sm mb-1 sm:mb-2">Risk Level</p>
+                  <p className="text-blue-700 font-bold text-sm sm:text-base">
                     {result.predicted_outcome?.risk_assessment?.level || "Unknown"}
                   </p>
                 </div>
@@ -766,22 +751,22 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Key Analysis Factors */}
       {result.key_factors && Object.keys(result.key_factors).length > 0 && (
-        <div style={{
+        <div className="mx-3 sm:mx-0" style={{
           background: "white",
           border: "1px solid #e8e8e8",
           borderRadius: "16px",
-          padding: "28px",
+          padding: "16px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
           transition: "all 0.3s ease",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "24px" }}>⚖️</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <span className="text-xl sm:text-2xl">⚖️</span>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 m-0">
               Key Analysis Factors
             </h3>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "16px" }}>
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {Object.entries(result.key_factors)
               .filter(([key]) => key.toLowerCase() !== "reasoning")
               .slice(0, showAllFactors ? undefined : 4)
@@ -798,38 +783,18 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
                 const isExpanded = expandedFactors.has(key);
 
                 return (
-                  <div key={key} style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: "16px",
-                    marginBottom: "12px",
-                    background: "#f8f9fa",
-                    borderRadius: "12px",
-                    border: "1px solid #f0f0f0",
-                    gap: "16px",
-                    transition: "all 0.2s ease",
-                    cursor: "pointer",
-                  }}
-                    onMouseOver={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "#f0f4f8";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.06)";
-                    }}
-                    onMouseOut={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = "#f8f9fa";
-                      (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                    }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
-                      <p style={{ fontWeight: "600", color: "#333", margin: 0 }}>{key}</p>
+                  <div key={key} className="flex flex-col sm:flex-row sm:items-center p-3 sm:p-4 mb-2 sm:mb-3 bg-gray-50 rounded-xl border border-gray-100 gap-2 sm:gap-4 transition-all hover:bg-gray-100 cursor-pointer">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 flex-wrap">
+                      <p className="font-semibold text-gray-800 m-0 text-sm sm:text-base">{key}</p>
                       <span style={{
                         background: getBadgeColor(String(value)),
                         color: "white",
-                        padding: "6px 12px",
-                        minWidth: "50px",
+                        padding: "4px 10px",
+                        minWidth: "40px",
                         maxWidth: "100px",
                         textAlign: "center",
                         borderRadius: "20px",
-                        fontSize: "11px",
+                        fontSize: "10px",
                         fontWeight: "bold",
                         whiteSpace: "normal",
                         wordBreak: "break-word",
@@ -839,26 +804,14 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
                         {badgeText}
                       </span>
                     </div>
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <p style={{ fontSize: "13px", color: "#666", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                    <div className="flex-1 flex flex-col gap-1">
+                      <p className="text-xs sm:text-sm text-gray-600 m-0 whitespace-pre-wrap break-words">
                         {isExpanded ? full : preview}
                       </p>
                       {isLong && (
                         <button
                           onClick={() => toggleFactorExpanded(key)}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#3498db",
-                            fontSize: "12px",
-                            fontWeight: "600",
-                            cursor: "pointer",
-                            padding: "4px 0",
-                            textDecoration: "none",
-                            alignSelf: "flex-start",
-                          }}
-                          onMouseOver={(e) => (e.currentTarget.style.textDecoration = "underline")}
-                          onMouseOut={(e) => (e.currentTarget.style.textDecoration = "none")}
+                          className="bg-transparent border-none text-blue-500 text-xs font-semibold cursor-pointer p-0 pt-1 self-start hover:underline"
                         >
                           {isExpanded ? "Show Less ▲" : "Show More ▼"}
                         </button>
@@ -902,16 +855,16 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Legal Assessment Section */}
       {result.legal_assessment && (
-        <div style={{
+        <div className="mx-3 sm:mx-0" style={{
           background: "#fffbf5",
           border: "1px solid #ffe0b2",
           borderRadius: "16px",
-          padding: "28px",
+          padding: "16px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "24px" }}>⚖️</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#e67e22", margin: 0 }}>
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <span className="text-xl sm:text-2xl">⚖️</span>
+            <h3 className="text-lg sm:text-xl font-bold m-0" style={{ color: "#e67e22" }}>
               {isCriminalCase ? "Criminal Assessment" : "Liability Assessment"}
             </h3>
           </div>
@@ -1420,16 +1373,16 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Strategic Recommendations */}
       {result.strategic_recommendations && result.strategic_recommendations.length > 0 && (
-        <div style={{
+        <div className="mx-3 sm:mx-0" style={{
           background: "white",
           border: "1px solid #e8e8e8",
           borderRadius: "16px",
-          padding: "28px",
+          padding: "16px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "24px" }}>💡</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <span className="text-xl sm:text-2xl">💡</span>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 m-0">
               Strategic Recommendations
             </h3>
           </div>
@@ -1445,43 +1398,34 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
                 };
 
                 return (
-                  <div key={idx} style={{
+                  <div key={idx} className="p-3 sm:p-4 mb-3 rounded-lg" style={{
                     background: "#f8f9fa",
                     border: `2px solid ${getPriorityColor(rec.priority)}`,
                     borderLeft: `4px solid ${getPriorityColor(rec.priority)}`,
-                    borderRadius: "8px",
-                    padding: "16px",
-                    marginBottom: "12px",
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontWeight: "600", color: "#333", margin: "0 0 4px 0", fontSize: "14px" }}>
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-800 m-0 mb-1 text-sm">
                           {rec.title}
                         </p>
                         {rec.impact && (
-                          <p style={{ fontSize: "12px", color: "#27ae60", fontWeight: "bold", margin: "4px 0 0 0" }}>
+                          <p className="text-xs text-green-600 font-bold m-0">
                             ↑ Impact: {rec.impact}
                           </p>
                         )}
                       </div>
-                      <span style={{
+                      <span className="self-start px-3 py-1 rounded text-xs font-bold whitespace-nowrap" style={{
                         background: getPriorityColor(rec.priority),
                         color: "white",
-                        padding: "4px 12px",
-                        borderRadius: "4px",
-                        fontSize: "11px",
-                        fontWeight: "bold",
-                        whiteSpace: "nowrap",
-                        marginLeft: "12px",
                       }}>
                         {rec.priority}
                       </span>
                     </div>
-                    <p style={{ fontSize: "13px", color: "#666", margin: 0 }}>
+                    <p className="text-xs sm:text-sm text-gray-600 m-0">
                       {rec.description}
                     </p>
                     {rec.category && (
-                      <p style={{ fontSize: "11px", color: "#999", margin: "8px 0 0 0" }}>
+                      <p className="text-xs text-gray-400 mt-2 m-0">
                         Category: <strong>{rec.category}</strong>
                       </p>
                     )}
@@ -1517,17 +1461,17 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Precedent Cases with Links */}
       {result.precedent_cases && result.precedent_cases.length > 0 && (
-        <div style={{
+        <div className="mx-3 sm:mx-0" style={{
           background: "white",
           border: "1px solid #e8e8e8",
           borderRadius: "16px",
-          padding: "28px",
+          padding: "16px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "24px" }}>📖</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
-              Supporting Precedent Cases ({result.precedent_cases.length})
+          <div className="flex items-center gap-3 mb-4 sm:mb-5 flex-wrap">
+            <span className="text-xl sm:text-2xl">📖</span>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 m-0">
+              Precedent Cases ({result.precedent_cases.length})
             </h3>
           </div>
 
@@ -1539,31 +1483,24 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
             };
 
             return (
-              <div key={idx} style={{
+              <div key={idx} className="p-3 sm:p-4 mb-3" style={{
                 background: "#f8f9fa",
                 border: "1px solid #e0e0e0",
                 borderLeft: `4px solid ${getSimilarityColor(precedent.similarity_score)}`,
                 borderRadius: "8px",
-                padding: "16px",
-                marginBottom: "12px",
               }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
-                  <div>
-                    <p style={{ fontWeight: "600", color: "#2c5aa0", margin: "0 0 4px 0", fontSize: "14px" }}>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-blue-700 m-0 mb-1 text-sm break-words">
                       {precedent.case_name}
                     </p>
-                    <p style={{ fontSize: "12px", color: "#666", margin: 0 }}>
+                    <p className="text-xs text-gray-500 m-0 break-words">
                       {precedent.citation}
                     </p>
                   </div>
-                  <span style={{
+                  <span className="self-start px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap" style={{
                     background: getSimilarityColor(precedent.similarity_score),
                     color: "white",
-                    padding: "6px 12px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
                   }}>
                     {Math.round(precedent.similarity_score * 100)}% Similar
                   </span>
@@ -1650,21 +1587,21 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
 
       {/* Executive Summary */}
       {result.executive_summary && (
-        <div style={{
+        <div className="mx-3 sm:mx-0" style={{
           background: "#fffbf5",
           border: "1px solid #ffe0b2",
           borderRadius: "16px",
-          padding: "28px",
+          padding: "16px",
           boxShadow: "0 4px 16px rgba(0,0,0,0.05)",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
-            <span style={{ fontSize: "24px" }}>📋</span>
-            <h3 style={{ fontSize: "20px", fontWeight: "bold", color: "#333", margin: 0 }}>
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <span className="text-xl sm:text-2xl">📋</span>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-800 m-0">
               Executive Summary
             </h3>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-5">
             {result.executive_summary.charges && (
               <div style={{
                 background: "white",
