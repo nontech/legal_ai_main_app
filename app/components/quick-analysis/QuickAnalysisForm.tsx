@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import JurisdictionSection from "../JurisdictionSection";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
@@ -62,6 +63,8 @@ export default function QuickAnalysisForm({
   caseId,
   uploadedDocuments = {},
 }: QuickAnalysisFormProps) {
+  const t = useTranslations("caseAnalysis.caseDetails");
+  const tPage = useTranslations("quickAnalysisPage");
   const router = useRouter();
   const params = useParams();
   const country = params?.country as string || 'us';
@@ -555,10 +558,10 @@ export default function QuickAnalysisForm({
               </div>
               <div>
                 <h3 className="text-lg font-bold text-ink-900">
-                  Step 4: Case Information
+                  {t("stepTitle")}
                 </h3>
                 <p className="text-sm text-ink-600">
-                  Basic details about your case
+                  {t("description")}
                 </p>
               </div>
             </div>
@@ -770,7 +773,7 @@ export default function QuickAnalysisForm({
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
                 />
               </svg>
-              <span>Calculate Results</span>
+              <span>{tPage("calculateButton")}</span>
             </button>
             {(!caseName?.trim() ||
               !caseDescription?.trim() ||
@@ -780,7 +783,7 @@ export default function QuickAnalysisForm({
               !caseTypeId?.trim() ||
               !role?.trim()) && (
                 <p className="text-center text-sm text-ink-500 mt-2">
-                  Please fill in all required fields to continue
+                  {tPage("fillRequiredFields")}
                 </p>
               )}
           </div>

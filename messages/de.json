@@ -621,6 +621,7 @@
         },
         "caseDetails": {
             "title": "Falldetails",
+            "stepTitle": "Schritt 4: Fallinformationen",
             "description": "Verwalten und organisieren Sie alle Fallinformationen und unterstützenden Dokumente",
             "sectionsCompleted": "Abschnitte abgeschlossen",
             "caseInformation": "Fallinformationen",
@@ -859,6 +860,18 @@
             "linkCopied": "Link in die Zwischenablage kopiert",
             "noDescription": "Keine Beschreibung verfügbar"
         },
+        "loading": "Wird geladen..."
+    },
+    "quickAnalysisPage": {
+        "title": "Schnelle Fallanalyse",
+        "uploadStep": "Dokumente hochladen",
+        "calculateStep": "Ergebnisse berechnen",
+        "dropFiles": "Dateien hier ablegen oder klicken",
+        "fileTypes": "PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max. 10 MB",
+        "processButton": "Dokumente verarbeiten & automatisch ausfüllen",
+        "skipLink": "Überspringen und Falldetails manuell eingeben",
+        "calculateButton": "Ergebnisse berechnen",
+        "fillRequiredFields": "Bitte füllen Sie alle erforderlichen Felder aus, um fortzufahren",
         "loading": "Wird geladen..."
     }
 }

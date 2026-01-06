@@ -621,6 +621,7 @@
     },
     "caseDetails": {
       "title": "Case Details",
+      "stepTitle": "Step 4: Case Information",
       "description": "Manage and organize all case information and supporting documents",
       "sectionsCompleted": "Sections Completed",
       "caseInformation": "Case Information",
@@ -859,6 +860,18 @@
       "linkCopied": "Link copied to clipboard",
       "noDescription": "No description available"
     },
+    "loading": "Loading..."
+  },
+  "quickAnalysisPage": {
+    "title": "Quick Case Analysis",
+    "uploadStep": "Upload Documents",
+    "calculateStep": "Calculate Results",
+    "dropFiles": "Drop files here or click",
+    "fileTypes": "PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB",
+    "processButton": "Process Documents & Auto-Fill",
+    "skipLink": "Skip and enter case details manually",
+    "calculateButton": "Calculate Results",
+    "fillRequiredFields": "Please fill in all required fields to continue",
     "loading": "Loading..."
   }
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 interface HorizontalStepperProps {
   currentStep: number;
   onStepClick?: (step: number) => void;
@@ -9,9 +11,10 @@ export default function HorizontalStepper({
   currentStep,
   onStepClick,
 }: HorizontalStepperProps) {
+  const t = useTranslations("quickAnalysisPage");
   const steps = [
-    { number: 1, label: "Upload Documents" },
-    { number: 2, label: "Calculate Results" },
+    { number: 1, label: t("uploadStep") },
+    { number: 2, label: t("calculateStep") },
   ];
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import Navbar from "@/app/components/Navbar";
 
 export const dynamic = 'force-dynamic';
@@ -13,6 +14,7 @@ import VerdictStep from "@/app/components/VerdictStep";
 type Step = "upload" | "form" | "verdict";
 
 function CaseAnalysisContent() {
+  const t = useTranslations("quickAnalysisPage");
   const searchParams = useSearchParams();
   const [currentStep, setCurrentStep] = useState<Step>("upload");
   const [uploadedDocuments, setUploadedDocuments] = useState<File[]>(
@@ -103,7 +105,7 @@ function CaseAnalysisContent() {
           <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-4">
             <div className="text-center">
               <h3 className="text-lg sm:text-xl font-semibold text-ink-900">
-                Quick Case Analysis
+                {t("title")}
               </h3>
             </div>
 

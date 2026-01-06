@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 interface CaseType {
   id: string;
@@ -257,6 +258,7 @@ export default function CompactCaseType({
   countryId,
   showExtractedBadge = false,
 }: CompactCaseTypeProps) {
+  const t = useTranslations("caseAnalysis.caseType");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const caseTypes = DEFAULT_CASE_TYPES;
   const [selectedCaseType, setSelectedCaseType] = useState<CaseType>(() => {
@@ -337,7 +339,7 @@ export default function CompactCaseType({
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap mb-1">
-                  Step 2: Case Type{" "}
+                  {t("stepTitle")}{" "}
                   <span className="text-red-500">*</span>
                   {showExtractedBadge && (
                     <div className="relative group">

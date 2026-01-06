@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import StreamingUploadDisplay from "../StreamingUploadDisplay";
 
 type DocumentCategory =
@@ -39,6 +40,7 @@ export default function DocumentUploadStep({
   onContinue,
   caseId: initialCaseId,
 }: DocumentUploadStepProps) {
+  const t = useTranslations("quickAnalysisPage");
   const [classifiedFiles, setClassifiedFiles] = useState<
     ClassifiedFile[]
   >([]);
@@ -794,10 +796,10 @@ export default function DocumentUploadStep({
                     </svg>
                   </div>
                   <p className="text-base sm:text-lg font-semibold text-ink-900 mb-2">
-                    Drop files here or click
+                    {t("dropFiles")}
                   </p>
                   <p className="text-xs sm:text-sm text-ink-500 text-center px-2">
-                    PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB
+                    {t("fileTypes")}
                   </p>
                 </label>
               </div>
@@ -982,7 +984,7 @@ export default function DocumentUploadStep({
                 </>
               ) : (
                 <>
-                  <span>Process Documents & Auto-Fill</span>
+                  <span>{t("processButton")}</span>
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
@@ -1007,7 +1009,7 @@ export default function DocumentUploadStep({
               disabled={isUploading}
               className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium underline disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              Skip and enter case details manually
+              {t("skipLink")}
             </button>
           </div>
         </>

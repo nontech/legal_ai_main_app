@@ -2,7 +2,7 @@ import NavbarWrapper from "@/app/components/NavbarWrapper";
 import BackToHome from "@/app/components/BackToHome";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

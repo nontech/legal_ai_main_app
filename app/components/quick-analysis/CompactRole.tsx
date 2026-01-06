@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Briefcase, Shield, HelpCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type RoleType = "defendant" | "plaintiff";
 
@@ -12,6 +13,7 @@ interface CompactRoleProps {
 }
 
 export default function CompactRole({ onUpdate, initialValue, countryId }: CompactRoleProps) {
+  const t = useTranslations("caseAnalysis.role");
   const [selectedRole, setSelectedRole] =
     useState<RoleType | null>(initialValue || null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -81,11 +83,11 @@ export default function CompactRole({ onUpdate, initialValue, countryId }: Compa
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
-                Step 3: Your Role{" "}
+                {t("stepTitle")}{" "}
                 <span className="text-red-500">*</span>
               </h3>
               <p className="text-xs sm:text-sm text-ink-600">
-                Your position in this case
+                {t("positionDesc")}
               </p>
             </div>
           </div>
