@@ -71,6 +71,7 @@ function DetailedCaseAnalysisContent() {
           6: 0,
           7: 0,
           8: 0,
+          9: 0, // Initialize Verdict step
         };
 
         // Check jurisdiction (step 0)
@@ -146,16 +147,19 @@ function DetailedCaseAnalysisContent() {
     }));
   }, []);
 
+  const isCriminal = !caseType || caseType.toLowerCase() === "criminal";
+
   const steps = [
     { id: "jurisdiction", label: t("steps.jurisdiction"), icon: null },
     { id: "case-type", label: t("steps.caseType"), icon: null },
     { id: "role", label: t("steps.role"), icon: null },
-    { id: "charges", label: t("steps.charges"), icon: null },
+    { id: "charges", label: isCriminal ? t("steps.charges") : t("steps.claims"), icon: null },
     { id: "case-details", label: t("steps.caseDetails"), icon: null },
     { id: "judge", label: t("steps.judge"), icon: null },
     { id: "jury", label: t("steps.jury"), icon: null },
     { id: "results", label: t("steps.results"), icon: null },
     { id: "game-plan", label: t("steps.gamePlan"), icon: null },
+    { id: "verdict", label: t("steps.verdict"), icon: null },
   ];
 
   const renderStepContent = () => {

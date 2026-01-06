@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import SaveCaseButton from "./SaveCaseButton";
+import { useTranslations } from "next-intl";
 
 interface CaseType {
   id: string;
@@ -71,6 +72,7 @@ export default function CaseTypeSelector({
   caseId,
   countryId,
 }: CaseTypeSelectorProps) {
+  const t = useTranslations("caseAnalysis.caseType");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCaseType, setSelectedCaseType] =
     useState<CaseType | null>(null);
@@ -441,11 +443,10 @@ export default function CaseTypeSelector({
         <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
           <div className="text-center">
             <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              Select Case Type
+              {t("selectTitle")}
             </h2>
             <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              Choose the fundamental nature of your legal case to
-              ensure accurate analysis and applicable legal standards.
+              {t("selectDescription")}
             </p>
           </div>
         </div>
@@ -468,16 +469,13 @@ export default function CaseTypeSelector({
             </svg>
             <div>
               <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                Case Type Selection Confirmed
+                {t("selectionConfirmed")}
               </h4>
               <p className="text-ink-600 text-xs sm:text-sm">
-                You have selected{" "}
-                <span className="font-semibold">
-                  {selectedCaseType?.title || "N/A"}
-                </span>{" "}
-                - The analysis will apply the appropriate legal
-                standards and burden of proof specific to this case
-                type.
+                {t.rich("selectionConfirmedDesc", {
+                  type: selectedCaseType?.title || t("na"),
+                  font: (chunks) => <span className="font-semibold">{chunks}</span>
+                })}
               </p>
             </div>
           </div>
@@ -510,11 +508,11 @@ export default function CaseTypeSelector({
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
-                    Step 2: Case Type{" "}
+                    {t("stepTitle")}{" "}
                     <span className="text-red-500">*</span>
                   </h3>
                   <p className="text-xs sm:text-sm text-ink-600 truncate">
-                    {selectedCaseType?.subtitle || "Select a case type"}
+                    {selectedCaseType?.subtitle || t("selectTitle")}
                   </p>
                 </div>
               </div>
@@ -525,7 +523,7 @@ export default function CaseTypeSelector({
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg hover:bg-surface-100 transition-colors group cursor-pointer"
               >
                 <span className="text-base sm:text-lg font-semibold text-ink-900 group-hover:text-primary-600 transition-colors">
-                  {selectedCaseType?.title || "Select Case Type"}
+                  {selectedCaseType?.title || t("selectTitle")}
                 </span>
                 <svg
                   className="w-4 h-4 text-ink-400 group-hover:text-primary-600 transition-colors"
@@ -557,7 +555,7 @@ export default function CaseTypeSelector({
               <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-white">
-                    Select Case Type
+                    {t("selectTitle")}
                   </h2>
                   <button
                     onClick={() => setIsModalOpen(false)}
@@ -579,9 +577,7 @@ export default function CaseTypeSelector({
                   </button>
                 </div>
                 <p className="text-primary-100 text-sm mt-1">
-                  Choose the fundamental nature of your legal case to
-                  ensure accurate analysis and applicable legal
-                  standards.
+                  {t("selectDescription")}
                 </p>
               </div>
 
@@ -609,67 +605,67 @@ export default function CaseTypeSelector({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {caseTypes.map((caseType) => (
-                    <button
-                      key={caseType.id}
-                      onClick={() => handleSelectCaseType(caseType)}
-                      className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
+                      <button
+                        key={caseType.id}
+                        onClick={() => handleSelectCaseType(caseType)}
+                        className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
                           ? "border-primary-500 bg-primary-100"
                           : "border-border-200 hover:border-primary-300"
-                        }`}
-                    >
-                      <div className="flex items-start mb-2">
-                        <div className="text-3xl mr-3">
-                          {caseType.icon}
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-ink-900 text-sm mb-1">
-                            {caseType.title}
-                          </h3>
-                          <p className="text-xs text-ink-600 mb-2">
-                            {caseType.subtitle}
-                          </p>
-                        </div>
-                        {selectedCaseType?.id === caseType.id && (
-                          <div className="flex-shrink-0">
-                            <svg
-                              className="w-5 h-5 text-primary-600"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
+                          }`}
+                      >
+                        <div className="flex items-start mb-2">
+                          <div className="text-3xl mr-3">
+                            {caseType.icon}
                           </div>
-                        )}
-                      </div>
-
-                      <div className="text-xs text-ink-600 space-y-1 mb-2">
-                        {caseType.typicalCases
-                          .slice(0, 3)
-                          .map((case_, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start"
-                            >
-                              <span className="text-primary-500 mr-1">
-                                •
-                              </span>
-                              <span className="line-clamp-1">
-                                {case_}
-                              </span>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-ink-900 text-sm mb-1">
+                              {caseType.title}
+                            </h3>
+                            <p className="text-xs text-ink-600 mb-2">
+                              {caseType.subtitle}
+                            </p>
+                          </div>
+                          {selectedCaseType?.id === caseType.id && (
+                            <div className="flex-shrink-0">
+                              <svg
+                                className="w-5 h-5 text-primary-600"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
                             </div>
-                          ))}
-                      </div>
+                          )}
+                        </div>
 
-                      <div className="text-xs text-ink-500 pt-2 border-t border-border-200">
-                        <span className="font-medium">Proof:</span>{" "}
-                        {caseType.standardOfProof}
-                      </div>
-                    </button>
-                  ))}
+                        <div className="text-xs text-ink-600 space-y-1 mb-2">
+                          {caseType.typicalCases
+                            .slice(0, 3)
+                            .map((case_, index) => (
+                              <div
+                                key={index}
+                                className="flex items-start"
+                              >
+                                <span className="text-primary-500 mr-1">
+                                  •
+                                </span>
+                                <span className="line-clamp-1">
+                                  {case_}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+
+                        <div className="text-xs text-ink-500 pt-2 border-t border-border-200">
+                          <span className="font-medium">Proof:</span>{" "}
+                          {caseType.standardOfProof}
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

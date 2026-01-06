@@ -541,6 +541,7 @@
       "caseType": "Case Type",
       "role": "Role",
       "charges": "Charges",
+      "claims": "Claims",
       "caseDetails": "Case Details",
       "judge": "Judge",
       "jury": "Jury",
@@ -548,9 +549,99 @@
       "gamePlan": "Game Plan",
       "verdict": "Verdict"
     },
+    "jurisdiction": {
+      "title": "Jurisdiction",
+      "stepTitle": "Step 1: Jurisdiction",
+      "description": "Specify where your case will be heard",
+      "whereHeard": "Where your case will be heard",
+      "country": "Country",
+      "stateProvince": "State/Province",
+      "courtName": "Court Name",
+      "selectCountry": "Select country",
+      "selectStateProvince": "Select state/province",
+      "selectCourt": "Select court",
+      "enterCountry": "Enter country name",
+      "enterStateProvince": "Enter state/province",
+      "enterCourt": "Enter court name",
+      "extracted": "Extracted",
+      "extractedTooltip": "Extracted from case information documents"
+    },
+    "saveButton": {
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "savedSuccessfully": "Saved successfully",
+      "failedToSave": "Failed to save",
+      "caseIdRequired": "Case ID is required"
+    },
     "pretrial": {
       "title": "Pretrial Process & Motions",
       "description": "Manage all pretrial procedures, discovery, and motions"
+    },
+    "caseType": {
+      "selectTitle": "Select Case Type",
+      "selectDescription": "Choose the fundamental nature of your legal case to ensure accurate analysis and applicable legal standards.",
+      "selectionConfirmed": "Case Type Selection Confirmed",
+      "selectionConfirmedDesc": "You have selected {type}. The analysis will apply the appropriate legal standards and burden of proof for this case type.",
+      "stepTitle": "Step 2: Case Type",
+      "na": "N/A"
+    },
+    "role": {
+      "selectTitle": "Select Your Role",
+      "selectDescription": "Your role determines the legal strategy, burden of proof, and analysis perspective for this case.",
+      "selectionConfirmed": "Role Selection Confirmed",
+      "selectionConfirmedDesc": "You have selected {role}. The analysis will be tailored to your strategic position and legal burden in this case.",
+      "stepTitle": "Step 3: Your Role",
+      "positionDesc": "Your position in this case"
+    },
+    "charges": {
+      "title": "Charges",
+      "titleClaims": "Claims",
+      "description": "Add and manage charges for your case.",
+      "descriptionClaims": "Add and manage claims for your case.",
+      "addedCount": "{count} charge(s) added",
+      "addedCountClaims": "{count} claim(s) added",
+      "addCharge": "Add Charge",
+      "addClaim": "Add Claim",
+      "count": "Count {number}",
+      "statuteNumber": "Statute Number",
+      "statuteNumberPlaceholder": "e.g., 18 U.S. Code § 1001",
+      "chargeDescription": "Charge Description",
+      "claimDescription": "Claim Description",
+      "essentialFacts": "Essential Facts",
+      "defendantPlea": "Defendant's Plea",
+      "defendantClaim": "Defendant's Claim",
+      "notGuilty": "Not Guilty",
+      "guilty": "Guilty",
+      "nonLiable": "Non-Liable",
+      "liable": "Liable",
+      "noloContendere": "Nolo Contendere (No Contest)",
+      "pending": "Pending",
+      "saveChanges": "Save Changes",
+      "saving": "Saving..."
+    },
+    "caseDetails": {
+      "title": "Case Details",
+      "description": "Manage and organize all case information and supporting documents",
+      "sectionsCompleted": "Sections Completed",
+      "caseInformation": "Case Information",
+      "caseInformationDesc": "Add case title and comprehensive description with supporting documents",
+      "evidence": "Evidence & Supporting Materials",
+      "evidenceDesc": "Upload photos, forensic reports, expert reports, and supporting documents",
+      "witness": "Key Witness & Testimony",
+      "witnessDesc": "Upload witness statements, depositions, and testimony transcripts",
+      "legalPrecedents": "Relevant Legal Precedents",
+      "legalPrecedentsDesc": "Upload case law PDFs and legal research documents",
+      "policeReport": "Police Report",
+      "policeReportDesc": "Upload official police reports and incident documentation",
+      "challenges": "Potential Challenges & Weaknesses",
+      "challengesDesc": "Upload opposing counsel briefs and vulnerability analyses",
+      "document": "document",
+      "documents": "documents",
+      "loading": "Loading case details..."
+    },
+    "common": {
+      "incomplete": "Incomplete",
+      "locked": "Locked"
     },
     "loading": "Loading..."
   }

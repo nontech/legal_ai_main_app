@@ -541,6 +541,7 @@
             "caseType": "Falltyp",
             "role": "Rolle",
             "charges": "Anklagen",
+            "claims": "Ansprüche",
             "caseDetails": "Falldetails",
             "judge": "Richter",
             "jury": "Geschworene",
@@ -548,9 +549,99 @@
             "gamePlan": "Spielplan",
             "verdict": "Urteil"
         },
+        "jurisdiction": {
+            "title": "Gerichtsbarkeit",
+            "stepTitle": "Schritt 1: Gerichtsbarkeit",
+            "description": "Geben Sie an, wo Ihr Fall verhandelt wird",
+            "whereHeard": "Wo Ihr Fall verhandelt wird",
+            "country": "Land",
+            "stateProvince": "Bundesland/Provinz",
+            "courtName": "Gerichtsname",
+            "selectCountry": "Land auswählen",
+            "selectStateProvince": "Bundesland/Provinz auswählen",
+            "selectCourt": "Gericht auswählen",
+            "enterCountry": "Landesnamen eingeben",
+            "enterStateProvince": "Bundesland/Provinz eingeben",
+            "enterCourt": "Gerichtsnamen eingeben",
+            "extracted": "Extrahiert",
+            "extractedTooltip": "Aus Fallinformationsdokumenten extrahiert"
+        },
+        "saveButton": {
+            "saveChanges": "Änderungen speichern",
+            "saving": "Speichert...",
+            "savedSuccessfully": "Erfolgreich gespeichert",
+            "failedToSave": "Speichern fehlgeschlagen",
+            "caseIdRequired": "Fall-ID ist erforderlich"
+        },
         "pretrial": {
             "title": "Vorverfahren & Anträge",
             "description": "Verwalten Sie alle Vorverfahren, Beweisaufnahme und Anträge"
+        },
+        "caseType": {
+            "selectTitle": "Falltyp auswählen",
+            "selectDescription": "Wählen Sie die grundlegende Art Ihres Rechtsfalls, um eine genaue Analyse und anwendbare Rechtsstandards sicherzustellen.",
+            "selectionConfirmed": "Auswahl des Falltyps bestätigt",
+            "selectionConfirmedDesc": "Sie haben {type} ausgewählt. Die Analyse wendet die entsprechenden Rechtsstandards und Beweislasten für diesen Falltyp an.",
+            "stepTitle": "Schritt 2: Falltyp",
+            "na": "N/A"
+        },
+        "role": {
+            "selectTitle": "Wählen Sie Ihre Rolle",
+            "selectDescription": "Ihre Rolle bestimmt die rechtliche Strategie, Beweislast und Analyseperspektive für diesen Fall.",
+            "selectionConfirmed": "Rollenwahl bestätigt",
+            "selectionConfirmedDesc": "Sie haben {role} ausgewählt. Die Analyse wird auf Ihre strategische Position und rechtliche Belastung in diesem Fall zugeschnitten.",
+            "stepTitle": "Schritt 3: Ihre Rolle",
+            "positionDesc": "Ihre Position in diesem Fall"
+        },
+        "charges": {
+            "title": "Anklagepunkte",
+            "titleClaims": "Ansprüche",
+            "description": "Fügen Sie Anklagepunkte für Ihren Fall hinzu und verwalten Sie diese.",
+            "descriptionClaims": "Fügen Sie Ansprüche für Ihren Fall hinzu und verwalten Sie diese.",
+            "addedCount": "{count} Anklagepunkt(e) hinzugefügt",
+            "addedCountClaims": "{count} Anspruch/Ansprüche hinzugefügt",
+            "addCharge": "Anklagepunkt hinzufügen",
+            "addClaim": "Anspruch hinzufügen",
+            "count": "Zählpunkt {number}",
+            "statuteNumber": "Gesetzesnummer",
+            "statuteNumberPlaceholder": "z.B. § 823 BGB",
+            "chargeDescription": "Beschreibung des Anklagepunkts",
+            "claimDescription": "Beschreibung des Anspruchs",
+            "essentialFacts": "Wesentliche Fakten",
+            "defendantPlea": "Plädoyer des Beklagten",
+            "defendantClaim": "Anspruch des Beklagten",
+            "notGuilty": "Nicht schuldig",
+            "guilty": "Schuldig",
+            "nonLiable": "Nicht haftbar",
+            "liable": "Haftbar",
+            "noloContendere": "Nolo Contendere (Kein Einspruch)",
+            "pending": "Ausstehend",
+            "saveChanges": "Änderungen speichern",
+            "saving": "Wird gespeichert..."
+        },
+        "caseDetails": {
+            "title": "Falldetails",
+            "description": "Verwalten und organisieren Sie alle Fallinformationen und unterstützenden Dokumente",
+            "sectionsCompleted": "Abschnitte abgeschlossen",
+            "caseInformation": "Fallinformationen",
+            "caseInformationDesc": "Fügen Sie den Falltitel und eine umfassende Beschreibung mit unterstützenden Dokumenten hinzu",
+            "evidence": "Beweise & Unterstützungsmaterialien",
+            "evidenceDesc": "Laden Sie Fotos, forensische Berichte, Expertenberichte und unterstützende Dokumente hoch",
+            "witness": "Hauptzeuge & Aussage",
+            "witnessDesc": "Laden Sie Zeugenaussagen, Depositionen und Aussagenprotokolle hoch",
+            "legalPrecedents": "Relevante rechtliche Präzedenzfälle",
+            "legalPrecedentsDesc": "Laden Sie Fallrechts-PDFs und juristische Forschungsdokumente hoch",
+            "policeReport": "Polizeibericht",
+            "policeReportDesc": "Laden Sie offizielle Polizeiberichte und Vorfallsdokumentationen hoch",
+            "challenges": "Potenzielle Herausforderungen & Schwächen",
+            "challengesDesc": "Laden Sie Schriftsätze der Gegenseite und Schwachstellenanalysen hoch",
+            "document": "Dokument",
+            "documents": "Dokumente",
+            "loading": "Wird geladen..."
+        },
+        "common": {
+            "incomplete": "Unvollständig",
+            "locked": "Gesperrt"
         },
         "loading": "Wird geladen..."
     }

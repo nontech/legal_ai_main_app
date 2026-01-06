@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface SaveCaseButtonProps {
     caseId?: string;
@@ -16,15 +17,16 @@ export default function SaveCaseButton({
     field,
     value,
     onSave,
-    children = "Save Changes",
+    children,
     ...rest
 }: SaveCaseButtonProps) {
+    const t = useTranslations("caseAnalysis.saveButton");
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
     const handleSave = async () => {
         if (!caseId) {
-            setMessage({ type: "error", text: "Case ID is required" });
+            setMessage({ type: "error", text: t("caseIdRequired") });
             return;
         }
 
@@ -41,10 +43,10 @@ export default function SaveCaseButton({
             const json = await res.json();
 
             if (!res.ok || !json?.ok) {
-                throw new Error(json?.error || "Failed to save");
+                throw new Error(json?.error || t("failedToSave"));
             }
 
-            setMessage({ type: "success", text: "Saved successfully" });
+            setMessage({ type: "success", text: t("savedSuccessfully") });
             if (onSave) onSave();
 
             // Clear success message after 2 seconds
@@ -52,7 +54,7 @@ export default function SaveCaseButton({
         } catch (e) {
             setMessage({
                 type: "error",
-                text: e instanceof Error ? e.message : "Failed to save",
+                text: e instanceof Error ? e.message : t("failedToSave"),
             });
         } finally {
             setIsSaving(false);
@@ -71,14 +73,14 @@ export default function SaveCaseButton({
                         <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Saving...
+                        {t("saving")}
                     </>
                 ) : (
                     <>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        {children}
+                        {children || t("saveChanges")}
                     </>
                 )}
             </button>

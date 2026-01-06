@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface Charge {
   id: string;
@@ -16,6 +17,7 @@ interface ChargesSectionProps {
 }
 
 export default function ChargesSection({ caseId, onCompletionChange }: ChargesSectionProps) {
+  const t = useTranslations("caseAnalysis.charges");
   const [charges, setCharges] = useState<Charge[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [caseType, setCaseType] = useState<string>("criminal");
@@ -144,8 +146,9 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
   };
 
   const isCriminal = caseType?.toLowerCase() === "criminal";
-  const chargeLabel = isCriminal ? "Charges" : "Claims";
-  const chargeWord = isCriminal ? "charge" : "claim";
+  // Used for dynamic labels that are simple words, but we prefer full translation keys
+  // const chargeLabel = isCriminal ? "Charges" : "Claims"; 
+  // const chargeWord = isCriminal ? "charge" : "claim";
 
   return (
     <div className="space-y-6">
@@ -153,16 +156,21 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">{chargeLabel}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              {isCriminal ? t("title") : t("titleClaims")}
+            </h2>
             <p className="text-sm text-gray-600 mt-1">
-              Add and manage {chargeLabel.toLowerCase()} for your case
+              {isCriminal ? t("description") : t("descriptionClaims")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="text-sm text-gray-600">
-            {charges?.length || 0} {chargeWord}{charges?.length !== 1 ? "s" : ""} added
+            {isCriminal
+              ? t("addedCount", { count: charges?.length || 0 })
+              : t("addedCountClaims", { count: charges?.length || 0 })
+            }
           </div>
           <button
             onClick={addCharge}
@@ -181,7 +189,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                 d="M12 4v16m8-8H4"
               />
             </svg>
-            Add {chargeLabel === "Charges" ? "Charge" : "Claim"}
+            {isCriminal ? t("addCharge") : t("addClaim")}
           </button>
         </div>
 
@@ -194,7 +202,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
               {/* Charge Header with Delete Button */}
               <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Count {index + 1}
+                  {t("count", { number: index + 1 })}
                 </h3>
                 <button
                   onClick={() => removeCharge(charge.id)}
@@ -221,7 +229,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Statute Number
+                    {t("statuteNumber")}
                   </label>
                   <input
                     type="text"
@@ -229,14 +237,14 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                     onChange={(e) =>
                       updateCharge(charge.id, "statuteNumber", e.target.value)
                     }
-                    placeholder="e.g., 18 U.S.C. § 1001"
+                    placeholder={t("statuteNumberPlaceholder")}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 placeholder:text-gray-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {chargeLabel === "Charges" ? "Charge Description" : "Claim Description"}
+                    {isCriminal ? t("chargeDescription") : t("claimDescription")}
                   </label>
                   <textarea
                     value={charge.chargeDescription}
@@ -247,7 +255,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                         e.target.value
                       )
                     }
-                    placeholder="Describe the charge"
+                    placeholder={isCriminal ? t("chargeDescription") : t("claimDescription")}
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 placeholder:text-gray-500 resize-y"
                   />
@@ -255,14 +263,14 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Essential Facts
+                    {t("essentialFacts")}
                   </label>
                   <textarea
                     value={charge.essentialFacts}
                     onChange={(e) =>
                       updateCharge(charge.id, "essentialFacts", e.target.value)
                     }
-                    placeholder="Describe the essential facts of this charge"
+                    placeholder={t("essentialFacts")}
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 placeholder:text-gray-500 resize-y"
                   />
@@ -270,7 +278,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {caseType?.toLowerCase() === "criminal" ? "Defendant's Plea" : "Defendant's Claim"}
+                    {isCriminal ? t("defendantPlea") : t("defendantClaim")}
                   </label>
                   <select
                     value={charge.defendantPlea}
@@ -279,19 +287,19 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                     }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-gray-900 text-gray-900 bg-white"
                   >
-                    {caseType?.toLowerCase() === "criminal" ? (
+                    {isCriminal ? (
                       <>
-                        <option value="not-guilty">Not Guilty</option>
-                        <option value="guilty">Guilty</option>
-                        <option value="nolo">Nolo Contendere</option>
-                        <option value="pending">Pending</option>
+                        <option value="not-guilty">{t("notGuilty")}</option>
+                        <option value="guilty">{t("guilty")}</option>
+                        <option value="nolo">{t("noloContendere")}</option>
+                        <option value="pending">{t("pending")}</option>
                       </>
                     ) : (
                       <>
-                        <option value="non-liable">Non-Liable</option>
-                        <option value="liable">Liable</option>
-                        <option value="nolo">Nolo Contendere</option>
-                        <option value="pending">Pending</option>
+                        <option value="non-liable">{t("nonLiable")}</option>
+                        <option value="liable">{t("liable")}</option>
+                        <option value="nolo">{t("noloContendere")}</option>
+                        <option value="pending">{t("pending")}</option>
                       </>
                     )}
                   </select>
@@ -315,14 +323,14 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
                 <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                Saving...
+                {t("saving")}
               </>
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Save Changes
+                {t("saveChanges")}
               </>
             )}
           </button>

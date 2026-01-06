@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import SaveCaseButton from "./SaveCaseButton";
 import SearchableSelect from "./ui/searchable-select";
 
@@ -103,6 +104,8 @@ export default function JurisdictionSection({
   hideSaveButton = false,
   showExtractedBadge = false,
 }: JurisdictionSectionProps) {
+  const t = useTranslations("caseAnalysis.jurisdiction");
+  
   // Data state
   const [countries, setCountries] = useState<Country[]>([]);
   const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
@@ -655,17 +658,17 @@ export default function JurisdictionSection({
           </div>
           <div className="min-w-0">
             <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap">
-              Step 1: Jurisdiction <span className="text-red-500">*</span>
+              {t("stepTitle")} <span className="text-red-500">*</span>
               {showExtractedBadge && (
                 <div className="relative group">
                   <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
                     <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-xs font-medium text-primary-700">Extracted</span>
+                    <span className="text-xs font-medium text-primary-700">{t("extracted")}</span>
                   </div>
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
-                    Extracted from case information documents
+                    {t("extractedTooltip")}
                     <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
                       <div className="border-4 border-transparent border-t-ink-900"></div>
                     </div>
@@ -673,13 +676,13 @@ export default function JurisdictionSection({
                 </div>
               )}
             </h3>
-            <p className="text-xs sm:text-sm text-ink-600">Where your case will be heard</p>
+            <p className="text-xs sm:text-sm text-ink-600">{t("whereHeard")}</p>
           </div>
         </div>
       ) : (
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-ink-900 mb-2">Jurisdiction</h2>
-          <p className="text-ink-600">Specify where your case will be heard</p>
+          <h2 className="text-2xl font-bold text-ink-900 mb-2">{t("title")}</h2>
+          <p className="text-ink-600">{t("description")}</p>
         </div>
       )}
 
@@ -705,13 +708,13 @@ export default function JurisdictionSection({
           {/* Country */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-2">
-              Country <span className="text-red-500">*</span>
+              {t("country")} <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
               options={countryOptions}
               value={country}
               onChange={handleCountryChange}
-              placeholder="Select country"
+              placeholder={t("selectCountry")}
               allowOther
             />
             {country === "__other__" && (
@@ -719,7 +722,7 @@ export default function JurisdictionSection({
                 type="text"
                 value={customCountry}
                 onChange={(e) => setCustomCountry(e.target.value)}
-                placeholder="Enter country name"
+                placeholder={t("enterCountry")}
                 className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
               />
             )}
@@ -728,13 +731,13 @@ export default function JurisdictionSection({
           {/* Jurisdiction */}
           <div>
             <label className="block text-sm font-medium text-ink-700 mb-2">
-              State/Province <span className="text-red-500">*</span>
+              {t("stateProvince")} <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
               options={jurisdictionOptions.map((j) => ({ value: j, label: j }))}
               value={jurisdiction}
               onChange={handleJurisdictionChange}
-              placeholder="Select state/province"
+              placeholder={t("selectStateProvince")}
               disabled={!countryId || isLoadingJurisdictions}
               allowOther
             />
@@ -743,7 +746,7 @@ export default function JurisdictionSection({
                 type="text"
                 value={customJurisdiction}
                 onChange={(e) => setCustomJurisdiction(e.target.value)}
-                placeholder="Enter state/province"
+                placeholder={t("enterStateProvince")}
                 className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
               />
             )}
@@ -752,13 +755,13 @@ export default function JurisdictionSection({
           {/* Court */}
           <div className={isCompact ? "md:col-span-2" : ""}>
             <label className="block text-sm font-medium text-ink-700 mb-2">
-              Court Name <span className="text-red-500">*</span>
+              {t("courtName")} <span className="text-red-500">*</span>
             </label>
             <SearchableSelect
               options={courtOptions.map((c) => ({ value: c, label: c }))}
               value={court}
               onChange={handleCourtChange}
-              placeholder="Select court"
+              placeholder={t("selectCourt")}
               disabled={!jurisdictionId || isLoadingCourts}
               allowOther
             />
@@ -767,7 +770,7 @@ export default function JurisdictionSection({
                 type="text"
                 value={customCourt}
                 onChange={(e) => setCustomCourt(e.target.value)}
-                placeholder="Enter court name"
+                placeholder={t("enterCourt")}
                 className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
               />
             )}
