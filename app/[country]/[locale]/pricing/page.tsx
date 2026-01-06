@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Navbar from "@/app/components/Navbar";
+import NavbarWrapper from "@/app/components/NavbarWrapper";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   Check,
@@ -8,6 +8,8 @@ import {
   ShieldCheck,
   Scale,
 } from "lucide-react";
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -34,7 +36,7 @@ export default async function Pricing({
 
   return (
     <div className="min-h-screen bg-surface-100">
-      <Navbar />
+      <NavbarWrapper />
 
       {/* Hero Section */}
       <div className="bg-primary-900 text-white pt-32 pb-24">

@@ -1,6 +1,8 @@
 import Link from "next/link";
-import Navbar from "@/app/components/Navbar";
+import NavbarWrapper from "@/app/components/NavbarWrapper";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
@@ -27,7 +29,7 @@ export default async function Contact({
   
   return (
     <div className="min-h-screen bg-surface-100">
-      <Navbar />
+      <NavbarWrapper />
       
       {/* Hero Header */}
       <div className="bg-primary-900 text-white pt-32 pb-24">

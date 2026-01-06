@@ -53,7 +53,7 @@ export function middleware(request: NextRequest) {
 
     // If only country is specified (e.g., /de), add default locale for that country
     const countryMatch = pathname.match(/^\/([a-z]{2})$/);
-    if (countryMatch && countries.includes(countryMatch[1])) {
+    if (countryMatch && countries.includes(countryMatch[1] as any)) {
         const country = countryMatch[1];
         const locale = (countryDefaults as Record<string, string>)[country] || 'en';
         request.nextUrl.pathname = `/${country}/${locale}`;

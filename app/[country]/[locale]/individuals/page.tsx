@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import Link from "next/link";
@@ -24,7 +25,9 @@ import {
 export default function IndividualsPage() {
     return (
         <div className="min-h-screen bg-surface-100 text-ink-900 font-sans">
-            <Navbar />
+            <Suspense fallback={<div className="h-20" />}>
+                <Navbar />
+            </Suspense>
 
             {/* Hero Section */}
             <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 bg-surface-100">

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -44,7 +45,9 @@ export default async function LocaleLayout({
   // Note: html and body tags are removed here because they are already provided by root layout
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <Navbar />
+      <Suspense fallback={<div className="h-20" />}>
+        <Navbar />
+      </Suspense>
       {children}
       <Footer />
     </NextIntlClientProvider>

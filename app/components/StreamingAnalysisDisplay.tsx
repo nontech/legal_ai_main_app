@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 // Hook for typing animation
 function useTypingAnimation(text: string, speed: number = 30) {
@@ -242,6 +243,7 @@ export default function StreamingAnalysisDisplay({
     onComplete,
     onClose,
 }: StreamingAnalysisDisplayProps) {
+    const t = useTranslations("caseAnalysis.streamingAnalysis");
     const [groupedSteps, setGroupedSteps] = useState<Map<string, GroupedStep>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -271,10 +273,10 @@ export default function StreamingAnalysisDisplay({
         // Check if executive summary is completed
         const executiveSummaryStep = groupedSteps.get("executive_summary");
         const isExecutiveSummaryComplete = executiveSummaryStep?.status === "completed";
-        
+
         // Only start timer if analysis is complete AND executive summary is completed
         const shouldStartTimer = isComplete && isExecutiveSummaryComplete;
-        
+
         if (!shouldStartTimer) {
             // Clear any existing timers when not ready
             if (inactivityTimerRef.current) {
@@ -300,7 +302,7 @@ export default function StreamingAnalysisDisplay({
             if (event?.type === 'scroll' && isProgrammaticScrollRef.current) {
                 return;
             }
-            
+
             lastActivityRef.current = Date.now();
             // Cancel timer completely when activity detected
             if (inactivityTimerRef.current) {
@@ -549,10 +551,10 @@ export default function StreamingAnalysisDisplay({
                                     baseStep: "finalization",
                                     status: "in_progress",
                                     messages: [],
-                                    pendingMessages: ["Finalizing results..."],
+                                    pendingMessages: [t("steps.finalization") + "..."],
                                     currentMessageIndex: 0,
                                     icon: "✨",
-                                    label: "Finalizing Results",
+                                    label: t("steps.finalization"),
                                 });
                                 return updated;
                             });
@@ -697,14 +699,14 @@ export default function StreamingAnalysisDisplay({
                                 </div>
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                                        {isComplete ? "Analysis Complete!" : "Analyzing..."}
+                                        {isComplete ? t("completeTitle") : t("analyzingTitle")}
                                     </h2>
                                     <p className="text-primary-100 text-xs sm:text-sm truncate">
                                         {isComplete
                                             ? autoClickCountdown !== null && autoClickCountdown > 0
-                                                ? `Opening results automatically in ${autoClickCountdown}s...`
-                                                : "Click 'View Results' to see your analysis"
-                                            : "Analyzing your case in real-time..."}
+                                                ? t("autoOpening", { count: autoClickCountdown })
+                                                : t("clickToView")
+                                            : t("analyzingSubtitle")}
                                     </p>
                                 </div>
                             </div>
@@ -718,7 +720,7 @@ export default function StreamingAnalysisDisplay({
                             ></div>
                         </div>
                         <div className="mt-2 text-xs text-primary-100 text-right">
-                            {progress}% Complete
+                            {progress}% {t("complete")}
                         </div>
                     </div>
 
@@ -733,7 +735,7 @@ export default function StreamingAnalysisDisplay({
                                     <span className="text-2xl">❌</span>
                                     <div>
                                         <h3 className="font-semibold text-critical-900">
-                                            Analysis Error
+                                            {t("errorTitle")}
                                         </h3>
                                         <p className="text-sm text-critical-700 mt-1">{error}</p>
                                     </div>
@@ -746,7 +748,7 @@ export default function StreamingAnalysisDisplay({
                                 <div className="inline-block">
                                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
                                 </div>
-                                <p className="text-ink-600 mt-4">Initializing analysis...</p>
+                                <p className="text-ink-600 mt-4">{t("initializing")}</p>
                             </div>
                         )}
 
@@ -765,7 +767,7 @@ export default function StreamingAnalysisDisplay({
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-2">
                                             <h4 className="font-semibold text-ink-900">
-                                                {step.label}
+                                                {t(`steps.${step.baseStep}`, { defaultValue: step.label })}
                                             </h4>
                                             {step.status === "completed" && (
                                                 <span className="text-2xl flex-shrink-0">
@@ -800,13 +802,13 @@ export default function StreamingAnalysisDisplay({
                                             <div className="mt-3 text-xs bg-surface-000 p-3 rounded border border-border-100 space-y-1.5">
                                                 {step.data.win_probability !== undefined && (
                                                     <div className="text-ink-700">
-                                                        <span className="font-semibold">Win Probability:</span>{" "}
+                                                        <span className="font-semibold">{t("winProbability")}:</span>{" "}
                                                         {Math.round(step.data.win_probability * 100)}%
                                                     </div>
                                                 )}
                                                 {step.data.confidence !== undefined && (
                                                     <div className="text-ink-700">
-                                                        <span className="font-semibold">Confidence:</span>{" "}
+                                                        <span className="font-semibold">{t("confidence")}:</span>{" "}
                                                         {Math.round(step.data.confidence * 100)}%
                                                     </div>
                                                 )}
@@ -827,7 +829,7 @@ export default function StreamingAnalysisDisplay({
                                         <svg className="w-4 h-4 text-primary-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-                                        <span>Opening automatically in {autoClickCountdown}s...</span>
+                                        <span>{t("autoOpening", { count: autoClickCountdown })}</span>
                                     </div>
                                 )}
                                 {(!autoClickCountdown || autoClickCountdown === 0) && <div></div>}
@@ -844,7 +846,7 @@ export default function StreamingAnalysisDisplay({
                                             countdownIntervalRef.current = null;
                                         }
                                         setAutoClickCountdown(null);
-                                        
+
                                         if (lastResultRef.current) {
                                             onCompleteRef.current?.(lastResultRef.current);
                                         }
@@ -852,7 +854,7 @@ export default function StreamingAnalysisDisplay({
                                     }}
                                     className="cursor-pointer px-6 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors"
                                 >
-                                    View Results →
+                                    {t("viewResults")} →
                                 </button>
                             </div>
                         </div>

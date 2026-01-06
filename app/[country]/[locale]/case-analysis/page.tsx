@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/app/components/Navbar";
+
+export const dynamic = 'force-dynamic';
 import HorizontalStepper from "@/app/components/quick-analysis/HorizontalStepper";
 import DocumentUploadStep from "@/app/components/quick-analysis/DocumentUploadStep";
 import QuickAnalysisForm from "@/app/components/quick-analysis/QuickAnalysisForm";

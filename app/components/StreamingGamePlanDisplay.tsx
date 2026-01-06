@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 interface GamePlanEvent {
     type: "status" | "reasoning" | "result" | "complete" | "error" | "message";
@@ -51,6 +52,7 @@ export default function StreamingGamePlanDisplay({
     onComplete,
     onClose,
 }: StreamingGamePlanDisplayProps) {
+    const t = useTranslations("caseAnalysis.streaming");
     const [events, setEvents] = useState<GamePlanEvent[]>([]);
     const [progress, setProgress] = useState(0);
     const [allComplete, setAllComplete] = useState(false);
@@ -265,10 +267,10 @@ export default function StreamingGamePlanDisplay({
                                 </div>
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                                        {allComplete ? "Game Plan Generated!" : "Generating Game Plan..."}
+                                        {allComplete ? t("completeTitle") : t("generatingTitle")}
                                     </h2>
                                     <p className="text-primary-100 text-xs sm:text-sm truncate">
-                                        Creating strategic action plan for your case
+                                        {t("generatingSubtitle")}
                                     </p>
                                 </div>
                             </div>
@@ -282,7 +284,7 @@ export default function StreamingGamePlanDisplay({
                             ></div>
                         </div>
                         <div className="mt-2 text-xs text-primary-100 text-right">
-                            {progress}% Complete
+                            {progress}% {t("complete")}
                         </div>
                     </div>
 
@@ -296,7 +298,7 @@ export default function StreamingGamePlanDisplay({
                                 <div className="inline-block">
                                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
                                 </div>
-                                <p className="text-ink-600 mt-4">Initializing game plan generation...</p>
+                                <p className="text-ink-600 mt-4">{t("initializing")}</p>
                             </div>
                         )}
 
@@ -314,6 +316,7 @@ export default function StreamingGamePlanDisplay({
                             // Render grouped events
                             return Object.entries(groupedEvents).map(([stepKey, stepEvents]) => {
                                 const firstEvent = stepEvents[0];
+                                const stepLabel = t(`steps.${stepKey}`, { defaultValue: stepLabels[stepKey] || firstEvent.message });
                                 const messages = stepEvents.map(e => e.message).filter(m => m && m !== (stepLabels[stepKey] || firstEvent.message));
 
                                 return (
@@ -344,7 +347,7 @@ export default function StreamingGamePlanDisplay({
                                                                     : "text-ink-900"
                                                             }`}
                                                     >
-                                                        {stepLabels[stepKey] || firstEvent.message}
+                                                        {stepLabel}
                                                     </h4>
                                                 </div>
                                                 {messages.length > 0 && (
