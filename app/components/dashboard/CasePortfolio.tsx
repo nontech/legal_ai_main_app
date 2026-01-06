@@ -12,6 +12,7 @@ interface DBCase {
   jurisdiction?: any;
   created_at: string;
   owner_id?: string | null;
+  result?: any;
 }
 
 interface Case {
@@ -70,9 +71,9 @@ function mapDBCaseToUI(dbCase: DBCase): Case {
   };
 }
 
-// Filter out untitled cases (cases with no caseName)
+// Only show cases that have analysis results
 function isValidCase(dbCase: DBCase): boolean {
-  return Boolean(dbCase?.id);
+  return Boolean(dbCase?.id && dbCase?.result);
 }
 
 export default function CasePortfolio() {
