@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter, usePathname } from "next/navigation";
+import { useParams, useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { COUNTRIES } from "@/i18n/routing";
 import { Globe, ChevronDown } from "lucide-react";
@@ -10,6 +10,7 @@ export function CountryLanguageSelector() {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useTranslations();
   const [isPending, startTransition] = useTransition();
   const [isCountryOpen, setIsCountryOpen] = useState(false);
@@ -17,6 +18,10 @@ export function CountryLanguageSelector() {
 
   const currentCountry = (params.country as string) || "us";
   const currentLocale = (params.locale as string) || "en";
+  
+  // Get current query string
+  const queryString = searchParams.toString();
+  const queryPart = queryString ? `?${queryString}` : "";
 
   const selectedCountry = COUNTRIES.find(
     (c) => c.code === currentCountry
@@ -28,12 +33,12 @@ export function CountryLanguageSelector() {
       ? currentLocale
       : country?.defaultLocale || "en";
 
-    // Preserve the rest of the path
+    // Preserve the rest of the path and query parameters
     const pathParts = pathname.split("/");
     const restOfPath = pathParts.slice(3).join("/");
     const newPath = `/${newCountry}/${newLocale}${
       restOfPath ? "/" + restOfPath : ""
-    }`;
+    }${queryPart}`;
 
     setIsCountryOpen(false);
     startTransition(() => {
@@ -46,7 +51,7 @@ export function CountryLanguageSelector() {
     const restOfPath = pathParts.slice(3).join("/");
     const newPath = `/${currentCountry}/${newLocale}${
       restOfPath ? "/" + restOfPath : ""
-    }`;
+    }${queryPart}`;
 
     setIsLanguageOpen(false);
     startTransition(() => {

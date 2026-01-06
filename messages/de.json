@@ -534,5 +534,24 @@
         "notifyVictims": "Benachrichtigung von Opfern bei Datenverstößen",
         "reporting": "Meldung von Verstößen",
         "reportingText": "Wenn Sie glauben, dass jemand gegen diese Richtlinie verstößt, melden Sie dies bitte unter"
+    },
+    "caseAnalysis": {
+        "steps": {
+            "jurisdiction": "Gerichtsbarkeit",
+            "caseType": "Falltyp",
+            "role": "Rolle",
+            "charges": "Anklagen",
+            "caseDetails": "Falldetails",
+            "judge": "Richter",
+            "jury": "Geschworene",
+            "results": "Ergebnisse",
+            "gamePlan": "Spielplan",
+            "verdict": "Urteil"
+        },
+        "pretrial": {
+            "title": "Vorverfahren & Anträge",
+            "description": "Verwalten Sie alle Vorverfahren, Beweisaufnahme und Anträge"
+        },
+        "loading": "Wird geladen..."
     }
 }

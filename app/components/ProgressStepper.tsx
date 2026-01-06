@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface Step {
   id: string;
@@ -25,6 +26,7 @@ export default function ProgressStepper({
   caseId,
   caseType,
 }: ProgressStepperProps) {
+  const t = useTranslations("caseAnalysis.steps");
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function ProgressStepper({
   const steps: Step[] = [
     {
       id: "jurisdiction",
-      label: "Jurisdiction",
+      label: t("jurisdiction"),
       subSections: 1,
       icon: (
         <svg
@@ -96,7 +98,7 @@ export default function ProgressStepper({
     },
     {
       id: "case-type",
-      label: "Case Type",
+      label: t("caseType"),
       subSections: 1,
       icon: (
         <svg
@@ -116,7 +118,7 @@ export default function ProgressStepper({
     },
     {
       id: "role",
-      label: "Role",
+      label: t("role"),
       subSections: 1,
       icon: (
         <svg
@@ -136,7 +138,7 @@ export default function ProgressStepper({
     },
     {
       id: "charges",
-      label: "Charges",
+      label: t("charges"),
       subSections: 1,
       icon: (
         <svg
@@ -156,7 +158,7 @@ export default function ProgressStepper({
     },
     {
       id: "case-details",
-      label: "Case Details",
+      label: t("caseDetails"),
       subSections: 6,
       icon: (
         <svg
@@ -176,7 +178,7 @@ export default function ProgressStepper({
     },
     {
       id: "judge",
-      label: "Judge",
+      label: t("judge"),
       subSections: 1,
       icon: (
         <svg
@@ -196,7 +198,7 @@ export default function ProgressStepper({
     },
     {
       id: "jury",
-      label: "Jury",
+      label: t("jury"),
       subSections: 2,
       icon: (
         <svg
@@ -216,7 +218,7 @@ export default function ProgressStepper({
     },
     {
       id: "results",
-      label: "Results",
+      label: t("results"),
       subSections: 1,
       icon: (
         <svg
@@ -236,7 +238,7 @@ export default function ProgressStepper({
     },
     {
       id: "game-plan",
-      label: "Game Plan",
+      label: t("gamePlan"),
       subSections: 1,
       icon: (
         <svg
@@ -256,7 +258,7 @@ export default function ProgressStepper({
     },
     {
       id: "verdict",
-      label: "Verdict",
+      label: t("verdict"),
       subSections: 1,
       icon: (
         <svg

@@ -534,5 +534,24 @@
     "notifyVictims": "Notify victims of any breaches",
     "reporting": "Reporting Violations",
     "reportingText": "If you believe someone is violating this policy, please report it to"
+  },
+  "caseAnalysis": {
+    "steps": {
+      "jurisdiction": "Jurisdiction",
+      "caseType": "Case Type",
+      "role": "Role",
+      "charges": "Charges",
+      "caseDetails": "Case Details",
+      "judge": "Judge",
+      "jury": "Jury",
+      "results": "Results",
+      "gamePlan": "Game Plan",
+      "verdict": "Verdict"
+    },
+    "pretrial": {
+      "title": "Pretrial Process & Motions",
+      "description": "Manage all pretrial procedures, discovery, and motions"
+    },
+    "loading": "Loading..."
   }
 }

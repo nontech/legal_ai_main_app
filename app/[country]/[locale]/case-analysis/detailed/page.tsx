@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 import Navbar from "@/app/components/Navbar";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
@@ -19,6 +20,7 @@ import ResultsStep from "@/app/components/ResultsStep";
 import VerdictStep from "@/app/components/VerdictStep";
 
 function DetailedCaseAnalysisContent() {
+  const t = useTranslations("caseAnalysis");
   const searchParams = useSearchParams();
   const initialStep = searchParams.get("step");
   const caseIdParam = searchParams.get("caseId");
@@ -145,15 +147,15 @@ function DetailedCaseAnalysisContent() {
   }, []);
 
   const steps = [
-    { id: "jurisdiction", label: "Jurisdiction", icon: null },
-    { id: "case-type", label: "Case Type", icon: null },
-    { id: "role", label: "Role", icon: null },
-    { id: "charges", label: "Charges", icon: null },
-    { id: "case-details", label: "Case Details", icon: null },
-    { id: "judge", label: "Judge", icon: null },
-    { id: "jury", label: "Jury", icon: null },
-    { id: "results", label: "Results", icon: null },
-    { id: "game-plan", label: "Game Plan", icon: null },
+    { id: "jurisdiction", label: t("steps.jurisdiction"), icon: null },
+    { id: "case-type", label: t("steps.caseType"), icon: null },
+    { id: "role", label: t("steps.role"), icon: null },
+    { id: "charges", label: t("steps.charges"), icon: null },
+    { id: "case-details", label: t("steps.caseDetails"), icon: null },
+    { id: "judge", label: t("steps.judge"), icon: null },
+    { id: "jury", label: t("steps.jury"), icon: null },
+    { id: "results", label: t("steps.results"), icon: null },
+    { id: "game-plan", label: t("steps.gamePlan"), icon: null },
   ];
 
   const renderStepContent = () => {
@@ -252,11 +254,10 @@ function DetailedCaseAnalysisContent() {
                     </svg>
                     <div>
                       <h2 className="text-2xl font-bold text-white">
-                        Pretrial Process & Motions
+                        {t("pretrial.title")}
                       </h2>
                       <p className="text-blue-100 text-sm">
-                        Manage all pretrial procedures, discovery, and
-                        motions
+                        {t("pretrial.description")}
                       </p>
                     </div>
                   </div>
@@ -294,8 +295,9 @@ function DetailedCaseAnalysisContent() {
 }
 
 export default function DetailedCaseAnalysis() {
+  const t = useTranslations("caseAnalysis");
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t("loading")}</div>}>
       <DetailedCaseAnalysisContent />
     </Suspense>
   );
