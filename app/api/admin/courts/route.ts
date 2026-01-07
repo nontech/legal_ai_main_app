@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_CMS_URL = process.env.NEXT_PUBLIC_SUPABASE_CMS_URL!;
-const SUPABASE_CMS_SERVICE_KEY =
-  process.env.SUPABASE_CMS_SERVICE_ROLE_KEY!;
+import { getSupabaseCMSClient } from "@/app/admin/supabase/supabaseCMSServer";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,11 +14,8 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Create admin client for server-side operations
-    const supabase = createClient(
-      SUPABASE_CMS_URL,
-      SUPABASE_CMS_SERVICE_KEY
-    );
+    // Get CMS Supabase client
+    const supabase = getSupabaseCMSClient();
 
     // Fetch courts with country information
     const { data: courts, error } = await supabase

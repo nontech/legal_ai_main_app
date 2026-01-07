@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import SaveCaseButton from "./SaveCaseButton";
 import SearchableSelect from "./ui/searchable-select";
@@ -21,11 +22,13 @@ interface Jurisdiction {
 
 interface Court {
   id: string;
-  country_id: string | null;
-  jurisdiction_id: string | null;
-  court_level_id: string | null;
   name: string | null;
-  official_name: string | null;
+  officialName: string | null;
+  displayName: string;
+  country?: {
+    iso_code: string;
+    name: string;
+  };
 }
 
 interface JurisdictionData {
@@ -104,6 +107,8 @@ export default function JurisdictionSection({
   hideSaveButton = false,
   showExtractedBadge = false,
 }: JurisdictionSectionProps) {
+  const params = useParams();
+  const locale = (params.locale as string) || "en";
   const t = useTranslations("caseAnalysis.jurisdiction");
 
   // Data state
@@ -198,9 +203,18 @@ export default function JurisdictionSection({
     fetchJurisdictions();
   }, [countryId]);
 
-  // Fetch courts when jurisdiction changes
+  // Fetch courts when country changes
   useEffect(() => {
-    if (!countryId || !jurisdictionId) {
+    // Calculate country code
+    const getCountryCode = () => {
+      if (!country || country === "__other__") return "";
+      const byId = countries.find((c) => c.id === countryId);
+      const byName = countries.find((c) => c.name === country);
+      return (byId ?? byName)?.iso_code || "";
+    };
+
+    const countryCode = getCountryCode();
+    if (!countryCode) {
       setCourts([]);
       return;
     }
@@ -209,12 +223,12 @@ export default function JurisdictionSection({
       try {
         setIsLoadingCourts(true);
         const res = await fetch(
-          `/api/admin/courts?country_id=${countryId}&jurisdiction_id=${jurisdictionId}`
+          `/api/admin/courts?country=${countryCode}&locale=${locale}`
         );
         const json = await res.json();
 
-        if (json.ok && json.data) {
-          setCourts(json.data);
+        if (json.courts) {
+          setCourts(json.courts);
         } else {
           setError(json.error || "Failed to fetch courts");
         }
@@ -227,7 +241,7 @@ export default function JurisdictionSection({
     };
 
     fetchCourts();
-  }, [countryId, jurisdictionId]);
+  }, [countries, country, countryId, locale]);
 
   // Match country from initialValues (prioritize code over name)
   const matchCountry = useCallback((countries: Country[], initialValues?: Partial<JurisdictionData>) => {
@@ -300,11 +314,12 @@ export default function JurisdictionSection({
     const exactMatch = courts.find(
       (c) =>
         (c.name && matchesString(c.name, courtName)) ||
-        (c.official_name && matchesString(c.official_name, courtName))
+        (c.officialName && matchesString(c.officialName, courtName)) ||
+        (c.displayName && matchesString(c.displayName, courtName))
     );
 
-    if (exactMatch && exactMatch.name) {
-      console.log("✅ Exact match found for court:", exactMatch.name);
+    if (exactMatch && exactMatch.displayName) {
+      console.log("✅ Exact match found for court:", exactMatch.displayName);
       return exactMatch;
     }
 
@@ -321,8 +336,15 @@ export default function JurisdictionSection({
           bestMatch = c;
         }
       }
-      if (c.official_name) {
-        const score = calculateSimilarity(courtName, c.official_name);
+      if (c.officialName) {
+        const score = calculateSimilarity(courtName, c.officialName);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = c;
+        }
+      }
+      if (c.displayName) {
+        const score = calculateSimilarity(courtName, c.displayName);
         if (score > bestScore) {
           bestScore = score;
           bestMatch = c;
@@ -461,8 +483,8 @@ export default function JurisdictionSection({
     const courtName = initialValues?.court_name || court;
     const matchedCourt = matchCourt(courts, courtName);
 
-    if (matchedCourt && matchedCourt.name) {
-      setCourt(matchedCourt.name);
+    if (matchedCourt && matchedCourt.displayName) {
+      setCourt(matchedCourt.displayName);
     } else {
       setCourt("__other__");
       setCustomCourt(courtName);
@@ -544,7 +566,7 @@ export default function JurisdictionSection({
   );
 
   const courtOptions = useMemo(() =>
-    Array.from(new Set(courts.map((c) => c.name).filter((n): n is string => Boolean(n)))),
+    Array.from(new Set(courts.map((c) => c.displayName).filter((n): n is string => Boolean(n)))),
     [courts]
   );
 
