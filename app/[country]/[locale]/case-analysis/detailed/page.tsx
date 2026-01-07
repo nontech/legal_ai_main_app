@@ -75,7 +75,9 @@ function DetailedCaseAnalysisContent() {
         };
 
         // Check jurisdiction (step 0)
-        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction && data.jurisdiction.court) {
+        // Support both 'court' (from SaveCaseButton) and 'court_name' (from quick analysis)
+        const courtValue = data.jurisdiction?.court || data.jurisdiction?.court_name;
+        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction && courtValue) {
           newCompletionData[0] = 100;
         }
 

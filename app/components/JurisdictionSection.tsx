@@ -460,8 +460,11 @@ export default function JurisdictionSection({
             const {
               country: countryName,
               jurisdiction: jurisdictionName,
-              court: courtName,
+              // Support both field names: 'court' (from SaveCaseButton) and 'court_name' (from quick analysis)
+              court,
+              court_name,
             } = json.data.jurisdiction;
+            const courtName = court || court_name; // Use whichever is available
 
             const matchedCountry = matchCountry(countries, {
               country: countryName || undefined,
@@ -532,31 +535,40 @@ export default function JurisdictionSection({
     initialize();
   }, [countries, caseId, initialValues, matchCountry]);
 
-  // Match jurisdiction when jurisdictions load (prioritize code matching)
+  // Match jurisdiction when jurisdictions load (initial matching only, not after user interaction)
+  // This handles both: initialValues mode (quick analysis) and caseId mode (detailed analysis)
   useEffect(() => {
+    // Skip if user has already interacted with jurisdiction - respect their selection
+    if (hasUserInteractedRef.current && jurisdictionId) return;
+    
     if (!jurisdictions.length) return;
     if (jurisdiction === "__other__") return;
 
-    // Allow code-only initialValues to populate even if `jurisdiction` hasn't been set yet
-    if (!jurisdiction && !initialValues?.jurisdiction_code) return;
+    // Get jurisdiction name to match - from initialValues or current state
+    const jurisdictionToMatch = initialValues?.jurisdiction || jurisdiction;
+    const jurisdictionCodeToMatch = initialValues?.jurisdiction_code;
 
-    // Only try to match if we have initialValues with code or name
-    if (
-      !initialValues?.jurisdiction_code &&
-      !initialValues?.jurisdiction
-    )
-      return;
+    // Skip if nothing to match
+    if (!jurisdictionToMatch && !jurisdictionCodeToMatch) return;
+
+    // Skip if we already have a valid jurisdictionId for the current jurisdiction
+    if (jurisdictionId) {
+      const currentMatch = jurisdictions.find(j => j.id === jurisdictionId);
+      if (currentMatch && currentMatch.name === jurisdiction) {
+        return; // Already matched, no need to re-match
+      }
+    }
 
     console.log("🔍 Attempting to match jurisdiction with:", {
-      code: initialValues?.jurisdiction_code,
-      name: initialValues?.jurisdiction,
+      code: jurisdictionCodeToMatch,
+      name: jurisdictionToMatch,
       currentJurisdiction: jurisdiction,
     });
 
-    const matchedJurisdiction = matchJurisdiction(
-      jurisdictions,
-      initialValues
-    );
+    // Try to match by code first (using initialValues), then by name
+    const matchedJurisdiction = initialValues 
+      ? matchJurisdiction(jurisdictions, initialValues)
+      : jurisdictions.find(j => j.name && matchesString(j.name, jurisdictionToMatch!));
 
     if (matchedJurisdiction && matchedJurisdiction.name) {
       if (matchedJurisdiction.name !== jurisdiction) {
@@ -569,35 +581,72 @@ export default function JurisdictionSection({
         setJurisdiction(matchedJurisdiction.name);
       }
       setJurisdictionId(matchedJurisdiction.id);
-    } else {
+    } else if (jurisdictionToMatch) {
       // No match found, move to "Other"
       console.log(
-        `⚠️ Jurisdiction "${jurisdiction}" not found in dropdown, moving to "Other"`
+        `⚠️ Jurisdiction "${jurisdictionToMatch}" not found in dropdown, moving to "Other"`
       );
       setJurisdiction("__other__");
-      setCustomJurisdiction(jurisdiction);
+      setCustomJurisdiction(jurisdictionToMatch);
     }
   }, [
     jurisdictions,
+    jurisdiction,
+    jurisdictionId,
     initialValues?.jurisdiction_code,
     initialValues?.jurisdiction,
     matchJurisdiction,
   ]);
 
-  // Match court when courts load
+  // Match court when courts load (initial matching only, not after user interaction)
   useEffect(() => {
-    if (!courts.length || !court || court === "__other__") return;
+    // Skip if user has already interacted - respect their selection
+    if (hasUserInteractedRef.current) return;
+    
+    // Skip if already in "other" mode
+    if (court === "__other__") return;
 
+    // Get court name to match - from initialValues (for quick analysis) or current court state (for caseId mode)
     const courtName = initialValues?.court_name || court;
+    
+    // Skip if nothing to match
+    if (!courtName) return;
+
+    // If no courts loaded yet but we have a court value, wait for courts to load
+    // UNLESS courts loading has finished (isLoadingCourts is false) and there are no courts
+    if (!courts.length) {
+      // If we're done loading and there are still no courts, convert to custom/other mode
+      if (!isLoadingCourts && countryId) {
+        setCourt("__other__");
+        setCustomCourt(courtName);
+      }
+      return;
+    }
+
     const matchedCourt = matchCourt(courts, courtName);
 
     if (matchedCourt && matchedCourt.displayName) {
-      setCourt(matchedCourt.displayName);
+      // Found a match in the dropdown
+      if (court !== matchedCourt.displayName) {
+        setCourt(matchedCourt.displayName);
+      }
     } else {
+      // No match found - show as custom/other
       setCourt("__other__");
       setCustomCourt(courtName);
     }
-  }, [courts, initialValues, matchCourt]);
+  }, [courts, court, initialValues?.court_name, matchCourt, isLoadingCourts, countryId]);
+
+  // When jurisdiction is "Other", automatically set court to "Other" mode for proper completion tracking
+  useEffect(() => {
+    if (jurisdiction === "__other__" && court !== "__other__") {
+      // Preserve any existing court value in customCourt
+      if (court) {
+        setCustomCourt(court);
+      }
+      setCourt("__other__");
+    }
+  }, [jurisdiction, court]);
 
   // Notify parent of country changes
   useEffect(() => {
@@ -996,24 +1045,43 @@ export default function JurisdictionSection({
                 {t("courtName")}{" "}
                 <span className="text-red-500">*</span>
               </label>
-              <SearchableSelect
-                options={courtOptions.map((c) => ({
-                  value: c,
-                  label: c,
-                }))}
-                value={court}
-                onChange={handleCourtChange}
-                placeholder={t("selectCourt")}
-                disabled={!jurisdictionId || isLoadingCourts}
-                allowOther
-              />
-              {court === "__other__" && (
+              {/* Show dropdown when we have courts available or a valid jurisdiction */}
+              {jurisdiction !== "__other__" ? (
+                <>
+                  <SearchableSelect
+                    options={courtOptions.map((c) => ({
+                      value: c,
+                      label: c,
+                    }))}
+                    value={court}
+                    onChange={handleCourtChange}
+                    placeholder={t("selectCourt")}
+                    disabled={isLoadingCourts || (!jurisdictionId && !courts.length)}
+                    allowOther
+                  />
+                  {court === "__other__" && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        value={customCourt}
+                        onChange={(e) => setCustomCourt(e.target.value)}
+                        placeholder={t("enterCourt")}
+                        className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                      />
+                      <p className="mt-1 text-xs text-ink-500">
+                        {t("selectFromDropdown") || "Select from dropdown above to change, or enter custom court name"}
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* When jurisdiction is "Other", show direct text input for court */
                 <input
                   type="text"
                   value={customCourt}
                   onChange={(e) => setCustomCourt(e.target.value)}
                   placeholder={t("enterCourt")}
-                  className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                  className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
                 />
               )}
             </div>
