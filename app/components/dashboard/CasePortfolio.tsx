@@ -187,25 +187,6 @@ export default function CasePortfolio() {
               {t("description")}
             </p>
           </div>
-          <button
-            onClick={() => router.push(`/${country}/${locale}/case-analysis`)}
-            className="cursor-pointer bg-gradient-to-r from-primary-700 to-primary-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-primary-800 hover:to-primary-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 self-start md:self-auto"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {t("newCase")}
-          </button>
         </div>
 
         {/* Search and Filters */}

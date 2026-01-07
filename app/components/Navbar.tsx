@@ -130,31 +130,14 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                 <div className="w-8 h-4 bg-surface-200 rounded animate-pulse"></div>
               </div>
             ) : isAuthenticated ? (
-              // User Menu - Authenticated
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 rounded-lg hover:bg-surface-100 cursor-pointer"
+              // Authenticated User - Dashboard link + User Menu
+              <>
+                <Link
+                  href={`/${country}/${locale}`}
+                  className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group flex items-center gap-1.5"
                 >
-                  <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
-                    <svg
-                      className="w-4 h-4 text-primary-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
-                  <span className="text-sm">{userEmail || t("account")}</span>
                   <svg
-                    className={`w-4 h-4 transition-transform ${isUserMenuOpen ? "rotate-180" : ""
-                      }`}
+                    className="w-4 h-4"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -163,30 +146,64 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                     />
                   </svg>
-                </button>
+                  <span className="relative z-10">{t("dashboard")}</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
+                </Link>
 
-                {/* Dropdown Menu */}
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-2 z-50">
-                    <Link
-                      href={`/${country}/${locale}`}
-                      className="block px-4 py-2 text-sm text-ink-600 hover:bg-surface-100 transition-colors"
-                      onClick={() => setIsUserMenuOpen(false)}
+                {/* User Menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 rounded-lg hover:bg-surface-100 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
+                      <svg
+                        className="w-4 h-4 text-primary-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-sm">{userEmail || t("account")}</span>
+                    <svg
+                      className={`w-4 h-4 transition-transform ${isUserMenuOpen ? "rotate-180" : ""
+                        }`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      {t("dashboard")}
-                    </Link>
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full text-left px-4 py-2 text-sm text-critical-500 cursor-pointer hover:bg-critical-100 transition-colors border-t border-border-200"
-                    >
-                      {t("signOut")}
-                    </button>
-                  </div>
-                )}
-              </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isUserMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-surface-000 rounded-lg shadow-lg border border-border-200 py-2 z-50">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full text-left px-4 py-2 text-sm text-critical-500 cursor-pointer hover:bg-critical-100 transition-colors"
+                      >
+                        {t("signOut")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               // Auth Buttons - Not Authenticated
               <>
@@ -266,6 +283,29 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
 
             {!isLoading && isAuthenticated ? (
               <>
+                {/* Dashboard Link - Mobile */}
+                <Link
+                  href={`/${country}/${locale}`}
+                  className="flex items-center gap-2 px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                    />
+                  </svg>
+                  {t("dashboard")}
+                </Link>
+
+                {/* User Info & Sign Out - Mobile */}
                 <div className="px-4 py-2.5 border-t border-border-200 mt-2 pt-2">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
@@ -285,13 +325,6 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
                     </div>
                     <span className="text-sm text-ink-600 truncate">{userEmail || t("account")}</span>
                   </div>
-                  <Link
-                    href={`/${country}/${locale}`}
-                    className="block px-3 py-2 text-sm text-ink-600 hover:bg-surface-100 rounded transition-colors"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {t("dashboard")}
-                  </Link>
                   <button
                     onClick={() => {
                       handleSignOut();
