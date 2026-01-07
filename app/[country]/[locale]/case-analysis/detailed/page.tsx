@@ -75,7 +75,7 @@ function DetailedCaseAnalysisContent() {
         };
 
         // Check jurisdiction (step 0)
-        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.state && data.jurisdiction.city && data.jurisdiction.court) {
+        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction && data.jurisdiction.court) {
           newCompletionData[0] = 100;
         }
 
