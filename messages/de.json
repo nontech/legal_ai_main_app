@@ -557,6 +557,7 @@
             "country": "Land",
             "stateProvince": "Bundesland/Provinz",
             "courtName": "Gerichtsname",
+            "selectFromDropdown": "Wählen Sie aus der Dropdown-Liste oben, um es zu ändern, oder geben Sie einen benutzerdefinierten Gerichtsnamen ein",
             "selectCountry": "Land auswählen",
             "selectStateProvince": "Bundesland/Provinz auswählen",
             "selectCourt": "Gericht auswählen",
@@ -776,6 +777,7 @@
             "winProbability": "Gewinnwahrscheinlichkeit",
             "confidence": "Konfidenz",
             "steps": {
+                "initialization": "Initialisierung",
                 "status": "Initialisierung",
                 "charges_analysis": "Analysiere Anklagepunkte/Ansprüche",
                 "precedent_retrieval": "Suche nach Präzedenzfällen",

@@ -557,6 +557,7 @@
       "country": "Country",
       "stateProvince": "State/Province",
       "courtName": "Court Name",
+      "selectFromDropdown": "Select from dropdown above to change, or enter custom court name",
       "selectCountry": "Select country",
       "selectStateProvince": "Select state/province",
       "selectCourt": "Select court",
@@ -776,6 +777,7 @@
       "winProbability": "Win Probability",
       "confidence": "Confidence",
       "steps": {
+        "initialization": "Initializing",
         "status": "Initializing",
         "charges_analysis": "Analyzing Charges",
         "precedent_retrieval": "Finding Precedent Cases",
