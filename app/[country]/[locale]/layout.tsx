@@ -4,7 +4,7 @@ import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { COUNTRIES } from "@/i18n/routing";
 import Navbar from "@/app/components/Navbar";
-import Footer from "@/app/components/Footer";
+import ConditionalFooter from "@/app/components/ConditionalFooter";
 
 const validCountries = COUNTRIES.map((c) => c.code);
 const validLocales = ["en", "de"];
@@ -49,7 +49,7 @@ export default async function LocaleLayout({
         <Navbar />
       </Suspense>
       {children}
-      <Footer />
+      <ConditionalFooter />
     </NextIntlClientProvider>
   );
 }
