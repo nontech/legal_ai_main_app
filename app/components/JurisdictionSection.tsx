@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import SaveCaseButton from "./SaveCaseButton";
@@ -91,7 +97,10 @@ const calculateSimilarity = (str1: string, str2: string): number => {
 };
 
 // Helper: Case-insensitive string match
-const matchesString = (str1: string, str2: string | null | undefined): boolean => {
+const matchesString = (
+  str1: string,
+  str2: string | null | undefined
+): boolean => {
   if (!str1 || !str2) return false;
   return str1.trim().toLowerCase() === str2.trim().toLowerCase();
 };
@@ -113,7 +122,9 @@ export default function JurisdictionSection({
 
   // Data state
   const [countries, setCountries] = useState<Country[]>([]);
-  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>([]);
+  const [jurisdictions, setJurisdictions] = useState<Jurisdiction[]>(
+    []
+  );
   const [courts, setCourts] = useState<Court[]>([]);
 
   // Selection state
@@ -131,7 +142,8 @@ export default function JurisdictionSection({
   // Loading states
   const [isLoading, setIsLoading] = useState(!!caseId);
   const [isLoadingCountries, setIsLoadingCountries] = useState(true);
-  const [isLoadingJurisdictions, setIsLoadingJurisdictions] = useState(false);
+  const [isLoadingJurisdictions, setIsLoadingJurisdictions] =
+    useState(false);
   const [isLoadingCourts, setIsLoadingCourts] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -184,7 +196,9 @@ export default function JurisdictionSection({
     const fetchJurisdictions = async () => {
       try {
         setIsLoadingJurisdictions(true);
-        const res = await fetch(`/api/admin/jurisdictions?country_id=${countryId}`);
+        const res = await fetch(
+          `/api/admin/jurisdictions?country_id=${countryId}`
+        );
         const json = await res.json();
 
         if (json.ok && json.data) {
@@ -244,125 +258,192 @@ export default function JurisdictionSection({
   }, [countries, country, countryId, locale]);
 
   // Match country from initialValues (prioritize code over name)
-  const matchCountry = useCallback((countries: Country[], initialValues?: Partial<JurisdictionData>) => {
-    if (!initialValues) return null;
+  const matchCountry = useCallback(
+    (
+      countries: Country[],
+      initialValues?: Partial<JurisdictionData>
+    ) => {
+      if (!initialValues) return null;
 
-    // PRIORITY 1: Try matching by ISO code first
-    if (initialValues.country_code) {
-      const match = countries.find((c) => c.iso_code === initialValues.country_code);
-      if (match) {
-        console.log("✅ Matched country by code:", initialValues.country_code, "→", match.name);
-        return match;
-      }
-      console.log("⚠️ No country found with code:", initialValues.country_code);
-    }
-
-    // PRIORITY 2: Try matching by name (fallback)
-    if (initialValues.country) {
-      const match = countries.find((c) => matchesString(c.name, initialValues.country));
-      if (match) {
-        console.log("✅ Matched country by name:", initialValues.country, "→", match.name);
-        return match;
-      }
-      console.log("⚠️ No country found with name:", initialValues.country);
-    }
-
-    return null;
-  }, []);
-
-  // Match jurisdiction from initialValues (prioritize code over name)
-  const matchJurisdiction = useCallback((jurisdictions: Jurisdiction[], initialValues?: Partial<JurisdictionData>) => {
-    if (!initialValues) return null;
-
-    // PRIORITY 1: Try matching by code first
-    if (initialValues.jurisdiction_code) {
-      // Accept both "US-CA" and "CA" formats (and tolerate extra spaces)
-      const raw = initialValues.jurisdiction_code.trim();
-      const parts = raw
-        .split("-")
-        .map((p) => p.trim())
-        .filter(Boolean);
-      const code = (parts.length > 1 ? parts[1] : parts[0]) || "";
-      if (code) {
-        const match = jurisdictions.find((j) => j.code === code);
-        if (match && match.name) {
-          console.log("✅ Matched jurisdiction by code:", code, "→", match.name);
+      // PRIORITY 1: Try matching by ISO code first
+      if (initialValues.country_code) {
+        const match = countries.find(
+          (c) => c.iso_code === initialValues.country_code
+        );
+        if (match) {
+          console.log(
+            "✅ Matched country by code:",
+            initialValues.country_code,
+            "→",
+            match.name
+          );
           return match;
         }
-        console.log("⚠️ No jurisdiction found with code:", code);
+        console.log(
+          "⚠️ No country found with code:",
+          initialValues.country_code
+        );
       }
-    }
 
-    // PRIORITY 2: Try matching by name (fallback)
-    if (initialValues.jurisdiction) {
-      const match = jurisdictions.find((j) => j.name && matchesString(j.name, initialValues.jurisdiction!));
-      if (match && match.name) {
-        console.log("✅ Matched jurisdiction by name:", initialValues.jurisdiction, "→", match.name);
-        return match;
+      // PRIORITY 2: Try matching by name (fallback)
+      if (initialValues.country) {
+        const match = countries.find((c) =>
+          matchesString(c.name, initialValues.country)
+        );
+        if (match) {
+          console.log(
+            "✅ Matched country by name:",
+            initialValues.country,
+            "→",
+            match.name
+          );
+          return match;
+        }
+        console.log(
+          "⚠️ No country found with name:",
+          initialValues.country
+        );
       }
-      console.log("⚠️ No jurisdiction found with name:", initialValues.jurisdiction);
-    }
 
-    return null;
-  }, []);
+      return null;
+    },
+    []
+  );
+
+  // Match jurisdiction from initialValues (prioritize code over name)
+  const matchJurisdiction = useCallback(
+    (
+      jurisdictions: Jurisdiction[],
+      initialValues?: Partial<JurisdictionData>
+    ) => {
+      if (!initialValues) return null;
+
+      // PRIORITY 1: Try matching by code first
+      if (initialValues.jurisdiction_code) {
+        // Accept both "US-CA" and "CA" formats (and tolerate extra spaces)
+        const raw = initialValues.jurisdiction_code.trim();
+        const parts = raw
+          .split("-")
+          .map((p) => p.trim())
+          .filter(Boolean);
+        const code = (parts.length > 1 ? parts[1] : parts[0]) || "";
+        if (code) {
+          const match = jurisdictions.find((j) => j.code === code);
+          if (match && match.name) {
+            console.log(
+              "✅ Matched jurisdiction by code:",
+              code,
+              "→",
+              match.name
+            );
+            return match;
+          }
+          console.log("⚠️ No jurisdiction found with code:", code);
+        }
+      }
+
+      // PRIORITY 2: Try matching by name (fallback)
+      if (initialValues.jurisdiction) {
+        const match = jurisdictions.find(
+          (j) =>
+            j.name &&
+            matchesString(j.name, initialValues.jurisdiction!)
+        );
+        if (match && match.name) {
+          console.log(
+            "✅ Matched jurisdiction by name:",
+            initialValues.jurisdiction,
+            "→",
+            match.name
+          );
+          return match;
+        }
+        console.log(
+          "⚠️ No jurisdiction found with name:",
+          initialValues.jurisdiction
+        );
+      }
+
+      return null;
+    },
+    []
+  );
 
   // Match court with fuzzy matching
-  const matchCourt = useCallback((courts: Court[], courtName?: string) => {
-    if (!courtName) return null;
+  const matchCourt = useCallback(
+    (courts: Court[], courtName?: string) => {
+      if (!courtName) return null;
 
-    // Try exact match first
-    const exactMatch = courts.find(
-      (c) =>
-        (c.name && matchesString(c.name, courtName)) ||
-        (c.officialName && matchesString(c.officialName, courtName)) ||
-        (c.displayName && matchesString(c.displayName, courtName))
-    );
+      // Try exact match first
+      const exactMatch = courts.find(
+        (c) =>
+          (c.name && matchesString(c.name, courtName)) ||
+          (c.officialName &&
+            matchesString(c.officialName, courtName)) ||
+          (c.displayName && matchesString(c.displayName, courtName))
+      );
 
-    if (exactMatch && exactMatch.displayName) {
-      console.log("✅ Exact match found for court:", exactMatch.displayName);
-      return exactMatch;
-    }
+      if (exactMatch && exactMatch.displayName) {
+        console.log(
+          "✅ Exact match found for court:",
+          exactMatch.displayName
+        );
+        return exactMatch;
+      }
 
-    // Try fuzzy matching (75% threshold)
-    const THRESHOLD = 75;
-    let bestMatch: Court | null = null;
-    let bestScore = 0;
+      // Try fuzzy matching (75% threshold)
+      const THRESHOLD = 75;
+      let bestMatch: Court | null = null;
+      let bestScore = 0;
 
-    courts.forEach((c) => {
-      if (c.name) {
-        const score = calculateSimilarity(courtName, c.name);
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = c;
+      courts.forEach((c) => {
+        if (c.name) {
+          const score = calculateSimilarity(courtName, c.name);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = c;
+          }
+        }
+        if (c.officialName) {
+          const score = calculateSimilarity(
+            courtName,
+            c.officialName
+          );
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = c;
+          }
+        }
+        if (c.displayName) {
+          const score = calculateSimilarity(courtName, c.displayName);
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = c;
+          }
+        }
+      });
+
+      if (bestMatch && bestScore >= THRESHOLD) {
+        const matchedName = (bestMatch as Court).name;
+        if (matchedName) {
+          console.log(
+            `🎯 Fuzzy match for court: "${courtName}" → "${matchedName}" (${bestScore.toFixed(
+              1
+            )}%)`
+          );
+          return bestMatch;
         }
       }
-      if (c.officialName) {
-        const score = calculateSimilarity(courtName, c.officialName);
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = c;
-        }
-      }
-      if (c.displayName) {
-        const score = calculateSimilarity(courtName, c.displayName);
-        if (score > bestScore) {
-          bestScore = score;
-          bestMatch = c;
-        }
-      }
-    });
 
-    if (bestMatch && bestScore >= THRESHOLD) {
-      const matchedName = (bestMatch as Court).name;
-      if (matchedName) {
-        console.log(`🎯 Fuzzy match for court: "${courtName}" → "${matchedName}" (${bestScore.toFixed(1)}%)`);
-        return bestMatch;
-      }
-    }
-
-    console.log(`⚠️ No match for court "${courtName}" (best: ${bestScore.toFixed(1)}%)`);
-    return null;
-  }, []);
+      console.log(
+        `⚠️ No match for court "${courtName}" (best: ${bestScore.toFixed(
+          1
+        )}%)`
+      );
+      return null;
+    },
+    []
+  );
 
   // Initialize from initialValues or caseId
   useEffect(() => {
@@ -376,9 +457,15 @@ export default function JurisdictionSection({
           const json = await res.json();
 
           if (json.ok && json.data?.jurisdiction) {
-            const { country: countryName, jurisdiction: jurisdictionName, court: courtName } = json.data.jurisdiction;
+            const {
+              country: countryName,
+              jurisdiction: jurisdictionName,
+              court: courtName,
+            } = json.data.jurisdiction;
 
-            const matchedCountry = matchCountry(countries, { country: countryName || undefined });
+            const matchedCountry = matchCountry(countries, {
+              country: countryName || undefined,
+            });
             if (matchedCountry) {
               setCountry(matchedCountry.name);
               setCountryId(matchedCountry.id);
@@ -420,8 +507,10 @@ export default function JurisdictionSection({
         if (matchedCountry) {
           setCountry(matchedCountry.name);
           setCountryId(matchedCountry.id);
-          if (initialValues.jurisdiction) setJurisdiction(initialValues.jurisdiction);
-          if (initialValues.court_name) setCourt(initialValues.court_name);
+          if (initialValues.jurisdiction)
+            setJurisdiction(initialValues.jurisdiction);
+          if (initialValues.court_name)
+            setCourt(initialValues.court_name);
         } else if (initialValues.country) {
           setCountry("__other__");
           setCustomCountry(initialValues.country);
@@ -452,29 +541,48 @@ export default function JurisdictionSection({
     if (!jurisdiction && !initialValues?.jurisdiction_code) return;
 
     // Only try to match if we have initialValues with code or name
-    if (!initialValues?.jurisdiction_code && !initialValues?.jurisdiction) return;
+    if (
+      !initialValues?.jurisdiction_code &&
+      !initialValues?.jurisdiction
+    )
+      return;
 
     console.log("🔍 Attempting to match jurisdiction with:", {
       code: initialValues?.jurisdiction_code,
       name: initialValues?.jurisdiction,
-      currentJurisdiction: jurisdiction
+      currentJurisdiction: jurisdiction,
     });
 
-    const matchedJurisdiction = matchJurisdiction(jurisdictions, initialValues);
+    const matchedJurisdiction = matchJurisdiction(
+      jurisdictions,
+      initialValues
+    );
 
     if (matchedJurisdiction && matchedJurisdiction.name) {
       if (matchedJurisdiction.name !== jurisdiction) {
-        console.log("🔄 Updating jurisdiction:", jurisdiction, "→", matchedJurisdiction.name);
+        console.log(
+          "🔄 Updating jurisdiction:",
+          jurisdiction,
+          "→",
+          matchedJurisdiction.name
+        );
         setJurisdiction(matchedJurisdiction.name);
       }
       setJurisdictionId(matchedJurisdiction.id);
     } else {
       // No match found, move to "Other"
-      console.log(`⚠️ Jurisdiction "${jurisdiction}" not found in dropdown, moving to "Other"`);
+      console.log(
+        `⚠️ Jurisdiction "${jurisdiction}" not found in dropdown, moving to "Other"`
+      );
       setJurisdiction("__other__");
       setCustomJurisdiction(jurisdiction);
     }
-  }, [jurisdictions, initialValues?.jurisdiction_code, initialValues?.jurisdiction, matchJurisdiction]);
+  }, [
+    jurisdictions,
+    initialValues?.jurisdiction_code,
+    initialValues?.jurisdiction,
+    matchJurisdiction,
+  ]);
 
   // Match court when courts load
   useEffect(() => {
@@ -499,74 +607,106 @@ export default function JurisdictionSection({
   }, [countryId, onCountryChange]);
 
   // Handle changes
-  const handleCountryChange = useCallback((selectedCountryName: string) => {
-    hasUserInteractedRef.current = true;
-    setCountry(selectedCountryName);
-    setJurisdiction("");
-    setJurisdictionId("");
-    setCourt("");
-    setCustomJurisdiction("");
-    setCustomCourt("");
-
-    if (selectedCountryName === "__other__") {
-      setCountryId("");
-      setCustomCountry("");
-    } else {
-      const selected = countries.find((c) => c.name === selectedCountryName);
-      if (selected) {
-        setCountryId(selected.id);
-      }
-      setCustomCountry("");
-    }
-  }, [countries]);
-
-  const handleJurisdictionChange = useCallback((selectedJurisdictionName: string) => {
-    hasUserInteractedRef.current = true;
-    setJurisdiction(selectedJurisdictionName);
-    setCourt("");
-    setCustomCourt("");
-
-    if (selectedJurisdictionName === "__other__") {
+  const handleCountryChange = useCallback(
+    (selectedCountryName: string) => {
+      hasUserInteractedRef.current = true;
+      setCountry(selectedCountryName);
+      setJurisdiction("");
       setJurisdictionId("");
+      setCourt("");
       setCustomJurisdiction("");
-    } else {
-      const selected = jurisdictions.find((j) => j.name === selectedJurisdictionName);
-      if (selected) {
-        setJurisdictionId(selected.id);
-        if (onJurisdictionChange) {
-          onJurisdictionChange(selected.id);
-        }
-      }
-      setCustomJurisdiction("");
-    }
-  }, [jurisdictions, onJurisdictionChange]);
-
-  const handleCourtChange = useCallback((selectedCourtName: string) => {
-    hasUserInteractedRef.current = true;
-    setCourt(selectedCourtName);
-    if (selectedCourtName !== "__other__") {
       setCustomCourt("");
-    }
-  }, []);
 
-  // Get final values
-  const getFinalValue = useCallback((selectedValue: string, customValue: string) => {
-    return selectedValue === "__other__" ? customValue : selectedValue;
-  }, []);
-
-  // Prepare dropdown options
-  const countryOptions = useMemo(() =>
-    countries.map((c) => ({ value: c.name, label: c.name })),
+      if (selectedCountryName === "__other__") {
+        setCountryId("");
+        setCustomCountry("");
+      } else {
+        const selected = countries.find(
+          (c) => c.name === selectedCountryName
+        );
+        if (selected) {
+          setCountryId(selected.id);
+        }
+        setCustomCountry("");
+      }
+    },
     [countries]
   );
 
-  const jurisdictionOptions = useMemo(() =>
-    Array.from(new Set(jurisdictions.map((j) => j.name).filter((n): n is string => Boolean(n)))),
+  const handleJurisdictionChange = useCallback(
+    (selectedJurisdictionName: string) => {
+      hasUserInteractedRef.current = true;
+      setJurisdiction(selectedJurisdictionName);
+      setCourt("");
+      setCustomCourt("");
+
+      if (selectedJurisdictionName === "__other__") {
+        setJurisdictionId("");
+        setCustomJurisdiction("");
+      } else {
+        const selected = jurisdictions.find(
+          (j) => j.name === selectedJurisdictionName
+        );
+        if (selected) {
+          setJurisdictionId(selected.id);
+          if (onJurisdictionChange) {
+            onJurisdictionChange(selected.id);
+          }
+        }
+        setCustomJurisdiction("");
+      }
+    },
+    [jurisdictions, onJurisdictionChange]
+  );
+
+  const handleCourtChange = useCallback(
+    (selectedCourtName: string) => {
+      hasUserInteractedRef.current = true;
+      setCourt(selectedCourtName);
+      if (selectedCourtName !== "__other__") {
+        setCustomCourt("");
+      }
+    },
+    []
+  );
+
+  // Get final values
+  const getFinalValue = useCallback(
+    (selectedValue: string, customValue: string) => {
+      return selectedValue === "__other__"
+        ? customValue
+        : selectedValue;
+    },
+    []
+  );
+
+  // Prepare dropdown options
+  const countryOptions = useMemo(
+    () => countries.map((c) => ({ value: c.name, label: c.name })),
+    [countries]
+  );
+
+  const jurisdictionOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          jurisdictions
+            .map((j) => j.name)
+            .filter((n): n is string => Boolean(n))
+        )
+      ),
     [jurisdictions]
   );
 
-  const courtOptions = useMemo(() =>
-    Array.from(new Set(courts.map((c) => c.displayName).filter((n): n is string => Boolean(n)))),
+  const courtOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          courts
+            .map((c) => c.displayName)
+            .filter((n): n is string => Boolean(n))
+        )
+      ),
     [courts]
   );
 
@@ -598,14 +738,25 @@ export default function JurisdictionSection({
     if (!jc) return "";
     const cc = (selectedCountryCode || initialCountryCode)?.trim();
     return cc ? `${cc}-${jc}` : jc;
-  }, [initialCountryCode, selectedCountryCode, selectedJurisdictionRawCode]);
+  }, [
+    initialCountryCode,
+    selectedCountryCode,
+    selectedJurisdictionRawCode,
+  ]);
 
   // Track completion and notify parent
   useEffect(() => {
     const countryValue = getFinalValue(country, customCountry);
-    const jurisdictionValue = getFinalValue(jurisdiction, customJurisdiction);
+    const jurisdictionValue = getFinalValue(
+      jurisdiction,
+      customJurisdiction
+    );
     const courtValue = getFinalValue(court, customCourt);
-    const isComplete = !!(countryValue && jurisdictionValue && courtValue);
+    const isComplete = !!(
+      countryValue &&
+      jurisdictionValue &&
+      courtValue
+    );
 
     // Notify completion change
     if (onCompletionChangeRef.current) {
@@ -623,13 +774,22 @@ export default function JurisdictionSection({
 
       // Prevent wiping extracted metadata: if we have incoming initial values but we haven't applied them yet
       // (and the user hasn't interacted), skip emitting updates from the blank/default local state.
-      if (hasAnyIncomingInitialValues && !hasInitializedRef.current && !hasUserInteractedRef.current) {
+      if (
+        hasAnyIncomingInitialValues &&
+        !hasInitializedRef.current &&
+        !hasUserInteractedRef.current
+      ) {
         return;
       }
 
-      const countryCode = country === "__other__" ? "" : (selectedCountryCode || initialCountryCode);
+      const countryCode =
+        country === "__other__"
+          ? ""
+          : selectedCountryCode || initialCountryCode;
       const jurisdictionCode =
-        jurisdiction === "__other__" ? "" : (selectedJurisdictionCode || initialJurisdictionCode);
+        jurisdiction === "__other__"
+          ? ""
+          : selectedJurisdictionCode || initialJurisdictionCode;
 
       const currentValues = JSON.stringify({
         country: countryValue,
@@ -670,25 +830,58 @@ export default function JurisdictionSection({
   // Render
   return (
     <>
-      <div className={`bg-white ${isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"}`}>
+      <div
+        className={`bg-white ${
+          isCompact ? "p-3 sm:p-6" : "shadow-sm p-8"
+        }`}
+      >
         {/* Section Header */}
         {isCompact ? (
           <div className="flex items-start mb-3 sm:mb-4">
-            <div className={`flex items-center justify-center ${isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"} bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}>
-              <svg className={`${isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"} text-primary-600`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div
+              className={`flex items-center justify-center ${
+                isCompact ? "w-8 h-8 sm:w-10 sm:h-10" : "w-10 h-10"
+              } bg-primary-100 mr-2 sm:mr-3 flex-shrink-0`}
+            >
+              <svg
+                className={`${
+                  isCompact ? "w-4 h-4 sm:w-5 sm:h-5" : "w-6 h-6"
+                } text-primary-600`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div className="min-w-0">
               <h3 className="text-base sm:text-lg font-bold text-ink-900 flex items-center gap-2 flex-wrap">
-                {t("stepTitle")} <span className="text-red-500">*</span>
+                {t("stepTitle")}{" "}
+                <span className="text-red-500">*</span>
                 {showExtractedBadge && (
                   <div className="relative group">
                     <div className="flex items-center gap-1 px-2 py-0.5 bg-primary-50 border border-primary-200 rounded-md cursor-help">
-                      <svg className="w-3 h-3 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <svg
+                        className="w-3 h-3 text-primary-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                       </svg>
-                      <span className="text-xs font-medium text-primary-700">{t("extracted")}</span>
+                      <span className="text-xs font-medium text-primary-700">
+                        {t("extracted")}
+                      </span>
                     </div>
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-ink-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none whitespace-nowrap z-50">
                       {t("extractedTooltip")}
@@ -699,12 +892,16 @@ export default function JurisdictionSection({
                   </div>
                 )}
               </h3>
-              <p className="text-xs sm:text-sm text-ink-600">{t("whereHeard")}</p>
+              <p className="text-xs sm:text-sm text-ink-600">
+                {t("whereHeard")}
+              </p>
             </div>
           </div>
         ) : (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-ink-900 mb-2">{t("title")}</h2>
+            <h2 className="text-2xl font-bold text-ink-900 mb-2">
+              {t("title")}
+            </h2>
             <p className="text-ink-600">{t("description")}</p>
           </div>
         )}
@@ -718,7 +915,13 @@ export default function JurisdictionSection({
 
         {/* Form Fields */}
         {isLoading || isLoadingCountries ? (
-          <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
+          <div
+            className={`grid grid-cols-1 ${
+              isCompact
+                ? "md:grid-cols-4 gap-3"
+                : "md:grid-cols-2 gap-6"
+            } ${isCompact ? "mb-0" : "mb-8"}`}
+          >
             {[...Array(4)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-4 bg-surface-200 rounded w-24 animate-pulse"></div>
@@ -727,7 +930,13 @@ export default function JurisdictionSection({
             ))}
           </div>
         ) : (
-          <div className={`grid grid-cols-1 ${isCompact ? "md:grid-cols-4 gap-3" : "md:grid-cols-2 gap-6"} ${isCompact ? "mb-0" : "mb-8"}`}>
+          <div
+            className={`grid grid-cols-1 ${
+              isCompact
+                ? "md:grid-cols-4 gap-3"
+                : "md:grid-cols-2 gap-6"
+            } ${isCompact ? "mb-0" : "mb-8"}`}
+          >
             {/* Country */}
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-2">
@@ -754,10 +963,14 @@ export default function JurisdictionSection({
             {/* Jurisdiction */}
             <div>
               <label className="block text-sm font-medium text-ink-700 mb-2">
-                {t("stateProvince")} <span className="text-red-500">*</span>
+                {t("stateProvince")}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <SearchableSelect
-                options={jurisdictionOptions.map((j) => ({ value: j, label: j }))}
+                options={jurisdictionOptions.map((j) => ({
+                  value: j,
+                  label: j,
+                }))}
                 value={jurisdiction}
                 onChange={handleJurisdictionChange}
                 placeholder={t("selectStateProvince")}
@@ -768,7 +981,9 @@ export default function JurisdictionSection({
                 <input
                   type="text"
                   value={customJurisdiction}
-                  onChange={(e) => setCustomJurisdiction(e.target.value)}
+                  onChange={(e) =>
+                    setCustomJurisdiction(e.target.value)
+                  }
                   placeholder={t("enterStateProvince")}
                   className="mt-2 w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
                 />
@@ -778,10 +993,14 @@ export default function JurisdictionSection({
             {/* Court */}
             <div className={isCompact ? "md:col-span-2" : ""}>
               <label className="block text-sm font-medium text-ink-700 mb-2">
-                {t("courtName")} <span className="text-red-500">*</span>
+                {t("courtName")}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <SearchableSelect
-                options={courtOptions.map((c) => ({ value: c, label: c }))}
+                options={courtOptions.map((c) => ({
+                  value: c,
+                  label: c,
+                }))}
                 value={court}
                 onChange={handleCourtChange}
                 placeholder={t("selectCourt")}
@@ -800,22 +1019,22 @@ export default function JurisdictionSection({
             </div>
           </div>
         )}
-
       </div>
       {/* Save Button */}
-      {
-        !hideSaveButton && caseId && (
-          <SaveCaseButton
-            caseId={caseId}
-            field="jurisdiction"
-            value={{
-              country: getFinalValue(country, customCountry),
-              jurisdiction: getFinalValue(jurisdiction, customJurisdiction),
-              court: getFinalValue(court, customCourt),
-            }}
-          />
-        )
-      }
+      {!hideSaveButton && caseId && (
+        <SaveCaseButton
+          caseId={caseId}
+          field="jurisdiction"
+          value={{
+            country: getFinalValue(country, customCountry),
+            jurisdiction: getFinalValue(
+              jurisdiction,
+              customJurisdiction
+            ),
+            court: getFinalValue(court, customCourt),
+          }}
+        />
+      )}
     </>
   );
 }
