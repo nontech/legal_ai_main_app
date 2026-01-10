@@ -1,9 +1,19 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { CountrySelector } from "./CountrySelector";
+
+// Suspense wrapper for CountrySelector (uses useSearchParams)
+function CountrySelectorWrapper() {
+  return (
+    <Suspense fallback={<div className="w-24 h-8 bg-white/10 rounded animate-pulse" />}>
+      <CountrySelector />
+    </Suspense>
+  );
+}
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -17,7 +27,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Country Selector Row - First Row, Extreme Right */}
         <div className="flex justify-end mb-12 pb-8 border-b border-white/10">
-          <CountrySelector />
+          <CountrySelectorWrapper />
         </div>
 
         {/* Rest of Footer Content */}
