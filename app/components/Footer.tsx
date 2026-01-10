@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import { CountrySelector } from "./CountrySelector";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,6 +15,12 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        {/* Country Selector Row - First Row, Extreme Right */}
+        <div className="flex justify-end mb-12 pb-8 border-b border-white/10">
+          <CountrySelector />
+        </div>
+
+        {/* Rest of Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand Column */}
           <div className="lg:col-span-1">
