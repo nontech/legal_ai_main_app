@@ -8,6 +8,13 @@
     "dashboard": "Dashboard",
     "account": "Account"
   },
+  "dashboard": {
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "welcomeBack": "Welcome back to your legal analysis dashboard. Ready to analyze a new case?",
+    "newAnalysis": "New Analysis"
+  },
   "countries": {
     "de": "Germany",
     "uk": "United Kingdom",
@@ -20,7 +27,9 @@
   },
   "selector": {
     "country": "Country",
-    "language": "Language"
+    "language": "Language",
+    "selectJurisdiction": "Select Jurisdiction",
+    "selectLanguage": "Select Language"
   },
   "hero": {
     "title": "Predict Legal Case Outcomes",

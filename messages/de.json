@@ -5,8 +5,15 @@
         "signIn": "Anmelden",
         "signUp": "Registrieren",
         "signOut": "Abmelden",
-        "dashboard": "Dashboard",
+        "dashboard": "Übersicht",
         "account": "Konto"
+    },
+    "dashboard": {
+        "goodMorning": "Guten Morgen",
+        "goodAfternoon": "Guten Tag",
+        "goodEvening": "Guten Abend",
+        "welcomeBack": "Willkommen zurück zu Ihrem Dashboard für Rechtsanalysen. Bereit, einen neuen Fall zu analysieren?",
+        "newAnalysis": "Neue Analyse"
     },
     "countries": {
         "de": "Deutschland",
@@ -20,7 +27,9 @@
     },
     "selector": {
         "country": "Land",
-        "language": "Sprache"
+        "language": "Sprache",
+        "selectJurisdiction": "Gerichtsbarkeit auswählen",
+        "selectLanguage": "Sprache auswählen"
     },
     "hero": {
         "title": "Vorhersage von Ergebnissen in Rechtsfällen",

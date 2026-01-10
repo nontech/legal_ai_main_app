@@ -1,10 +1,19 @@
 "use client";
 
-import { useState, useEffect, memo, useCallback } from "react";
+import { useState, useEffect, memo, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CountryLanguageSelector } from "./CountryLanguageSelector";
+import { LanguageSelector } from "./LanguageSelector";
+
+// Suspense wrapper for LanguageSelector (uses useSearchParams)
+function LanguageSelectorWrapper() {
+  return (
+    <Suspense fallback={<div className="w-8 h-4 bg-surface-100 rounded animate-pulse" />}>
+      <LanguageSelector />
+    </Suspense>
+  );
+}
 
 interface NavbarProps {
   onPretrialClick?: () => void;
@@ -122,7 +131,7 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
             )}
 
             <div className="px-3">
-              <CountryLanguageSelector />
+              <LanguageSelectorWrapper />
             </div>
 
             {isLoading ? (
@@ -251,9 +260,9 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border-200 py-3 space-y-2">
-            {/* Country/Language Selector - Mobile */}
+            {/* Language Selector - Mobile */}
             <div className="px-4 pb-3 border-b border-border-200">
-              <CountryLanguageSelector />
+              <LanguageSelectorWrapper />
             </div>
 
             {isAuthenticated && showPretrialButton && (

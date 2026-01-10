@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import HeroSection from "@/app/components/dashboard/HeroSection";
 import CasePortfolio from "@/app/components/dashboard/CasePortfolio";
 import ConfidentialByDesign from "@/app/components/dashboard/ConfidentialByDesign";
@@ -11,20 +12,21 @@ import UseCases from "@/app/components/UseCases";
 
 export const dynamic = "force-dynamic";
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
-}
-
 export default function Dashboard() {
   const params = useParams();
-  const country = params?.country as string || 'us';
-  const locale = params?.locale as string || 'en';
+  const country = (params?.country as string) || "us";
+  const locale = (params?.locale as string) || "en";
+  const t = useTranslations("dashboard");
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  function getGreeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return t("goodMorning");
+    if (hour < 18) return t("goodAfternoon");
+    return t("goodEvening");
+  }
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -59,7 +61,9 @@ export default function Dashboard() {
                   </svg>
                 </div>
               </div>
-              <p className="mt-4 text-ink-500 font-medium">Loading...</p>
+              <p className="mt-4 text-ink-500 font-medium">
+                Loading...
+              </p>
             </div>
           </div>
         </div>
@@ -78,7 +82,7 @@ export default function Dashboard() {
                       {getGreeting()}! 👋
                     </h1>
                     <p className="text-primary-100 text-sm sm:text-base">
-                      Welcome back to your legal analysis dashboard. Ready to analyze a new case?
+                      {t("welcomeBack")}
                     </p>
                   </div>
                   <a
@@ -98,7 +102,7 @@ export default function Dashboard() {
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    New Analysis
+                    {t("newAnalysis")}
                   </a>
                 </div>
               </div>
@@ -129,7 +133,9 @@ export default function Dashboard() {
           </div>
 
           {/* Main Content */}
-          <main className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-8 `}>
+          <main
+            className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-8 `}
+          >
             {/* Case Portfolio */}
             <CasePortfolio />
           </main>
