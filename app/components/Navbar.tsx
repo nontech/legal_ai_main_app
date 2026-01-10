@@ -10,7 +10,7 @@ import { LanguageSelector } from "./LanguageSelector";
 function LanguageSelectorWrapper() {
   return (
     <Suspense fallback={<div className="w-8 h-4 bg-surface-100 rounded animate-pulse" />}>
-      <LanguageSelectorWrapper />
+      <LanguageSelector />
     </Suspense>
   );
 }
