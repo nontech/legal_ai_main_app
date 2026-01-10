@@ -163,7 +163,7 @@ export default function FileUploadModal({
     }
   };
 
-  const handleFiles = (files: File[]) => {
+  const handleFiles = async (files: File[]) => {
     const newFiles: ClassifiedUploadedFile[] = files.map((file) => ({
       id: Date.now().toString() + Math.random().toString(36),
       name: file.name,
@@ -174,14 +174,25 @@ export default function FileUploadModal({
       isClassifying: false,
     }));
 
-    // Add to selected files instead of uploaded files
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
-
     // Store actual File objects
     newFiles.forEach((fileObj, index) => {
       const actualFile = files[index];
       fileObjectsMap.current.set(fileObj.id, actualFile);
     });
+
+    // Directly upload files instead of adding to selected files
+    if (caseId && sectionName) {
+      // First add files to selectedFiles to show loading indicator
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
+      
+      // Then upload each file
+      for (const file of newFiles) {
+        await handleUploadFile(file);
+      }
+    } else {
+      // Fallback: add to selected files if no caseId/sectionName
+      setSelectedFiles((prev) => [...prev, ...newFiles]);
+    }
   };
 
   const handleRemoveFile = (id: string, fromSelected: boolean = false) => {
@@ -451,7 +462,9 @@ export default function FileUploadModal({
       const responseData = await response.json();
 
       // Get the address from the response (first address corresponds to this file)
-      const address = responseData.data?.file_addresses?.[0];
+      // Support both new format (data.files[0].address) and legacy format (data.file_addresses[0])
+      const address = responseData.data?.files?.[0]?.address 
+        ?? responseData.data?.file_addresses?.[0];
 
       // Move file from selected to uploaded with the address from the server
       setSelectedFiles((prev) => prev.filter((f) => f.id !== file.id));
@@ -476,12 +489,6 @@ export default function FileUploadModal({
         newSet.delete(file.id);
         return newSet;
       });
-    }
-  };
-
-  const handleUploadAllFiles = async () => {
-    for (const file of selectedFiles) {
-      await handleUploadFile(file);
     }
   };
 
@@ -566,14 +573,26 @@ export default function FileUploadModal({
                       /* Expanded State */
                       <>
                         <div className="p-2 sm:p-4 border-b border-border-200 bg-surface-000 flex items-center justify-between min-h-[48px] sm:min-h-[56px] gap-2">
-                          <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
-                            Documents
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
+                              Documents
+                            </h3>
+                            {selectedFiles.length > 0 && (
+                              <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">
+                                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Uploading {selectedFiles.length}
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-1 sm:gap-2">
                             <button
                               onClick={() => fileInputRef.current?.click()}
-                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
-                              title="Add more documents"
+                              disabled={selectedFiles.length > 0}
+                              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                              title={selectedFiles.length > 0 ? "Wait for upload to complete" : "Upload documents"}
                             >
                               <svg
                                 className="w-4 h-4 sm:w-5 sm:h-5"
@@ -585,11 +604,11 @@ export default function FileUploadModal({
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                   strokeWidth={2}
-                                  d="M12 4v16m8-8H4"
+                                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                                 />
                               </svg>
-                              <span className="hidden sm:inline">Add Documents</span>
-                              <span className="sm:hidden">Add</span>
+                              <span className="hidden sm:inline">Upload Documents</span>
+                              <span className="sm:hidden">Upload</span>
                             </button>
                             <input
                               ref={fileInputRef}
@@ -625,9 +644,9 @@ export default function FileUploadModal({
                           {/* Empty State - No files at all */}
                           {uploadedFiles.length === 0 && selectedFiles.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
-                              <div className="w-16 h-16 bg-surface-100 rounded-full flex items-center justify-center mb-4">
+                              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-4">
                                 <svg
-                                  className="w-8 h-8 text-ink-400"
+                                  className="w-8 h-8 text-primary-600"
                                   fill="none"
                                   viewBox="0 0 24 24"
                                   stroke="currentColor"
@@ -636,15 +655,15 @@ export default function FileUploadModal({
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                                   />
                                 </svg>
                               </div>
                               <h4 className="text-lg font-semibold text-ink-900 mb-2">
-                                No Documents
+                                Upload Documents
                               </h4>
                               <p className="text-sm text-ink-600 mb-4 max-w-xs">
-                                Select documents to upload and generate an AI summary for case analysis.
+                                Upload documents to automatically extract information for case analysis.
                               </p>
                               <button
                                 onClick={() => fileInputRef.current?.click()}
@@ -660,84 +679,46 @@ export default function FileUploadModal({
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
                                     strokeWidth={2}
-                                    d="M12 4v16m8-8H4"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
                                   />
                                 </svg>
-                                Select Documents
+                                Upload Documents
                               </button>
                             </div>
                           )}
 
-                          {/* Selected Files Section */}
+                          {/* Uploading Files Section - shows files currently being uploaded */}
                           {selectedFiles.length > 0 && (
                             <div className="space-y-2">
                               <div className="flex items-center justify-between">
                                 <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
-                                  Selected Files ({selectedFiles.length})
+                                  Uploading ({selectedFiles.length})
                                 </h4>
-                                {caseId && sectionName && (
-                                  <button
-                                    onClick={handleUploadAllFiles}
-                                    disabled={uploadingFileIds.size > 0}
-                                    className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-                                  >
-                                    {uploadingFileIds.size > 0 ? (
-                                      <>
-                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Uploading...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                        Upload All
-                                      </>
-                                    )}
-                                  </button>
-                                )}
                               </div>
                               {selectedFiles.map((file) => (
                                 <div
                                   key={file.id}
-                                  className="bg-primary-100 border border-primary-200 rounded-lg p-3 hover:shadow-sm transition-shadow"
+                                  className="bg-primary-50 border border-primary-200 rounded-lg p-3"
                                 >
                                   <div className="flex items-start gap-2">
                                     <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
                                       <svg
-                                        className="w-4 h-4 text-primary-600"
+                                        className="w-4 h-4 text-primary-600 animate-spin"
                                         fill="none"
                                         viewBox="0 0 24 24"
-                                        stroke="currentColor"
                                       >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                        />
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                       </svg>
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium text-ink-900 truncate">
                                         {file.name}
                                       </p>
-                                      <p className="text-xs text-ink-600">
-                                        Ready to upload
+                                      <p className="text-xs text-primary-600">
+                                        Uploading...
                                       </p>
                                     </div>
-                                    <button
-                                      onClick={() => handleRemoveFile(file.id, true)}
-                                      className="flex-shrink-0 text-red-600 hover:bg-red-100 rounded-lg p-1 transition-colors"
-                                      title="Remove"
-                                    >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                      </svg>
-                                    </button>
                                   </div>
                                 </div>
                               ))}
@@ -1294,13 +1275,29 @@ export default function FileUploadModal({
                         />
                       </svg>
                       <h3 className="text-xl font-semibold text-ink-900 mb-2">
-                        Drop files here or click to upload
+                        Drop files here to upload instantly
                       </h3>
+                      <p className="text-sm text-ink-500 mb-4">
+                        Files will be uploaded and processed automatically
+                      </p>
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="mt-4 px-6 py-3 bg-surface-000 border border-border-300 rounded-lg text-ink-700 font-medium hover:bg-surface-100 transition-colors"
+                        className="mt-4 px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors flex items-center gap-2"
                       >
-                        Choose Files
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                          />
+                        </svg>
+                        Upload Files
                       </button>
                       <p className="text-sm text-ink-500 mt-4">
                         Supported: PDF, DOC, DOCX, TXT, JPG, PNG, GIF •
@@ -1321,7 +1318,7 @@ export default function FileUploadModal({
                   {uploadedFiles.length === 0 ? (
                     <div className="text-center py-12">
                       <p className="text-lg text-ink-500">
-                        No files uploaded yet. Drag and drop or click "Choose Files" to add documents.
+                        No files uploaded yet. Drag and drop or click "Upload Files" to upload documents.
                       </p>
                     </div>
                   ) : (

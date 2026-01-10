@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import FileUploadModal from "./FileUploadModal";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -71,22 +71,43 @@ const DB_KEY_TO_TRANS_KEY: Record<string, string> = {
   "potential_challenges_and_weaknesses": "challenges",
 };
 
+const CATEGORY_LABELS: Record<string, { label: string; color: string; icon: string }> = {
+  "case_information": { label: "Case Information", color: "primary", icon: "📋" },
+  "evidence_and_supporting_materials": { label: "Evidence & Materials", color: "accent", icon: "🔍" },
+  "key_witness_and_testimony": { label: "Witness & Testimony", color: "highlight", icon: "👤" },
+  "relevant_legal_precedents": { label: "Legal Precedents", color: "success", icon: "⚖️" },
+  "police_report": { label: "Police Report", color: "critical", icon: "🚔" },
+  "potential_challenges_and_weaknesses": { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
+};
+
+const getCategoryColor = (color: string) => {
+  const colorMap: Record<string, string> = {
+    primary: "bg-primary-100 text-primary-600 border-primary-200",
+    accent: "bg-accent-100 text-accent-600 border-accent-500",
+    success: "bg-success-100 text-success-600 border-success-500",
+    highlight: "bg-highlight-200 text-highlight-600 border-highlight-500",
+    critical: "bg-critical-100 text-critical-600 border-critical-500",
+  };
+  return colorMap[color] || colorMap.primary;
+};
+
 export default function CaseDetailsSection({
   onModalChange,
   caseId,
   onCompletionChange,
 }: CaseDetailsSectionProps) {
   const t = useTranslations("caseAnalysis.caseDetails");
-  const [openModal, setOpenModal] = useState<string | null>(null);
-  const [caseTitle, setCaseTitle] = useState<string>("");
+  const [selectedSection, setSelectedSection] = useState<string>("case_information");
   const [caseDescription, setCaseDescription] = useState<string>("");
-  const [caseFilesNames, setCaseFilesNames] = useState<string[]>([]);
-  const [caseFilesAddresses, setCaseFilesAddresses] = useState<string[]>([]);
-  const [isEditingHeader, setIsEditingHeader] = useState(false);
-  const [editedTitle, setEditedTitle] = useState<string>("");
   const [editedDescription, setEditedDescription] = useState<string>("");
-  const [isSavingHeader, setIsSavingHeader] = useState(false);
+  const [editedSummary, setEditedSummary] = useState<string>("");
+  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
+  const [showAllDocuments, setShowAllDocuments] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Store all case details keyed by database keys
   const [caseDetails, setCaseDetails] = useState<Record<string, SectionData>>({});
@@ -107,20 +128,10 @@ export default function CaseDetailsSection({
         const details = json.data.case_details;
         setCaseDetails(details);
 
-        // Extract case title and description from case_information
-        if (details.case_information?.caseName) {
-          setCaseTitle(details.case_information.caseName);
-          setEditedTitle(details.case_information.caseName);
-        }
+        // Extract case description from case_information
         if (details.case_information?.caseDescription) {
           setCaseDescription(details.case_information.caseDescription);
           setEditedDescription(details.case_information.caseDescription);
-        }
-        if (details.case_information?.files_names) {
-          setCaseFilesNames(details.case_information.files_names);
-        }
-        if (details.case_information?.files_addresses) {
-          setCaseFilesAddresses(details.case_information.files_addresses);
         }
       }
     } catch (error) {
@@ -135,43 +146,33 @@ export default function CaseDetailsSection({
     fetchCaseDetails();
   }, [fetchCaseDetails]);
 
-  // Notify parent when modal state changes
+  // Update edited summary when section changes
   useEffect(() => {
-    if (onModalChange) {
-      onModalChange(openModal !== null);
+    const sectionData = getSectionData(selectedSection);
+    if (selectedSection === "case_information") {
+      setEditedSummary(sectionData.caseDescription || "");
+    } else {
+      setEditedSummary(sectionData.summary || "");
     }
-  }, [openModal, onModalChange]);
+    setIsMarkdownPreview(false);
+    setShowAllDocuments(false); // Reset document expansion when changing sections
+  }, [selectedSection, caseDetails]);
 
   // Get section data by database key
   const getSectionData = (dbKey: string): SectionData => {
     return caseDetails[dbKey] || {};
   };
 
-  // Calculate section status
-  const getSectionStatus = (
-    dbKey: string
-  ): "complete" | "empty" => {
-    const data = getSectionData(dbKey);
-
-    // Check if there's a summary
-    if (data.summary?.trim() || data.caseDescription?.trim()) {
-      return "complete";
-    }
-
-    return "empty";
-  };
-
   // Get item count for display
   const getItemCount = (dbKey: string): number => {
     const data = getSectionData(dbKey);
-    // Support new format (files array) and old format (separate arrays)
     if (data.files && Array.isArray(data.files)) {
       return data.files.length;
     }
     return (data.file_addresses?.length ?? 0) || (data.file_names?.length ?? 0) || 0;
   };
 
-  const getInitialFilesForSection = (dbKey: string): UploadedFile[] => {
+  const getFilesForSection = (dbKey: string): UploadedFile[] => {
     const data = getSectionData(dbKey);
 
     // Support new format: files array of objects with name and address
@@ -186,143 +187,46 @@ export default function CaseDetailsSection({
       }));
     }
 
-    // Fallback to old format: separate file_names and file_addresses arrays
+    // Fallback to old format
     const names = Array.isArray(data.file_names) ? data.file_names : [];
     const addresses = Array.isArray(data.file_addresses) ? data.file_addresses : [];
-    const existingFiles = Array.isArray(data.files) ? data.files : [];
 
-    const results: UploadedFile[] = [];
-
-    names.forEach((rawName, index) => {
-      if (typeof rawName !== "string") {
-        return;
-      }
-
-      const name = rawName.trim();
-      if (!name) {
-        return;
-      }
-
-      const existing = existingFiles[index];
-
-      const id =
-        typeof existing === "object" && existing !== null && "id" in existing
-          ? String((existing as { id: unknown }).id)
-          : `${dbKey}-${index}-${name}`;
-
-      const sizeValue =
-        typeof existing === "object" && existing !== null && "size" in existing
-          ? Number((existing as { size: unknown }).size)
-          : undefined;
-
-      const resolvedSize =
-        typeof sizeValue === "number" && Number.isFinite(sizeValue) ? sizeValue : undefined;
-
-      const typeValue =
-        typeof existing === "object" && existing !== null && "type" in existing
-          ? String((existing as { type: unknown }).type)
-          : undefined;
-
-      const uploadedAtValue =
-        typeof existing === "object" && existing !== null && "uploadedAt" in existing
-          ? (existing as { uploadedAt: unknown }).uploadedAt
-          : undefined;
-
-      const uploadedAt =
-        uploadedAtValue instanceof Date
-          ? uploadedAtValue
-          : typeof uploadedAtValue === "string"
-            ? new Date(uploadedAtValue)
-            : undefined;
-
-      results.push({
-        id,
-        name,
-        size: resolvedSize,
-        type: typeValue,
-        uploadedAt,
-        address: addresses[index],
-      });
-    });
-
-    return results;
+    return names.map((name: string, index: number) => ({
+      id: `${dbKey}-${index}-${name}`,
+      name,
+      address: addresses[index],
+    }));
   };
 
-  const getCompletedSectionsCount = () => {
-    return SECTION_KEYS.filter(
-      (key) => getSectionStatus(key) === "complete"
-    ).length;
-  };
-
-  // Notify parent of completion percentage and save to database
-  useEffect(() => {
-    const completedCount = getCompletedSectionsCount();
-    const percentage = Math.round((completedCount / SECTION_KEYS.length) * 100);
-
-    if (onCompletionChange) {
-      onCompletionChange(percentage);
-    }
-
-    // Save completion status to database
-    const saveCompletionStatus = async () => {
-      if (!caseId) return;
-
-      try {
-        await fetch(`/api/cases/update`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caseId,
-            field: "case_details",
-            value: {
-              _completion_status: percentage,
-            },
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to save completion status:", error);
-      }
-    };
-
-    saveCompletionStatus();
-  }, [caseDetails, onCompletionChange, caseId]);
-
-  const getModalContent = (dbKey: string) => {
-    const transKey = DB_KEY_TO_TRANS_KEY[dbKey];
-
-    // Fallback descriptions if translation fails or key missing
-    const description = t(`${transKey}Desc`) || "Upload relevant documents for this section";
-    const title = t(transKey) || "Upload Documents";
-
-    return {
-      title: title,
-      description: description,
-      icon: SECTION_ICONS[dbKey] || "📄",
-    };
-  };
-
-  const handleEditHeader = () => {
-    setEditedTitle(caseTitle);
-    setEditedDescription(caseDescription);
-    setIsEditingHeader(true);
-  };
-
-  const handleSaveHeader = async (title?: string, description?: string) => {
+  const handleSaveSection = async () => {
     if (!caseId) return;
 
-    const newTitle = title !== undefined ? title : editedTitle;
-    const newDescription = description !== undefined ? description : editedDescription;
-
-    setIsSavingHeader(true);
+    setIsSaving(true);
     try {
-      const updateData = {
-        ...caseDetails,
-        case_information: {
-          ...caseDetails.case_information,
-          caseName: newTitle,
-          caseDescription: newDescription,
-        },
-      };
+      const existingSection = caseDetails[selectedSection] || {};
+      const existingCaseInfo = caseDetails["case_information"] || {};
+
+      let updateData: Record<string, SectionData>;
+
+      if (selectedSection === "case_information") {
+        updateData = {
+          ...caseDetails,
+          case_information: {
+            ...existingCaseInfo,
+            caseDescription: editedSummary,
+          },
+        };
+        setCaseDescription(editedSummary);
+      } else {
+        updateData = {
+          ...caseDetails,
+          [selectedSection]: {
+            ...existingSection,
+            summary: editedSummary,
+            summaryGenerated: Boolean(editedSummary),
+          },
+        };
+      }
 
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -340,95 +244,80 @@ export default function CaseDetailsSection({
         throw new Error(json?.error || "Failed to save");
       }
 
-      setCaseTitle(newTitle);
-      setCaseDescription(newDescription);
       setCaseDetails(updateData);
-      setIsEditingHeader(false);
     } catch (error) {
-      console.error("Failed to save header:", error);
-      setEditedTitle(caseTitle);
-      setEditedDescription(caseDescription);
+      console.error("Failed to save section:", error);
     } finally {
-      setIsSavingHeader(false);
+      setIsSaving(false);
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditedTitle(caseTitle);
-    setEditedDescription(caseDescription);
-    setIsEditingHeader(false);
-  };
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !caseId) return;
 
-  const handleSaveSectionData = async (sectionUiId: string, data: { files?: any[]; summary: string }) => {
-    if (!caseId) return;
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
 
-    const dbKey = UI_TO_DB_MAP[sectionUiId];
-    if (!dbKey) return;
+    setIsUploading(true);
 
     try {
-      // Get existing section data
-      const existingSection = caseDetails[dbKey] || {};
+      // Collect uploaded file info from responses
+      const uploadedFiles: Array<{ name: string; address: string }> = [];
+      
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("section", selectedSection);
+        formData.append("case_id", caseId);
+        formData.append("files", file);
 
-      // Merge files if provided
-      let mergedFiles = data.files || [];
-      if (data.files && data.files.length > 0) {
-        // Convert provided files to new format if needed
-        const newFiles = data.files.map((file: any) => ({
-          name: file.name || file.fileName,
-          address: file.address,
-          size: file.size,
-          type: file.type,
-          uploadedAt: file.uploadedAt,
-        }));
+        const response = await fetch("/api/documents/upload-section", {
+          method: "POST",
+          body: formData,
+        });
 
-        // Merge with existing files
-        const existingFiles = existingSection.files || [];
-        mergedFiles = [...existingFiles, ...newFiles];
-      } else {
-        // Keep existing files if not updating
-        mergedFiles = existingSection.files || [];
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Upload failed");
+        }
+        
+        // Collect file info from response
+        const responseData = await response.json();
+        if (responseData.data?.files) {
+          uploadedFiles.push(...responseData.data.files);
+        } else if (responseData.data?.file_names && responseData.data?.file_addresses) {
+          responseData.data.file_names.forEach((name: string, idx: number) => {
+            uploadedFiles.push({ name, address: responseData.data.file_addresses[idx] });
+          });
+        }
       }
 
-      const updateData = {
-        ...caseDetails,
-        [dbKey]: {
-          ...existingSection,
-          files: mergedFiles.length > 0 ? mergedFiles : undefined,
-        },
-      };
-
-      // Only update if there's a summary
-      if (data.summary) {
-        updateData[dbKey].summary = data.summary;
-        updateData[dbKey].summaryGenerated = Boolean(data.summary);
+      // Refresh case details
+      await fetchCaseDetails();
+      
+      // Reset file input before extraction
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
-
-      const res = await fetch("/api/cases/update", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          caseId,
-          field: "case_details",
-          value: updateData,
-        }),
-      });
-
-      const json = await res.json();
-
-      if (!res.ok || !json?.ok) {
-        throw new Error(json?.error || "Failed to update summary");
+      
+      setIsUploading(false);
+      
+      // Automatically extract information using the uploaded files directly
+      if (uploadedFiles.length > 0) {
+        await handleGenerateSummaryWithFiles(uploadedFiles);
       }
-
-      setCaseDetails(updateData);
     } catch (error) {
-      console.error("Failed to save section data:", error);
-      throw error;
+      console.error("Failed to upload file:", error);
+      alert(error instanceof Error ? error.message : "Failed to upload file");
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
-  const handleDeleteFile = async (dbKey: string, fileAddress: string, fileName: string) => {
-    // Ask for confirmation before deleting
-    if (!confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)) {
+  const handleDeleteFile = async (fileAddress: string, fileName: string) => {
+    if (!confirm(`Are you sure you want to delete "${fileName}"?`)) {
       return;
     }
 
@@ -440,7 +329,7 @@ export default function CaseDetailsSection({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileAddress,
-          section: dbKey,
+          section: selectedSection,
           caseId,
         }),
       });
@@ -451,221 +340,401 @@ export default function CaseDetailsSection({
         throw new Error(json?.error || "Failed to delete file");
       }
 
-      // Update local case details with the updated files list
+      // Update local case details
       const updatedCaseDetails = {
         ...caseDetails,
-        [dbKey]: {
-          ...(caseDetails[dbKey] || {}),
+        [selectedSection]: {
+          ...(caseDetails[selectedSection] || {}),
           files: json.data.updatedFiles,
         },
       };
 
       setCaseDetails(updatedCaseDetails);
-
-      // Show success message
-      alert("File deleted successfully");
     } catch (error) {
       console.error("Failed to delete file:", error);
       alert(error instanceof Error ? error.message : "Failed to delete file");
     }
   };
 
+  // Generate summary using files from state
+  const handleGenerateSummary = async () => {
+    if (!caseId) return;
+
+    const files = getFilesForSection(selectedSection);
+    if (files.length === 0) {
+      alert("No files uploaded in this section");
+      return;
+    }
+
+    await handleGenerateSummaryWithFiles(files.map(f => ({ name: f.name, address: f.address || "" })));
+  };
+
+  // Generate summary using provided files (used after upload when state hasn't updated yet)
+  const handleGenerateSummaryWithFiles = async (files: Array<{ name: string; address: string }>) => {
+    if (!caseId || files.length === 0) return;
+
+    setIsGeneratingSummary(true);
+
+    try {
+      const response = await fetch("/api/documents/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          file_addresses: files.map((f) => f.address),
+          file_names: files.map((f) => f.name),
+          file_category: selectedSection,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to generate summary");
+      }
+
+      const data = await response.json();
+      const summary = data.summary || data.data?.summary || "";
+
+      setEditedSummary(summary);
+    } catch (error) {
+      console.error("Failed to generate summary:", error);
+      alert(error instanceof Error ? error.message : "Failed to generate summary");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
+  const formatFileSize = (bytes?: number) => {
+    if (!bytes) return "";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split(".").pop()?.toLowerCase();
+    switch (extension) {
+      case "pdf":
+        return "📄";
+      case "doc":
+      case "docx":
+        return "📝";
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
+        return "🖼️";
+      case "txt":
+        return "📃";
+      default:
+        return "📁";
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6 flex items-center justify-center h-32">
-          <div className="flex flex-col items-center gap-2">
-            <svg className="w-8 h-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <p className="text-ink-600 font-medium">{t("loading", { defaultMessage: "Loading case details..." })}</p>
-          </div>
+      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6 flex items-center justify-center h-96">
+        <div className="flex flex-col items-center gap-2">
+          <svg className="w-8 h-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <p className="text-ink-600 font-medium">{t("loading", { defaultMessage: "Loading case details..." })}</p>
         </div>
       </div>
     );
   }
 
+  const currentSectionData = getSectionData(selectedSection);
+  const currentFiles = getFilesForSection(selectedSection);
+  const transKey = DB_KEY_TO_TRANS_KEY[selectedSection];
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
-        <div className="flex items-start">
-          <div className="flex items-center justify-center w-10 h-10 bg-primary-100 rounded-full flex-shrink-0 mr-3">
-            <svg
-              className="w-6 h-6 text-primary-700"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-ink-900">{t("title")}</h2>
-            <p className="text-sm text-ink-600 mt-1">
-              {t("description")}
-            </p>
-          </div>
-        </div>
-      </div>
+    <div>
+      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 overflow-hidden">
+        <div className="flex flex-col lg:flex-row min-h-[500px]">
+          {/* Left Sidebar - Section Navigation */}
+          <div className="lg:w-64 bg-surface-50 border-b lg:border-b-0 lg:border-r border-border-200 flex-shrink-0">
+            <nav className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-400px)] lg:max-h-none">
+              {SECTION_KEYS.map((dbKey) => {
+                const itemCount = getItemCount(dbKey);
+                const sectionTransKey = DB_KEY_TO_TRANS_KEY[dbKey];
+                const isSelected = selectedSection === dbKey;
 
-      {/* Progress Overview */}
-      <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6">
-        <div className="space-y-6">
-          {/* Overall Progress */}
-          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-6 border border-primary-200">
-            <div className="text-center mb-4">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-5xl font-bold text-primary-600">
-                  {getCompletedSectionsCount()}
-                </span>
-                <span className="text-3xl font-bold text-ink-400">/</span>
-                <span className="text-5xl font-bold text-ink-400">
-                  {SECTION_KEYS.length}
-                </span>
-              </div>
-              <p className="text-ink-700 font-medium">{t("sectionsCompleted")}</p>
-            </div>
-            <div className="w-full bg-surface-200 rounded-full h-3">
-              <div
-                className="bg-primary-500 h-3 rounded-full transition-all duration-500"
-                style={{
-                  width: `${(getCompletedSectionsCount() / SECTION_KEYS.length) * 100}%`,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Section Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {/* Case Information Card - Opens Modal */}
-            <button
-              onClick={() => setOpenModal("case-info")}
-              className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center flex-1">
-                  <span className="text-2xl mr-2">📋</span>
-                  <h3 className="font-semibold text-ink-900 text-sm">
-                    {t("caseInformation")}
-                  </h3>
-                </div>
-              </div>
-
-              <p className="text-xs text-ink-600 mb-3 line-clamp-2">
-                {t("caseInformationDesc")}
-              </p>
-
-              <div className="flex items-end justify-between pt-2">
-                {caseTitle && caseDescription && (
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center justify-center w-5 h-5 bg-green-100 rounded-full">
-                      <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-semibold text-green-600">Complete</span>
-                  </div>
-                )}
-                <div className="text-right ml-auto">
-                  <p className="text-xs text-ink-600">
-                    {getItemCount("case_information")} {getItemCount("case_information") === 1 ? t("document") : t("documents")}
-                  </p>
-                </div>
-              </div>
-            </button>
-
-            {/* Document Upload Sections */}
-            {SECTION_KEYS.map((dbKey) => {
-              const uiId = DB_TO_UI_MAP[dbKey];
-              const status = getSectionStatus(dbKey);
-              const itemCount = getItemCount(dbKey);
-              if (dbKey === "case_information") {
-                return null;
-              }
-
-              const transKey = DB_KEY_TO_TRANS_KEY[dbKey];
-
-              return (
-                <button
-                  key={dbKey}
-                  onClick={() => setOpenModal(uiId)}
-                  className="bg-surface-000 border border-border-200 rounded-lg p-4 hover:shadow-md transition-shadow text-left cursor-pointer group"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center flex-1">
-                      <span className="text-2xl mr-2">{SECTION_ICONS[dbKey]}</span>
-                      <h3 className="font-semibold text-ink-900 text-sm">
-                        {t(transKey)}
-                      </h3>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-ink-600 mb-3 line-clamp-2">
-                    {t(transKey + "Desc")}
-                  </p>
-
-                  <div className="flex items-end justify-between pt-2">
-                    {status === "complete" && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="flex items-center justify-center w-5 h-5 bg-green-100 rounded-full">
-                          <svg className="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <span className="text-xs font-semibold text-green-600">Complete</span>
-                      </div>
-                    )}
-                    <div className="text-right ml-auto">
-                      <p className="text-xs text-ink-600">
+                return (
+                  <button
+                    key={dbKey}
+                    onClick={() => setSelectedSection(dbKey)}
+                    className={`w-full text-left px-3 py-3 rounded-lg transition-all flex items-start gap-3 ${
+                      isSelected
+                        ? "bg-primary-100 text-primary-900 border-l-4 border-primary-500"
+                        : "hover:bg-surface-100 text-ink-700"
+                    }`}
+                  >
+                    <span className="text-xl flex-shrink-0">{SECTION_ICONS[dbKey]}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium text-sm truncate ${isSelected ? "text-primary-900" : "text-ink-900"}`}>
+                        {t(sectionTransKey)}
+                      </p>
+                      <p className="text-xs text-ink-500 mt-0.5">
                         {itemCount} {itemCount === 1 ? t("document") : t("documents")}
                       </p>
                     </div>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Right Content Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Section Header */}
+            <div className="p-4 sm:p-6 border-b border-border-200 bg-surface-000">
+              <div className="flex items-start gap-3 min-w-0">
+                <span className="text-3xl">{SECTION_ICONS[selectedSection]}</span>
+                <div className="min-w-0">
+                  <h3 className="text-xl font-bold text-ink-900">{t(transKey)}</h3>
+                  <p className="text-sm text-ink-600 mt-1">{t(transKey + "Desc")}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              onChange={handleFileUpload}
+              className="hidden"
+              accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+            />
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+              {/* Summary/Description Section - First */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
+                    {selectedSection === "case_information" ? "Case Description" : "Details"}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    {editedSummary && (
+                      <button
+                        onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                          isMarkdownPreview
+                            ? "bg-primary-100 text-primary-700"
+                            : "bg-surface-100 text-ink-600 hover:bg-surface-200"
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {isMarkdownPreview ? "Edit" : "Preview"}
+                      </button>
+                    )}
+                    {isGeneratingSummary && (
+                      <span className="px-3 py-1.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-lg flex items-center gap-1.5">
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Extracting...
+                      </span>
+                    )}
                   </div>
-                </button>
-              );
-            })}
+                </div>
+
+                {isMarkdownPreview && editedSummary ? (
+                  <div className="p-4 bg-surface-50 rounded-lg border border-border-200 min-h-[150px] max-h-[300px] overflow-y-auto">
+                    <MarkdownRenderer content={editedSummary} />
+                  </div>
+                ) : (
+                  <textarea
+                    value={editedSummary}
+                    onChange={(e) => setEditedSummary(e.target.value)}
+                    className="w-full min-h-[150px] p-4 border border-border-300 rounded-lg resize-y text-sm text-ink-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder={
+                      selectedSection === "case_information"
+                        ? "Enter case description or extract from uploaded documents..."
+                        : "Extract information from documents or add manually..."
+                    }
+                  />
+                )}
+              </div>
+
+              {/* Files Section - After Description */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
+                    Documents ({currentFiles.length})
+                  </h4>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="px-3 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isUploading ? (
+                      <>
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Upload
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Uploading State Banner */}
+                {isUploading && (
+                  <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-3 flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-primary-900">Uploading documents...</p>
+                      <p className="text-xs text-primary-700">Please wait while your files are being uploaded</p>
+                    </div>
+                  </div>
+                )}
+
+                {currentFiles.length === 0 && !isUploading && (
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="w-full border-2 border-dashed border-border-300 rounded-lg p-6 text-center hover:border-primary-400 hover:bg-primary-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                    </div>
+                    <p className="text-ink-700 font-medium text-sm mb-1">Click to upload documents</p>
+                    <p className="text-xs text-ink-500">PDF, DOC, DOCX, TXT, JPG, PNG supported</p>
+                  </button>
+                )}
+
+                {currentFiles.length > 0 && (
+                  <div className="space-y-2">
+                    {currentFiles
+                      .slice(0, showAllDocuments ? undefined : 2)
+                      .map((file) => {
+                        const categoryInfo = CATEGORY_LABELS[selectedSection];
+                        return (
+                          <div
+                            key={file.id}
+                            className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors group"
+                          >
+                            <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
+                              <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo?.color || "primary")}`}>
+                                <span>{categoryInfo?.icon}</span>
+                                <span>{categoryInfo?.label}</span>
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteFile(file.address || "", file.name)}
+                              className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                              title="Delete file"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    
+                    {/* Show More/Less Button */}
+                    {currentFiles.length > 2 && (
+                      <button
+                        onClick={() => setShowAllDocuments(!showAllDocuments)}
+                        className="w-full py-2 px-3 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                      >
+                        {showAllDocuments ? (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                            </svg>
+                            Show Less
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                            Show {currentFiles.length - 2} More
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+          {/* Footer */}
+          <div className="p-4 sm:p-6 border-t border-border-200 bg-surface-50">
+            <div className="flex justify-end">
+              <button
+                onClick={handleSaveSection}
+                disabled={isSaving || isUploading || isGeneratingSummary}
+                className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </>
+                ) : isUploading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Uploading...
+                  </>
+                ) : isGeneratingSummary ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Modals */}
-      {openModal ? (
-        <FileUploadModal
-          isOpen={true}
-          onClose={() => setOpenModal(null)}
-          title={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").title}
-          description={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").description}
-          icon={getModalContent(UI_TO_DB_MAP[openModal] || "case_information").icon}
-          summaryText={getSectionData(UI_TO_DB_MAP[openModal] || "case_information")?.summary || ""}
-          initialFiles={getInitialFilesForSection(UI_TO_DB_MAP[openModal] || "case_information")}
-          summaryGenerated={Boolean(getSectionData(UI_TO_DB_MAP[openModal] || "case_information")?.summaryGenerated)}
-          onFilesUpdate={() => { }}
-          onSummaryGenerated={() => { }}
-          caseId={caseId}
-          sectionName={UI_TO_DB_MAP[openModal] || "case_information"}
-          onSave={async (data) => {
-            await handleSaveSectionData(openModal, data);
-            setOpenModal(null);
-          }}
-          caseTitle={caseTitle}
-          caseDescription={caseDescription}
-          onCaseDetailsUpdate={async (title, description) => {
-            await handleSaveHeader(title, description);
-          }}
-          isCaseInformation={openModal === "case-info"}
-          onFileUploadSuccess={fetchCaseDetails}
-          onDeleteFile={async (fileAddress, fileName) => {
-            const dbKey = UI_TO_DB_MAP[openModal] || "case_information";
-            await handleDeleteFile(dbKey, fileAddress, fileName);
-          }}
-        />
-      ) : null}
+      </div>
     </div>
   );
 }

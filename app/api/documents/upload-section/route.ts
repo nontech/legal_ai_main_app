@@ -153,6 +153,9 @@ export async function POST(request: Request) {
             data: {
                 files: newFiles,
                 section,
+                // Include raw arrays for backward compatibility with different client expectations
+                file_names: newFiles.map((f: { name: string }) => f.name),
+                file_addresses: newFiles.map((f: { address: string }) => f.address),
             },
         });
     } catch (error) {
