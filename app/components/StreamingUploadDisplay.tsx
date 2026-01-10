@@ -103,10 +103,14 @@ export default function StreamingUploadDisplay({
   const startUploadForAllFiles = async (filesToUpload: Array<{ file: File; fileId: string; category?: string }>) => {
     try {
       // Upload all files at once (classification happens automatically in backend)
+      // Use indexed keys for IE compatibility (IE has bugs with multiple files on same key)
       const formData = new FormData();
-      filesToUpload.forEach(({ file }) => {
-        formData.append("files", file);
+      filesToUpload.forEach(({ file }, index) => {
+        formData.append(`files`, file, file.name);
+        // Also append with indexed key for IE compatibility
+        formData.append(`file_${index}`, file, file.name);
       });
+      formData.append("file_count", String(filesToUpload.length));
       formData.append("user_id", "test-user");
       formData.append("case_id", caseId || "test-case");
       formData.append("tenant_id", "default-tenant");

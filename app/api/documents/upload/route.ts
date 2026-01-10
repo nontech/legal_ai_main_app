@@ -55,7 +55,28 @@ const getExistingCaseDetails = async (caseId: string) => {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const files = formData.getAll("files") as File[];
+    
+    // Get files from standard "files" key
+    let files = formData.getAll("files") as File[];
+    
+    // IE compatibility: also check for indexed keys (file_0, file_1, etc.)
+    // This handles cases where IE doesn't properly send multiple files with same key
+    const fileCount = formData.get("file_count");
+    if (fileCount) {
+      const count = parseInt(fileCount as string, 10);
+      const indexedFiles: File[] = [];
+      for (let i = 0; i < count; i++) {
+        const file = formData.get(`file_${i}`) as File | null;
+        if (file && file.name) {
+          indexedFiles.push(file);
+        }
+      }
+      // Use indexed files if we got more files that way (IE fallback)
+      if (indexedFiles.length > files.length) {
+        files = indexedFiles;
+      }
+    }
+    
     const userId = formData.get("user_id") as string || "test-user";
     const caseId = formData.get("case_id") as string || "test-case";
     const tenantId = formData.get("tenant_id") as string || "default-tenant";
