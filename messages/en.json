@@ -566,7 +566,7 @@
     },
     "jurisdiction": {
       "title": "Jurisdiction",
-      "stepTitle": "Step 1: Jurisdiction",
+      "stepTitle": "Select Jurisdiction",
       "description": "Specify where your case will be heard",
       "whereHeard": "Where your case will be heard",
       "country": "Country",
