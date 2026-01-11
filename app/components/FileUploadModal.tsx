@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 interface UploadedFile {
@@ -96,6 +97,7 @@ export default function FileUploadModal({
 
   const [uploadingFileIds, setUploadingFileIds] = useState<Set<string>>(new Set());
   const fileObjectsMap = useRef<Map<string, File>>(new Map());
+  const locale = useLocale();
 
   // Update local state when initialFiles or summaryText changes
   useEffect(() => {
@@ -448,6 +450,7 @@ export default function FileUploadModal({
       formData.append("section", sectionName);
       formData.append("case_id", caseId);
       formData.append("files", actualFile);
+      formData.append("language_code", locale);
 
       const response = await fetch("/api/documents/upload-section", {
         method: "POST",

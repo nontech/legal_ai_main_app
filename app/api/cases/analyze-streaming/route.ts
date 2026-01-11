@@ -6,7 +6,7 @@ export async function POST(
     request: NextRequest
 ): Promise<NextResponse> {
     try {
-        const { caseId } = await request.json();
+        const { caseId, language_code = "en" } = await request.json();
 
         if (!caseId) {
             return NextResponse.json(
@@ -82,6 +82,7 @@ export async function POST(
                 police_report_summary: policeReportSummary || null,
                 weaknesses_summary: weaknessesSummary || null,
             },
+            language_code,
         };
 
         console.log(

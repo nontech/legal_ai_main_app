@@ -80,6 +80,7 @@ export async function POST(request: Request) {
     const userId = formData.get("user_id") as string || "test-user";
     const caseId = formData.get("case_id") as string || "test-case";
     const tenantId = formData.get("tenant_id") as string || "default-tenant";
+    const languageCode = formData.get("language_code") as string || "en";
 
     // Validate inputs
     if (!files || files.length === 0) {
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
     externalFormData.append("user_id", userId);
     externalFormData.append("case_id", caseId);
     externalFormData.append("tenant_id", tenantId);
+    externalFormData.append("language_code", languageCode);
 
     // Call external upload API
     const response = await fetch(

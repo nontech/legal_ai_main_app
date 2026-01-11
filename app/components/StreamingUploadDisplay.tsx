@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useLocale } from "next-intl";
 
 interface UploadEvent {
   type: "status" | "complete" | "error" | "warning";
@@ -83,6 +84,7 @@ export default function StreamingUploadDisplay({
   const streamStartedRef = useRef(false);
   const lastResultRef = useRef<any>(null);
   const categoryResultsRef = useRef<Record<string, any>>({}); // Store results by category
+  const locale = useLocale();
 
   useEffect(() => {
     if (!isOpen || files.length === 0) {
@@ -114,6 +116,7 @@ export default function StreamingUploadDisplay({
       formData.append("user_id", "test-user");
       formData.append("case_id", caseId || "test-case");
       formData.append("tenant_id", "default-tenant");
+      formData.append("language_code", locale);
 
       const decoder = new TextDecoder();
       const globalTotalFiles = filesToUpload.length;

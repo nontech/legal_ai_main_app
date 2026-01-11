@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 // Hook for typing animation
 function useTypingAnimation(text: string, speed: number = 30) {
@@ -244,6 +244,7 @@ export default function StreamingAnalysisDisplay({
     onClose,
 }: StreamingAnalysisDisplayProps) {
     const t = useTranslations("caseAnalysis.streamingAnalysis");
+    const locale = useLocale();
     const [groupedSteps, setGroupedSteps] = useState<Map<string, GroupedStep>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -407,7 +408,7 @@ export default function StreamingAnalysisDisplay({
                 const response = await fetch("/api/cases/analyze-streaming", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ caseId }),
+                    body: JSON.stringify({ caseId, language_code: locale }),
                 });
 
                 if (!response.ok) {

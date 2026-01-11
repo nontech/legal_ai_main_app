@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseServer";
 export async function POST(request: NextRequest): Promise<Response> {
     try {
         const body = await request.json();
-        const { caseId, case_analysis, case_info } = body;
+        const { caseId, case_analysis, case_info, language_code = "en" } = body;
 
         if (!caseId || !case_analysis || !case_info) {
             return new Response(
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                 body: JSON.stringify({
                     case_analysis,
                     case_info,
+                    language_code,
                 }),
             }
         );

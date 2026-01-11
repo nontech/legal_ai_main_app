@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 interface GamePlanEvent {
     type: "status" | "reasoning" | "result" | "complete" | "error" | "message";
@@ -53,6 +53,7 @@ export default function StreamingGamePlanDisplay({
     onClose,
 }: StreamingGamePlanDisplayProps) {
     const t = useTranslations("caseAnalysis.streaming");
+    const locale = useLocale();
     const [events, setEvents] = useState<GamePlanEvent[]>([]);
     const [progress, setProgress] = useState(0);
     const [allComplete, setAllComplete] = useState(false);
@@ -86,6 +87,7 @@ export default function StreamingGamePlanDisplay({
                     caseId,
                     case_analysis,
                     case_info,
+                    language_code: locale,
                 }),
             });
 

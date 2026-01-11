@@ -21,6 +21,7 @@ export async function POST(request: Request) {
         const files = formData.getAll("files") as File[];
         const section = formData.get("section") as string;
         const caseId = formData.get("case_id") as string;
+        const language = formData.get("language_code") as string || "en";
 
         console.log("formData", formData);
 
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
         externalFormData.append("file_category", section);
         externalFormData.append("user_id", userRes.user.id);
         externalFormData.append("case_id", caseId);
+        externalFormData.append("language_code", language);
 
         // Call external upload API
         const response = await fetch(

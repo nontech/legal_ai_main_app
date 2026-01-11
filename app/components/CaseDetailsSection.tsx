@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
 
 interface CaseDetailsSectionProps {
@@ -97,6 +97,7 @@ export default function CaseDetailsSection({
   onCompletionChange,
 }: CaseDetailsSectionProps) {
   const t = useTranslations("caseAnalysis.caseDetails");
+  const locale = useLocale();
   const [selectedSection, setSelectedSection] = useState<string>("case_information");
   const [caseDescription, setCaseDescription] = useState<string>("");
   const [editedDescription, setEditedDescription] = useState<string>("");
@@ -269,6 +270,7 @@ export default function CaseDetailsSection({
         formData.append("section", selectedSection);
         formData.append("case_id", caseId);
         formData.append("files", file);
+        formData.append("language_code", locale);
 
         const response = await fetch("/api/documents/upload-section", {
           method: "POST",
