@@ -948,7 +948,7 @@ export default function JurisdictionSection({
           </div>
         ) : (
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-ink-900 mb-2">
+            <h2 className="text-xl sm:text-2xl font-bold text-ink-900 mb-2">
               {t("title")}
             </h2>
             <p className="text-ink-600">{t("description")}</p>

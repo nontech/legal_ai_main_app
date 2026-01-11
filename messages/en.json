@@ -598,7 +598,7 @@
       "selectDescription": "Choose the fundamental nature of your legal case to ensure accurate analysis and applicable legal standards.",
       "selectionConfirmed": "Case Type Selection Confirmed",
       "selectionConfirmedDesc": "You have selected {type}. The analysis will apply the appropriate legal standards and burden of proof for this case type.",
-      "stepTitle": "Step 2: Case Type",
+      "stepTitle": "Select Case Type",
       "na": "N/A"
     },
     "role": {
@@ -606,7 +606,7 @@
       "selectDescription": "Your role determines the legal strategy, burden of proof, and analysis perspective for this case.",
       "selectionConfirmed": "Role Selection Confirmed",
       "selectionConfirmedDesc": "You have selected {role}. The analysis will be tailored to your strategic position and legal burden in this case.",
-      "stepTitle": "Step 3: Your Role",
+      "stepTitle": "Select Your Role",
       "positionDesc": "Your position in this case"
     },
     "charges": {
@@ -637,7 +637,7 @@
     },
     "caseDetails": {
       "title": "Case Details",
-      "stepTitle": "Step 4: Case Information",
+      "stepTitle": "Case Information",
       "description": "Manage and organize all case information and supporting documents",
       "sectionsCompleted": "Sections Completed",
       "caseInformation": "Case Information",

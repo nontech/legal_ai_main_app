@@ -107,10 +107,20 @@ const DEFAULT_JUDGES: Judge[] = [
   },
 ];
 
-export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }: { caseId?: string; onSaveSuccess?: () => void; jurisdictionId?: string }) {
+export default function JudgeSelection({
+  caseId,
+  onSaveSuccess,
+  jurisdictionId,
+}: {
+  caseId?: string;
+  onSaveSuccess?: () => void;
+  jurisdictionId?: string;
+}) {
   const t = useTranslations("caseAnalysis.judge");
   const [judges, setJudges] = useState<Judge[]>(DEFAULT_JUDGES);
-  const [selectedJudge, setSelectedJudge] = useState<string | null>(null);
+  const [selectedJudge, setSelectedJudge] = useState<string | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFetchingJudges, setIsFetchingJudges] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,24 +135,49 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
     const fetchJudgesFromAPI = async () => {
       try {
         setIsFetchingJudges(true);
-        const res = await fetch(`/api/admin/judges?jurisdiction_id=${jurisdictionId}`);
+        const res = await fetch(
+          `/api/admin/judges?jurisdiction_id=${jurisdictionId}`
+        );
         const json = await res.json();
 
         if (json.ok && json.data && Array.isArray(json.data)) {
           // Transform API response to Judge format
-          const apiJudges = json.data.map((judgeInfo: any, index: number) => ({
-            id: judgeInfo.id || `judge-${index}`,
-            name: judgeInfo.name || "",
-            experience: judgeInfo.experience || 0,
-            background: judgeInfo.background || "",
-            leaningLabel: judgeInfo.leaningLabel || judgeInfo.leaning_label || "Moderate",
-            leaningColor: judgeInfo.leaningColor || judgeInfo.leaning_color || "yellow",
-            temperament: judgeInfo.temperament || "",
-            temperamentDetails: judgeInfo.temperamentDetails || judgeInfo.temperament_details || [],
-            criminalCases: judgeInfo.criminalCases || judgeInfo.criminal_cases || { conviction: 0, dismissal: 0, pleaDeals: 0 },
-            civilCases: judgeInfo.civilCases || judgeInfo.civil_cases || { plaintiffWins: 0, defendantWins: 0 },
-            notablePatterns: judgeInfo.notablePatterns || judgeInfo.notable_patterns || [],
-          }));
+          const apiJudges = json.data.map(
+            (judgeInfo: any, index: number) => ({
+              id: judgeInfo.id || `judge-${index}`,
+              name: judgeInfo.name || "",
+              experience: judgeInfo.experience || 0,
+              background: judgeInfo.background || "",
+              leaningLabel:
+                judgeInfo.leaningLabel ||
+                judgeInfo.leaning_label ||
+                "Moderate",
+              leaningColor:
+                judgeInfo.leaningColor ||
+                judgeInfo.leaning_color ||
+                "yellow",
+              temperament: judgeInfo.temperament || "",
+              temperamentDetails:
+                judgeInfo.temperamentDetails ||
+                judgeInfo.temperament_details ||
+                [],
+              criminalCases: judgeInfo.criminalCases ||
+                judgeInfo.criminal_cases || {
+                  conviction: 0,
+                  dismissal: 0,
+                  pleaDeals: 0,
+                },
+              civilCases: judgeInfo.civilCases ||
+                judgeInfo.civil_cases || {
+                  plaintiffWins: 0,
+                  defendantWins: 0,
+                },
+              notablePatterns:
+                judgeInfo.notablePatterns ||
+                judgeInfo.notable_patterns ||
+                [],
+            })
+          );
           setJudges(apiJudges);
         } else {
           setJudges(DEFAULT_JUDGES);
@@ -218,50 +253,6 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
   return (
     <>
       <div className="space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
-          <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              {t("title")}
-            </h2>
-            <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              {t("description")}
-            </p>
-          </div>
-        </div>
-
-        {/* Summary Card */}
-        {selectedJudge && (
-          <div className="bg-highlight-200 rounded-lg border border-transparent p-3 sm:p-6">
-            <div className="flex items-start gap-2 sm:gap-3">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div>
-                <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                  {t("confirmedTitle")}
-                </h4>
-                <p className="text-ink-600 text-xs sm:text-sm">
-                  {t.rich("confirmedDesc", {
-                    name: selectedJudgeData?.name || "",
-                    font: (chunks) => <span className="font-semibold">{chunks}</span>
-                  })}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Compact Display with Button */}
         <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
           {!selectedJudgeData ? (
@@ -331,7 +322,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                     {selectedJudgeData.name}
                   </p>
                   <p className="text-sm text-ink-600">
-                    {t("experience", { years: selectedJudgeData.experience })}
+                    {t("experience", {
+                      years: selectedJudgeData.experience,
+                    })}
                   </p>
                 </div>
               </div>
@@ -345,6 +338,40 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
             </div>
           )}
         </div>
+
+        {/* Summary Card */}
+        {selectedJudge && (
+          <div className="bg-highlight-200 rounded-lg border border-transparent p-3 sm:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
+                  {t("confirmedTitle")}
+                </h4>
+                <p className="text-ink-600 text-xs sm:text-sm">
+                  {t.rich("confirmedDesc", {
+                    name: selectedJudgeData?.name || "",
+                    font: (chunks) => (
+                      <span className="font-semibold">{chunks}</span>
+                    ),
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -397,10 +424,11 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                     <div
                       key={judge.id}
                       onClick={() => handleJudgeSelect(judge.id)}
-                      className={`bg-surface-000 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-lg ${selectedJudge === judge.id
-                        ? "border-primary-500 ring-2 ring-primary-200"
-                        : "border-border-200 hover:border-primary-300"
-                        }`}
+                      className={`bg-surface-000 rounded-xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-lg ${
+                        selectedJudge === judge.id
+                          ? "border-primary-500 ring-2 ring-primary-200"
+                          : "border-border-200 hover:border-primary-300"
+                      }`}
                     >
                       <div className="p-3 sm:p-6">
                         {/* Judge Header */}
@@ -426,7 +454,10 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                                 {judge.name}
                               </h3>
                               <p className="text-ink-600 mt-1 text-xs sm:text-sm truncate hidden sm:block">
-                                {t("experience", { years: judge.experience })} • {judge.background}
+                                {t("experience", {
+                                  years: judge.experience,
+                                })}{" "}
+                                • {judge.background}
                               </p>
                             </div>
                           </div>
@@ -438,7 +469,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                             <span className="text-sm sm:text-lg">
                               {getLeaningIcon(judge.leaningColor)}
                             </span>
-                            <span className="hidden sm:inline">{judge.leaningLabel}</span>
+                            <span className="hidden sm:inline">
+                              {judge.leaningLabel}
+                            </span>
                           </div>
                         </div>
 
@@ -520,7 +553,9 @@ export default function JudgeSelection({ caseId, onSaveSuccess, jurisdictionId }
                             <div className="pt-2">
                               <div className="inline-block bg-surface-100 px-4 py-2 rounded-lg">
                                 <p className="text-sm font-semibold text-ink-900">
-                                  {t("experience", { years: judge.experience })}
+                                  {t("experience", {
+                                    years: judge.experience,
+                                  })}
                                 </p>
                               </div>
                             </div>

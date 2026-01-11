@@ -566,7 +566,7 @@
     },
     "jurisdiction": {
       "title": "Gerichtsbarkeit",
-      "stepTitle": "Schritt 1: Gerichtsbarkeit",
+      "stepTitle": "Wählen Sie die Gerichtsbarkeit",
       "description": "Geben Sie an, wo Ihr Fall verhandelt wird",
       "whereHeard": "Wo Ihr Fall verhandelt wird",
       "country": "Land",
@@ -598,7 +598,7 @@
       "selectDescription": "Wählen Sie die grundlegende Art Ihres Rechtsfalls, um eine genaue Analyse und anwendbare Rechtsstandards sicherzustellen.",
       "selectionConfirmed": "Auswahl des Falltyps bestätigt",
       "selectionConfirmedDesc": "Sie haben {type} ausgewählt. Die Analyse wendet die entsprechenden Rechtsstandards und Beweislasten für diesen Falltyp an.",
-      "stepTitle": "Schritt 2: Falltyp",
+      "stepTitle": "Wählen Sie den Falltyp",
       "na": "N/A"
     },
     "role": {
@@ -606,7 +606,7 @@
       "selectDescription": "Ihre Rolle bestimmt die rechtliche Strategie, Beweislast und Analyseperspektive für diesen Fall.",
       "selectionConfirmed": "Rollenwahl bestätigt",
       "selectionConfirmedDesc": "Sie haben {role} ausgewählt. Die Analyse wird auf Ihre strategische Position und rechtliche Belastung in diesem Fall zugeschnitten.",
-      "stepTitle": "Schritt 3: Ihre Rolle",
+      "stepTitle": "Wählen Sie Ihre Rolle",
       "positionDesc": "Ihre Position in diesem Fall"
     },
     "charges": {
@@ -637,7 +637,7 @@
     },
     "caseDetails": {
       "title": "Falldetails",
-      "stepTitle": "Schritt 4: Fallinformationen",
+      "stepTitle": "Fallinformationen",
       "description": "Verwalten und organisieren Sie alle Fallinformationen und unterstützenden Dokumente",
       "sectionsCompleted": "Abschnitte abgeschlossen",
       "caseInformation": "Fallinformationen",

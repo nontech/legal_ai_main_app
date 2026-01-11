@@ -12,9 +12,14 @@ interface RoleSelectorProps {
   countryId?: string;
 }
 
-export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
+export default function RoleSelector({
+  caseId,
+  countryId,
+}: RoleSelectorProps) {
   const t = useTranslations("caseAnalysis.role");
-  const [selectedRole, setSelectedRole] = useState<RoleType | null>(null);
+  const [selectedRole, setSelectedRole] = useState<RoleType | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(!!caseId);
 
@@ -84,50 +89,6 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
   return (
     <>
       <div className="space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
-          <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              {t("selectTitle")}
-            </h2>
-            <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              {t("selectDescription")}
-            </p>
-          </div>
-        </div>
-
-        {/* Confirmation Card */}
-        {selectedRoleData && (
-          <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
-            <div className="flex items-start gap-2 sm:gap-3">
-              <svg
-                className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <div>
-                <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                  {t("selectionConfirmed")}
-                </h4>
-                <p className="text-ink-600 text-xs sm:text-sm">
-                  {t.rich("selectionConfirmedDesc", {
-                    role: selectedRoleData.title,
-                    font: (chunks) => <span className="font-semibold">{chunks}</span>
-                  })}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Compact Display with Button */}
         <div className="bg-surface-000 p-3 sm:p-6">
           {isLoading ? (
@@ -149,10 +110,11 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="flex items-start sm:items-center flex-1 min-w-0">
                 <div
-                  className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${selectedRole && selectedRoleData
-                    ? "bg-primary-100 text-primary-600"
-                    : "bg-surface-100 text-ink-500"
-                    }`}
+                  className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-lg mr-2 sm:mr-3 flex-shrink-0 ${
+                    selectedRole && selectedRoleData
+                      ? "bg-primary-100 text-primary-600"
+                      : "bg-surface-100 text-ink-500"
+                  }`}
                 >
                   {selectedRole && selectedRoleData ? (
                     <span className="text-base sm:text-lg flex items-center justify-center">
@@ -187,12 +149,51 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
                 </svg>
               </button>
             </div>
           )}
         </div>
+
+        {/* Confirmation Card */}
+        {selectedRoleData && (
+          <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
+            <div className="flex items-start gap-2 sm:gap-3">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <div>
+                <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
+                  {t("selectionConfirmed")}
+                </h4>
+                <p className="text-ink-600 text-xs sm:text-sm">
+                  {t.rich("selectionConfirmedDesc", {
+                    role: selectedRoleData.title,
+                    font: (chunks) => (
+                      <span className="font-semibold">{chunks}</span>
+                    ),
+                  })}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Modal */}
@@ -234,21 +235,23 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                 {t("selectDescription")}
               </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
                 {/* Defendant Card */}
                 <button
                   onClick={() => handleRoleSelect("defendant")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "defendant"
-                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
+                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${
+                    selectedRole === "defendant"
+                      ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                      : "border-border-200 bg-surface-000 hover:border-primary-300"
+                  }`}
                 >
                   <div className="flex items-start mb-3 sm:mb-4">
                     <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "defendant"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
-                        }`}
+                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${
+                        selectedRole === "defendant"
+                          ? "bg-primary-600 text-white"
+                          : "bg-surface-200 text-ink-500"
+                      }`}
                     >
                       {ROLES.defendant.icon}
                     </div>
@@ -273,7 +276,9 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                             key={index}
                             className="text-sm text-ink-600 flex items-start"
                           >
-                            <span className="text-primary-600 mr-2">•</span>
+                            <span className="text-primary-600 mr-2">
+                              •
+                            </span>
                             <span>{resp}</span>
                           </li>
                         )
@@ -283,7 +288,9 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
 
                   <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
                     <p className="text-sm text-ink-600">
-                      <span className="font-semibold">Strategic Focus:</span>{" "}
+                      <span className="font-semibold">
+                        Strategic Focus:
+                      </span>{" "}
                       {ROLES.defendant.strategicFocus}
                     </p>
                   </div>
@@ -292,17 +299,19 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                 {/* Plaintiff Card */}
                 <button
                   onClick={() => handleRoleSelect("plaintiff")}
-                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${selectedRole === "plaintiff"
-                    ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
-                    : "border-border-200 bg-surface-000 hover:border-primary-300"
-                    }`}
+                  className={`text-left p-3 sm:p-6 rounded-lg border-2 transition-all ${
+                    selectedRole === "plaintiff"
+                      ? "border-primary-500 bg-primary-100 ring-2 ring-primary-200"
+                      : "border-border-200 bg-surface-000 hover:border-primary-300"
+                  }`}
                 >
                   <div className="flex items-start mb-3 sm:mb-4">
                     <div
-                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${selectedRole === "plaintiff"
-                        ? "bg-primary-600 text-white"
-                        : "bg-surface-200 text-ink-500"
-                        }`}
+                      className={`flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full mr-3 sm:mr-4 flex-shrink-0 ${
+                        selectedRole === "plaintiff"
+                          ? "bg-primary-600 text-white"
+                          : "bg-surface-200 text-ink-500"
+                      }`}
                     >
                       {ROLES.plaintiff.icon}
                     </div>
@@ -327,7 +336,9 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                             key={index}
                             className="text-sm text-ink-600 flex items-start"
                           >
-                            <span className="text-primary-600 mr-2">•</span>
+                            <span className="text-primary-600 mr-2">
+                              •
+                            </span>
                             <span>{resp}</span>
                           </li>
                         )
@@ -337,7 +348,9 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
 
                   <div className="pt-3 sm:pt-4 border-t border-border-200 hidden sm:block">
                     <p className="text-sm text-ink-600">
-                      <span className="font-semibold">Strategic Focus:</span>{" "}
+                      <span className="font-semibold">
+                        Strategic Focus:
+                      </span>{" "}
                       {ROLES.plaintiff.strategicFocus}
                     </p>
                   </div>
@@ -350,7 +363,11 @@ export default function RoleSelector({ caseId, countryId }: RoleSelectorProps) {
                   <p className="text-sm text-ink-700">
                     {t.rich("selectionConfirmedDesc", {
                       role: selectedRoleData.title,
-                      font: (chunks) => <span className="font-semibold">{chunks}</span>
+                      font: (chunks) => (
+                        <span className="font-semibold">
+                          {chunks}
+                        </span>
+                      ),
                     })}
                   </p>
                 </div>

@@ -240,7 +240,7 @@ export default function JuryComposition({ caseId, onSaveSuccess, countryId }: { 
       {/* Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
         <div className="text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">
             {t("title")}
           </h2>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto">

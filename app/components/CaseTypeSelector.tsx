@@ -439,51 +439,9 @@ export default function CaseTypeSelector({
   return (
     <>
       <div className="space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-4 sm:p-8">
-          <div className="text-center">
-            <h2 className="text-2xl sm:text-4xl font-bold text-ink-900 mb-2 sm:mb-4">
-              {t("selectTitle")}
-            </h2>
-            <p className="text-sm sm:text-lg text-ink-600 max-w-4xl mx-auto">
-              {t("selectDescription")}
-            </p>
-          </div>
-        </div>
-
-        {/* Confirmation Card */}
-        <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
-          <div className="flex items-start gap-2 sm:gap-3">
-            <svg
-              className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <div>
-              <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
-                {t("selectionConfirmed")}
-              </h4>
-              <p className="text-ink-600 text-xs sm:text-sm">
-                {t.rich("selectionConfirmedDesc", {
-                  type: selectedCaseType?.title || t("na"),
-                  font: (chunks) => <span className="font-semibold">{chunks}</span>
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Selected Case Type Display */}
         <div className="bg-surface-000 p-3 sm:p-6">
-          {(isLoading || isFetchingCaseTypes) ? (
+          {isLoading || isFetchingCaseTypes ? (
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
               <div className="flex items-start sm:items-center flex-1 min-w-0">
                 <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-surface-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0 animate-pulse">
@@ -503,7 +461,9 @@ export default function CaseTypeSelector({
               <div className="flex items-start sm:items-center flex-1 min-w-0">
                 <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
                   <span className="text-xl sm:text-2xl text-primary-600">
-                    {selectedCaseType?.icon ? getEmojiIcon(selectedCaseType.icon) : "⚖️"}
+                    {selectedCaseType?.icon
+                      ? getEmojiIcon(selectedCaseType.icon)
+                      : "⚖️"}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1">
@@ -531,11 +491,48 @@ export default function CaseTypeSelector({
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
                 </svg>
               </button>
             </div>
           )}
+        </div>
+
+        {/* Confirmation Card */}
+        <div className="bg-highlight-200 border border-transparent rounded-lg p-3 sm:p-6">
+          <div className="flex items-start gap-2 sm:gap-3">
+            <svg
+              className="w-5 h-5 sm:w-6 sm:h-6 text-highlight-600 flex-shrink-0 mt-0.5 sm:mt-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <div>
+              <h4 className="font-bold text-ink-900 mb-1 sm:mb-2 text-sm sm:text-base">
+                {t("selectionConfirmed")}
+              </h4>
+              <p className="text-ink-600 text-xs sm:text-sm">
+                {t.rich("selectionConfirmedDesc", {
+                  type: selectedCaseType?.title || t("na"),
+                  font: (chunks) => (
+                    <span className="font-semibold">{chunks}</span>
+                  ),
+                })}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -586,7 +583,10 @@ export default function CaseTypeSelector({
                 {isFetchingCaseTypes ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="p-4 rounded-lg border-2 border-border-200 animate-pulse">
+                      <div
+                        key={i}
+                        className="p-4 rounded-lg border-2 border-border-200 animate-pulse"
+                      >
                         <div className="flex items-start mb-2">
                           <div className="w-8 h-8 bg-surface-200 rounded mr-3"></div>
                           <div className="flex-1">
@@ -608,10 +608,11 @@ export default function CaseTypeSelector({
                       <button
                         key={caseType.id}
                         onClick={() => handleSelectCaseType(caseType)}
-                        className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${selectedCaseType?.id === caseType.id
-                          ? "border-primary-500 bg-primary-100"
-                          : "border-border-200 hover:border-primary-300"
-                          }`}
+                        className={`text-left p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                          selectedCaseType?.id === caseType.id
+                            ? "border-primary-500 bg-primary-100"
+                            : "border-border-200 hover:border-primary-300"
+                        }`}
                       >
                         <div className="flex items-start mb-2">
                           <div className="text-3xl mr-3">
