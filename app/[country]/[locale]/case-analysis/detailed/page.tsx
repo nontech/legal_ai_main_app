@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import Navbar from "@/app/components/Navbar";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
+import CaseTitleHeader from "@/app/components/CaseTitleHeader";
 import JurisdictionSection from "@/app/components/JurisdictionSection";
 import CaseTypeSelector from "@/app/components/CaseTypeSelector";
 import RoleSelector from "@/app/components/RoleSelector";
@@ -33,6 +34,8 @@ function DetailedCaseAnalysisContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const [caseType, setCaseType] = useState<string>("");
+  const [caseTitle, setCaseTitle] = useState<string>("");
+  const [isOwner, setIsOwner] = useState(false);
   const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
 
   // Track completion data for each step (percentage)
@@ -61,6 +64,20 @@ function DetailedCaseAnalysisContent() {
 
       if (json.ok && json.data) {
         const data = json.data;
+
+        // Extract case title from case_details.case_information.caseName
+        const title =
+          data.case_details?.case_information?.caseName || "";
+        setCaseTitle(title);
+
+        // Check ownership
+        const ownershipRes = await fetch(
+          `/api/cases/${caseId}/ownership`
+        );
+        if (ownershipRes.ok) {
+          const ownershipData = await ownershipRes.json();
+          setIsOwner(ownershipData.isOwner || false);
+        }
         const newCompletionData: { [key: number]: number } = {
           0: 0,
           1: 0,
@@ -76,8 +93,14 @@ function DetailedCaseAnalysisContent() {
 
         // Check jurisdiction (step 0)
         // Support both 'court' (from SaveCaseButton) and 'court_name' (from quick analysis)
-        const courtValue = data.jurisdiction?.court || data.jurisdiction?.court_name;
-        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction && courtValue) {
+        const courtValue =
+          data.jurisdiction?.court || data.jurisdiction?.court_name;
+        if (
+          data.jurisdiction &&
+          data.jurisdiction.country &&
+          data.jurisdiction.jurisdiction &&
+          courtValue
+        ) {
           newCompletionData[0] = 100;
         }
 
@@ -93,7 +116,11 @@ function DetailedCaseAnalysisContent() {
         }
 
         // Check charges (step 3)
-        if (data.charges && Array.isArray(data.charges) && data.charges.length > 0) {
+        if (
+          data.charges &&
+          Array.isArray(data.charges) &&
+          data.charges.length > 0
+        ) {
           newCompletionData[3] = 100;
         }
 
@@ -108,7 +135,13 @@ function DetailedCaseAnalysisContent() {
         }
 
         // Check jury (step 6)
-        if (data.jury && data.jury.demographics && data.jury.demographics.length > 0 && data.jury.psychological && data.jury.psychological.length > 0) {
+        if (
+          data.jury &&
+          data.jury.demographics &&
+          data.jury.demographics.length > 0 &&
+          data.jury.psychological &&
+          data.jury.psychological.length > 0
+        ) {
           newCompletionData[6] = 100;
         }
 
@@ -135,27 +168,42 @@ function DetailedCaseAnalysisContent() {
     }
   };
 
-  const handleChargesCompletion = useCallback((isComplete: boolean) => {
-    setCompletionData((prev) => ({
-      ...prev,
-      3: isComplete ? 100 : 0,
-    }));
-  }, []);
+  const handleChargesCompletion = useCallback(
+    (isComplete: boolean) => {
+      setCompletionData((prev) => ({
+        ...prev,
+        3: isComplete ? 100 : 0,
+      }));
+    },
+    []
+  );
 
-  const handleCaseDetailsCompletion = useCallback((percentage: number) => {
-    setCompletionData((prev) => ({
-      ...prev,
-      4: percentage,
-    }));
-  }, []);
+  const handleCaseDetailsCompletion = useCallback(
+    (percentage: number) => {
+      setCompletionData((prev) => ({
+        ...prev,
+        4: percentage,
+      }));
+    },
+    []
+  );
 
-  const isCriminal = !caseType || caseType.toLowerCase() === "criminal";
+  const isCriminal =
+    !caseType || caseType.toLowerCase() === "criminal";
 
   const steps = [
-    { id: "jurisdiction", label: t("steps.jurisdiction"), icon: null },
+    {
+      id: "jurisdiction",
+      label: t("steps.jurisdiction"),
+      icon: null,
+    },
     { id: "case-type", label: t("steps.caseType"), icon: null },
     { id: "role", label: t("steps.role"), icon: null },
-    { id: "charges", label: isCriminal ? t("steps.charges") : t("steps.claims"), icon: null },
+    {
+      id: "charges",
+      label: isCriminal ? t("steps.charges") : t("steps.claims"),
+      icon: null,
+    },
     { id: "case-details", label: t("steps.caseDetails"), icon: null },
     { id: "judge", label: t("steps.judge"), icon: null },
     { id: "jury", label: t("steps.jury"), icon: null },
@@ -167,19 +215,50 @@ function DetailedCaseAnalysisContent() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} onJurisdictionChange={setJurisdictionId} />;
+        return (
+          <JurisdictionSection
+            caseId={caseId}
+            onCountryChange={setCountryId}
+            onJurisdictionChange={setJurisdictionId}
+          />
+        );
       case 1:
-        return <CaseTypeSelector caseId={caseId} countryId={countryId} />;
+        return (
+          <CaseTypeSelector caseId={caseId} countryId={countryId} />
+        );
       case 2:
         return <RoleSelector caseId={caseId} countryId={countryId} />;
       case 3:
-        return <ChargesSection caseId={caseId} onCompletionChange={handleChargesCompletion} />;
+        return (
+          <ChargesSection
+            caseId={caseId}
+            onCompletionChange={handleChargesCompletion}
+          />
+        );
       case 4:
-        return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
+        return (
+          <CaseDetailsSection
+            onModalChange={setIsModalOpen}
+            caseId={caseId}
+            onCompletionChange={handleCaseDetailsCompletion}
+          />
+        );
       case 5:
-        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} jurisdictionId={jurisdictionId} />;
+        return (
+          <JudgeSelection
+            caseId={caseId}
+            onSaveSuccess={fetchCaseCompletion}
+            jurisdictionId={jurisdictionId}
+          />
+        );
       case 6:
-        return <JuryComposition caseId={caseId} countryId={countryId} onSaveSuccess={fetchCaseCompletion} />;
+        return (
+          <JuryComposition
+            caseId={caseId}
+            countryId={countryId}
+            onSaveSuccess={fetchCaseCompletion}
+          />
+        );
       case 7:
         return <ResultsStep />;
       case 8:
@@ -187,13 +266,31 @@ function DetailedCaseAnalysisContent() {
       case 9:
         return <VerdictStep />;
       default:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} />;
+        return (
+          <JurisdictionSection
+            caseId={caseId}
+            onCountryChange={setCountryId}
+          />
+        );
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onPretrialClick={() => setIsPretrialOpen(true)} showPretrialButton={true} />
+      <Navbar
+        onPretrialClick={() => setIsPretrialOpen(true)}
+        showPretrialButton={true}
+      />
+
+      {/* Case Title Header - Show only if caseId exists */}
+      {caseId && (
+        <CaseTitleHeader
+          caseId={caseId}
+          initialTitle={caseTitle}
+          isOwner={isOwner}
+          onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
+        />
+      )}
 
       {/* Mobile Progress Bar - Shown on mobile only */}
       <MobileProgressBar
@@ -204,7 +301,7 @@ function DetailedCaseAnalysisContent() {
       />
 
       {/* Main content area */}
-      <main className="pt-20 md:pt-32 pb-32 px-3 sm:px-4 lg:px-8">
+      <main className="pb-32 pt-6 px-3 sm:px-4 lg:px-8">
         <div className="flex gap-6">
           {/* Main Content */}
           <div className="flex-1 min-w-0">
@@ -215,7 +312,7 @@ function DetailedCaseAnalysisContent() {
 
           {/* Sidebar - Hidden on mobile, visible on md+ */}
           <div className="hidden md:block w-64 flex-shrink-0">
-            <div className="sticky top-32">
+            <div className="sticky top-20">
               <ProgressStepper
                 currentStep={currentStep}
                 onStepChange={setCurrentStep}
@@ -227,7 +324,6 @@ function DetailedCaseAnalysisContent() {
           </div>
         </div>
       </main>
-
 
       {/* Pretrial Process Modal */}
       {isPretrialOpen && (
