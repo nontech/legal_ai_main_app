@@ -120,6 +120,12 @@
       "feature2": "Estimate settlement and risk exposure",
       "feature3": "Decide whether to fight or settle claims"
     },
+    "taxCompliance": {
+      "title": "Assess Substance Compliance Under Tax Law",
+      "feature1": "Analyze company structures for TT exemption substance compliance",
+      "feature2": "Detect weaknesses under Finanzamt scrutiny",
+      "feature3": "Enable informed structuring and documentation decisions"
+    },
     "learnMore": "Learn More",
     "comingSoon": "Coming Soon"
   },

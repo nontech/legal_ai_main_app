@@ -8,7 +8,8 @@ import {
   User,
   Building2,
   GraduationCap,
-  ShieldCheck
+  ShieldCheck,
+  FileCheck
 } from "lucide-react";
 
 interface ProfileCardProps {
@@ -132,6 +133,16 @@ export default function UseCases() {
         t("insurers.feature3"),
       ],
       icon: <ShieldCheck className="w-6 h-6" />,
+      href: "#",
+    },
+    {
+      title: t("taxCompliance.title"),
+      features: [
+        t("taxCompliance.feature1"),
+        t("taxCompliance.feature2"),
+        t("taxCompliance.feature3"),
+      ],
+      icon: <FileCheck className="w-6 h-6" />,
       href: "#",
     },
   ];

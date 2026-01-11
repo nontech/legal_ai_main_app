@@ -120,6 +120,12 @@
             "feature2": "Schätzung der Vergleichsleistung und des Risikopotenzials",
             "feature3": "Entscheiden Sie, ob Sie einen Anspruch abwehren oder vergleichen"
         },
+        "taxCompliance": {
+            "title": "Bewertung der Substanz-Compliance im Steuerrecht",
+            "feature1": "Analyse von Unternehmensstrukturen auf TT-Befreiung Substanz-Compliance",
+            "feature2": "Erkennung von Schwachstellen bei Finanzamt-Prüfungen",
+            "feature3": "Ermöglicht fundierte Strukturierungs- und Dokumentationsentscheidungen"
+        },
         "learnMore": "Mehr erfahren",
         "comingSoon": "Demnächst verfügbar"
     },
