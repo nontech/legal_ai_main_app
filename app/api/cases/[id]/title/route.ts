@@ -60,10 +60,19 @@ export async function PATCH(
         }
 
         // Update the case title in case_details.case_information.caseName
+        // Ensure case_details is treated as an object
+        const existingCaseDetails = (caseData.case_details && typeof caseData.case_details === 'object' && !Array.isArray(caseData.case_details))
+            ? caseData.case_details as Record<string, any>
+            : {};
+        
+        const existingCaseInformation = (existingCaseDetails.case_information && typeof existingCaseDetails.case_information === 'object' && !Array.isArray(existingCaseDetails.case_information))
+            ? existingCaseDetails.case_information as Record<string, any>
+            : {};
+        
         const updatedCaseDetails = {
-            ...caseData.case_details,
+            ...existingCaseDetails,
             case_information: {
-                ...(caseData.case_details?.case_information || {}),
+                ...existingCaseInformation,
                 caseName: title.trim(),
             },
         };
