@@ -792,6 +792,7 @@
       "winProbability": "Win Probability",
       "confidence": "Confidence",
       "steps": {
+        "Initialization": "Initializing",
         "initialization": "Initializing",
         "status": "Initializing",
         "charges_analysis": "Analyzing Charges",

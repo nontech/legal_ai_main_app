@@ -41,10 +41,21 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
           setIsAuthenticated(false);
         } else if (res.ok) {
           setIsAuthenticated(true);
-          // Try to get user info from localStorage or session
-          const userInfo = sessionStorage.getItem("userEmail");
-          if (userInfo) {
-            setUserEmail(userInfo);
+          
+          // Fetch actual user email from server
+          const userRes = await fetch("/api/auth/user");
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            if (userData.email) {
+              setUserEmail(userData.email);
+              sessionStorage.setItem("userEmail", userData.email);
+            }
+          } else {
+            // Fallback to sessionStorage if API fails
+            const cachedEmail = sessionStorage.getItem("userEmail");
+            if (cachedEmail) {
+              setUserEmail(cachedEmail);
+            }
           }
         }
       } catch {

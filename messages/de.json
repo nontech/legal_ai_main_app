@@ -792,6 +792,7 @@
       "winProbability": "Gewinnwahrscheinlichkeit",
       "confidence": "Konfidenz",
       "steps": {
+        "Initialization": "Initialisierung",
         "initialization": "Initialisierung",
         "status": "Initialisierung",
         "charges_analysis": "Analysiere Anklagepunkte/Ansprüche",

@@ -40,6 +40,9 @@ function SignInContent() {
                 sessionStorage.setItem("userEmail", json.email);
             }
 
+            // Small delay to ensure sessionStorage write completes
+            await new Promise(resolve => setTimeout(resolve, 50));
+
             // Redirect to dashboard or case page using full page reload
             // This ensures Navbar and other components re-fetch auth status
             if (caseId) {

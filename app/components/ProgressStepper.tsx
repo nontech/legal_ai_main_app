@@ -29,6 +29,7 @@ export default function ProgressStepper({
   const t = useTranslations("caseAnalysis");
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCaseOwner, setIsCaseOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [canScrollUp, setCanScrollUp] = useState(false);
@@ -37,19 +38,44 @@ export default function ProgressStepper({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check authentication status
-    const checkAuth = async () => {
+    // Check authentication status and case ownership
+    const checkAuthAndOwnership = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch("/api/cases");
-        setIsAuthenticated(res.status !== 401);
+        // Check authentication
+        const authRes = await fetch("/api/cases");
+        const isAuth = authRes.status !== 401;
+        setIsAuthenticated(isAuth);
+        
+        // Check case ownership if authenticated and caseId provided
+        if (isAuth && caseId) {
+          try {
+            const ownershipRes = await fetch(`/api/cases/${caseId}/ownership`);
+            if (ownershipRes.ok) {
+              const { isOwner } = await ownershipRes.json();
+              console.log(`[ProgressStepper] Ownership check for case ${caseId}: isOwner=${isOwner}`);
+              setIsCaseOwner(isOwner);
+            } else {
+              console.log(`[ProgressStepper] Ownership check failed with status: ${ownershipRes.status}`);
+              setIsCaseOwner(false);
+            }
+          } catch (err) {
+            console.error(`[ProgressStepper] Ownership check error:`, err);
+            setIsCaseOwner(false);
+          }
+        } else {
+          // No caseId means we're not on a case page, unlock all steps for authenticated users
+          setIsCaseOwner(isAuth);
+        }
       } catch {
         setIsAuthenticated(false);
+        setIsCaseOwner(false);
       } finally {
         setIsLoading(false);
       }
     };
-    checkAuth();
-  }, []);
+    checkAuthAndOwnership();
+  }, [caseId]);
 
   useEffect(() => {
     // Handle scroll detection
@@ -73,7 +99,7 @@ export default function ProgressStepper({
       element.addEventListener("scroll", handleScroll);
       return () => element.removeEventListener("scroll", handleScroll);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isCaseOwner]);
 
   const steps: Step[] = [
     {
@@ -301,8 +327,8 @@ export default function ProgressStepper({
     );
   }
 
-  // For unauthenticated users, show all steps but lock them except Results
-  if (!isAuthenticated) {
+  // For unauthenticated users or users who don't own the case, show all steps but lock them except Results
+  if (!isAuthenticated || (isAuthenticated && caseId && !isCaseOwner)) {
     return (
       <>
         <div className="fixed right-0 top-16 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-30 shadow-lg flex flex-col">
