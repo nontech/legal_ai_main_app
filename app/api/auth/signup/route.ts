@@ -37,13 +37,15 @@ export async function POST(request: Request) {
         }
 
         // If caseId provided, link case to user using admin client
+        // Only claim ownership if the case is unowned (owner_id is null)
         if (caseId) {
             try {
                 const adminClient = getSupabaseAdminClient();
                 const { error: updateError } = await adminClient
                     .from("cases")
                     .update({ owner_id: userId })
-                    .eq("id", caseId);
+                    .eq("id", caseId)
+                    .is("owner_id", null);
 
                 if (updateError) {
                     console.error("Error linking case to user:", updateError);
