@@ -6,6 +6,7 @@ interface CaseTitleHeaderProps {
   caseId: string;
   initialTitle: string;
   isOwner: boolean;
+  hideSidebar?: boolean;
   onTitleUpdate?: (newTitle: string) => void;
 }
 
@@ -13,6 +14,7 @@ export default function CaseTitleHeader({
   caseId,
   initialTitle,
   isOwner,
+  hideSidebar = false,
   onTitleUpdate,
 }: CaseTitleHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -164,9 +166,11 @@ export default function CaseTitleHeader({
               </div>
             </div>
           </div>
-          
+
           {/* Spacer for sidebar on desktop - matches sidebar width */}
-          <div className="hidden md:block w-64 flex-shrink-0"></div>
+          {!hideSidebar && (
+            <div className="hidden md:block w-64 flex-shrink-0"></div>
+          )}
         </div>
       </div>
     </div>

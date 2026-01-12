@@ -17,7 +17,7 @@ interface AnalysisResult {
   precedent_cases?: any[];
 }
 
-export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlanOnly?: boolean }) {
+export default function ResultsStep({ showGamePlanOnly = false, isOwner = false }: { showGamePlanOnly?: boolean; isOwner?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const caseId = searchParams.get("caseId");
@@ -409,7 +409,7 @@ export default function ResultsStep({ showGamePlanOnly = false }: { showGamePlan
             </div>
           </div>
           <div className="flex gap-2 flex-wrap justify-start lg:justify-end">
-            {isAuthenticated && (
+            {isAuthenticated && isOwner && (
               <button
                 onClick={handleRegenerate}
                 disabled={isRegenerating}
