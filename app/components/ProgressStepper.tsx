@@ -46,7 +46,7 @@ export default function ProgressStepper({
         const authRes = await fetch("/api/cases");
         const isAuth = authRes.status !== 401;
         setIsAuthenticated(isAuth);
-        
+
         // Check case ownership if authenticated and caseId provided
         if (isAuth && caseId) {
           try {
@@ -320,8 +320,9 @@ export default function ProgressStepper({
   if (isLoading) {
     return (
       <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 z-30 shadow-lg">
-        <div className="px-5 py-6 pt-10">
-          <div className="h-40 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="px-5 py-6 pt-10 flex flex-col items-center justify-center h-full">
+          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading</p>
         </div>
       </div>
     );

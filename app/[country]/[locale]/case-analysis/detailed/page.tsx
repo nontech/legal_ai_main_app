@@ -399,7 +399,12 @@ function DetailedCaseAnalysisContent() {
 export default function DetailedCaseAnalysis() {
   const t = useTranslations("caseAnalysis");
   return (
-    <Suspense fallback={<div>{t("loading")}</div>}>
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600 font-medium text-lg">{t("loading")}</p>
+      </div>
+    }>
       <DetailedCaseAnalysisContent />
     </Suspense>
   );
