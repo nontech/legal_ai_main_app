@@ -6,6 +6,7 @@ interface CaseTitleHeaderProps {
   caseId: string;
   initialTitle: string;
   isOwner: boolean;
+  hideSidebar?: boolean;
   onTitleUpdate?: (newTitle: string) => void;
 }
 
@@ -13,6 +14,7 @@ export default function CaseTitleHeader({
   caseId,
   initialTitle,
   isOwner,
+  hideSidebar = false,
   onTitleUpdate,
 }: CaseTitleHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -66,7 +68,9 @@ export default function CaseTitleHeader({
 
   // Determine if we're in loading state (no title and initialTitle is empty)
   const isLoading = !title && !initialTitle;
-  const displayTitle = isLoading ? "Loading Title..." : (title || "Untitled Case");
+  const displayTitle = isLoading
+    ? "Loading Title..."
+    : title || "Untitled Case";
 
   return (
     <div className="w-full mt-16 sm:mt-20">
@@ -84,7 +88,7 @@ export default function CaseTitleHeader({
                         type="text"
                         value={tempTitle}
                         onChange={(e) => setTempTitle(e.target.value)}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg sm:text-xl font-semibold bg-white text-center"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg sm:text-xl font-semibold bg-white text-center text-gray-900"
                         placeholder="Enter case title"
                         autoFocus
                         onKeyDown={(e) => {
@@ -134,7 +138,11 @@ export default function CaseTitleHeader({
                     </div>
                   ) : (
                     <div className="flex items-center justify-center gap-3 relative w-full">
-                      <h1 className={`text-xl sm:text-2xl font-bold text-gray-900 ${isLoading ? 'text-gray-400' : ''}`}>
+                      <h1
+                        className={`text-xl sm:text-2xl font-bold text-gray-900 ${
+                          isLoading ? "text-gray-400" : ""
+                        }`}
+                      >
                         {displayTitle}
                       </h1>
                       {isOwner && !isLoading && (
@@ -164,9 +172,11 @@ export default function CaseTitleHeader({
               </div>
             </div>
           </div>
-          
+
           {/* Spacer for sidebar on desktop - matches sidebar width */}
-          <div className="hidden md:block w-64 flex-shrink-0"></div>
+          {!hideSidebar && (
+            <div className="hidden md:block w-64 flex-shrink-0"></div>
+          )}
         </div>
       </div>
     </div>

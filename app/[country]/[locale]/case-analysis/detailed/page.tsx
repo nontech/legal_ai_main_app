@@ -36,6 +36,8 @@ function DetailedCaseAnalysisContent() {
   const [caseType, setCaseType] = useState<string>("");
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [isOwner, setIsOwner] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [ownershipLoading, setOwnershipLoading] = useState(true);
   const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
 
   // Track completion data for each step (percentage)
@@ -70,14 +72,19 @@ function DetailedCaseAnalysisContent() {
           data.case_details?.case_information?.caseName || "";
         setCaseTitle(title);
 
-        // Check ownership
+        // Check ownership and authentication
         const ownershipRes = await fetch(
           `/api/cases/${caseId}/ownership`
         );
         if (ownershipRes.ok) {
           const ownershipData = await ownershipRes.json();
           setIsOwner(ownershipData.isOwner || false);
+          setIsAuthenticated(true);
+        } else if (ownershipRes.status === 401) {
+          setIsAuthenticated(false);
+          setIsOwner(false);
         }
+        setOwnershipLoading(false);
         const newCompletionData: { [key: number]: number } = {
           0: 0,
           1: 0,
@@ -260,9 +267,9 @@ function DetailedCaseAnalysisContent() {
           />
         );
       case 7:
-        return <ResultsStep />;
+        return <ResultsStep isOwner={isOwner} />;
       case 8:
-        return <ResultsStep showGamePlanOnly={true} />;
+        return <ResultsStep showGamePlanOnly={true} isOwner={isOwner} />;
       case 9:
         return <VerdictStep />;
       default:
@@ -288,6 +295,7 @@ function DetailedCaseAnalysisContent() {
           caseId={caseId}
           initialTitle={caseTitle}
           isOwner={isOwner}
+          hideSidebar={ownershipLoading || (isAuthenticated && !isOwner)}
           onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
         />
       )}
@@ -302,26 +310,28 @@ function DetailedCaseAnalysisContent() {
 
       {/* Main content area */}
       <main className="pb-32 pt-6 px-3 sm:px-4 lg:px-8">
-        <div className="flex gap-6">
+        <div className={`flex ${!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? 'gap-6' : 'justify-center'}`}>
           {/* Main Content */}
-          <div className="flex-1 min-w-0">
+          <div className={!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? "flex-1 min-w-0" : "w-full"}>
             <div className="max-w-4xl mx-auto w-full">
               {renderStepContent()}
             </div>
           </div>
 
-          {/* Sidebar - Hidden on mobile, visible on md+ */}
-          <div className="hidden md:block w-64 flex-shrink-0">
-            <div className="sticky top-20">
-              <ProgressStepper
-                currentStep={currentStep}
-                onStepChange={setCurrentStep}
-                completionData={completionData}
-                caseId={caseId || undefined}
-                caseType={caseType}
-              />
+          {/* Sidebar - Hidden on mobile, visible on md+, hidden for authenticated non-owners, hidden while loading ownership for shared cases */}
+          {!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) && (
+            <div className="hidden md:block w-64 flex-shrink-0">
+              <div className="sticky top-20">
+                <ProgressStepper
+                  currentStep={currentStep}
+                  onStepChange={setCurrentStep}
+                  completionData={completionData}
+                  caseId={caseId || undefined}
+                  caseType={caseType}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
 
@@ -399,7 +409,12 @@ function DetailedCaseAnalysisContent() {
 export default function DetailedCaseAnalysis() {
   const t = useTranslations("caseAnalysis");
   return (
-    <Suspense fallback={<div>{t("loading")}</div>}>
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+        <p className="mt-4 text-gray-600 font-medium text-lg">{t("loading")}</p>
+      </div>
+    }>
       <DetailedCaseAnalysisContent />
     </Suspense>
   );

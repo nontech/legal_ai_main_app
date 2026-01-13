@@ -24,6 +24,7 @@
     "lucide-react": "^0.548.0",
     "next": "15.5.9",
     "next-intl": "^4.7.0",
+    "puppeteer": "^24.35.0",
     "react": "19.1.2",
     "react-dom": "19.1.2",
     "react-markdown": "^10.1.0",
