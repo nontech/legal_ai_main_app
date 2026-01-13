@@ -57,6 +57,7 @@ export default function ResultsStep({
   const [showOutcomeReasoning, setShowOutcomeReasoning] =
     useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
 
   useEffect(() => {
     // Check authentication status
@@ -143,6 +144,57 @@ export default function ResultsStep({
     setIsGamePlanStreamingOpen(false);
     // Refresh the data from the database
     fetchResults(false);
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!caseId) {
+      alert("Case ID not found");
+      return;
+    }
+
+    setIsDownloadingPDF(true);
+
+    try {
+      const response = await fetch(`/api/cases/${caseId}/pdf`);
+
+      if (!response.ok) {
+        throw new Error("Failed to generate PDF");
+      }
+
+      // Get the PDF blob
+      const blob = await response.blob();
+
+      // Get filename from Content-Disposition header or use default
+      const contentDisposition = response.headers.get(
+        "Content-Disposition"
+      );
+      let filename = "Case_Analysis.pdf";
+
+      if (contentDisposition) {
+        const filenameMatch =
+          contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      // Create a download link and trigger it
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      alert("Failed to download PDF. Please try again.");
+    } finally {
+      setIsDownloadingPDF(false);
+    }
   };
 
   const toggleFactorExpanded = (factorKey: string) => {
@@ -602,6 +654,58 @@ export default function ResultsStep({
               title="Print"
             >
               🖨️ <span className="hidden sm:inline">Print</span>
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloadingPDF}
+              className="p-2 hover:bg-gray-200 rounded transition-colors text-xs sm:text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              title={
+                isDownloadingPDF
+                  ? "Generating PDF..."
+                  : "Download as PDF"
+              }
+            >
+              {isDownloadingPDF ? (
+                <svg
+                  className="w-4 h-4 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              )}
+              <span className="hidden sm:inline">
+                {isDownloadingPDF
+                  ? "Generating..."
+                  : "Download as PDF"}
+              </span>
             </button>
             <button
               onClick={() => {
