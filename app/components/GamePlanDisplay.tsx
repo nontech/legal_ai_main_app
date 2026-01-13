@@ -14,7 +14,15 @@ interface GamePlanData {
 
 type TabType = "opening" | "evidence" | "witness" | "closing";
 
-export default function GamePlanDisplay({ gamePlan }: { gamePlan: GamePlanData }) {
+export default function GamePlanDisplay({ 
+    gamePlan, 
+    isAuthenticated = true,
+    onShowAuthModal 
+}: { 
+    gamePlan: GamePlanData;
+    isAuthenticated?: boolean;
+    onShowAuthModal?: () => void;
+}) {
     const t = useTranslations("caseAnalysis.gamePlan");
     const [activeTab, setActiveTab] = useState<TabType>("opening");
 
@@ -627,7 +635,19 @@ export default function GamePlanDisplay({ gamePlan }: { gamePlan: GamePlanData }
                             <Printer className="w-5 h-5" />
                             <span>{t("print")}</span>
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition">
+                        <button 
+                            onClick={() => {
+                                // Anonymous users must sign in to share
+                                if (!isAuthenticated && onShowAuthModal) {
+                                    onShowAuthModal();
+                                    return;
+                                }
+                                // Authenticated users can share
+                                navigator.clipboard.writeText(window.location.href);
+                                alert("Link copied to clipboard");
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                        >
                             <Share2 className="w-5 h-5" />
                             <span>{t("share")}</span>
                         </button>
