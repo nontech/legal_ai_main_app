@@ -111,10 +111,10 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href={`/${country}/${locale}/security`}
+                  href={`/${country}/${locale}/about-us`}
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
-                  {t("security")}
+                  {t("aboutUs")}
                 </Link>
               </li>
               <li>
@@ -131,6 +131,14 @@ export default function Footer() {
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("support")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href={`/${country}/${locale}/security`}
+                  className="text-sm text-white/70 hover:text-accent-400 transition-colors"
+                >
+                  {t("security")}
                 </Link>
               </li>
             </ul>

@@ -137,6 +137,7 @@
     "pricing": "Preisgestaltung",
     "useCases": "Use Cases",
     "resources": "Ressourcen",
+    "aboutUs": "Über uns",
     "security": "Sicherheit",
     "documentation": "Dokumentation",
     "support": "Support",
@@ -510,6 +511,14 @@
     "doNotTrackDesc": "Einige Browser enthalten eine \"Nicht verfolgen\"-Funktion. Unser Service reagiert derzeit nicht auf \"Nicht verfolgen\"-Signale.",
     "changesToPolicy": "Änderungen dieser Richtlinie",
     "changesDesc": "Wir können diese Cookie-Richtlinie von Zeit zu Zeit aktualisieren. Änderungen werden auf dieser Seite mit dem aktualisierten Datum \"Zuletzt aktualisiert\" veröffentlicht."
+  },
+  "aboutUs": {
+    "title": "Über uns",
+    "description": "Erfahren Sie mehr über unsere Mission und Vision",
+    "aboutTheLawThingTitle": "Über TheLawThing",
+    "platformDescription": "Unsere Plattform wird von einer fortschrittlichen KI-gesteuerten Szenarioanalyse-Engine betrieben. Durch die Auswertung Tausender Variablen und historischer Rechtsfallergebnisse bewerten wir die Fallmachbarkeit und schätzen potenzielle Gewinn- oder Verlustszenarien. Über die Analyse hinaus zeigen wir strategische Maßnahmen auf, die darauf ausgelegt sind, Ihre Position zu stärken. Durch die Nutzung öffentlicher Aufzeichnungen, interner Datensätze und kanzleispezifischer proprietärer Daten mit strengen Sicherheitskontrollen helfen wir Rechtsteams, schnellere Entscheidungen von höherer Qualität zu treffen.",
+    "visionTitle": "Die Vision",
+    "visionDescription": "Unser Ziel ist es, Rechtsstreitigkeiten zu vereinfachen, damit jeder, unabhängig von seinem rechtlichen Hintergrund, aufgrund der Vorzüge seines Falls verstanden werden kann. Durch die Reduzierung von Kostenbarrieren und Verfahrenskomplexität befähigen wir Einzelpersonen und Fachkräfte, faire Ergebnisse durch TheLawThing zu erzielen."
   },
   "acceptableUse": {
     "title": "Richtlinie zur akzeptablen Nutzung",
