@@ -9,7 +9,11 @@ import { CountrySelector } from "./CountrySelector";
 // Suspense wrapper for CountrySelector (uses useSearchParams)
 function CountrySelectorWrapper() {
   return (
-    <Suspense fallback={<div className="w-24 h-8 bg-white/10 rounded animate-pulse" />}>
+    <Suspense
+      fallback={
+        <div className="w-24 h-8 bg-white/10 rounded animate-pulse" />
+      }
+    >
       <CountrySelector />
     </Suspense>
   );
@@ -200,16 +204,10 @@ export default function Footer() {
             <p className="text-sm text-white/70">
               {t("allRightsReserved", { year: currentYear })}
             </p>
-            <p className="text-sm text-white/60">
-              {t("notLawFirm")}
-            </p>
+            <p className="text-sm text-white/60">{t("notLawFirm")}</p>
           </div>
         </div>
       </div>
     </footer>
   );
 }
-
-
-
-
