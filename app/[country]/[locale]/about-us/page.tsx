@@ -1,6 +1,26 @@
 import NavbarWrapper from "@/app/components/NavbarWrapper";
 import BackToHome from "@/app/components/BackToHome";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Linkedin } from "lucide-react";
+
+const teamMembers = [
+  {
+    name: "Aman Jaiswal",
+    linkedin: "https://www.linkedin.com/in/aman-jaiswal07/",
+  },
+  {
+    name: "Mukesh Jaiswal",
+    linkedin: "https://www.linkedin.com/in/jais-mukesh/",
+  },
+  {
+    name: "Philip Tapiwa",
+    linkedin: "https://www.linkedin.com/in/philip-m-40917013b/",
+  },
+  {
+    name: "Helen Lindenberg",
+    linkedin: "https://www.linkedin.com/in/helen-lindenberg/",
+  },
+];
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +82,36 @@ export default async function AboutUs({
               <p className="text-lg leading-relaxed">
                 {t("visionDescription")}
               </p>
+            </section>
+
+            <section>
+              <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">
+                {t("teamTitle")}
+              </h2>
+              <p className="text-lg leading-relaxed mb-8">
+                {t("teamDescription")}
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {teamMembers.map((member) => (
+                  <div
+                    key={member.name}
+                    className="flex items-center justify-between p-4 bg-surface-50 rounded-xl border border-border-200 hover:border-primary-300 hover:shadow-md transition-all"
+                  >
+                    <span className="font-medium text-ink-900">
+                      {member.name}
+                    </span>
+                    <a
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-primary-600 hover:text-primary-700 transition-colors"
+                      aria-label={`${t("viewLinkedIn")} - ${member.name}`}
+                    >
+                      <Linkedin className="w-5 h-5" />
+                    </a>
+                  </div>
+                ))}
+              </div>
             </section>
           </div>
 

@@ -518,7 +518,10 @@
     "aboutTheLawThingTitle": "About TheLawThing",
     "platformDescription": "Our platform is powered by an advanced AI-driven scenario analysis engine. By evaluating thousands of variables and historical legal outcomes, we assess case viability and estimate potential win or loss scenarios. Beyond analysis, we surface strategic actions designed to strengthen your position. Using public records, internal datasets, and firm-specific proprietary data with strict security controls, we help legal teams make higher-quality decisions faster.",
     "visionTitle": "The Vision",
-    "visionDescription": "We aim to simplify litigation so that anyone, regardless of legal background, can be understood on the merits of their case. By reducing cost barriers and procedural complexity, we empower individuals and professionals to pursue fair outcomes through TheLawThing."
+    "visionDescription": "We aim to simplify litigation so that anyone, regardless of legal background, can be understood on the merits of their case. By reducing cost barriers and procedural complexity, we empower individuals and professionals to pursue fair outcomes through TheLawThing.",
+    "teamTitle": "Our Team",
+    "teamDescription": "Meet the people behind TheLawThing",
+    "viewLinkedIn": "View LinkedIn Profile"
   },
   "acceptableUse": {
     "title": "Acceptable Use Policy",
