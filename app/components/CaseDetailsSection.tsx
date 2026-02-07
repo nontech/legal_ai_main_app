@@ -453,7 +453,7 @@ export default function CaseDetailsSection({
   return (
     <div>
       <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 overflow-hidden">
-        <div className="flex flex-col lg:flex-row min-h-[500px]">
+        <div className="flex flex-col lg:flex-row">
           {/* Left Sidebar - Section Navigation */}
           <div className="lg:w-64 bg-surface-50 border-b lg:border-b-0 lg:border-r border-border-200 flex-shrink-0">
             <nav className="p-2 space-y-1 overflow-y-auto max-h-[calc(100vh-400px)] lg:max-h-none">
@@ -490,7 +490,7 @@ export default function CaseDetailsSection({
           {/* Right Content Area */}
           <div className="flex-1 flex flex-col min-w-0">
             {/* Section Header */}
-            <div className="p-4 sm:p-6 border-b border-border-200 bg-surface-000">
+            <div className="p-2 border-b border-border-200 bg-surface-000">
               <div className="flex items-start gap-3 min-w-0">
                 <span className="text-3xl">{SECTION_ICONS[selectedSection]}</span>
                 <div className="min-w-0">
@@ -512,60 +512,7 @@ export default function CaseDetailsSection({
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
-              {/* Summary/Description Section - First */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
-                    {selectedSection === "case_information" ? "Case Description" : "Details"}
-                  </h4>
-                  <div className="flex items-center gap-2">
-                    {editedSummary && (
-                      <button
-                        onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
-                          isMarkdownPreview
-                            ? "bg-primary-100 text-primary-700"
-                            : "bg-surface-100 text-ink-600 hover:bg-surface-200"
-                        }`}
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        {isMarkdownPreview ? "Edit" : "Preview"}
-                      </button>
-                    )}
-                    {isGeneratingSummary && (
-                      <span className="px-3 py-1.5 text-xs font-medium bg-primary-100 text-primary-700 rounded-lg flex items-center gap-1.5">
-                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Extracting...
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {isMarkdownPreview && editedSummary ? (
-                  <div className="p-4 bg-surface-50 rounded-lg border border-border-200 min-h-[150px] max-h-[300px] overflow-y-auto">
-                    <MarkdownRenderer content={editedSummary} />
-                  </div>
-                ) : (
-                  <textarea
-                    value={editedSummary}
-                    onChange={(e) => setEditedSummary(e.target.value)}
-                    className="w-full min-h-[150px] p-4 border border-border-300 rounded-lg resize-y text-sm text-ink-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder={
-                      selectedSection === "case_information"
-                        ? "Enter case description or extract from uploaded documents..."
-                        : "Extract information from documents or add manually..."
-                    }
-                  />
-                )}
-              </div>
-
-              {/* Files Section - After Description */}
+              {/* Files Section - First */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
@@ -615,7 +562,7 @@ export default function CaseDetailsSection({
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="w-full border-2 border-dashed border-border-300 rounded-lg p-6 text-center hover:border-primary-400 hover:bg-primary-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full border-2 border-dashed border-border-300 rounded-lg p-2 text-center hover:border-primary-400 hover:bg-primary-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -628,112 +575,124 @@ export default function CaseDetailsSection({
                 )}
 
                 {currentFiles.length > 0 && (
-                  <div className="space-y-2">
-                    {currentFiles
-                      .slice(0, showAllDocuments ? undefined : 2)
-                      .map((file) => {
-                        const categoryInfo = CATEGORY_LABELS[selectedSection];
-                        return (
-                          <div
-                            key={file.id}
-                            className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors group"
-                          >
-                            <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
-                              <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            </div>
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
-                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo?.color || "primary")}`}>
-                                <span>{categoryInfo?.icon}</span>
-                                <span>{categoryInfo?.label}</span>
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => handleDeleteFile(file.address || "", file.name)}
-                              className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
-                              title="Delete file"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
+                  <div className="max-h-[150px] overflow-y-auto space-y-2 pr-2">
+                    {currentFiles.map((file) => {
+                      const categoryInfo = CATEGORY_LABELS[selectedSection];
+                      return (
+                        <div
+                          key={file.id}
+                          className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors group"
+                        >
+                          <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
+                            <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                           </div>
-                        );
-                      })}
-                    
-                    {/* Show More/Less Button */}
-                    {currentFiles.length > 2 && (
-                      <button
-                        onClick={() => setShowAllDocuments(!showAllDocuments)}
-                        className="w-full py-2 px-3 text-sm font-medium text-primary-600 hover:text-primary-700 hover:bg-primary-50 rounded-lg transition-colors flex items-center justify-center gap-1.5"
-                      >
-                        {showAllDocuments ? (
-                          <>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo?.color || "primary")}`}>
+                              <span>{categoryInfo?.icon}</span>
+                              <span>{categoryInfo?.label}</span>
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteFile(file.address || "", file.name)}
+                            className="p-1.5 text-ink-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100"
+                            title="Delete file"
+                          >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            Show Less
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                            Show {currentFiles.length - 2} More
-                          </>
-                        )}
-                      </button>
-                    )}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-            </div>
 
-          {/* Footer */}
-          <div className="p-4 sm:p-6 border-t border-border-200 bg-surface-50">
-            <div className="flex justify-end">
-              <button
-                onClick={handleSaveSection}
-                disabled={isSaving || isUploading || isGeneratingSummary}
-                className="px-6 py-2.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSaving ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                  </>
-                ) : isUploading ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Uploading...
-                  </>
-                ) : isGeneratingSummary ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Extracting...
-                  </>
+              {/* Summary/Description Section - After Documents */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-ink-700 uppercase tracking-wide">
+                    {selectedSection === "case_information" ? "Case Description" : "Details"}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    {editedSummary && (
+                      <button
+                        onClick={() => setIsMarkdownPreview(!isMarkdownPreview)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5 ${
+                          isMarkdownPreview
+                            ? "bg-primary-100 text-primary-700"
+                            : "bg-surface-100 text-ink-600 hover:bg-surface-200"
+                        }`}
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                        {isMarkdownPreview ? "Edit" : "Preview"}
+                      </button>
+                    )}
+                    <button
+                      onClick={handleSaveSection}
+                      disabled={isSaving || isUploading || isGeneratingSummary}
+                      className="px-4 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSaving ? (
+                        <>
+                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Saving...
+                        </>
+                      ) : isUploading ? (
+                        <>
+                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Uploading...
+                        </>
+                      ) : isGeneratingSummary ? (
+                        <>
+                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Extracting...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {isMarkdownPreview && editedSummary ? (
+                  <div className="p-4 bg-surface-50 rounded-lg border border-border-200 h-[300px] overflow-y-auto">
+                    <MarkdownRenderer content={editedSummary} />
+                  </div>
                 ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Save Changes
-                  </>
+                  <textarea
+                    value={editedSummary}
+                    onChange={(e) => setEditedSummary(e.target.value)}
+                    className="w-full h-[300px] p-4 border border-border-300 rounded-lg resize-y text-sm text-ink-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder={
+                      selectedSection === "case_information"
+                        ? "Enter case description or extract from uploaded documents..."
+                        : "Extract information from documents or add manually..."
+                    }
+                  />
                 )}
-              </button>
+              </div>
             </div>
-          </div>
         </div>
       </div>
       </div>
