@@ -13,7 +13,7 @@ export async function GET(
       request.headers.get("origin") || "http://localhost:3000";
 
     // Construct the URL to the case analysis page
-    const url = `${origin}/us/en/case-analysis/detailed?step=7&caseId=${caseId}`;
+    const url = `${origin}/us/en/case-analysis/${caseId}/results`;
 
     // Launch Puppeteer
     const browser = await puppeteer.launch({

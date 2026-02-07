@@ -475,7 +475,7 @@ export default function QuickAnalysisForm({
     // Navigate to results page after a brief delay (modal will show completion state)
     setTimeout(() => {
       setIsStreamingOpen(false);
-      router.push(`/${country}/${locale}/case-analysis/detailed?step=7&caseId=${streamingCaseId}`);
+      router.push(`/${country}/${locale}/case-analysis/${streamingCaseId}/results`);
     }, 2000);
   };
 

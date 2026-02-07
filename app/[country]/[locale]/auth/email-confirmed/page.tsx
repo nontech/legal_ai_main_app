@@ -24,7 +24,7 @@ function EmailConfirmedContent() {
                     if (prev <= 1) {
                         setIsRedirecting(true);
                         // Use full page reload to ensure Navbar updates
-                        window.location.href = `/${country}/${locale}/case-analysis/detailed?step=0&caseId=${caseId}`;
+                        window.location.href = `/${country}/${locale}/case-analysis/${caseId}/jurisdiction`;
                         return 0;
                     }
                     return prev - 1;
@@ -38,7 +38,7 @@ function EmailConfirmedContent() {
     const handleContinueAnalysis = () => {
         if (caseId) {
             // Use full page reload to ensure Navbar updates
-            window.location.href = `/${country}/${locale}/case-analysis/detailed?step=0&caseId=${caseId}`;
+            window.location.href = `/${country}/${locale}/case-analysis/${caseId}/jurisdiction`;
         }
     };
 

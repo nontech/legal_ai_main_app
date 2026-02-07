@@ -1,44 +1,32 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Navbar from "@/app/components/Navbar";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
 import CaseTitleHeader from "@/app/components/CaseTitleHeader";
-import JurisdictionSection from "@/app/components/JurisdictionSection";
-import CaseTypeSelector from "@/app/components/CaseTypeSelector";
-import RoleSelector from "@/app/components/RoleSelector";
-import ChargesSection from "@/app/components/ChargesSection";
-import CaseDetailsSection from "@/app/components/CaseDetailsSection";
-import JudgeSelection from "@/app/components/JudgeSelection";
 import PretrialProcess from "@/app/components/PretrialProcess";
-import JuryComposition from "@/app/components/JuryComposition";
-import ResultsStep from "@/app/components/ResultsStep";
-import VerdictStep from "@/app/components/VerdictStep";
 
-function DetailedCaseAnalysisContent() {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function CaseAnalysisLayout({ children }: LayoutProps) {
   const t = useTranslations("caseAnalysis");
-  const searchParams = useSearchParams();
-  const initialStep = searchParams.get("step");
-  const caseIdParam = searchParams.get("caseId");
-  const caseId = caseIdParam || undefined;
-  const [currentStep, setCurrentStep] = useState(
-    initialStep ? parseInt(initialStep) : 0
-  );
+  const params = useParams();
+  const pathname = usePathname();
+  const caseId = params["case-id"] as string;
+  
   const [countryId, setCountryId] = useState<string>("");
   const [jurisdictionId, setJurisdictionId] = useState<string>("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const [caseType, setCaseType] = useState<string>("");
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [isOwner, setIsOwner] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [ownershipLoading, setOwnershipLoading] = useState(true);
-  const totalSteps = 10; // Total number of steps (added Game Plan and Verdict)
 
   // Track completion data for each step (percentage)
   const [completionData, setCompletionData] = useState<{
@@ -85,6 +73,7 @@ function DetailedCaseAnalysisContent() {
           setIsOwner(false);
         }
         setOwnershipLoading(false);
+        
         const newCompletionData: { [key: number]: number } = {
           0: 0,
           1: 0,
@@ -95,11 +84,10 @@ function DetailedCaseAnalysisContent() {
           6: 0,
           7: 0,
           8: 0,
-          9: 0, // Initialize Verdict step
+          9: 0,
         };
 
         // Check jurisdiction (step 0)
-        // Support both 'court' (from SaveCaseButton) and 'court_name' (from quick analysis)
         const courtValue =
           data.jurisdiction?.court || data.jurisdiction?.court_name;
         if (
@@ -131,7 +119,7 @@ function DetailedCaseAnalysisContent() {
           newCompletionData[3] = 100;
         }
 
-        // Check case details (step 4) - Use saved completion status from database
+        // Check case details (step 4)
         if (data.case_details?._completion_status !== undefined) {
           newCompletionData[4] = data.case_details._completion_status;
         }
@@ -163,38 +151,6 @@ function DetailedCaseAnalysisContent() {
     fetchCaseCompletion();
   }, [caseId, fetchCaseCompletion]);
 
-  const handleNext = () => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleChargesCompletion = useCallback(
-    (isComplete: boolean) => {
-      setCompletionData((prev) => ({
-        ...prev,
-        3: isComplete ? 100 : 0,
-      }));
-    },
-    []
-  );
-
-  const handleCaseDetailsCompletion = useCallback(
-    (percentage: number) => {
-      setCompletionData((prev) => ({
-        ...prev,
-        4: percentage,
-      }));
-    },
-    []
-  );
-
   const isCriminal =
     !caseType || caseType.toLowerCase() === "criminal";
 
@@ -219,68 +175,15 @@ function DetailedCaseAnalysisContent() {
     { id: "verdict", label: t("steps.verdict"), icon: null },
   ];
 
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <JurisdictionSection
-            caseId={caseId}
-            onCountryChange={setCountryId}
-            onJurisdictionChange={setJurisdictionId}
-          />
-        );
-      case 1:
-        return (
-          <CaseTypeSelector caseId={caseId} countryId={countryId} />
-        );
-      case 2:
-        return <RoleSelector caseId={caseId} countryId={countryId} />;
-      case 3:
-        return (
-          <ChargesSection
-            caseId={caseId}
-            onCompletionChange={handleChargesCompletion}
-          />
-        );
-      case 4:
-        return (
-          <CaseDetailsSection
-            onModalChange={setIsModalOpen}
-            caseId={caseId}
-            onCompletionChange={handleCaseDetailsCompletion}
-          />
-        );
-      case 5:
-        return (
-          <JudgeSelection
-            caseId={caseId}
-            onSaveSuccess={fetchCaseCompletion}
-            jurisdictionId={jurisdictionId}
-          />
-        );
-      case 6:
-        return (
-          <JuryComposition
-            caseId={caseId}
-            countryId={countryId}
-            onSaveSuccess={fetchCaseCompletion}
-          />
-        );
-      case 7:
-        return <ResultsStep isOwner={isOwner} />;
-      case 8:
-        return <ResultsStep showGamePlanOnly={true} isOwner={isOwner} />;
-      case 9:
-        return <VerdictStep />;
-      default:
-        return (
-          <JurisdictionSection
-            caseId={caseId}
-            onCountryChange={setCountryId}
-          />
-        );
-    }
+  // Determine current step from pathname
+  const getCurrentStep = () => {
+    const pathSegments = pathname.split("/");
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    const stepIndex = steps.findIndex(step => step.id === lastSegment);
+    return stepIndex >= 0 ? stepIndex : 0;
   };
+
+  const currentStep = getCurrentStep();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -304,7 +207,7 @@ function DetailedCaseAnalysisContent() {
       <MobileProgressBar
         currentStep={currentStep}
         steps={steps}
-        onStepChange={setCurrentStep}
+        onStepChange={() => {}} // Will be handled by router navigation
         completionData={completionData}
       />
 
@@ -314,17 +217,17 @@ function DetailedCaseAnalysisContent() {
           {/* Main Content */}
           <div className={!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? "flex-1 min-w-0" : "w-full"}>
             <div className="max-w-4xl mx-auto w-full">
-              {renderStepContent()}
+              {children}
             </div>
           </div>
 
-          {/* Sidebar - Hidden on mobile, visible on md+, hidden for authenticated non-owners, hidden while loading ownership for shared cases */}
+          {/* Sidebar - Hidden on mobile, visible on md+, hidden for authenticated non-owners */}
           {!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) && (
             <div className="hidden md:block w-64 flex-shrink-0">
               <div className="sticky top-20">
                 <ProgressStepper
                   currentStep={currentStep}
-                  onStepChange={setCurrentStep}
+                  onStepChange={() => {}} // Will be handled by router navigation
                   completionData={completionData}
                   caseId={caseId || undefined}
                   caseType={caseType}
@@ -403,19 +306,5 @@ function DetailedCaseAnalysisContent() {
         </div>
       )}
     </div>
-  );
-}
-
-export default function DetailedCaseAnalysis() {
-  const t = useTranslations("caseAnalysis");
-  return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p className="mt-4 text-gray-600 font-medium text-lg">{t("loading")}</p>
-      </div>
-    }>
-      <DetailedCaseAnalysisContent />
-    </Suspense>
   );
 }

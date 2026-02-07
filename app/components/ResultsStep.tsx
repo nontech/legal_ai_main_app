@@ -19,13 +19,16 @@ interface AnalysisResult {
 export default function ResultsStep({
   showGamePlanOnly = false,
   isOwner = false,
+  caseId,
 }: {
   showGamePlanOnly?: boolean;
   isOwner?: boolean;
+  caseId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const caseId = searchParams.get("caseId");
+  // Use prop caseId if provided, otherwise fall back to searchParams for backward compatibility
+  const effectiveCaseId = caseId || searchParams.get("caseId");
 
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,7 +78,7 @@ export default function ResultsStep({
   const fetchResults = async (showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const response = await fetch(`/api/cases/${caseId}`);
+      const response = await fetch(`/api/cases/${effectiveCaseId}`);
       const data = await response.json();
 
       if (!data.ok || !data.data?.result) {
@@ -110,7 +113,7 @@ export default function ResultsStep({
   };
 
   const handleGenerateGamePlan = () => {
-    if (!caseId || !result || !caseInfo) {
+    if (!effectiveCaseId || !result || !caseInfo) {
       alert("Missing required data to generate game plan");
       return;
     }
@@ -147,7 +150,7 @@ export default function ResultsStep({
   };
 
   const handleDownloadPDF = async () => {
-    if (!caseId) {
+    if (!effectiveCaseId) {
       alert("Case ID not found");
       return;
     }
@@ -155,7 +158,7 @@ export default function ResultsStep({
     setIsDownloadingPDF(true);
 
     try {
-      const response = await fetch(`/api/cases/${caseId}/pdf`);
+      const response = await fetch(`/api/cases/${effectiveCaseId}/pdf`);
 
       if (!response.ok) {
         throw new Error("Failed to generate PDF");
@@ -255,14 +258,14 @@ export default function ResultsStep({
   };
 
   useEffect(() => {
-    if (!caseId) {
+    if (!effectiveCaseId) {
       setError("No case ID provided");
       setLoading(false);
       return;
     }
 
     fetchResults();
-  }, [caseId]);
+  }, [effectiveCaseId]);
 
   // If showing only game plan, render just that section
   if (showGamePlanOnly) {
@@ -270,7 +273,7 @@ export default function ResultsStep({
       <>
         <StreamingGamePlanDisplay
           isOpen={isGamePlanStreamingOpen}
-          caseId={caseId || ""}
+          caseId={effectiveCaseId || ""}
           case_analysis={result}
           case_info={caseInfo}
           onComplete={handleGamePlanStreamingComplete}
@@ -414,14 +417,14 @@ export default function ResultsStep({
     >
       <StreamingAnalysisDisplay
         isOpen={isStreamingOpen}
-        caseId={caseId || ""}
+        caseId={effectiveCaseId || ""}
         onComplete={handleStreamingComplete}
         onClose={() => setIsStreamingOpen(false)}
       />
 
       <StreamingGamePlanDisplay
         isOpen={isGamePlanStreamingOpen}
-        caseId={caseId || ""}
+        caseId={effectiveCaseId || ""}
         case_analysis={result}
         case_info={caseInfo}
         onComplete={handleGamePlanStreamingComplete}
@@ -2956,7 +2959,7 @@ export default function ResultsStep({
             <div className="space-y-3">
               <button
                 onClick={() =>
-                  router.push(`/auth/signin?caseId=${caseId}`)
+                  router.push(`/auth/signin?caseId=${effectiveCaseId}`)
                 }
                 className="cursor-pointer w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
               >
@@ -2964,7 +2967,7 @@ export default function ResultsStep({
               </button>
               <button
                 onClick={() =>
-                  router.push(`/auth/signup?caseId=${caseId}`)
+                  router.push(`/auth/signup?caseId=${effectiveCaseId}`)
                 }
                 className="cursor-pointer w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
               >

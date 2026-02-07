@@ -155,7 +155,7 @@ export default function MethodSelectionStep({
 
           {/* Enter Data Manually Card */}
           <button
-            onClick={() => router.push(`/${country}/${locale}/case-analysis/detailed`)}
+            onClick={() => router.push(`/${country}/${locale}/case-analysis/new`)}
             className="group relative bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 hover:border-amber-400 rounded-2xl p-8 text-left transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
           >
             <div className="absolute top-4 right-4">

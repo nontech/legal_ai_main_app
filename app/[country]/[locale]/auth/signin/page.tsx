@@ -46,7 +46,7 @@ function SignInContent() {
             // Redirect to dashboard or case page using full page reload
             // This ensures Navbar and other components re-fetch auth status
             if (caseId) {
-                window.location.href = `/${country}/${locale}/case-analysis/detailed?step=7&caseId=${caseId}`;
+                window.location.href = `/${country}/${locale}/case-analysis/${caseId}/results`;
             } else {
                 window.location.href = `/${country}/${locale}`;
             }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface Step {
@@ -28,6 +28,10 @@ export default function ProgressStepper({
 }: ProgressStepperProps) {
   const t = useTranslations("caseAnalysis");
   const router = useRouter();
+  const params = useParams();
+  const pathname = usePathname();
+  const country = params?.country as string || 'us';
+  const locale = params?.locale as string || 'en';
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCaseOwner, setIsCaseOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -317,6 +321,14 @@ export default function ProgressStepper({
     return step?.label || "";
   };
 
+  const handleStepNavigation = (stepIndex: number) => {
+    if (!caseId) return;
+    const step = steps[stepIndex];
+    if (step) {
+      router.push(`/${country}/${locale}/case-analysis/${caseId}/${step.id}`);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 z-30 shadow-lg">
@@ -349,7 +361,7 @@ export default function ProgressStepper({
                     <button
                       onClick={() => {
                         if (isResultsStep) {
-                          onStepChange(index);
+                          handleStepNavigation(index);
                         } else {
                           setAuthModalMode("signin");
                           setShowAuthModal(true);
@@ -503,7 +515,7 @@ export default function ProgressStepper({
               <div key={step.id} className="relative">
                 {/* Step Item */}
                 <button
-                  onClick={() => onStepChange(index)}
+                  onClick={() => handleStepNavigation(index)}
                   className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${index === currentStep
                     ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
                     : "hover:bg-gray-50 border-2 border-transparent"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 interface Step {
@@ -23,6 +24,11 @@ export default function MobileProgressBar({
     completionData = {},
 }: MobileProgressBarProps) {
     const t = useTranslations("caseAnalysis.common");
+    const router = useRouter();
+    const params = useParams();
+    const country = params?.country as string || 'us';
+    const locale = params?.locale as string || 'en';
+    const caseId = params["case-id"] as string;
     const [isExpanded, setIsExpanded] = useState(false);
 
     const getTotalCompletion = () => {
@@ -32,6 +38,14 @@ export default function MobileProgressBar({
 
     const getStepCompletion = (stepIndex: number) => {
         return completionData[stepIndex] || 0;
+    };
+
+    const handleStepNavigation = (stepIndex: number) => {
+        if (!caseId) return;
+        const step = steps[stepIndex];
+        if (step) {
+            router.push(`/${country}/${locale}/case-analysis/${caseId}/${step.id}`);
+        }
     };
 
     return (
@@ -78,7 +92,7 @@ export default function MobileProgressBar({
                                     <button
                                         key={step.id}
                                         onClick={() => {
-                                            onStepChange(index);
+                                            handleStepNavigation(index);
                                             setIsExpanded(false);
                                         }}
                                         className={`w-full flex items-center py-2.5 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${isCurrent

@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-export default function VerdictStep() {
+export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
   const t = useTranslations("caseAnalysis.verdict");
   const searchParams = useSearchParams();
-  const caseId = searchParams.get("caseId");
+  // Use prop caseId if provided, otherwise fall back to searchParams for backward compatibility
+  const effectiveCaseId = caseId || searchParams.get("caseId");
 
   const [caseInfo, setCaseInfo] = useState<any>(null);
   const [verdicts, setVerdicts] = useState<Record<string, string>>({});
@@ -18,14 +19,14 @@ export default function VerdictStep() {
 
   useEffect(() => {
     const fetchCaseData = async () => {
-      if (!caseId) {
+      if (!effectiveCaseId) {
         setError("No case ID provided");
         setLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`/api/cases/${caseId}`);
+        const response = await fetch(`/api/cases/${effectiveCaseId}`);
         const data = await response.json();
 
         if (!data.ok || !data.data) {
@@ -58,7 +59,7 @@ export default function VerdictStep() {
     };
 
     fetchCaseData();
-  }, [caseId]);
+  }, [effectiveCaseId]);
 
   const handleVerdictChange = (chargeId: string, verdict: string) => {
     setVerdicts((prev) => ({
@@ -68,7 +69,7 @@ export default function VerdictStep() {
   };
 
   const handleSaveVerdicts = async () => {
-    if (!caseId) return;
+    if (!effectiveCaseId) return;
 
     setIsSavingVerdicts(true);
     try {
@@ -76,7 +77,7 @@ export default function VerdictStep() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          caseId,
+          caseId: effectiveCaseId,
           field: "verdict",
           value: verdicts,
         }),

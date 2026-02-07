@@ -282,7 +282,7 @@ export default function CasePortfolio() {
                 <tr
                   key={case_.id}
                   className="hover:bg-gray-50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/${country}/${locale}/case-analysis/detailed?step=7&caseId=${case_.id}`)}
+                  onClick={() => router.push(`/${country}/${locale}/case-analysis/${case_.id}/results`)}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     {case_.id.substring(0, 8)}
