@@ -332,13 +332,16 @@ export default function ProgressStepper({
                         : "cursor-pointer hover:bg-gray-100 border-2 border-transparent opacity-70"
                         }`}
                     >
-                      {/* Step Icon */}
+                      {/* Step Icon - current filled, previous outlined, future gray */}
                       <div className="relative flex-shrink-0">
                         <div
-                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${isResultsStep
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "bg-gray-200 text-gray-500"
-                            }`}
+                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                            index === currentStep
+                              ? "bg-blue-600 text-white shadow-md scale-110"
+                              : index < currentStep
+                                ? "border-2 border-blue-500 bg-white text-blue-600"
+                                : "bg-gray-200 text-gray-500"
+                          }`}
                         >
                           {step.icon}
                         </div>
@@ -351,13 +354,12 @@ export default function ProgressStepper({
                         )}
                       </div>
 
-                      {/* Step Label */}
+                      {/* Step Label - highlighted up to current step */}
                       <div className="ml-3 flex-1 text-left">
                         <div
-                          className={`text-sm font-semibold transition-colors ${isResultsStep
-                            ? "text-blue-700"
-                            : "text-gray-500"
-                            }`}
+                          className={`text-sm font-semibold transition-colors ${
+                            index <= currentStep ? "text-blue-600" : "text-gray-500"
+                          }`}
                         >
                           {getStepLabel(step.id)}
                         </div>
@@ -485,29 +487,31 @@ export default function ProgressStepper({
                     : "hover:bg-gray-50 border-2 border-transparent"
                     }`}
                 >
-                  {/* Step Icon - Always show original icon */}
+                  {/* Step Icon - current filled, previous outlined, future gray */}
                   <div className="relative flex-shrink-0">
                     <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${index === currentStep
-                        ? "bg-blue-600 text-white shadow-md scale-110"
-                        : isComplete
-                          ? "bg-gray-100 border-2 border-gray-300 text-gray-500"
-                          : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
-                        }`}
+                      className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                        index === currentStep
+                          ? "bg-blue-600 text-white shadow-md scale-110"
+                          : index < currentStep
+                            ? "border-2 border-blue-500 bg-white text-blue-600"
+                            : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                      }`}
                     >
                       {step.icon}
                     </div>
                   </div>
 
-                  {/* Step Label */}
+                  {/* Step Label - highlighted up to current step */}
                   <div className="ml-3 flex-1 text-left">
                     <div
-                      className={`text-sm font-semibold transition-colors ${index === currentStep
-                        ? "text-blue-700"
-                        : isComplete
-                          ? "text-gray-700"
+                      className={`text-sm font-semibold transition-colors ${
+                        index <= currentStep
+                          ? index === currentStep
+                            ? "text-blue-700"
+                            : "text-blue-600"
                           : "text-gray-500 group-hover:text-gray-700"
-                        }`}
+                      }`}
                     >
                       {getStepLabel(step.id)}
                     </div>
