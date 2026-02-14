@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
         // Call external upload API
         const response = await fetch(
-            "https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net/api/v1/documents/upload-to-section",
+            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/upload-to-section`,
             {
                 method: "POST",
                 body: externalFormData,

@@ -77,7 +77,7 @@ export async function DELETE(request: Request) {
         console.log("External Form Data:", externalFormData);
         // Call external delete API
         const response = await fetch(
-            "https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net/api/v1/documents/delete-file",
+            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/delete-file`,
             {
                 method: "DELETE",
                 body: externalFormData,

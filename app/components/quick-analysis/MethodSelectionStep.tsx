@@ -219,7 +219,7 @@ export default function MethodSelectionStep({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span>Include charges, judge, jury details</span>
+                <span>Include charges and case details</span>
               </div>
               <div className="flex items-center text-sm text-gray-700">
                 <svg

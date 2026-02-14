@@ -81,6 +81,7 @@ export async function POST(
                 key_witnesses_summary: keyWitnessSummary || null,
                 police_report_summary: policeReportSummary || null,
                 weaknesses_summary: weaknessesSummary || null,
+                case_id: caseId,
             },
             language_code,
         };
@@ -100,7 +101,7 @@ export async function POST(
 
                 try {
                     const azureResponse = await fetch(
-                        "https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net/api/v1/prediction/analyze-case-streaming",
+                        `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/prediction/analyze-case-streaming`,
                         {
                             method: "POST",
                             headers: {

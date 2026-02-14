@@ -8,7 +8,6 @@ import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
 import CaseTitleHeader from "@/app/components/CaseTitleHeader";
 import PretrialProcess from "@/app/components/PretrialProcess";
-
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -37,11 +36,9 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
     2: 0, // Role
     3: 0, // Charges
     4: 0, // Case Details
-    5: 0, // Judge
-    6: 0, // Jury
-    7: 0, // Results
-    8: 0, // Game Plan
-    9: 0, // Verdict
+    5: 0, // Results
+    6: 0, // Game Plan
+    7: 0, // Verdict
   });
 
   // Fetch case data and calculate completion percentages
@@ -83,8 +80,6 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           5: 0,
           6: 0,
           7: 0,
-          8: 0,
-          9: 0,
         };
 
         // Check jurisdiction (step 0)
@@ -124,20 +119,19 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           newCompletionData[4] = data.case_details._completion_status;
         }
 
-        // Check judge (step 5)
-        if (data.judge) {
+        // Check results (step 5)
+        if (data.result) {
           newCompletionData[5] = 100;
         }
 
-        // Check jury (step 6)
-        if (
-          data.jury &&
-          data.jury.demographics &&
-          data.jury.demographics.length > 0 &&
-          data.jury.psychological &&
-          data.jury.psychological.length > 0
-        ) {
+        // Check game plan (step 6)
+        if (data.game_plan) {
           newCompletionData[6] = 100;
+        }
+
+        // Check verdict (step 7)
+        if (data.verdict && Object.keys(data.verdict).length > 0) {
+          newCompletionData[7] = 100;
         }
 
         setCompletionData(newCompletionData);
@@ -168,8 +162,6 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
       icon: null,
     },
     { id: "case-details", label: t("steps.caseDetails"), icon: null },
-    { id: "judge", label: t("steps.judge"), icon: null },
-    { id: "jury", label: t("steps.jury"), icon: null },
     { id: "results", label: t("steps.results"), icon: null },
     { id: "game-plan", label: t("steps.gamePlan"), icon: null },
     { id: "verdict", label: t("steps.verdict"), icon: null },
@@ -187,10 +179,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar
-        onPretrialClick={() => setIsPretrialOpen(true)}
-        showPretrialButton={true}
-      />
+      <Navbar />
 
       {/* Case Title Header - Show only if caseId exists */}
       {caseId && (
@@ -200,6 +189,8 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           isOwner={isOwner}
           hideSidebar={ownershipLoading || (isAuthenticated && !isOwner)}
           onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
+          isAuthenticated={isAuthenticated}
+          onPretrialClick={() => setIsPretrialOpen(true)}
         />
       )}
 

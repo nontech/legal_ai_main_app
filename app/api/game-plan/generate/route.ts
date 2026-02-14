@@ -16,19 +16,21 @@ export async function POST(request: NextRequest): Promise<Response> {
             );
         }
 
+        const gamePlanPayload = {
+            case_analysis,
+            case_info,
+            language_code,
+        };
+
         // Call the external API
         const response = await fetch(
-            "https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net/api/v1/prediction/generate-game-plan-streaming",
+            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/prediction/generate-game-plan-streaming`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    case_analysis,
-                    case_info,
-                    language_code,
-                }),
+                body: JSON.stringify(gamePlanPayload),
             }
         );
 

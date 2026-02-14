@@ -12,9 +12,7 @@ import CaseTypeSelector from "@/app/components/CaseTypeSelector";
 import RoleSelector from "@/app/components/RoleSelector";
 import ChargesSection from "@/app/components/ChargesSection";
 import CaseDetailsSection from "@/app/components/CaseDetailsSection";
-import JudgeSelection from "@/app/components/JudgeSelection";
 import PretrialProcess from "@/app/components/PretrialProcess";
-import JuryComposition from "@/app/components/JuryComposition";
 import ResultsStep from "@/app/components/ResultsStep";
 import VerdictStep from "@/app/components/VerdictStep";
 
@@ -81,7 +79,7 @@ function NewCaseAnalysisContent() {
         setOwnershipLoading(false);
 
         const newCompletionData: { [key: number]: number } = {
-          0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0,
+          0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
         };
 
         const courtValue = data.jurisdiction?.court || data.jurisdiction?.court_name;
@@ -106,12 +104,16 @@ function NewCaseAnalysisContent() {
           newCompletionData[4] = data.case_details._completion_status;
         }
 
-        if (data.judge) {
+        if (data.result) {
           newCompletionData[5] = 100;
         }
 
-        if (data.jury && data.jury.demographics && data.jury.demographics.length > 0 && data.jury.psychological && data.jury.psychological.length > 0) {
+        if (data.game_plan) {
           newCompletionData[6] = 100;
+        }
+
+        if (data.verdict && Object.keys(data.verdict).length > 0) {
+          newCompletionData[7] = 100;
         }
 
         setCompletionData(newCompletionData);
@@ -154,8 +156,6 @@ function NewCaseAnalysisContent() {
     { id: "role", label: t("steps.role"), icon: null },
     { id: "charges", label: isCriminal ? t("steps.charges") : t("steps.claims"), icon: null },
     { id: "case-details", label: t("steps.caseDetails"), icon: null },
-    { id: "judge", label: t("steps.judge"), icon: null },
-    { id: "jury", label: t("steps.jury"), icon: null },
     { id: "results", label: t("steps.results"), icon: null },
     { id: "game-plan", label: t("steps.gamePlan"), icon: null },
     { id: "verdict", label: t("steps.verdict"), icon: null },
@@ -174,15 +174,11 @@ function NewCaseAnalysisContent() {
       case 4:
         return <CaseDetailsSection onModalChange={setIsModalOpen} caseId={caseId} onCompletionChange={handleCaseDetailsCompletion} />;
       case 5:
-        return <JudgeSelection caseId={caseId} onSaveSuccess={fetchCaseCompletion} jurisdictionId={jurisdictionId} />;
+        return <ResultsStep isOwner={isOwner} caseId={caseId} />;
       case 6:
-        return <JuryComposition caseId={caseId} countryId={countryId} onSaveSuccess={fetchCaseCompletion} />;
+        return <ResultsStep showGamePlanOnly={true} isOwner={isOwner} caseId={caseId} />;
       case 7:
-        return <ResultsStep isOwner={isOwner} />;
-      case 8:
-        return <ResultsStep showGamePlanOnly={true} isOwner={isOwner} />;
-      case 9:
-        return <VerdictStep />;
+        return <VerdictStep caseId={caseId} />;
       default:
         return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} />;
     }
