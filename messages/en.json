@@ -601,6 +601,19 @@
       "failedToSave": "Failed to save",
       "caseIdRequired": "Case ID is required"
     },
+    "creditLimit": {
+      "subtitle": "Your credits reset at midnight UTC",
+      "close": "Close",
+      "signInForMore": "Sign in for more",
+      "dailyLimitTitle": "Daily Limit Reached",
+      "dailyLimitMessage": "You have reached your daily case creation limit. Please try again later or sign in for more.",
+      "goToDashboard": "Go to Dashboard",
+      "analysisLimitTitle": "Analysis Limit Reached",
+      "gamePlanLimitTitle": "Game Plan Limit Reached",
+      "analysisLimitMessage": "You have reached your daily analysis limit. Your credits reset at midnight UTC.",
+      "gamePlanLimitMessage": "You have reached your daily game plan limit. Your credits reset at midnight UTC.",
+      "defaultMessage": "You have reached your daily limit. Your credits reset at midnight UTC."
+    },
     "pretrial": {
       "title": "Pretrial Process & Motions",
       "description": "Manage all pretrial procedures, discovery, and motions"
@@ -857,7 +870,7 @@
       "loading": "Loading analysis results...",
       "noResults": "No analysis results found",
       "failedToLoad": "Failed to load analysis results",
-      "regenerate": "Regenerate",
+      "regenerate": "Regenerate Analysis",
       "regenerating": "Regenerating...",
       "print": "Print",
       "share": "Share",

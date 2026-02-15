@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
 
 export async function POST(request: NextRequest): Promise<Response> {
     try {
@@ -14,6 +16,37 @@ export async function POST(request: NextRequest): Promise<Response> {
                     headers: { "Content-Type": "application/json" }
                 }
             );
+        }
+
+        // Fetch case to verify ownership and check credits for authenticated users
+        const supabase = await getSupabaseServerClient();
+        const { data: caseData, error: caseError } = await supabase
+            .from("cases")
+            .select("owner_id")
+            .eq("id", caseId)
+            .single();
+
+        if (caseError || !caseData) {
+            return new Response(
+                JSON.stringify({ ok: false, error: "Case not found" }),
+                { status: 404, headers: { "Content-Type": "application/json" } }
+            );
+        }
+
+        const { data: userRes } = await supabase.auth.getUser();
+        if (userRes?.user && caseData.owner_id === userRes.user.id) {
+            const adminClient = getSupabaseAdminClient();
+            const creditResult = await checkAndConsumeUserCredits(
+                userRes.user.id,
+                "game_plan",
+                adminClient
+            );
+            if (!creditResult.allowed) {
+                return new Response(
+                    JSON.stringify({ ok: false, error: creditResult.error }),
+                    { status: 402, headers: { "Content-Type": "application/json" } }
+                );
+            }
         }
 
         const gamePlanPayload = {
@@ -90,8 +123,8 @@ export async function POST(request: NextRequest): Promise<Response> {
                     // Save the game plan to the database
                     if (gamePlanResult && caseId) {
                         console.log("Saving game plan to database for case:", caseId);
-                        const supabase = await getSupabaseServerClient();
-                        const { error } = await supabase
+                        const streamSupabase = await getSupabaseServerClient();
+                        const { error } = await streamSupabase
                             .from("cases")
                             .update({ game_plan: gamePlanResult })
                             .eq("id", caseId);

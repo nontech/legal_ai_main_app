@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import CreditLimitDialog from "./CreditLimitDialog";
 
 interface GamePlanEvent {
     type: "status" | "reasoning" | "result" | "complete" | "error" | "message";
@@ -53,10 +54,12 @@ export default function StreamingGamePlanDisplay({
     onClose,
 }: StreamingGamePlanDisplayProps) {
     const t = useTranslations("caseAnalysis.streaming");
+    const tCredit = useTranslations("caseAnalysis.creditLimit");
     const locale = useLocale();
     const [events, setEvents] = useState<GamePlanEvent[]>([]);
     const [progress, setProgress] = useState(0);
     const [allComplete, setAllComplete] = useState(false);
+    const [creditLimitReached, setCreditLimitReached] = useState<string | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const streamStartedRef = useRef(false);
     const lastResultRef = useRef<any>(null);
@@ -66,6 +69,7 @@ export default function StreamingGamePlanDisplay({
             setEvents([]);
             setProgress(0);
             setAllComplete(false);
+            setCreditLimitReached(null);
             streamStartedRef.current = false;
             return;
         }
@@ -94,7 +98,26 @@ export default function StreamingGamePlanDisplay({
             console.log("Response status:", response.status, response.ok);
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                if (response.status === 402) {
+                    let message = "You have reached your daily game plan limit. Your credits reset at midnight UTC.";
+                    try {
+                        const errJson = await response.json();
+                        if (errJson?.error) message = errJson.error;
+                    } catch {
+                        /* ignore */
+                    }
+                    setCreditLimitReached(message);
+                    setAllComplete(true);
+                    return;
+                }
+                let message = `HTTP error! status: ${response.status}`;
+                try {
+                    const errJson = await response.json();
+                    if (errJson?.error) message = errJson.error;
+                } catch {
+                    /* ignore */
+                }
+                throw new Error(message);
             }
 
             const reader = response.body?.getReader();
@@ -214,6 +237,18 @@ export default function StreamingGamePlanDisplay({
     }, [allComplete, onComplete, onClose]);
 
     if (!isOpen) return null;
+
+    if (creditLimitReached) {
+        return (
+            <CreditLimitDialog
+                title={tCredit("gamePlanLimitTitle")}
+                subtitle={tCredit("subtitle")}
+                message={tCredit("gamePlanLimitMessage")}
+                onClose={onClose}
+                primaryButtonLabel={tCredit("close")}
+            />
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-[9999] overflow-y-auto">

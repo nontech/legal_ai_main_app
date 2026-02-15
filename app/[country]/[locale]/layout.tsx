@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { COUNTRIES } from "@/i18n/routing";
 import Navbar from "@/app/components/Navbar";
 import ConditionalFooter from "@/app/components/ConditionalFooter";
+import { Toaster } from "@/app/components/ui/toaster";
 
 const validCountries = COUNTRIES.map((c) => c.code);
 const validLocales = ["en", "de"];
@@ -50,6 +51,7 @@ export default async function LocaleLayout({
       </Suspense>
       {children}
       <ConditionalFooter />
+      <Toaster />
     </NextIntlClientProvider>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
+import CreditLimitDialog from "./CreditLimitDialog";
 
 // Hook for typing animation
 function useTypingAnimation(text: string, speed: number = 30) {
@@ -244,10 +245,12 @@ export default function StreamingAnalysisDisplay({
     onClose,
 }: StreamingAnalysisDisplayProps) {
     const t = useTranslations("caseAnalysis.streamingAnalysis");
+    const tCredit = useTranslations("caseAnalysis.creditLimit");
     const locale = useLocale();
     const [groupedSteps, setGroupedSteps] = useState<Map<string, GroupedStep>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [creditLimitReached, setCreditLimitReached] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
     const [autoClickCountdown, setAutoClickCountdown] = useState<number | null>(null);
@@ -389,6 +392,7 @@ export default function StreamingAnalysisDisplay({
             setGroupedSteps(new Map());
             setIsLoading(false);
             setError(null);
+            setCreditLimitReached(null);
             setProgress(0);
             setIsComplete(false);
             stepOrderRef.current = [];
@@ -402,6 +406,7 @@ export default function StreamingAnalysisDisplay({
             setIsLoading(true);
             setGroupedSteps(new Map());
             setError(null);
+            setCreditLimitReached(null);
             setProgress(0);
 
             try {
@@ -412,7 +417,26 @@ export default function StreamingAnalysisDisplay({
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    if (response.status === 402) {
+                        let message = "You have reached your daily analysis limit. Your credits reset at midnight UTC.";
+                        try {
+                            const errJson = await response.json();
+                            if (errJson?.error) message = errJson.error;
+                        } catch {
+                            /* ignore */
+                        }
+                        setCreditLimitReached(message);
+                        setIsLoading(false);
+                        return;
+                    }
+                    let message = `HTTP error! status: ${response.status}`;
+                    try {
+                        const errJson = await response.json();
+                        if (errJson?.error) message = errJson.error;
+                    } catch {
+                        /* ignore */
+                    }
+                    throw new Error(message);
                 }
 
                 const reader = response.body?.getReader();
@@ -640,6 +664,18 @@ export default function StreamingAnalysisDisplay({
     }, [groupedSteps]);
 
     if (!isOpen) return null;
+
+    if (creditLimitReached) {
+        return (
+            <CreditLimitDialog
+                title={tCredit("analysisLimitTitle")}
+                subtitle={tCredit("subtitle")}
+                message={tCredit("analysisLimitMessage")}
+                onClose={onClose}
+                primaryButtonLabel={tCredit("close")}
+            />
+        );
+    }
 
     // Convert map to array in the order steps were encountered
     const stepsArray = Array.from(groupedSteps.values()).sort(

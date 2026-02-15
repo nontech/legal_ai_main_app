@@ -601,6 +601,19 @@
       "failedToSave": "Speichern fehlgeschlagen",
       "caseIdRequired": "Fall-ID ist erforderlich"
     },
+    "creditLimit": {
+      "subtitle": "Ihre Credits werden um Mitternacht UTC zurückgesetzt",
+      "close": "Schließen",
+      "signInForMore": "Anmelden für mehr",
+      "dailyLimitTitle": "Tageslimit erreicht",
+      "dailyLimitMessage": "Sie haben Ihr Tageslimit für die Fallerstellung erreicht. Bitte versuchen Sie es später erneut oder melden Sie sich an, um weitere Analysen durchzuführen.",
+      "goToDashboard": "Zur Übersicht",
+      "analysisLimitTitle": "Analyse-Limit erreicht",
+      "gamePlanLimitTitle": "Spielplan-Limit erreicht",
+      "analysisLimitMessage": "Sie haben Ihr tägliches Analyse-Limit erreicht. Ihre Credits werden um Mitternacht UTC zurückgesetzt.",
+      "gamePlanLimitMessage": "Sie haben Ihr tägliches Spielplan-Limit erreicht. Ihre Credits werden um Mitternacht UTC zurückgesetzt.",
+      "defaultMessage": "Sie haben Ihr Tageslimit erreicht. Ihre Credits werden um Mitternacht UTC zurückgesetzt."
+    },
     "pretrial": {
       "title": "Vorverfahren & Anträge",
       "description": "Verwalten Sie alle Vorverfahren, Beweisaufnahme und Anträge"
@@ -857,7 +870,7 @@
       "loading": "Lade Analyseergebnisse...",
       "noResults": "Keine Analyseergebnisse gefunden",
       "failedToLoad": "Laden der Analyseergebnisse fehlgeschlagen",
-      "regenerate": "Neu generieren",
+      "regenerate": "Analyse neu generieren",
       "regenerating": "Wird generiert...",
       "print": "Drucken",
       "share": "Teilen",

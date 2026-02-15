@@ -7,7 +7,7 @@ import Navbar from "@/app/components/Navbar";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
 import CaseTitleHeader from "@/app/components/CaseTitleHeader";
-import PretrialProcess from "@/app/components/PretrialProcess";
+import { CaseHeaderActionsProvider } from "@/app/components/CaseHeaderActionsContext";
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -20,7 +20,6 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
   
   const [countryId, setCountryId] = useState<string>("");
   const [jurisdictionId, setJurisdictionId] = useState<string>("");
-  const [isPretrialOpen, setIsPretrialOpen] = useState(false);
   const [caseType, setCaseType] = useState<string>("");
   const [caseTitle, setCaseTitle] = useState<string>("");
   const [isOwner, setIsOwner] = useState(false);
@@ -178,6 +177,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
   const currentStep = getCurrentStep();
 
   return (
+    <CaseHeaderActionsProvider>
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
@@ -190,7 +190,6 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           hideSidebar={ownershipLoading || (isAuthenticated && !isOwner)}
           onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
           isAuthenticated={isAuthenticated}
-          onPretrialClick={() => setIsPretrialOpen(true)}
         />
       )}
 
@@ -229,73 +228,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
         </div>
       </main>
 
-      {/* Pretrial Process Modal */}
-      {isPretrialOpen && (
-        <div className="fixed inset-0 z-[9999] overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 pt-4 pb-20">
-            {/* Background overlay */}
-            <div
-              className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity"
-              onClick={() => setIsPretrialOpen(false)}
-            ></div>
-
-            {/* Modal panel */}
-            <div className="relative inline-block w-full max-w-7xl my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-50 shadow-2xl rounded-lg sm:rounded-2xl">
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 sticky top-0 z-10">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                      />
-                    </svg>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">
-                        {t("pretrial.title")}
-                      </h2>
-                      <p className="text-blue-100 text-sm">
-                        {t("pretrial.description")}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setIsPretrialOpen(false)}
-                    className="text-white hover:text-gray-200 transition-colors"
-                  >
-                    <svg
-                      className="w-6 h-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Modal Content */}
-              <div className="px-6 py-6 max-h-[80vh] overflow-y-auto">
-                <PretrialProcess />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
+    </CaseHeaderActionsProvider>
   );
 }

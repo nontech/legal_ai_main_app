@@ -2,9 +2,11 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
 import GamePlanDisplay from "./GamePlanDisplay";
+import { useSetHeaderActions } from "./CaseHeaderActionsContext";
 
 interface AnalysisResult {
   predicted_outcome?: any;
@@ -57,9 +59,44 @@ export default function ResultsStep({
   const [gamePlan, setGamePlan] = useState<any>(null);
   const [isGamePlanStreamingOpen, setIsGamePlanStreamingOpen] =
     useState(false);
+  const [isGeneratingGamePlan, setIsGeneratingGamePlan] = useState(false);
   const [showOutcomeReasoning, setShowOutcomeReasoning] =
     useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const setHeaderActions = useSetHeaderActions();
+  const tResults = useTranslations("caseAnalysis.results");
+
+  // Register Regenerate button in header when on results page (with provider)
+  useEffect(() => {
+    if (!setHeaderActions || showGamePlanOnly) return;
+    if (!result || !isAuthenticated || !isOwner) {
+      setHeaderActions(null);
+      return;
+    }
+    const button = (
+      <button
+        onClick={handleRegenerate}
+        disabled={isRegenerating}
+        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all font-medium text-sm shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        title={isRegenerating ? tResults("regenerating") : tResults("regenerate")}
+      >
+        {isRegenerating ? (
+          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        )}
+        <span>{isRegenerating ? "..." : tResults("regenerate")}</span>
+      </button>
+    );
+    setHeaderActions(button);
+    return () => setHeaderActions(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handleRegenerate/tResults from closure
+  }, [setHeaderActions, showGamePlanOnly, result, isAuthenticated, isOwner, isRegenerating]);
 
   useEffect(() => {
     // Check authentication status
@@ -138,11 +175,13 @@ export default function ResultsStep({
     };
 
     // Open the streaming display modal
+    setIsGeneratingGamePlan(true);
     setIsGamePlanStreamingOpen(true);
   };
 
   const handleGamePlanStreamingComplete = (result: any) => {
     setGamePlan(result);
+    setIsGeneratingGamePlan(false);
     setIsGamePlanStreamingOpen(false);
     // Refresh the data from the database
     fetchResults(false);
@@ -225,8 +264,12 @@ export default function ResultsStep({
           case_analysis={result}
           case_info={caseInfo}
           onComplete={handleGamePlanStreamingComplete}
-          onClose={() => setIsGamePlanStreamingOpen(false)}
+          onClose={() => {
+            setIsGeneratingGamePlan(false);
+            setIsGamePlanStreamingOpen(false);
+          }}
         />
+
 
         <div style={{ maxWidth: "100%", width: "100%" }}>
           <div
@@ -267,7 +310,7 @@ export default function ResultsStep({
               </div>
               <button
                 onClick={handleGenerateGamePlan}
-                disabled={loading}
+                disabled={loading || isGeneratingGamePlan}
                 type="button"
                 title={
                   gamePlan
@@ -275,7 +318,7 @@ export default function ResultsStep({
                     : "Generate Game Plan"
                 }
                 style={{
-                  background: loading
+                  background: loading || isGeneratingGamePlan
                     ? "#ccc"
                     : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                   color: "white",
@@ -284,20 +327,20 @@ export default function ResultsStep({
                   borderRadius: "8px",
                   fontSize: "14px",
                   fontWeight: "600",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  boxShadow: loading
+                  cursor: loading || isGeneratingGamePlan ? "not-allowed" : "pointer",
+                  boxShadow: loading || isGeneratingGamePlan
                     ? "none"
                     : "0 4px 12px rgba(102, 126, 234, 0.3)",
                   transition: "all 0.3s ease",
                   display: "flex",
                   alignItems: "center",
                   gap: "8px",
-                  pointerEvents: loading ? "none" : "auto",
-                  opacity: loading ? 0.6 : 1,
+                  pointerEvents: loading || isGeneratingGamePlan ? "none" : "auto",
+                  opacity: loading || isGeneratingGamePlan ? 0.6 : 1,
                 }}
               >
                 <span>✨</span>
-                {gamePlan ? "Regenerate" : "Generate"} Game Plan
+                {isGeneratingGamePlan ? "..." : gamePlan ? "Regenerate" : "Generate"} Game Plan
               </button>
             </div>
 
@@ -367,7 +410,10 @@ export default function ResultsStep({
         isOpen={isStreamingOpen}
         caseId={effectiveCaseId || ""}
         onComplete={handleStreamingComplete}
-        onClose={() => setIsStreamingOpen(false)}
+        onClose={() => {
+          setIsStreamingOpen(false);
+          setIsRegenerating(false);
+        }}
       />
 
       <StreamingGamePlanDisplay
@@ -376,7 +422,10 @@ export default function ResultsStep({
         case_analysis={result}
         case_info={caseInfo}
         onComplete={handleGamePlanStreamingComplete}
-        onClose={() => setIsGamePlanStreamingOpen(false)}
+        onClose={() => {
+          setIsGeneratingGamePlan(false);
+          setIsGamePlanStreamingOpen(false);
+        }}
       />
 
       {/* Reasoning Panel Toggle Button */}
@@ -556,15 +605,15 @@ export default function ResultsStep({
             </div>
           </div>
           <div className="flex gap-2 flex-wrap justify-start lg:justify-end">
-            {isAuthenticated && isOwner && (
+            {isAuthenticated && isOwner && !setHeaderActions && (
               <button
                 onClick={handleRegenerate}
                 disabled={isRegenerating}
                 className="cursor-pointer p-2 hover:bg-blue-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-xs sm:text-sm"
                 title={
                   isRegenerating
-                    ? "Regenerating..."
-                    : "Regenerate Results"
+                    ? tResults("regenerating")
+                    : tResults("regenerate")
                 }
               >
                 {isRegenerating ? (
@@ -604,7 +653,7 @@ export default function ResultsStep({
                   </svg>
                 )}
                 <span className="font-medium">
-                  {isRegenerating ? "..." : "Regenerate"}
+                  {isRegenerating ? "..." : tResults("regenerate")}
                 </span>
               </button>
             )}

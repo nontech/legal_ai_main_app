@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useHeaderActions } from "./CaseHeaderActionsContext";
 
 interface CaseTitleHeaderProps {
   caseId: string;
@@ -10,7 +10,6 @@ interface CaseTitleHeaderProps {
   hideSidebar?: boolean;
   onTitleUpdate?: (newTitle: string) => void;
   isAuthenticated?: boolean;
-  onPretrialClick?: () => void;
 }
 
 export default function CaseTitleHeader({
@@ -20,9 +19,8 @@ export default function CaseTitleHeader({
   hideSidebar = false,
   onTitleUpdate,
   isAuthenticated = false,
-  onPretrialClick,
 }: CaseTitleHeaderProps) {
-  const tNav = useTranslations("navigation");
+  const headerActions = useHeaderActions();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [tempTitle, setTempTitle] = useState(initialTitle);
@@ -177,30 +175,10 @@ export default function CaseTitleHeader({
                     )}
                   </div>
 
-                  {/* Pretrial Process button */}
-                  {isAuthenticated && !isEditing && onPretrialClick && (
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={onPretrialClick}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all font-medium text-sm shadow-md hover:shadow-lg"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                          />
-                        </svg>
-                        <span>{tNav("pretrialProcess")}</span>
-                      </button>
-                    </div>
-                  )}
+                  {/* Header actions (e.g. Regenerate) */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {headerActions}
+                  </div>
                 </div>
               </div>
             </div>
