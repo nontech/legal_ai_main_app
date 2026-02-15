@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 
 interface SaveCaseButtonProps {
     caseId?: string;
@@ -47,6 +48,7 @@ export default function SaveCaseButton({
             }
 
             setMessage({ type: "success", text: t("savedSuccessfully") });
+            dispatchCaseUpdated();
             if (onSave) onSave();
 
             // Clear success message after 2 seconds

@@ -872,6 +872,7 @@
       "failedToLoad": "Failed to load analysis results",
       "regenerate": "Regenerate Analysis",
       "regenerating": "Regenerating...",
+      "regenerateDisabled": "Make changes to case details to enable regeneration",
       "print": "Print",
       "share": "Share",
       "showReasoning": "Show Analysis Reasoning",

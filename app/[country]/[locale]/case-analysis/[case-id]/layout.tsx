@@ -8,6 +8,7 @@ import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
 import CaseTitleHeader from "@/app/components/CaseTitleHeader";
 import { CaseHeaderActionsProvider } from "@/app/components/CaseHeaderActionsContext";
+import RegenerateHeaderButton from "@/app/components/RegenerateHeaderButton";
 interface LayoutProps {
   children: React.ReactNode;
 }
@@ -25,6 +26,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
   const [isOwner, setIsOwner] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [ownershipLoading, setOwnershipLoading] = useState(true);
+  const [hasResult, setHasResult] = useState(false);
 
   // Track completion data for each step (percentage)
   const [completionData, setCompletionData] = useState<{
@@ -121,6 +123,9 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
         // Check results (step 5)
         if (data.result) {
           newCompletionData[5] = 100;
+          setHasResult(true);
+        } else {
+          setHasResult(false);
         }
 
         // Check game plan (step 6)
@@ -179,6 +184,15 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
   return (
     <CaseHeaderActionsProvider>
     <div className="min-h-screen bg-gray-50">
+      {caseId && isAuthenticated && isOwner && (
+        <RegenerateHeaderButton
+          caseId={caseId}
+          hasResult={hasResult}
+          isOwner={isOwner}
+          isAuthenticated={isAuthenticated}
+          onRegenerateComplete={fetchCaseCompletion}
+        />
+      )}
       <Navbar />
 
       {/* Case Title Header - Show only if caseId exists */}

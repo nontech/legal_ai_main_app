@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useHeaderActions } from "./CaseHeaderActionsContext";
+import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 
 interface CaseTitleHeaderProps {
   caseId: string;
@@ -58,6 +59,7 @@ export default function CaseTitleHeader({
       if (res.ok) {
         setTitle(tempTitle.trim());
         setIsEditing(false);
+        dispatchCaseUpdated();
         onTitleUpdate?.(tempTitle.trim());
       } else {
         alert("Failed to update case title");

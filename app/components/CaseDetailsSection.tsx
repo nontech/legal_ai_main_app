@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
+import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -244,6 +245,8 @@ export default function CaseDetailsSection({
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error || "Failed to save");
       }
+
+      dispatchCaseUpdated();
 
       setCaseDetails(updateData);
     } catch (error) {

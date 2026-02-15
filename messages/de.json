@@ -872,6 +872,7 @@
       "failedToLoad": "Laden der Analyseergebnisse fehlgeschlagen",
       "regenerate": "Analyse neu generieren",
       "regenerating": "Wird generiert...",
+      "regenerateDisabled": "Änderungen an den Falldetails vornehmen, um die Regenerierung zu aktivieren",
       "print": "Drucken",
       "share": "Teilen",
       "showReasoning": "Analyse-Begründung anzeigen",
