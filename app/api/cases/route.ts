@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import {
+    getClientIp,
+    checkAnonymousCaseLimit,
+    incrementAnonymousCaseCount,
+    checkAndConsumeUserCredits,
+} from "@/lib/rateLimit";
 
 export async function GET(request: Request) {
     try {
@@ -47,9 +53,45 @@ export async function POST(request: Request) {
             }
 
             const isAuthed = Boolean(userRes?.user);
-            const client = isAuthed ? supabase : getSupabaseAdminClient();
             const ownerId = userRes?.user?.id ?? null;
+            const adminClient = getSupabaseAdminClient();
 
+            // Authenticated: check and consume case credits
+            if (isAuthed && userRes.user) {
+                const creditResult = await checkAndConsumeUserCredits(
+                    userRes.user.id,
+                    "case",
+                    adminClient
+                );
+                if (!creditResult.allowed) {
+                    return NextResponse.json(
+                        { ok: false, error: creditResult.error },
+                        { status: 402 }
+                    );
+                }
+            } else {
+                // Anonymous: check IP-based limit
+                const ip = getClientIp(request);
+                if (!ip) {
+                    return NextResponse.json(
+                        { ok: false, error: "Unable to verify request origin." },
+                        { status: 400 }
+                    );
+                }
+                const underLimit = await checkAnonymousCaseLimit(ip, adminClient);
+                if (!underLimit) {
+                    return NextResponse.json(
+                        {
+                            ok: false,
+                            error:
+                                "Anonymous case limit reached for today. Sign in for more.",
+                        },
+                        { status: 429 }
+                    );
+                }
+            }
+
+            const client = isAuthed ? supabase : adminClient;
             const { data, error } = await client
                 .from("cases")
                 .insert({
@@ -68,6 +110,12 @@ export async function POST(request: Request) {
 
             if (error) {
                 return NextResponse.json({ ok: false, error: error.message, code: error.code }, { status: 500 });
+            }
+
+            // Anonymous: increment count after successful insert
+            if (!isAuthed && ownerId === null) {
+                const ip = getClientIp(request);
+                if (ip) await incrementAnonymousCaseCount(ip, adminClient);
             }
 
             return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
@@ -101,9 +149,45 @@ export async function POST(request: Request) {
             return NextResponse.json({ ok: false, error: userErr.message }, { status: 500 });
         }
         const isAuthed = Boolean(userRes?.user);
-
-        const client = isAuthed ? supabase : getSupabaseAdminClient();
         const ownerId = userRes?.user?.id ?? null;
+        const adminClient = getSupabaseAdminClient();
+
+        // Authenticated: check and consume case credits
+        if (isAuthed && userRes?.user) {
+            const creditResult = await checkAndConsumeUserCredits(
+                userRes.user.id,
+                "case",
+                adminClient
+            );
+            if (!creditResult.allowed) {
+                return NextResponse.json(
+                    { ok: false, error: creditResult.error },
+                    { status: 402 }
+                );
+            }
+        } else {
+            // Anonymous: check IP-based limit
+            const ip = getClientIp(request);
+            if (!ip) {
+                return NextResponse.json(
+                    { ok: false, error: "Unable to verify request origin." },
+                    { status: 400 }
+                );
+            }
+            const underLimit = await checkAnonymousCaseLimit(ip, adminClient);
+            if (!underLimit) {
+                return NextResponse.json(
+                    {
+                        ok: false,
+                        error:
+                            "Anonymous case limit reached for today. Sign in for more.",
+                    },
+                    { status: 429 }
+                );
+            }
+        }
+
+        const client = isAuthed ? supabase : adminClient;
 
         // Calculate completion status: basic-info complete = 1/6 sections = ~16.67%
         const completionPercentage = Math.round((1 / 6) * 100);
@@ -135,6 +219,12 @@ export async function POST(request: Request) {
 
         if (error) {
             return NextResponse.json({ ok: false, error: error.message, code: error.code }, { status: 500 });
+        }
+
+        // Anonymous: increment count after successful insert
+        if (!isAuthed && ownerId === null) {
+            const ip = getClientIp(request);
+            if (ip) await incrementAnonymousCaseCount(ip, adminClient);
         }
 
         return NextResponse.json({ ok: true, id: data.id }, { status: 201 });

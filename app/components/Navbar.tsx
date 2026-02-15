@@ -15,12 +15,7 @@ function LanguageSelectorWrapper() {
   );
 }
 
-interface NavbarProps {
-  onPretrialClick?: () => void;
-  showPretrialButton?: boolean;
-}
-
-export default function Navbar({ onPretrialClick, showPretrialButton = false }: NavbarProps) {
+export default function Navbar() {
   const router = useRouter();
   const params = useParams();
   const country = params.country as string;
@@ -119,28 +114,6 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
-            {isAuthenticated && showPretrialButton && (
-              <button
-                onClick={onPretrialClick}
-                className="flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all duration-200 font-medium shadow-md hover:shadow-lg hover:scale-105"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                  />
-                </svg>
-                <span>{t("pretrialProcess")}</span>
-              </button>
-            )}
-
             <div className="px-3">
               <LanguageSelectorWrapper />
             </div>
@@ -275,31 +248,6 @@ export default function Navbar({ onPretrialClick, showPretrialButton = false }: 
             <div className="px-4 pb-3 border-b border-border-200">
               <LanguageSelectorWrapper />
             </div>
-
-            {isAuthenticated && showPretrialButton && (
-              <button
-                onClick={() => {
-                  onPretrialClick?.();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full text-left px-4 py-2.5 bg-gradient-to-r from-primary-700 to-primary-600 text-white hover:from-primary-800 hover:to-primary-700 rounded-lg transition-all duration-200 font-medium flex items-center gap-2"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                  />
-                </svg>
-                <span>{t("pretrialProcess")}</span>
-              </button>
-            )}
 
             {!isLoading && isAuthenticated ? (
               <>

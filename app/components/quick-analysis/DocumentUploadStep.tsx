@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import StreamingUploadDisplay from "../StreamingUploadDisplay";
+import { toast } from "@/hooks/use-toast";
 
 type DocumentCategory =
   | "case_information"
@@ -78,10 +79,22 @@ export default function DocumentUploadStep({
           if (json.ok && json.id) {
             setCaseId(json.id);
           } else {
-            console.error("Failed to create case:", json.error);
+            const msg = json?.error || "Failed to create case";
+            toast({
+              title: "Limit reached",
+              description: msg,
+              variant: "destructive",
+            });
+            caseCreationAttempted.current = false;
           }
         } catch (error) {
           console.error("Error creating case:", error);
+          toast({
+            title: "Error",
+            description: "Failed to create case. Please try again.",
+            variant: "destructive",
+          });
+          caseCreationAttempted.current = false;
         } finally {
           setIsCreatingCase(false);
         }

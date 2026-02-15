@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      anonymous_case_usage: {
+        Row: {
+          case_count: number
+          created_at: string
+          id: string
+          ip_hash: string
+          usage_date: string
+        }
+        Insert: {
+          case_count?: number
+          created_at?: string
+          id?: string
+          ip_hash: string
+          usage_date: string
+        }
+        Update: {
+          case_count?: number
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          usage_date?: string
+        }
+        Relationships: []
+      }
       cases: {
         Row: {
           case_details: Json | null
@@ -62,6 +86,39 @@ export type Database = {
           role?: string | null
           status?: string | null
           verdict?: Json | null
+        }
+        Relationships: []
+      }
+      user_daily_usage: {
+        Row: {
+          analyses_used: number
+          cases_created: number
+          created_at: string
+          game_plans_used: number
+          id: string
+          updated_at: string
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          analyses_used?: number
+          cases_created?: number
+          created_at?: string
+          game_plans_used?: number
+          id?: string
+          updated_at?: string
+          usage_date: string
+          user_id: string
+        }
+        Update: {
+          analyses_used?: number
+          cases_created?: number
+          created_at?: string
+          game_plans_used?: number
+          id?: string
+          updated_at?: string
+          usage_date?: string
+          user_id?: string
         }
         Relationships: []
       }

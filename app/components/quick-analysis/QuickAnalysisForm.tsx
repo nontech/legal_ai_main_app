@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { toast } from "@/hooks/use-toast";
 import JurisdictionSection from "../JurisdictionSection";
 import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
@@ -455,7 +456,8 @@ export default function QuickAnalysisForm({
         "quickAnalysisData",
         JSON.stringify(formData)
       );
-      alert(e instanceof Error ? e.message : "Error analyzing case. Please try again.");
+      const msg = e instanceof Error ? e.message : "Error analyzing case. Please try again.";
+      toast({ title: "Error", description: msg, variant: "destructive" });
     }
   };
 

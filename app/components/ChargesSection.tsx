@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 import { useTranslations } from "next-intl";
 
 interface Charge {
@@ -133,6 +134,8 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error || "Failed to save charges");
       }
+
+      dispatchCaseUpdated();
 
       // Notify parent that charges have been saved (complete if any charges exist)
       if (onCompletionChange && (charges || []).length > 0) {

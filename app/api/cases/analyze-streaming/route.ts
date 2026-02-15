@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
 
 export async function POST(
     request: NextRequest
@@ -29,6 +31,23 @@ export async function POST(
                 { ok: false, error: "Case not found" },
                 { status: 404 }
             );
+        }
+
+        // Credit check for authenticated users who own the case
+        const { data: userRes } = await supabase.auth.getUser();
+        if (userRes?.user && caseData.owner_id === userRes.user.id) {
+            const adminClient = getSupabaseAdminClient();
+            const creditResult = await checkAndConsumeUserCredits(
+                userRes.user.id,
+                "analysis",
+                adminClient
+            );
+            if (!creditResult.allowed) {
+                return NextResponse.json(
+                    { ok: false, error: creditResult.error },
+                    { status: 402 }
+                );
+            }
         }
 
         const jurisdiction = (caseData.jurisdiction ?? {}) as {
