@@ -3,11 +3,17 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import HeroSection from "@/app/components/dashboard/HeroSection";
+// V1 components — commented out for V2 landing page
+// import HeroSection from "@/app/components/dashboard/HeroSection";
+// import UseCases from "@/app/components/UseCases";
+
 import CasePortfolio from "@/app/components/dashboard/CasePortfolio";
 import ConfidentialByDesign from "@/app/components/dashboard/ConfidentialByDesign";
-
-import UseCases from "@/app/components/UseCases";
+import HeroSectionV2 from "@/app/components/dashboard/HeroSectionV2";
+import WhatWeDo from "@/app/components/dashboard/WhatWeDo";
+import HowItWorks from "@/app/components/dashboard/HowItWorks";
+import WhatYouGet from "@/app/components/dashboard/WhatYouGet";
+import WhoItsFor from "@/app/components/dashboard/WhoItsFor";
 
 export const dynamic = "force-dynamic";
 
@@ -112,36 +118,40 @@ export default function Dashboard() {
             <CasePortfolio />
           </main>
 
-          {/* Hero Section */}
-          <HeroSection />
+          {/* How It Works — process reminder for returning users */}
+          <HowItWorks />
 
-          {/* Confidential by Design Section */}
-          <ConfidentialByDesign />
-          {/* Who are you? Section */}
+          {/* V1 components commented out
+          <HeroSection />
           <UseCases />
+          */}
         </>
       )}
 
-      {/* Unauthenticated User Layout: Hero → Portfolio → Others */}
+      {/* Unauthenticated User Layout: V2 storytelling arc */}
       {!isCheckingAuth && !isAuthenticated && (
         <>
-          <div className="pt-20">
-            {/* Hero Section */}
-            <HeroSection />
+          <div className="pt-24">
+            <HeroSectionV2 />
           </div>
 
-          {/* Main Content */}
-          <main
-            className={`max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-8 `}
-          >
-            {/* Case Portfolio */}
+          {/* Case Portfolio with sign-in blur overlay */}
+          <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-8">
             <CasePortfolio />
           </main>
 
+          <WhatWeDo />
+          <HowItWorks />
+          <WhatYouGet />
+          <WhoItsFor />
+
           {/* Confidential by Design Section */}
           <ConfidentialByDesign />
-          {/* Who are you? Section */}
+
+          {/* V1 components commented out
+          <HeroSection />
           <UseCases />
+          */}
         </>
       )}
 
