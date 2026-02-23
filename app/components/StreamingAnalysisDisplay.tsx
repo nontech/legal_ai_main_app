@@ -548,9 +548,11 @@ export default function StreamingAnalysisDisplay({
                                         // Don't call onComplete immediately - let user click "View Results"
                                     }
 
-                                    // Handle errors
+                                    // Handle errors - set state and break; don't throw (inner catch would swallow)
                                     if (event.type === "error") {
-                                        throw new Error(event.message);
+                                        setError(event.message || "An error occurred");
+                                        setIsLoading(false);
+                                        return;
                                     }
                                 } catch (e) {
                                     console.error("Failed to parse event:", dataStr, e);
@@ -663,6 +665,14 @@ export default function StreamingAnalysisDisplay({
         }
     }, [groupedSteps]);
 
+    // Gracefully exit modal on error: auto-close after showing error briefly
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => onClose(), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, onClose]);
+
     if (!isOpen) return null;
 
     if (creditLimitReached) {
@@ -685,10 +695,10 @@ export default function StreamingAnalysisDisplay({
     return (
         <div className="fixed inset-0 z-[9999] overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 pt-4 pb-20">
-                {/* Background overlay - prevent closing while loading */}
+                {/* Background overlay - allow close when complete or on error */}
                 <div
                     className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-                    onClick={isComplete ? onClose : undefined}
+                    onClick={isComplete || error ? onClose : undefined}
                 ></div>
 
                 {/* Modal panel */}
@@ -770,11 +780,18 @@ export default function StreamingAnalysisDisplay({
                             <div className="bg-critical-50 border border-critical-200 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
                                     <span className="text-2xl">❌</span>
-                                    <div>
+                                    <div className="flex-1">
                                         <h3 className="font-semibold text-critical-900">
                                             {t("errorTitle")}
                                         </h3>
                                         <p className="text-sm text-critical-700 mt-1">{error}</p>
+                                        <button
+                                            type="button"
+                                            onClick={onClose}
+                                            className="mt-3 py-2 px-4 rounded-lg bg-critical-600 hover:bg-critical-700 text-white font-medium text-sm transition-colors"
+                                        >
+                                            Close
+                                        </button>
                                     </div>
                                 </div>
                             </div>

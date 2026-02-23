@@ -228,8 +228,17 @@ export default function StreamingUploadDisplay({
       }
 
       // If we didn't get a complete event, check if we have a result
-      if (!allComplete && lastResultRef.current) {
+      if (lastResultRef.current) {
         setProgress(100);
+        setAllComplete(true);
+      } else {
+        setEvents((prev) => [
+          ...prev,
+          {
+            type: "error",
+            message: "Upload stream ended unexpectedly. The backend may have timed out or encountered an error. Try again or check that your Azure backend is running.",
+          },
+        ]);
         setAllComplete(true);
       }
     } catch (err) {
@@ -270,6 +279,15 @@ export default function StreamingUploadDisplay({
       return () => clearTimeout(timer);
     }
   }, [allComplete, onComplete, onClose]);
+
+  // Gracefully exit modal on error: auto-close after showing error briefly
+  const hasError = allComplete && !lastResultRef.current && events.some((e) => e.type === "error");
+  useEffect(() => {
+    if (hasError) {
+      const timer = setTimeout(() => onClose(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [hasError, onClose]);
 
   if (!isOpen || files.length === 0) return null;
 
@@ -327,7 +345,7 @@ export default function StreamingUploadDisplay({
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                    {allComplete ? "Upload Complete!" : "Uploading & Extracting Information..."}
+                    {hasError ? "Upload Failed" : allComplete ? "Upload Complete!" : "Uploading & Extracting Information..."}
                   </h2>
                   <p className="text-primary-100 text-xs sm:text-sm truncate">
                     {files.length} file{files.length !== 1 ? "s" : ""}{fileCategory !== "multiple" && ` • ${fileCategory}`}
@@ -422,6 +440,19 @@ export default function StreamingUploadDisplay({
               </div>
             ))}
           </div>
+
+          {/* Footer with Close button on error */}
+          {hasError && (
+            <div className="bg-surface-100 border-t border-border-200 px-4 sm:px-8 py-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-2.5 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

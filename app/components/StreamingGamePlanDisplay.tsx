@@ -180,9 +180,10 @@ export default function StreamingGamePlanDisplay({
                                     setAllComplete(true);
                                 }
 
-                                // Handle errors
+                                // Handle errors - event already added above; set complete and exit
                                 if (event.type === "error") {
-                                    throw new Error(event.message);
+                                    setAllComplete(true);
+                                    return;
                                 }
                             } catch (e) {
                                 console.error("Failed to parse event:", dataStr, e);
@@ -235,6 +236,15 @@ export default function StreamingGamePlanDisplay({
             return () => clearTimeout(timer);
         }
     }, [allComplete, onComplete, onClose]);
+
+    // Gracefully exit modal on error: auto-close after showing error briefly
+    const hasError = allComplete && !lastResultRef.current && events.some((e) => e.type === "error");
+    useEffect(() => {
+        if (hasError) {
+            const timer = setTimeout(() => onClose(), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [hasError, onClose]);
 
     if (!isOpen) return null;
 
@@ -304,7 +314,7 @@ export default function StreamingGamePlanDisplay({
                                 </div>
                                 <div className="min-w-0">
                                     <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
-                                        {allComplete ? t("completeTitle") : t("generatingTitle")}
+                                        {hasError ? "Generation Failed" : allComplete ? t("completeTitle") : t("generatingTitle")}
                                     </h2>
                                     <p className="text-primary-100 text-xs sm:text-sm truncate">
                                         {t("generatingSubtitle")}
@@ -403,6 +413,19 @@ export default function StreamingGamePlanDisplay({
                             });
                         })()}
                     </div>
+
+                    {/* Footer with Close button on error */}
+                    {hasError && (
+                        <div className="bg-surface-100 border-t border-border-200 px-4 sm:px-8 py-4">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-full py-2.5 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-medium transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
