@@ -502,15 +502,11 @@ export default function ProgressStepper({
                     </div>
                   </div>
 
-                  {/* Step Label - highlighted up to current step */}
+                  {/* Step Label - neutral text; only icons show progress */}
                   <div className="ml-3 flex-1 text-left">
                     <div
                       className={`text-sm font-semibold transition-colors ${
-                        index <= currentStep
-                          ? index === currentStep
-                            ? "text-blue-700"
-                            : "text-blue-600"
-                          : "text-gray-500 group-hover:text-gray-700"
+                        index === currentStep ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700"
                       }`}
                     >
                       {getStepLabel(step.id)}
