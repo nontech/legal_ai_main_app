@@ -11,8 +11,8 @@ export default function HeroSectionV2() {
   const locale = params.locale as string;
 
   return (
-    <section className="bg-gradient-to-br from-surface-050 via-white to-primary-50/30 text-ink-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-32 lg:pt-14 lg:pb-40">
+    <section className="bg-gradient-to-br from-surface-050 via-white to-primary-50/30 text-ink-900 min-h-screen flex items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 lg:py-28 w-full">
         <div className="max-w-3xl mx-auto text-center">
           {/* Headline */}
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-8 whitespace-nowrap">
