@@ -10,14 +10,6 @@ export default function HeroSectionV2() {
   const country = params.country as string;
   const locale = params.locale as string;
 
-  const scenarios = [
-    { key: "scenario1" as const, comingSoon: false },
-    { key: "scenario2" as const, comingSoon: false },
-    { key: "scenario3" as const, comingSoon: false },
-    { key: "scenario4" as const, comingSoon: false },
-    { key: "scenario5" as const, comingSoon: false },
-  ];
-
   return (
     <section className="bg-gradient-to-br from-surface-050 via-white to-primary-50/30 text-ink-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-32 lg:pt-14 lg:pb-40">
@@ -60,32 +52,6 @@ export default function HeroSectionV2() {
                 />
               </svg>
             </Link>
-          </div>
-        </div>
-
-        {/* Common Scenarios */}
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {scenarios.map(({ key, comingSoon }) => (
-              <span
-                key={key}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-colors duration-200 ${
-                  comingSoon
-                    ? "bg-surface-100 text-ink-400 border-border-200"
-                    : "bg-white text-ink-700 border-border-200 hover:border-primary-300 hover:bg-primary-50/50"
-                }`}
-              >
-                {!comingSoon && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0" />
-                )}
-                <span>{t(key)}</span>
-                {comingSoon && (
-                  <span className="text-xs text-ink-400 ml-1">
-                    ({t("scenarioComingSoon")})
-                  </span>
-                )}
-              </span>
-            ))}
           </div>
         </div>
       </div>
