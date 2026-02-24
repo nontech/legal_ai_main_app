@@ -90,6 +90,24 @@
     "step3Title": "Erstellen Sie gerichtstaugliche Dokumente",
     "step3Desc": "Schreiben, Antworten, Schriftsätze. Fertig in Minuten."
   },
+  "confidentialByDesign": {
+    "headingPrimary": "Vertraulichkeit",
+    "headingAccent": "von Anfang an",
+    "subheading": "Juristische Arbeit ist sensibel. TheLawThing wird mit Sicherheit und Vertraulichkeit als Grundprinzipien entwickelt – nicht als nachträglicher Gedanke.",
+    "card1Title": "Datenschutz",
+    "card1Item1": "Nicht zum Trainieren allgemeiner KI-Modelle verwendet",
+    "card1Item2": "Daten sind auf Ihren Workspace isoliert",
+    "card2Title": "Verschlüsselung",
+    "card2Item1": "TLS für Daten während der Übertragung",
+    "card2Item2": "Verschlüsselung ruhender Daten",
+    "card3Title": "Zugriffskontrolle",
+    "card3Item1": "Nur Ihr Workspace sieht Ihre Fälle",
+    "card3Item2": "Rollenbasierte Berechtigungen für Teams",
+    "card4Title": "Compliance-Ausrichtung",
+    "card4Item1": "DSGVO-konforme Infrastruktur",
+    "card4Item2": "EU- und internationale Datenschutzstandards",
+    "cta": "Mehr über Sicherheit erfahren"
+  },
   "whatYouGet": {
     "heading": "Was Sie bekommen",
     "feature1Title": "Schritt-für-Schritt-Anleitung",

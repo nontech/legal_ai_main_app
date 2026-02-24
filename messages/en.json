@@ -90,6 +90,24 @@
     "step3Title": "Create court-ready documents",
     "step3Desc": "Letters, responses, filings. Done in minutes."
   },
+  "confidentialByDesign": {
+    "headingPrimary": "Confidential",
+    "headingAccent": "by design",
+    "subheading": "Legal work is sensitive. TheLawThing is built with security and confidentiality as first principles, not an afterthought.",
+    "card1Title": "Data privacy",
+    "card1Item1": "Not used to train general-purpose models",
+    "card1Item2": "Data isolated to your workspace",
+    "card2Title": "Encryption",
+    "card2Item1": "TLS for data in transit",
+    "card2Item2": "At-rest encryption for stored data",
+    "card3Title": "Access control",
+    "card3Item1": "Only your workspace sees your cases",
+    "card3Item2": "Role-based permissions for teams",
+    "card4Title": "Compliance alignment",
+    "card4Item1": "GDPR-compliant infrastructure",
+    "card4Item2": "EU and international privacy standards",
+    "cta": "Learn more about security"
+  },
   "whatYouGet": {
     "heading": "What you get",
     "feature1Title": "Step-by-step guidance",
