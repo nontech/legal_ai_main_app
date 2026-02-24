@@ -84,15 +84,11 @@
   "howItWorks": {
     "heading": "So funktioniert es",
     "step1Title": "Erzählen Sie uns von Ihrem Fall",
-    "step1Desc": "Geben Sie ein paar Details ein oder laden Sie Ihre Dokumente hoch.",
+    "step1Desc": "2–3 Minuten. Einfaches Deutsch oder laden Sie Ihre Dokumente hoch.",
     "step2Title": "Erhalten Sie Ihren Schritt-für-Schritt-Plan",
-    "step2Desc": "Wir zerlegen den Prozess in klare Aufgaben.",
-    "step3Title": "Erstellen Sie die benötigten Dokumente",
-    "step3Desc": "Schreiben, überprüfen und verbessern Sie Ihre Entwürfe.",
-    "step4Title": "Bleiben Sie organisiert",
-    "step4Desc": "Halten Sie Notizen, Dateien und Termine zusammen.",
-    "step5Title": "Wissen Sie, wann ein Anwalt nötig ist",
-    "step5Desc": "Wenn Ihr Fall zu komplex oder riskant wird, helfen wir Ihnen, die Momente zu erkennen, in denen ein Anwalt sinnvoll sein kann."
+    "step2Desc": "Was Sie jetzt tun. Was als Nächstes kommt. Worauf Sie achten müssen.",
+    "step3Title": "Erstellen Sie gerichtstaugliche Dokumente",
+    "step3Desc": "Schreiben, Antworten, Schriftsätze. Fertig in Minuten."
   },
   "whatYouGet": {
     "heading": "Was Sie bekommen",

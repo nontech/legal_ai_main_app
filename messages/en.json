@@ -84,15 +84,11 @@
   "howItWorks": {
     "heading": "How it works",
     "step1Title": "Tell us about your case",
-    "step1Desc": "Fill in a few details or upload your documents.",
+    "step1Desc": "2-3 minutes. Plain English or upload your documents.",
     "step2Title": "Get your step-by-step plan",
-    "step2Desc": "We break the process into clear tasks.",
-    "step3Title": "Create the documents you need",
-    "step3Desc": "Write, review, and improve your drafts.",
-    "step4Title": "Stay organized",
-    "step4Desc": "Keep notes, files, and dates together.",
-    "step5Title": "Know when to get a lawyer",
-    "step5Desc": "If your case gets too complex or high-risk, we help you spot the moments when a lawyer may be worth it."
+    "step2Desc": "What to do now. What comes next. What to watch for.",
+    "step3Title": "Create court-ready documents",
+    "step3Desc": "Letters, responses, filings. Done in minutes."
   },
   "whatYouGet": {
     "heading": "What you get",
