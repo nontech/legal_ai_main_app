@@ -1,23 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 export default function ConfidentialByDesign() {
+  const t = useTranslations("confidentialByDesign");
   const params = useParams();
-  const country = params?.country as string || 'us';
-  const locale = params?.locale as string || 'en';
+  const country = (params?.country as string) || "us";
+  const locale = (params?.locale as string) || "en";
   return (
     <section className="py-20 bg-gradient-to-br from-surface-050 via-surface-100 to-primary-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
             <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-accent-600 bg-clip-text text-transparent">
-              Confidential by design
+              {t("headingPrimary")} {t("headingAccent")}
             </span>
           </h2>
           <p className="text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
-            Legal work is sensitive. TheLawThing is built with security and confidentiality as first principles, not an afterthought.
+            {t("subheading")}
           </p>
 
           <div className="grid md:grid-cols-2 gap-8">
@@ -40,15 +42,17 @@ export default function ConfidentialByDesign() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-3 text-ink-900">Data privacy</h3>
+                  <h3 className="text-xl font-bold mb-3 text-ink-900">
+                    {t("card1Title")}
+                  </h3>
                   <ul className="space-y-2 text-ink-600">
                     <li className="flex items-start gap-2">
                       <span className="text-primary-600 mt-1">•</span>
-                      <span>Not used to train general-purpose models</span>
+                      <span>{t("card1Item1")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary-600 mt-1">•</span>
-                      <span>Data isolated to your workspace</span>
+                      <span>{t("card1Item2")}</span>
                     </li>
                   </ul>
                 </div>
@@ -74,15 +78,17 @@ export default function ConfidentialByDesign() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-3 text-ink-900">Encryption</h3>
+                  <h3 className="text-xl font-bold mb-3 text-ink-900">
+                    {t("card2Title")}
+                  </h3>
                   <ul className="space-y-2 text-ink-600">
                     <li className="flex items-start gap-2">
                       <span className="text-success-600 mt-1">•</span>
-                      <span>TLS for data in transit</span>
+                      <span>{t("card2Item1")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-success-600 mt-1">•</span>
-                      <span>At-rest encryption for stored data</span>
+                      <span>{t("card2Item2")}</span>
                     </li>
                   </ul>
                 </div>
@@ -108,15 +114,17 @@ export default function ConfidentialByDesign() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-3 text-ink-900">Access control</h3>
+                  <h3 className="text-xl font-bold mb-3 text-ink-900">
+                    {t("card3Title")}
+                  </h3>
                   <ul className="space-y-2 text-ink-600">
                     <li className="flex items-start gap-2">
                       <span className="text-accent-600 mt-1">•</span>
-                      <span>Only your workspace sees your cases</span>
+                      <span>{t("card3Item1")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-accent-600 mt-1">•</span>
-                      <span>Role-based permissions for teams</span>
+                      <span>{t("card3Item2")}</span>
                     </li>
                   </ul>
                 </div>
@@ -142,15 +150,17 @@ export default function ConfidentialByDesign() {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-3 text-ink-900">Compliance alignment</h3>
+                  <h3 className="text-xl font-bold mb-3 text-ink-900">
+                    {t("card4Title")}
+                  </h3>
                   <ul className="space-y-2 text-ink-600">
                     <li className="flex items-start gap-2">
                       <span className="text-info-600 mt-1">•</span>
-                      <span>GDPR-compliant infrastructure</span>
+                      <span>{t("card4Item1")}</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-info-600 mt-1">•</span>
-                      <span>EU and international privacy standards</span>
+                      <span>{t("card4Item2")}</span>
                     </li>
                   </ul>
                 </div>
@@ -163,7 +173,7 @@ export default function ConfidentialByDesign() {
               href={`/${country}/${locale}/security`}
               className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors"
             >
-              Learn more about security
+              {t("cta")}
               <svg
                 className="w-4 h-4"
                 fill="none"

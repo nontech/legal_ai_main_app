@@ -142,8 +142,8 @@ export default function Dashboard() {
 
           <WhatWeDo />
           <HowItWorks />
-          <WhatYouGet />
-          <WhoItsFor />
+          {/* <WhatYouGet /> */}
+          {/* <WhoItsFor /> */}
 
           {/* Confidential by Design Section */}
           <ConfidentialByDesign />
