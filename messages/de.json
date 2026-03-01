@@ -50,12 +50,13 @@
     "feature3Item3": "Klärungsfragen für Mandanten"
   },
   "heroV2": {
-    "headline": "Ihr KI-Anwalt. Sofort verfügbar.",
-    "tagline": "KI-gestützte Rechtshilfe. Ergebnisse auf menschlichem Niveau.",
-    "descriptionPart1": "TheLawThing analysiert Ihre Situation, entwirft Ihre Dokumente und zeigt Ihnen genau, was als Nächstes passiert – ohne die ",
-    "descriptionHighlight": "Beratungskosten von 500 €.",
-    "descriptionPart2": "",
-    "cta": "Starten"
+    "headline": "KI-gestützte Analyse für Mietstreitigkeiten",
+    "subheadline": "Verstehen Sie Ihre mietrechtliche Situation – wo Sie stehen, was zu tun ist und was Sie erwartet – ohne die <bold>500 € Beratungsgebühr</bold>",
+    "cta": "Kostenlos starten",
+    "whoItsForTitle": "Für wen ist es geeignet",
+    "whoItsForList1": "Mieter, die ihre Rechte verstehen wollen",
+    "whoItsForList2": "Vermieter, die rechtliche Risiken einschätzen wollen",
+    "whoItsForList3": "<bold>Jeden</bold>, der bei einem Mietstreit schnell Klarheit braucht"
   },
   "whatWeDo": {
     "heading": "Was wir tun",

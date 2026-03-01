@@ -50,12 +50,13 @@
     "feature3Item3": "Client clarification questions"
   },
   "heroV2": {
-    "headline": "Your AI lawyer. Available now.",
-    "tagline": "AI-powered legal help. Human-level results.",
-    "descriptionPart1": "TheLawThing analyzes your situation, drafts your documents, and shows you exactly what happens next - without the ",
-    "descriptionHighlight": "€500 consultation fee.",
-    "descriptionPart2": "",
-    "cta": "Start"
+    "headline": "AI-powered analysis for tenant–landlord disputes",
+    "subheadline": "Understand your rental law situation - where you stand, what to do next, and what to expect - without the <bold>€500 consultation fee</bold>",
+    "cta": "Start for free",
+    "whoItsForTitle": "Who it’s for",
+    "whoItsForList1": "Tenants who want to understand their rights",
+    "whoItsForList2": "Landlords who want to assess legal risks",
+    "whoItsForList3": "<bold>Anyone</bold> dealing with a rental dispute who needs clarity fast"
   },
   "whatWeDo": {
     "heading": "What we do",
