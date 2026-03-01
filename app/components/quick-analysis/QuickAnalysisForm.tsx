@@ -13,6 +13,7 @@ import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, 
 
 type DocumentCategory =
   | "case_information"
+  | "contracts"
   | "evidence_and_supporting_materials"
   | "relevant_legal_precedents"
   | "key_witness_and_testimony"
@@ -161,11 +162,18 @@ export default function QuickAnalysisForm({
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "primary", icon: "📋" },
+    contracts: { label: "Contracts", color: "primary", icon: "📄" },
     evidence_and_supporting_materials: { label: "Evidence & Materials", color: "accent", icon: "🔍" },
     relevant_legal_precedents: { label: "Legal Precedents", color: "success", icon: "⚖️" },
     key_witness_and_testimony: { label: "Witness & Testimony", color: "highlight", icon: "👤" },
     police_report: { label: "Police Report", color: "critical", icon: "🚔" },
     potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
+  };
+
+  const normalizeCategoryForDisplay = (cat: string): DocumentCategory => {
+    if (cat === "Contract" || cat === "contract") return "contracts";
+    if (cat === "key_witnesses_and_testimony") return "key_witness_and_testimony";
+    return cat as DocumentCategory;
   };
 
   const getCategoryColor = (color: string) => {
@@ -676,19 +684,28 @@ export default function QuickAnalysisForm({
 
           {/* Uploaded Documents Section */}
           {Object.keys(documentsByCategory).length > 0 && (() => {
-            // Flatten all files with their categories
-            const allFiles: Array<{ name: string; address: string; category: string }> = [];
+            // Dedupe files by name+address and collect all categories per file (supports multi-category)
+            const fileMap = new Map<string, { name: string; address: string; categories: string[] }>();
             Object.entries(documentsByCategory).forEach(([category, docData]) => {
               if (docData.files && docData.files.length > 0) {
                 docData.files.forEach((file) => {
-                  allFiles.push({
-                    name: file.name,
-                    address: file.address,
-                    category,
-                  });
+                  const key = `${file.name}:${file.address}`;
+                  const existing = fileMap.get(key);
+                  if (existing) {
+                    if (!existing.categories.includes(category)) {
+                      existing.categories.push(category);
+                    }
+                  } else {
+                    fileMap.set(key, {
+                      name: file.name,
+                      address: file.address,
+                      categories: [category],
+                    });
+                  }
                 });
               }
             });
+            const allFiles = Array.from(fileMap.values());
 
             return (
               <div className="bg-surface-000 p-6">
@@ -719,27 +736,28 @@ export default function QuickAnalysisForm({
                 </div>
 
                 <div className="space-y-2">
-                  {allFiles.map((file, idx) => {
-                    const categoryInfo = categoryLabels[file.category as DocumentCategory];
-                    if (!categoryInfo) return null;
-
-                    return (
-                      <div key={idx} className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors">
-                        <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
-                          <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo.color)}`}>
-                            <span>{categoryInfo.icon}</span>
-                            <span>{categoryInfo.label}</span>
-                          </span>
-                        </div>
+                  {allFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors">
+                      <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
+                        <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                       </div>
-                    );
-                  })}
+                      <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                        <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
+                        {file.categories.map((cat) => {
+                          const categoryInfo = categoryLabels[normalizeCategoryForDisplay(cat)];
+                          if (!categoryInfo) return null;
+                          return (
+                            <span key={cat} className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo.color)}`}>
+                              <span>{categoryInfo.icon}</span>
+                              <span>{categoryInfo.label}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             );

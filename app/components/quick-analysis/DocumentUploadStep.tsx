@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 
 type DocumentCategory =
   | "case_information"
+  | "contracts"
   | "evidence_and_supporting_materials"
   | "relevant_legal_precedents"
   | "key_witness_and_testimony"
@@ -16,7 +17,8 @@ type DocumentCategory =
 interface ClassifiedFile {
   id: string; // Unique identifier for the file
   file: File;
-  category?: DocumentCategory; // Category assigned after upload
+  category?: DocumentCategory; // Primary category (legacy)
+  categories?: DocumentCategory[]; // Multiple categories when backend assigns file to more than one
   isUploading?: boolean; // Whether file is currently being uploaded
 }
 
@@ -113,6 +115,11 @@ export default function DocumentUploadStep({
       color: "primary",
       icon: "📋",
     },
+    contracts: {
+      label: "Contracts",
+      color: "primary",
+      icon: "📄",
+    },
     evidence_and_supporting_materials: {
       label: "Evidence & Materials",
       color: "accent",
@@ -138,6 +145,36 @@ export default function DocumentUploadStep({
       color: "highlight",
       icon: "⚠️",
     },
+  };
+
+  const normalizeCategory = (cat: string): string => {
+    if (cat === "Contract" || cat === "contract") return "contracts";
+    if (cat === "key_witnesses_and_testimony") return "key_witness_and_testimony";
+    return cat;
+  };
+
+  const getCategoriesFromResult = (categoryResult: any): string[] => {
+    const cats = categoryResult.categories;
+    if (Array.isArray(cats) && cats.length > 0) {
+      return cats.map((c: string) => normalizeCategory(c));
+    }
+    const single = categoryResult.file_category || categoryResult.category;
+    return single ? [normalizeCategory(single)] : [];
+  };
+
+  const mergeFileIntoList = (
+    list: Array<{ name: string; address: string }>,
+    files: Array<{ name: string; address: string }>
+  ) => {
+    const seen = new Set(list.map((f) => `${f.name}:${f.address}`));
+    files.forEach((f) => {
+      const key = `${f.name}:${f.address}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        list.push(f);
+      }
+    });
+    return list;
   };
 
   const [isUploadingOpen, setIsUploadingOpen] = useState(false);
@@ -166,22 +203,34 @@ export default function DocumentUploadStep({
       > = {};
 
       result.category_results.forEach((categoryResult: any) => {
-        const category =
-          categoryResult.file_category || categoryResult.category;
+        const categories = getCategoriesFromResult(categoryResult);
+        const fileNames =
+          categoryResult.file_names || categoryResult.fileNames;
+        const fileAddresses =
+          categoryResult.file_addresses || categoryResult.fileAddresses;
         if (
-          category &&
-          categoryResult.file_names &&
-          categoryResult.file_addresses
+          categories.length > 0 &&
+          fileNames &&
+          fileAddresses
         ) {
-          documentsByCategory[category] = {
-            files: categoryResult.file_names.map(
-              (name: string, index: number) => ({
-                name,
-                address: categoryResult.file_addresses[index] || "",
-              })
-            ),
-            summary: categoryResult.summary,
-          };
+          const newFiles = fileNames.map(
+            (name: string, index: number) => ({
+              name,
+              address: fileAddresses[index] || "",
+            })
+          );
+          categories.forEach((category) => {
+            if (!documentsByCategory[category]) {
+              documentsByCategory[category] = { files: [], summary: categoryResult.summary };
+            }
+            documentsByCategory[category].files = mergeFileIntoList(
+              documentsByCategory[category].files,
+              newFiles
+            );
+            if (categoryResult.summary) {
+              documentsByCategory[category].summary = categoryResult.summary;
+            }
+          });
         }
       });
       console.log(
@@ -191,22 +240,32 @@ export default function DocumentUploadStep({
 
       setUploadedDocuments(documentsByCategory);
 
-      // Update classifiedFiles with categories from upload result
+      // Update classifiedFiles with categories from upload result (supports multiple categories per file)
       setClassifiedFiles((prev) => {
-        const fileMap = new Map<string, DocumentCategory>();
+        const fileMap = new Map<string, DocumentCategory[]>();
 
-        // Build map of file names to categories from upload result
         result.category_results?.forEach((categoryResult: any) => {
-          const category = (categoryResult.file_category ||
-            categoryResult.category) as DocumentCategory;
-          categoryResult.file_names?.forEach((fileName: string) => {
-            fileMap.set(fileName, category);
+          const categories = getCategoriesFromResult(categoryResult);
+          const fileNames =
+            categoryResult.file_names || categoryResult.fileNames;
+          fileNames?.forEach((fileName: string) => {
+            const cats = categories.map((c) => c as DocumentCategory);
+            if (cats.length > 0) {
+              const existing = fileMap.get(fileName) || [];
+              const merged = [...new Set([...existing, ...cats])];
+              fileMap.set(fileName, merged);
+            }
           });
         });
 
         return prev.map((cf) => {
-          const category = fileMap.get(cf.file.name);
-          return category ? { ...cf, category } : cf;
+          const categories = fileMap.get(cf.file.name);
+          if (!categories || categories.length === 0) return cf;
+          return {
+            ...cf,
+            category: categories[0],
+            categories,
+          };
         });
       });
     }
@@ -475,12 +534,9 @@ export default function DocumentUploadStep({
                     categoryResults
                   );
 
-                  // Find case_information category result
-                  const caseInfoResult = categoryResults.find(
-                    (catResult: any) =>
-                      catResult.file_category ===
-                      "case_information" ||
-                      catResult.category === "case_information"
+                  // Find case_information category result (supports categories array)
+                  const caseInfoResult = categoryResults.find((catResult: any) =>
+                    getCategoriesFromResult(catResult).includes("case_information")
                   );
 
                   if (caseInfoResult) {
@@ -568,9 +624,7 @@ export default function DocumentUploadStep({
                   > = {};
 
                   categoryResults.forEach((categoryResult: any) => {
-                    const category =
-                      categoryResult.file_category ||
-                      categoryResult.category;
+                    const categories = getCategoriesFromResult(categoryResult);
                     const fileNames =
                       categoryResult.file_names ||
                       categoryResult.fileNames;
@@ -578,16 +632,25 @@ export default function DocumentUploadStep({
                       categoryResult.file_addresses ||
                       categoryResult.fileAddresses;
 
-                    if (category && fileNames && fileAddresses) {
-                      documentsByCategory[category] = {
-                        files: fileNames.map(
-                          (name: string, index: number) => ({
-                            name,
-                            address: fileAddresses[index] || "",
-                          })
-                        ),
-                        summary: categoryResult.summary,
-                      };
+                    if (categories.length > 0 && fileNames && fileAddresses) {
+                      const newFiles = fileNames.map(
+                        (name: string, index: number) => ({
+                          name,
+                          address: fileAddresses[index] || "",
+                        })
+                      );
+                      categories.forEach((category) => {
+                        if (!documentsByCategory[category]) {
+                          documentsByCategory[category] = { files: [], summary: categoryResult.summary };
+                        }
+                        documentsByCategory[category].files = mergeFileIntoList(
+                          documentsByCategory[category].files,
+                          newFiles
+                        );
+                        if (categoryResult.summary) {
+                          documentsByCategory[category].summary = categoryResult.summary;
+                        }
+                      });
                     }
                   });
 
@@ -614,13 +677,10 @@ export default function DocumentUploadStep({
                       // Build case details update with file info for each category
                       const caseDetailsUpdate: Record<string, any> =
                         {};
-                      let completionCount = 0;
 
                       categoryResults.forEach(
                         (categoryResult: any) => {
-                          const category =
-                            categoryResult.file_category ||
-                            categoryResult.category;
+                          const categories = getCategoriesFromResult(categoryResult);
                           const fileNames =
                             categoryResult.file_names ||
                             categoryResult.fileNames;
@@ -629,30 +689,38 @@ export default function DocumentUploadStep({
                             categoryResult.fileAddresses;
 
                           if (
-                            category &&
+                            categories.length > 0 &&
                             fileNames &&
                             fileAddresses
                           ) {
-                            const files = fileNames.map(
+                            const newFiles = fileNames.map(
                               (name: string, index: number) => ({
                                 name,
                                 address: fileAddresses[index] || "",
                               })
                             );
 
-                            caseDetailsUpdate[category] = {
-                              files,
-                              summary: categoryResult.summary || "",
-                              summaryGenerated:
-                                !!categoryResult.summary,
-                            };
-                            completionCount++;
+                            categories.forEach((category) => {
+                              const existing = caseDetailsUpdate[category];
+                              const existingFiles = existing?.files || [];
+                              const mergedFiles = mergeFileIntoList([...existingFiles], newFiles);
+
+                              caseDetailsUpdate[category] = {
+                                files: mergedFiles,
+                                summary: categoryResult.summary || existing?.summary || "",
+                                summaryGenerated:
+                                  !!categoryResult.summary || !!existing?.summaryGenerated,
+                              };
+                            });
                           }
                         }
                       );
 
+                      const sectionsWithContent = Object.keys(caseDetailsUpdate).filter(
+                        (k) => (caseDetailsUpdate[k]?.files?.length ?? 0) > 0
+                      ).length;
                       const completionPercentage = Math.round(
-                        (completionCount / 6) * 100
+                        Math.min(100, (sectionsWithContent / 7) * 100)
                       );
 
                       // Also update case_information with case name and description

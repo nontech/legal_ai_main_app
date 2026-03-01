@@ -59,6 +59,7 @@ export async function POST(
 
         const caseDetails = (caseData.case_details ?? {}) as {
             case_information?: Record<string, any>;
+            contracts?: Record<string, any>;
             evidence_and_supporting_materials?: Record<string, any>;
             relevant_legal_precedents?: Record<string, any>;
             key_witness_and_testimony?: Record<string, any>;
@@ -68,6 +69,8 @@ export async function POST(
         };
 
         const caseInformation = caseDetails.case_information ?? {};
+        const contractsSummary =
+            caseDetails.contracts?.summary ?? null;
         const evidenceSummary =
             caseDetails.evidence_and_supporting_materials?.summary ?? null;
         const legalPrecedentSummary =
@@ -100,6 +103,7 @@ export async function POST(
                 key_witnesses_summary: keyWitnessSummary || null,
                 police_report_summary: policeReportSummary || null,
                 weaknesses_summary: weaknessesSummary || null,
+                contracts_summary: contractsSummary || null,
                 case_id: caseId,
             },
             language_code,

@@ -732,6 +732,8 @@
       "sectionsCompleted": "Sections Completed",
       "caseInformation": "Case Information",
       "caseInformationDesc": "Add case title and comprehensive description with supporting documents",
+      "contracts": "Contracts",
+      "contractsDesc": "Upload contracts and agreement documents",
       "evidence": "Evidence & Supporting Materials",
       "evidenceDesc": "Upload photos, forensic reports, expert reports, and supporting documents",
       "witness": "Key Witness & Testimony",

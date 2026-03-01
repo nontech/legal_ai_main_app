@@ -732,6 +732,8 @@
       "sectionsCompleted": "Abschnitte abgeschlossen",
       "caseInformation": "Fallinformationen",
       "caseInformationDesc": "Fügen Sie den Falltitel und eine umfassende Beschreibung mit unterstützenden Dokumenten hinzu",
+      "contracts": "Verträge",
+      "contractsDesc": "Laden Sie Verträge und Vereinbarungsdokumente hoch",
       "evidence": "Beweise & Unterstützungsmaterialien",
       "evidenceDesc": "Laden Sie Fotos, forensische Berichte, Expertenberichte und unterstützende Dokumente hoch",
       "witness": "Hauptzeuge & Aussage",

@@ -34,6 +34,7 @@ interface SectionData {
 // Map database keys to UI section IDs
 const DB_TO_UI_MAP: Record<string, string> = {
   "case_information": "case-info",
+  "contracts": "contracts",
   "evidence_and_supporting_materials": "evidence",
   "key_witness_and_testimony": "witnesses",
   "relevant_legal_precedents": "precedents",
@@ -47,6 +48,7 @@ const UI_TO_DB_MAP: Record<string, string> = Object.fromEntries(
 
 const SECTION_ICONS: Record<string, string> = {
   "case_information": "📋",
+  "contracts": "📄",
   "evidence_and_supporting_materials": "📎",
   "key_witness_and_testimony": "👥",
   "relevant_legal_precedents": "⚖️",
@@ -56,6 +58,7 @@ const SECTION_ICONS: Record<string, string> = {
 
 const SECTION_KEYS: string[] = [
   "case_information",
+  "contracts",
   "evidence_and_supporting_materials",
   "key_witness_and_testimony",
   "relevant_legal_precedents",
@@ -65,6 +68,7 @@ const SECTION_KEYS: string[] = [
 
 const DB_KEY_TO_TRANS_KEY: Record<string, string> = {
   "case_information": "caseInformation",
+  "contracts": "contracts",
   "evidence_and_supporting_materials": "evidence",
   "key_witness_and_testimony": "witness",
   "relevant_legal_precedents": "legalPrecedents",
@@ -74,6 +78,7 @@ const DB_KEY_TO_TRANS_KEY: Record<string, string> = {
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   "case_information": { label: "Case Information", color: "primary", icon: "📋" },
+  "contracts": { label: "Contracts", color: "primary", icon: "📄" },
   "evidence_and_supporting_materials": { label: "Evidence & Materials", color: "accent", icon: "🔍" },
   "key_witness_and_testimony": { label: "Witness & Testimony", color: "highlight", icon: "👤" },
   "relevant_legal_precedents": { label: "Legal Precedents", color: "success", icon: "⚖️" },

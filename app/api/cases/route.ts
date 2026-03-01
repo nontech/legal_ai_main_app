@@ -203,6 +203,11 @@ export async function POST(request: Request) {
                         summary: "",
                         summaryGenerated: false,
                     },
+                    "contracts": {
+                        files: [],
+                        summary: "",
+                        summaryGenerated: false,
+                    },
                     _completion_status: completionPercentage,
                 },
                 jurisdiction,
