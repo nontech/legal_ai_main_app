@@ -73,12 +73,12 @@
   },
   "howItWorks": {
     "heading": "How it works",
-    "step1Title": "Tell us about your case",
-    "step1Desc": "2-3 minutes. Plain English or upload your documents.",
-    "step2Title": "Get your step-by-step plan",
-    "step2Desc": "What to do now. What comes next. What to watch for.",
-    "step3Title": "Create court-ready documents",
-    "step3Desc": "Letters, responses, filings. Done in minutes."
+    "step1Title": "Describe your rental situation",
+    "step1Desc": "2-3 minutes. Plain English or upload relevant documents.",
+    "step2Title": "AI analyzes legal patterns & scenarios",
+    "step2Desc": "AI identifies key issues, timelines, and arguments that typically matter.",
+    "step3Title": "You get clear insights + ready-to-send documents",
+    "step3Desc": "What to do now. What comes next. What to watch for.\n\nPlus drafts (Letters, responses, filings) you can use right away."
   },
   "confidentialByDesign": {
     "headingPrimary": "Confidential",

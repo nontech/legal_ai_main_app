@@ -73,12 +73,12 @@
   },
   "howItWorks": {
     "heading": "So funktioniert es",
-    "step1Title": "Erzählen Sie uns von Ihrem Fall",
-    "step1Desc": "2–3 Minuten. Einfaches Deutsch oder laden Sie Ihre Dokumente hoch.",
-    "step2Title": "Erhalten Sie Ihren Schritt-für-Schritt-Plan",
-    "step2Desc": "Was Sie jetzt tun. Was als Nächstes kommt. Worauf Sie achten müssen.",
-    "step3Title": "Erstellen Sie gerichtstaugliche Dokumente",
-    "step3Desc": "Schreiben, Antworten, Schriftsätze. Fertig in Minuten."
+    "step1Title": "Beschreiben Sie Ihre Mietstreitigkeit",
+    "step1Desc": "2–3 Minuten. Einfaches Deutsch oder laden Sie relevante Dokumente hoch.",
+    "step2Title": "KI analysiert Rechtsmuster & Szenarien",
+    "step2Desc": "Die KI ermittelt zentrale Punkte, zeitliche Abläufe und typisch relevante Argumente.",
+    "step3Title": "Sie erhalten klare Einblicke + versandfertige Dokumente",
+    "step3Desc": "Was Sie jetzt tun. Was als Nächstes kommt. Worauf Sie achten müssen.\n\nAußerdem Entwürfe (Schreiben, Antworten, Schriftsätze), die Sie sofort nutzen können."
   },
   "confidentialByDesign": {
     "headingPrimary": "Vertraulichkeit",
