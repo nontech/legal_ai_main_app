@@ -60,21 +60,16 @@
   },
   "whatWeDo": {
     "heading": "Was wir tun",
-    "leadPart1": "TheLawThing ist ein KI-Anwalt, der Ihren Fall analysiert wie ein ",
-    "leadHighlightRate": "Anwalt für 500 € pro Stunde",
-    "leadPart2": " – in ",
-    "leadHighlightTime": "3 Minuten statt in 3 Wochen",
-    "leadPart3": "",
+    "lead": "TheLawThing gibt Ihnen eine schnelle, erste rechtliche Einschätzung Ihrer Mietstreitigkeit – wie ein <bold>Anwalt für 500 €/Stunde</bold> – <bold>in 3 Minuten</bold> statt <bold>3 Wochen</bold>",
     "intro": "Das bieten wir an",
-    "item1Title": "Sofortige Fallanalyse",
+    "item1Title": "Sofortige Situationsanalyse",
     "item1Desc": "Wo Sie stehen, welchen Hebel Sie haben und wie stark Ihre Position ist",
-    "item2Title": "Ihre nächsten Schritte",
-    "item2Desc": "Werden sie klagen? Können Sie sich einigen? Was passiert als Nächstes? Lernen Sie Ihre wahrscheinlichen Ergebnisse kennen",
+    "item2Title": "Wahrscheinliche <bold>nächste Schritte</bold> & Ergebnisse",
+    "item2Desc": "Werden sie klagen? Können Sie sich einigen? Was passiert als Nächstes? Kennen Sie Ihre Optionen",
     "item3Title": "Gerichtsfertige Dokumente",
-    "item3Desc": "Schreiben, Antworten, Klageschriften. Fertig in Minuten statt in Tagen.",
+    "item3Desc": "Schreiben, Antworten, Klageschriften. Klar, vollständig und anpassungsfähig. Fertig in Minuten, nicht Tagen.",
     "item4Title": "Ihre Exit-Strategie",
-    "item4Desc": "Wann Sie Druck machen, wann Sie sich einigen und wann Sie tatsächlich einen Anwalt beauftragen sollten",
-    "outro": "Gewinnen Sie Klarheit, bevor Sie Tausende ausgeben"
+    "item4Desc": "Wann Sie Druck machen, wann Sie sich einigen und wann Sie tatsächlich einen Anwalt beauftragen sollten"
   },
   "howItWorks": {
     "heading": "So funktioniert es",

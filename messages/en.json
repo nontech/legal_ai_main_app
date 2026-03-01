@@ -60,21 +60,16 @@
   },
   "whatWeDo": {
     "heading": "What we do",
-    "leadPart1": "TheLawThing is an AI lawyer that analyzes your case like a ",
-    "leadHighlightRate": "€500/hour lawyer",
-    "leadPart2": " would – in ",
-    "leadHighlightTime": "3 minutes instead of 3 weeks",
-    "leadPart3": "",
+    "lead": "TheLawThing gives you a fast, first legal view of your rental issue like a <bold>€500/hour lawyer</bold> would - <bold>in 3 minutes</bold> instead of <bold>3 weeks</bold>",
     "intro": "Here is what we offer",
-    "item1Title": "Instant case analysis",
+    "item1Title": "Instant situation analysis",
     "item1Desc": "Where you stand, what leverage you have, how strong your position is",
-    "item2Title": "Your next moves",
-    "item2Desc": "Will they sue? Can you settle? What happens next? Know your likely outcomes",
+    "item2Title": "Likely <bold>next moves</bold> & outcomes",
+    "item2Desc": "Will they sue? Can you settle? What happens next? Know your options",
     "item3Title": "Court-ready documents",
-    "item3Desc": "Letters, responses, court filings. Done in minutes, not days.",
+    "item3Desc": "Letters, responses, court filings. Clear, complete, and ready to adapt. Done in minutes, not days.",
     "item4Title": "Your exit strategy",
-    "item4Desc": "When to push, when to settle, when to actually hire a lawyer",
-    "outro": "Get clarity before spending thousands"
+    "item4Desc": "When to push, when to settle, when to actually hire a lawyer"
   },
   "howItWorks": {
     "heading": "How it works",
