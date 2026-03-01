@@ -641,6 +641,7 @@
       "jurisdiction": "Gerichtsbarkeit",
       "caseType": "Falltyp",
       "role": "Rolle",
+      "tenancyStatus": "Mietstatus",
       "charges": "Anklagen",
       "claims": "Ansprüche",
       "caseDetails": "Falldetails",
@@ -708,6 +709,18 @@
       "stepTitle": "Wählen Sie Ihre Rolle",
       "positionDesc": "Ihre Position in diesem Fall"
     },
+    "tenancy": {
+      "stepTitle": "Mietstatus",
+      "positionDesc": "Ihre Position im Mietstreit",
+      "selectTitle": "Mietstatus wählen",
+      "selectDescription": "Wählen Sie, ob Sie Mieter oder Vermieter in diesem Streit sind.",
+      "selectionConfirmed": "Mietstatus bestätigt",
+      "selectionConfirmedDesc": "Sie haben {status} ausgewählt. Die Analyse wird auf Ihre Position zugeschnitten.",
+      "tenant": "Mieter",
+      "landlord": "Vermieter",
+      "tenantSubtitle": "Sie mieten die Immobilie",
+      "landlordSubtitle": "Sie besitzen oder verwalten die Immobilie"
+    },
     "charges": {
       "title": "Anklagepunkte",
       "titleClaims": "Ansprüche",
@@ -741,6 +754,8 @@
       "sectionsCompleted": "Abschnitte abgeschlossen",
       "caseInformation": "Fallinformationen",
       "caseInformationDesc": "Fügen Sie den Falltitel und eine umfassende Beschreibung mit unterstützenden Dokumenten hinzu",
+      "contracts": "Verträge",
+      "contractsDesc": "Laden Sie Verträge und Vereinbarungsdokumente hoch",
       "evidence": "Beweise & Unterstützungsmaterialien",
       "evidenceDesc": "Laden Sie Fotos, forensische Berichte, Expertenberichte und unterstützende Dokumente hoch",
       "witness": "Hauptzeuge & Aussage",
@@ -986,10 +1001,15 @@
     "calculateStep": "Ergebnisse berechnen",
     "dropFiles": "Dateien hier ablegen oder klicken",
     "fileTypes": "PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max. 10 MB",
+    "documentTypesHint": "Laden Sie Dokumente zu Mietstreitigkeiten hoch, z.B. Mietverträge, Mietquittungen, Korrespondenz mit Vermieter/Mieter, Wartungsanfragen oder Räumungsklagen.",
     "processButton": "Dokumente verarbeiten & automatisch ausfüllen",
     "skipLink": "Überspringen und Falldetails manuell eingeben",
     "calculateButton": "Ergebnisse berechnen",
     "fillRequiredFields": "Bitte füllen Sie alle erforderlichen Felder aus, um fortzufahren",
-    "loading": "Wird geladen..."
+    "loading": "Wird geladen...",
+    "tenancyStatus": "Mietstatus",
+    "tenancyStatusDesc": "Ihre Position im Mietstreit",
+    "tenant": "Mieter",
+    "landlord": "Vermieter"
   }
 }

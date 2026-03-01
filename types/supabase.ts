@@ -53,6 +53,7 @@ export type Database = {
           result: Json | null
           role: string | null
           status: string | null
+          tenancy_status: string | null
           verdict: Json | null
         }
         Insert: {
@@ -69,6 +70,7 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          tenancy_status?: string | null
           verdict?: Json | null
         }
         Update: {
@@ -85,6 +87,7 @@ export type Database = {
           result?: Json | null
           role?: string | null
           status?: string | null
+          tenancy_status?: string | null
           verdict?: Json | null
         }
         Relationships: []

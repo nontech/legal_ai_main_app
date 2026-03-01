@@ -28,18 +28,16 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
   const [ownershipLoading, setOwnershipLoading] = useState(true);
   const [hasResult, setHasResult] = useState(false);
 
-  // Track completion data for each step (percentage)
+  // Track completion data for each step (percentage) - 6 steps: jurisdiction, tenancy, role, case-details, results, game-plan
   const [completionData, setCompletionData] = useState<{
     [key: number]: number;
   }>({
     0: 0, // Jurisdiction
-    1: 0, // Case Type
+    1: 0, // Tenancy status
     2: 0, // Role
-    3: 0, // Charges
-    4: 0, // Case Details
-    5: 0, // Results
-    6: 0, // Game Plan
-    7: 0, // Verdict
+    3: 0, // Case Details
+    4: 0, // Results
+    5: 0, // Game Plan
   });
 
   // Fetch case data and calculate completion percentages
@@ -79,26 +77,23 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           3: 0,
           4: 0,
           5: 0,
-          6: 0,
-          7: 0,
         };
 
-        // Check jurisdiction (step 0)
-        const courtValue =
-          data.jurisdiction?.court || data.jurisdiction?.court_name;
+        // Check jurisdiction (step 0) - court not required (hidden in UI)
         if (
           data.jurisdiction &&
           data.jurisdiction.country &&
-          data.jurisdiction.jurisdiction &&
-          courtValue
+          data.jurisdiction.jurisdiction
         ) {
           newCompletionData[0] = 100;
         }
 
-        // Check case type (step 1)
-        if (data.case_type) {
+        // Case type hidden - not shown in sidebar (still set for charges/claims label)
+        if (data.case_type) setCaseType(data.case_type);
+
+        // Check tenancy status (step 1)
+        if (data.tenancy_status) {
           newCompletionData[1] = 100;
-          setCaseType(data.case_type);
         }
 
         // Check role (step 2)
@@ -106,36 +101,24 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
           newCompletionData[2] = 100;
         }
 
-        // Check charges (step 3)
-        if (
-          data.charges &&
-          Array.isArray(data.charges) &&
-          data.charges.length > 0
-        ) {
-          newCompletionData[3] = 100;
-        }
+        // Charges/claims and verdict hidden from sidebar - skip
 
-        // Check case details (step 4)
+        // Check case details (step 3)
         if (data.case_details?._completion_status !== undefined) {
-          newCompletionData[4] = data.case_details._completion_status;
+          newCompletionData[3] = data.case_details._completion_status;
         }
 
-        // Check results (step 5)
+        // Check results (step 4)
         if (data.result) {
-          newCompletionData[5] = 100;
+          newCompletionData[4] = 100;
           setHasResult(true);
         } else {
           setHasResult(false);
         }
 
-        // Check game plan (step 6)
+        // Check game plan (step 5)
         if (data.game_plan) {
-          newCompletionData[6] = 100;
-        }
-
-        // Check verdict (step 7)
-        if (data.verdict && Object.keys(data.verdict).length > 0) {
-          newCompletionData[7] = 100;
+          newCompletionData[5] = 100;
         }
 
         setCompletionData(newCompletionData);
@@ -149,32 +132,26 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
     fetchCaseCompletion();
   }, [caseId, fetchCaseCompletion]);
 
-  const isCriminal =
-    !caseType || caseType.toLowerCase() === "criminal";
-
   const steps = [
     {
       id: "jurisdiction",
       label: t("steps.jurisdiction"),
       icon: null,
     },
-    { id: "case-type", label: t("steps.caseType"), icon: null },
+    { id: "tenancy", label: t("steps.tenancyStatus"), icon: null },
     { id: "role", label: t("steps.role"), icon: null },
-    {
-      id: "charges",
-      label: isCriminal ? t("steps.charges") : t("steps.claims"),
-      icon: null,
-    },
     { id: "case-details", label: t("steps.caseDetails"), icon: null },
     { id: "results", label: t("steps.results"), icon: null },
     { id: "game-plan", label: t("steps.gamePlan"), icon: null },
-    { id: "verdict", label: t("steps.verdict"), icon: null },
   ];
 
-  // Determine current step from pathname
+  // Determine current step from pathname (map hidden routes to nearest visible step)
   const getCurrentStep = () => {
     const pathSegments = pathname.split("/");
     const lastSegment = pathSegments[pathSegments.length - 1];
+    if (lastSegment === "case-type") return 2; // Map to role
+    if (lastSegment === "charges") return 3; // Map to case-details
+    if (lastSegment === "verdict") return 5; // Map to game-plan
     const stepIndex = steps.findIndex(step => step.id === lastSegment);
     return stepIndex >= 0 ? stepIndex : 0;
   };

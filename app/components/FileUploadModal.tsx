@@ -39,6 +39,7 @@ type ViewType = "upload" | "summary";
 
 type DocumentCategory =
   | "case_information"
+  | "contracts"
   | "evidence_and_supporting_materials"
   | "relevant_legal_precedents"
   | "key_witness_and_testimony"

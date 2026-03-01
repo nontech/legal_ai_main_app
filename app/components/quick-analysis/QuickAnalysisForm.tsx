@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import JurisdictionSection from "../JurisdictionSection";
-import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
 import StreamingAnalysisDisplay from "../StreamingAnalysisDisplay";
@@ -13,6 +12,7 @@ import { Coins, Scale, Gavel, Briefcase, Heart, Anchor, Home, Building2, Globe, 
 
 type DocumentCategory =
   | "case_information"
+  | "contracts"
   | "evidence_and_supporting_materials"
   | "relevant_legal_precedents"
   | "key_witness_and_testimony"
@@ -89,9 +89,10 @@ export default function QuickAnalysisForm({
     jurisdiction_code: "",
     court_name: "",
   });
-  // Store the case type as its string id that API expects
-  const [caseTypeId, setCaseTypeId] = useState<string>("");
+  // Store the case type as its string id that API expects (hidden in quick analysis, default civil)
+  const [caseTypeId, setCaseTypeId] = useState<string>("civil");
   const [role, setRole] = useState<string>("plaintiff" as RoleType);
+  const [tenancyStatus, setTenancyStatus] = useState<"tenant" | "landlord">("tenant");
 
   // Update state when metadata arrives from document upload
   useEffect(() => {
@@ -161,11 +162,18 @@ export default function QuickAnalysisForm({
 
   const categoryLabels: Record<DocumentCategory, { label: string; color: string; icon: string }> = {
     case_information: { label: "Case Information", color: "primary", icon: "📋" },
+    contracts: { label: "Contracts", color: "primary", icon: "📄" },
     evidence_and_supporting_materials: { label: "Evidence & Materials", color: "accent", icon: "🔍" },
     relevant_legal_precedents: { label: "Legal Precedents", color: "success", icon: "⚖️" },
     key_witness_and_testimony: { label: "Witness & Testimony", color: "highlight", icon: "👤" },
     police_report: { label: "Police Report", color: "critical", icon: "🚔" },
     potential_challenges_and_weaknesses: { label: "Challenges & Weaknesses", color: "highlight", icon: "⚠️" },
+  };
+
+  const normalizeCategoryForDisplay = (cat: string): DocumentCategory => {
+    if (cat === "Contract" || cat === "contract") return "contracts";
+    if (cat === "key_witnesses_and_testimony") return "key_witness_and_testimony";
+    return cat as DocumentCategory;
   };
 
   const getCategoryColor = (color: string) => {
@@ -305,12 +313,8 @@ export default function QuickAnalysisForm({
       alert("Comprehensive Case Description is required.");
       return false;
     }
-    if (!jurisdiction?.country?.trim() || !jurisdiction?.jurisdiction?.trim() || !jurisdiction?.court_name?.trim()) {
-      alert("All jurisdiction fields (Country, Jurisdiction, Court) are required.");
-      return false;
-    }
-    if (!caseTypeId?.trim()) {
-      alert("Case Type is required.");
+    if (!jurisdiction?.country?.trim() || !jurisdiction?.jurisdiction?.trim()) {
+      alert("Country and Jurisdiction are required.");
       return false;
     }
     if (!role?.trim()) {
@@ -386,6 +390,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            tenancy_status: tenancyStatus,
             charges: normalizedCharges,
             field: "case_details",
             value: caseDetailsUpdate,
@@ -407,6 +412,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            tenancy_status: tenancyStatus,
             charges: normalizedCharges,
             result: null,
           }),
@@ -427,6 +433,7 @@ export default function QuickAnalysisForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             caseId: targetCaseId,
+            tenancy_status: tenancyStatus,
             field: "case_details",
             value: {
               _completion_status: completionPercentage,
@@ -444,6 +451,7 @@ export default function QuickAnalysisForm({
           jurisdiction,
           case_type: caseTypeId,
           role,
+          tenancyStatus,
         })
       );
 
@@ -502,15 +510,51 @@ export default function QuickAnalysisForm({
             initialValues={jurisdiction}
             hideSaveButton={true}
             showExtractedBadge={!!uploadedMetadata?.extractedFields?.jurisdiction}
+            hideCourtName={true}
           />
 
-          {/* Case Type */}
-          <CompactCaseType
-            initialCaseTypeId={caseTypeId || undefined}
-            countryId={countryId}
-            onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
-            showExtractedBadge={!!uploadedMetadata?.extractedFields?.caseType}
-          />
+          {/* Tenancy Status */}
+          <div className="bg-surface-000 p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center flex-1 min-w-0">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
+                  <Home className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
+                    {tPage("tenancyStatus")}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-ink-600">
+                    {tPage("tenancyStatusDesc")}
+                  </p>
+                </div>
+              </div>
+              <div className="w-full sm:w-auto flex-1 flex gap-2 items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setTenancyStatus("tenant")}
+                  className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg border font-medium transition-colors ${
+                    tenancyStatus === "tenant"
+                      ? "bg-primary-100 border-primary-500 text-primary-700"
+                      : "border-border-200 text-ink-600 hover:bg-surface-100"
+                  }`}
+                >
+                  {tPage("tenant")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTenancyStatus("landlord")}
+                  className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg border font-medium transition-colors ${
+                    tenancyStatus === "landlord"
+                      ? "bg-primary-100 border-primary-500 text-primary-700"
+                      : "border-border-200 text-ink-600 hover:bg-surface-100"
+                  }`}
+                >
+                  {tPage("landlord")}
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Role */}
           <div className="relative">
@@ -676,19 +720,28 @@ export default function QuickAnalysisForm({
 
           {/* Uploaded Documents Section */}
           {Object.keys(documentsByCategory).length > 0 && (() => {
-            // Flatten all files with their categories
-            const allFiles: Array<{ name: string; address: string; category: string }> = [];
+            // Dedupe files by name+address and collect all categories per file (supports multi-category)
+            const fileMap = new Map<string, { name: string; address: string; categories: string[] }>();
             Object.entries(documentsByCategory).forEach(([category, docData]) => {
               if (docData.files && docData.files.length > 0) {
                 docData.files.forEach((file) => {
-                  allFiles.push({
-                    name: file.name,
-                    address: file.address,
-                    category,
-                  });
+                  const key = `${file.name}:${file.address}`;
+                  const existing = fileMap.get(key);
+                  if (existing) {
+                    if (!existing.categories.includes(category)) {
+                      existing.categories.push(category);
+                    }
+                  } else {
+                    fileMap.set(key, {
+                      name: file.name,
+                      address: file.address,
+                      categories: [category],
+                    });
+                  }
                 });
               }
             });
+            const allFiles = Array.from(fileMap.values());
 
             return (
               <div className="bg-surface-000 p-6">
@@ -719,27 +772,28 @@ export default function QuickAnalysisForm({
                 </div>
 
                 <div className="space-y-2">
-                  {allFiles.map((file, idx) => {
-                    const categoryInfo = categoryLabels[file.category as DocumentCategory];
-                    if (!categoryInfo) return null;
-
-                    return (
-                      <div key={idx} className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors">
-                        <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
-                          <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                        </div>
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo.color)}`}>
-                            <span>{categoryInfo.icon}</span>
-                            <span>{categoryInfo.label}</span>
-                          </span>
-                        </div>
+                  {allFiles.map((file, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-3 bg-surface-50 rounded-lg border border-border-100 hover:border-border-200 hover:bg-surface-100 transition-colors">
+                      <div className="flex items-center justify-center w-8 h-8 bg-primary-50 rounded flex-shrink-0">
+                        <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                       </div>
-                    );
-                  })}
+                      <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                        <span className="text-sm font-medium text-ink-900 truncate">{file.name}</span>
+                        {file.categories.map((cat) => {
+                          const categoryInfo = categoryLabels[normalizeCategoryForDisplay(cat)];
+                          if (!categoryInfo) return null;
+                          return (
+                            <span key={cat} className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border flex-shrink-0 ${getCategoryColor(categoryInfo.color)}`}>
+                              <span>{categoryInfo.icon}</span>
+                              <span>{categoryInfo.label}</span>
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             );
@@ -757,8 +811,6 @@ export default function QuickAnalysisForm({
                 !caseDescription?.trim() ||
                 !jurisdiction?.country?.trim() ||
                 !jurisdiction?.jurisdiction?.trim() ||
-                !jurisdiction?.court_name?.trim() ||
-                !caseTypeId?.trim() ||
                 !role?.trim()}
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center justify-center gap-2 sm:gap-3"
             >
@@ -781,8 +833,6 @@ export default function QuickAnalysisForm({
               !caseDescription?.trim() ||
               !jurisdiction?.country?.trim() ||
               !jurisdiction?.jurisdiction?.trim() ||
-              !jurisdiction?.court_name?.trim() ||
-              !caseTypeId?.trim() ||
               !role?.trim()) && (
                 <p className="text-center text-sm text-ink-500 mt-2">
                   {tPage("fillRequiredFields")}
