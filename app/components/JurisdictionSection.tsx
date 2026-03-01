@@ -55,6 +55,7 @@ interface JurisdictionSectionProps {
   initialValues?: Partial<JurisdictionData>;
   hideSaveButton?: boolean;
   showExtractedBadge?: boolean;
+  hideCourtName?: boolean;
 }
 
 // Helper: Calculate string similarity (Levenshtein distance)
@@ -115,6 +116,7 @@ export default function JurisdictionSection({
   initialValues,
   hideSaveButton = false,
   showExtractedBadge = false,
+  hideCourtName = false,
 }: JurisdictionSectionProps) {
   const params = useParams();
   const locale = (params.locale as string) || "en";
@@ -804,7 +806,7 @@ export default function JurisdictionSection({
     const isComplete = !!(
       countryValue &&
       jurisdictionValue &&
-      courtValue
+      (hideCourtName || courtValue)
     );
 
     // Notify completion change
@@ -874,6 +876,7 @@ export default function JurisdictionSection({
     initialValues?.court_name,
     selectedCountryCode,
     selectedJurisdictionCode,
+    hideCourtName,
   ]);
 
   // Render
@@ -987,7 +990,7 @@ export default function JurisdictionSection({
             } ${isCompact ? "mb-0" : "mb-8"}`}
           >
             {/* Country */}
-            <div>
+            <div className={isCompact && hideCourtName ? "md:col-span-2" : ""}>
               <label className="block text-sm font-medium text-ink-700 mb-2">
                 {t("country")} <span className="text-red-500">*</span>
               </label>
@@ -1010,7 +1013,7 @@ export default function JurisdictionSection({
             </div>
 
             {/* Jurisdiction */}
-            <div>
+            <div className={isCompact && hideCourtName ? "md:col-span-2" : ""}>
               <label className="block text-sm font-medium text-ink-700 mb-2">
                 {t("stateProvince")}{" "}
                 <span className="text-red-500">*</span>
@@ -1040,51 +1043,53 @@ export default function JurisdictionSection({
             </div>
 
             {/* Court */}
-            <div className={isCompact ? "md:col-span-2" : ""}>
-              <label className="block text-sm font-medium text-ink-700 mb-2">
-                {t("courtName")}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              {/* Show dropdown when we have courts available or a valid jurisdiction */}
-              {jurisdiction !== "__other__" ? (
-                <>
-                  <SearchableSelect
-                    options={courtOptions.map((c) => ({
-                      value: c,
-                      label: c,
-                    }))}
-                    value={court}
-                    onChange={handleCourtChange}
-                    placeholder={t("selectCourt")}
-                    disabled={isLoadingCourts || (!jurisdictionId && !courts.length)}
-                    allowOther
+            {!hideCourtName && (
+              <div className={isCompact ? "md:col-span-2" : ""}>
+                <label className="block text-sm font-medium text-ink-700 mb-2">
+                  {t("courtName")}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                {/* Show dropdown when we have courts available or a valid jurisdiction */}
+                {jurisdiction !== "__other__" ? (
+                  <>
+                    <SearchableSelect
+                      options={courtOptions.map((c) => ({
+                        value: c,
+                        label: c,
+                      }))}
+                      value={court}
+                      onChange={handleCourtChange}
+                      placeholder={t("selectCourt")}
+                      disabled={isLoadingCourts || (!jurisdictionId && !courts.length)}
+                      allowOther
+                    />
+                    {court === "__other__" && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={customCourt}
+                          onChange={(e) => setCustomCourt(e.target.value)}
+                          placeholder={t("enterCourt")}
+                          className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
+                        />
+                        <p className="mt-1 text-xs text-ink-500">
+                          {t("selectFromDropdown") || "Select from dropdown above to change, or enter custom court name"}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  /* When jurisdiction is "Other", show direct text input for court */
+                  <input
+                    type="text"
+                    value={customCourt}
+                    onChange={(e) => setCustomCourt(e.target.value)}
+                    placeholder={t("enterCourt")}
+                    className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
                   />
-                  {court === "__other__" && (
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={customCourt}
-                        onChange={(e) => setCustomCourt(e.target.value)}
-                        placeholder={t("enterCourt")}
-                        className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
-                      />
-                      <p className="mt-1 text-xs text-ink-500">
-                        {t("selectFromDropdown") || "Select from dropdown above to change, or enter custom court name"}
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                /* When jurisdiction is "Other", show direct text input for court */
-                <input
-                  type="text"
-                  value={customCourt}
-                  onChange={(e) => setCustomCourt(e.target.value)}
-                  placeholder={t("enterCourt")}
-                  className="w-full px-3 py-2 border border-border-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-ink-900"
-                />
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

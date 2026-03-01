@@ -93,6 +93,7 @@ export async function POST(
                 court: (jurisdiction.court as string) || null,
                 case_type: caseData.case_type || null,
                 role: caseData.role || null,
+                tenancy_status: caseData.tenancy_status || null,
                 case_number: null,
                 case_title: caseInformation.caseName || null,
                 case_description: caseInformation.caseDescription || null,

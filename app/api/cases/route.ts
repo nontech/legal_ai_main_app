@@ -132,6 +132,7 @@ export async function POST(request: Request) {
             charges = null,
             judge = null,
             jury = null,
+            tenancy_status = null,
         } = await request.json();
         console.log(caseName, caseDescription, jurisdiction, case_type, role, result, charges, judge, jury);
 
@@ -213,6 +214,7 @@ export async function POST(request: Request) {
                 jurisdiction,
                 case_type,
                 role,
+                tenancy_status,
                 charges,
                 judge,
                 jury,

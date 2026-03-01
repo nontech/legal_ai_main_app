@@ -5,7 +5,6 @@ import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "@/hooks/use-toast";
 import JurisdictionSection from "../JurisdictionSection";
-import CompactCaseType from "./CompactCaseType";
 import CompactRole from "./CompactRole";
 import MarkdownRenderer from "../MarkdownRenderer";
 import StreamingAnalysisDisplay from "../StreamingAnalysisDisplay";
@@ -90,9 +89,10 @@ export default function QuickAnalysisForm({
     jurisdiction_code: "",
     court_name: "",
   });
-  // Store the case type as its string id that API expects
-  const [caseTypeId, setCaseTypeId] = useState<string>("");
+  // Store the case type as its string id that API expects (hidden in quick analysis, default civil)
+  const [caseTypeId, setCaseTypeId] = useState<string>("civil");
   const [role, setRole] = useState<string>("plaintiff" as RoleType);
+  const [tenancyStatus, setTenancyStatus] = useState<"tenant" | "landlord">("tenant");
 
   // Update state when metadata arrives from document upload
   useEffect(() => {
@@ -313,12 +313,8 @@ export default function QuickAnalysisForm({
       alert("Comprehensive Case Description is required.");
       return false;
     }
-    if (!jurisdiction?.country?.trim() || !jurisdiction?.jurisdiction?.trim() || !jurisdiction?.court_name?.trim()) {
-      alert("All jurisdiction fields (Country, Jurisdiction, Court) are required.");
-      return false;
-    }
-    if (!caseTypeId?.trim()) {
-      alert("Case Type is required.");
+    if (!jurisdiction?.country?.trim() || !jurisdiction?.jurisdiction?.trim()) {
+      alert("Country and Jurisdiction are required.");
       return false;
     }
     if (!role?.trim()) {
@@ -394,6 +390,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            tenancy_status: tenancyStatus,
             charges: normalizedCharges,
             field: "case_details",
             value: caseDetailsUpdate,
@@ -415,6 +412,7 @@ export default function QuickAnalysisForm({
             jurisdiction,
             case_type: caseTypeId,
             role,
+            tenancy_status: tenancyStatus,
             charges: normalizedCharges,
             result: null,
           }),
@@ -435,6 +433,7 @@ export default function QuickAnalysisForm({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             caseId: targetCaseId,
+            tenancy_status: tenancyStatus,
             field: "case_details",
             value: {
               _completion_status: completionPercentage,
@@ -452,6 +451,7 @@ export default function QuickAnalysisForm({
           jurisdiction,
           case_type: caseTypeId,
           role,
+          tenancyStatus,
         })
       );
 
@@ -510,15 +510,51 @@ export default function QuickAnalysisForm({
             initialValues={jurisdiction}
             hideSaveButton={true}
             showExtractedBadge={!!uploadedMetadata?.extractedFields?.jurisdiction}
+            hideCourtName={true}
           />
 
-          {/* Case Type */}
-          <CompactCaseType
-            initialCaseTypeId={caseTypeId || undefined}
-            countryId={countryId}
-            onUpdate={(ct: any) => setCaseTypeId(ct?.id)}
-            showExtractedBadge={!!uploadedMetadata?.extractedFields?.caseType}
-          />
+          {/* Tenancy Status */}
+          <div className="bg-surface-000 p-3 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-start sm:items-center flex-1 min-w-0">
+                <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-primary-100 rounded-lg mr-2 sm:mr-3 flex-shrink-0">
+                  <Home className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-bold text-ink-900 mb-1">
+                    {tPage("tenancyStatus")}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-ink-600">
+                    {tPage("tenancyStatusDesc")}
+                  </p>
+                </div>
+              </div>
+              <div className="w-full sm:w-auto flex-1 flex gap-2 items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => setTenancyStatus("tenant")}
+                  className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg border font-medium transition-colors ${
+                    tenancyStatus === "tenant"
+                      ? "bg-primary-100 border-primary-500 text-primary-700"
+                      : "border-border-200 text-ink-600 hover:bg-surface-100"
+                  }`}
+                >
+                  {tPage("tenant")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTenancyStatus("landlord")}
+                  className={`flex-1 sm:flex-initial px-4 py-2 rounded-lg border font-medium transition-colors ${
+                    tenancyStatus === "landlord"
+                      ? "bg-primary-100 border-primary-500 text-primary-700"
+                      : "border-border-200 text-ink-600 hover:bg-surface-100"
+                  }`}
+                >
+                  {tPage("landlord")}
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Role */}
           <div className="relative">
@@ -775,8 +811,6 @@ export default function QuickAnalysisForm({
                 !caseDescription?.trim() ||
                 !jurisdiction?.country?.trim() ||
                 !jurisdiction?.jurisdiction?.trim() ||
-                !jurisdiction?.court_name?.trim() ||
-                !caseTypeId?.trim() ||
                 !role?.trim()}
               className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-primary-500 text-white rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-primary-600 transition-colors shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed disabled:hover:shadow-md flex items-center justify-center gap-2 sm:gap-3"
             >
@@ -799,8 +833,6 @@ export default function QuickAnalysisForm({
               !caseDescription?.trim() ||
               !jurisdiction?.country?.trim() ||
               !jurisdiction?.jurisdiction?.trim() ||
-              !jurisdiction?.court_name?.trim() ||
-              !caseTypeId?.trim() ||
               !role?.trim()) && (
                 <p className="text-center text-sm text-ink-500 mt-2">
                   {tPage("fillRequiredFields")}

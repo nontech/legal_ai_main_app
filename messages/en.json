@@ -645,6 +645,7 @@
       "jurisdiction": "Jurisdiction",
       "caseType": "Case Type",
       "role": "Role",
+      "tenancyStatus": "Tenancy status",
       "charges": "Charges",
       "claims": "Claims",
       "caseDetails": "Case Details",
@@ -711,6 +712,18 @@
       "selectionConfirmedDesc": "You have selected {role}. The analysis will be tailored to your strategic position and legal burden in this case.",
       "stepTitle": "Select Your Role",
       "positionDesc": "Your position in this case"
+    },
+    "tenancy": {
+      "stepTitle": "Tenancy status",
+      "positionDesc": "Your position in the rental dispute",
+      "selectTitle": "Select tenancy status",
+      "selectDescription": "Choose whether you are the tenant or the landlord in this dispute.",
+      "selectionConfirmed": "Tenancy status confirmed",
+      "selectionConfirmedDesc": "You have selected {status}. The analysis will be tailored to your position.",
+      "tenant": "Tenant",
+      "landlord": "Landlord",
+      "tenantSubtitle": "Renting the property",
+      "landlordSubtitle": "Owning or managing the property"
     },
     "charges": {
       "title": "Charges",
@@ -992,10 +1005,15 @@
     "calculateStep": "Calculate Results",
     "dropFiles": "Drop files here or click",
     "fileTypes": "PDF, DOC, DOCX, TXT, JPG, PNG, GIF • Max 10 MB",
+    "documentTypesHint": "Upload documents relevant to rental disputes, e.g. lease agreements, rent receipts, correspondence with landlord/tenant, maintenance requests, or eviction notices.",
     "processButton": "Process Documents & Auto-Fill",
     "skipLink": "Skip and enter case details manually",
     "calculateButton": "Calculate Results",
     "fillRequiredFields": "Please fill in all required fields to continue",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "tenancyStatus": "Tenancy status",
+    "tenancyStatusDesc": "Your position in the rental dispute",
+    "tenant": "Tenant",
+    "landlord": "Landlord"
   }
 }

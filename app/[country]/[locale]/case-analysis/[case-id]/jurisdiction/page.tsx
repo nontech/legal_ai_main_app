@@ -15,6 +15,7 @@ export default function JurisdictionPage() {
       caseId={caseId}
       onCountryChange={setCountryId}
       onJurisdictionChange={setJurisdictionId}
+      hideCourtName={true}
     />
   );
 }

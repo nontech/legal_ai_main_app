@@ -835,7 +835,18 @@ export default function DocumentUploadStep({
         <>
           <div className="bg-surface-000 p-8 mb-6">
             {classifiedFiles.length === 0 ? (
-              <div
+              <>
+                <div className="flex items-start gap-3 px-4 py-3 mb-5 rounded-lg bg-primary-50/80 border border-primary-100 max-w-xl mx-auto">
+                  <div className="flex-shrink-0 mt-0.5">
+                    <svg className="w-5 h-5 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <p className="text-sm sm:text-base text-ink-700 leading-relaxed">
+                    {t("documentTypesHint")}
+                  </p>
+                </div>
+                <div
                 className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${isUploading
                   ? "border-border-200"
                   : isDragActive
@@ -884,6 +895,7 @@ export default function DocumentUploadStep({
                   </p>
                 </label>
               </div>
+              </>
             ) : (
               <div className="space-y-3">
                 <div className="border border-border-200 rounded-lg p-5 bg-white">

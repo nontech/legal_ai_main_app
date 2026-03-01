@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 export async function PATCH(request: Request) {
     try {
-        const { caseId, field, value, case_type, role, jurisdiction, charges } = await request.json();
+        const { caseId, field, value, case_type, role, jurisdiction, charges, tenancy_status } = await request.json();
 
         if (!caseId) {
             return NextResponse.json(
@@ -99,6 +99,11 @@ export async function PATCH(request: Request) {
         // Add jurisdiction if provided
         if (jurisdiction !== undefined) {
             updateData.jurisdiction = jurisdiction;
+        }
+
+        // Add tenancy_status if provided
+        if (tenancy_status !== undefined) {
+            updateData.tenancy_status = tenancy_status;
         }
 
         // Add charges if provided

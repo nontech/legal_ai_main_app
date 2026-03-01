@@ -81,8 +81,8 @@ function NewCaseAnalysisContent() {
           0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0,
         };
 
-        const courtValue = data.jurisdiction?.court || data.jurisdiction?.court_name;
-        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction && courtValue) {
+        // Jurisdiction (step 0) - court not required (hidden in UI)
+        if (data.jurisdiction && data.jurisdiction.country && data.jurisdiction.jurisdiction) {
           newCompletionData[0] = 100;
         }
 
@@ -163,7 +163,7 @@ function NewCaseAnalysisContent() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} onJurisdictionChange={setJurisdictionId} />;
+        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} onJurisdictionChange={setJurisdictionId} hideCourtName={true} />;
       case 1:
         return <CaseTypeSelector caseId={caseId} countryId={countryId} />;
       case 2:
@@ -179,7 +179,7 @@ function NewCaseAnalysisContent() {
       case 7:
         return <VerdictStep caseId={caseId} />;
       default:
-        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} />;
+        return <JurisdictionSection caseId={caseId} onCountryChange={setCountryId} hideCourtName={true} />;
     }
   };
 
