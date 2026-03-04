@@ -166,6 +166,10 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
 
   const currentStep = getCurrentStep();
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [pathname]);
+
   return (
     <CaseHeaderActionsProvider>
     <div className="min-h-screen bg-gray-50">

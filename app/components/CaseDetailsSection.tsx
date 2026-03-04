@@ -140,6 +140,7 @@ export default function CaseDetailsSection({
   const [editedDescription, setEditedDescription] = useState<string>("");
   const [editedSummary, setEditedSummary] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -153,6 +154,7 @@ export default function CaseDetailsSection({
   const [caseDetails, setCaseDetails] = useState<CaseDetailsData>({});
   const caseDetailsRef = useRef<CaseDetailsData>({});
   const lastSavedSummaryRef = useRef<Record<string, string>>({});
+  const savedIndicatorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const uploadAbortControllerRef = useRef<AbortController | null>(null);
   const summaryAbortControllerRef = useRef<AbortController | null>(null);
   const navigationGuardResolverRef = useRef<((value: boolean) => void) | null>(null);
@@ -266,6 +268,7 @@ export default function CaseDetailsSection({
     if (!caseId) return;
 
     setIsSaving(true);
+    setJustSaved(false);
     setSaveError(null);
     try {
       const currentCaseDetails = caseDetailsRef.current;
@@ -317,6 +320,13 @@ export default function CaseDetailsSection({
       caseDetailsRef.current = updateData;
       lastSavedSummaryRef.current[sectionKey] = summaryText;
       onCompletionChange?.(updateData._completion_status || 0);
+      setJustSaved(true);
+      if (savedIndicatorTimerRef.current) {
+        clearTimeout(savedIndicatorTimerRef.current);
+      }
+      savedIndicatorTimerRef.current = setTimeout(() => {
+        setJustSaved(false);
+      }, 1800);
     } catch (error) {
       console.error("Failed to save section:", error);
       setSaveError(error instanceof Error ? error.message : "Failed to save section");
@@ -324,6 +334,14 @@ export default function CaseDetailsSection({
       setIsSaving(false);
     }
   }, [caseId, onCompletionChange]);
+
+  useEffect(() => {
+    return () => {
+      if (savedIndicatorTimerRef.current) {
+        clearTimeout(savedIndicatorTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSummaryBlur = () => {
     if (!caseId || isLoading) return;
@@ -860,6 +878,13 @@ export default function CaseDetailsSection({
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Saving...
+                      </span>
+                    ) : justSaved ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success-600">
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Saved
                       </span>
                     ) : (
                       <span className="text-xs text-ink-500 font-medium">Auto-save enabled</span>
