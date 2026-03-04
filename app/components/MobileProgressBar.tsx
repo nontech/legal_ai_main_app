@@ -40,8 +40,13 @@ export default function MobileProgressBar({
         return completionData[stepIndex] || 0;
     };
 
-    const handleStepNavigation = (stepIndex: number) => {
+    const handleStepNavigation = async (stepIndex: number) => {
         if (!caseId) return;
+        const navigationGuard = (window as any).__caseDetailsNavigationGuard;
+        if (typeof navigationGuard === "function") {
+            const canNavigate = await navigationGuard();
+            if (!canNavigate) return;
+        }
         const step = steps[stepIndex];
         if (step) {
             router.push(`/${country}/${locale}/case-analysis/${caseId}/${step.id}`);
@@ -92,7 +97,7 @@ export default function MobileProgressBar({
                                     <button
                                         key={step.id}
                                         onClick={() => {
-                                            handleStepNavigation(index);
+                                            void handleStepNavigation(index);
                                             setIsExpanded(false);
                                         }}
                                         className={`w-full flex items-center py-2.5 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${isCurrent

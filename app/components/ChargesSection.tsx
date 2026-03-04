@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 import { useTranslations } from "next-intl";
 
@@ -21,8 +21,12 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
   const t = useTranslations("caseAnalysis.charges");
   const [charges, setCharges] = useState<Charge[] | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [caseType, setCaseType] = useState<string>("criminal");
   const [isLoadingCaseType, setIsLoadingCaseType] = useState(true);
+  const hasInitializedRef = useRef(false);
+  const lastSavedChargesRef = useRef<string>("null");
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (caseId) {
@@ -44,17 +48,22 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
             if (caseData.charges && Array.isArray(caseData.charges)) {
               console.log("Case data charges:", caseData.charges);
               setCharges(caseData.charges);
+              lastSavedChargesRef.current = JSON.stringify(caseData.charges);
               if (caseData.charges.length > 0) {
                 // Notify parent that charges are complete
                 if (onCompletionChange) {
                   onCompletionChange(true);
                 }
               }
+            } else {
+              setCharges(null);
+              lastSavedChargesRef.current = "null";
             }
           }
         } catch (error) {
           console.error("Failed to fetch charges data:", error);
         } finally {
+          hasInitializedRef.current = true;
           setIsLoadingCaseType(false);
         }
       };
@@ -80,31 +89,8 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
   const removeCharge = (chargeId: string) => {
     const updatedCharges = (charges || []).filter((c) => c.id !== chargeId);
     setCharges(updatedCharges);
-
-    // Save to database immediately
-    if (caseId) {
-      const saveToDb = async () => {
-        try {
-          await fetch("/api/cases/update", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              caseId,
-              field: "charges",
-              value: updatedCharges.length > 0 ? updatedCharges : null,
-            }),
-          });
-
-          // Notify parent that charges have been removed/updated
-          if (onCompletionChange) {
-            onCompletionChange(updatedCharges.length > 0);
-          }
-        } catch (error) {
-          console.error("Failed to save charges:", error);
-        }
-      };
-
-      saveToDb();
+    if (onCompletionChange) {
+      onCompletionChange(updatedCharges.length > 0);
     }
   };
 
@@ -114,10 +100,11 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
     );
   };
 
-  const handleSaveCharges = async () => {
+  const saveChargesToDb = async (nextCharges: Charge[] | null) => {
     if (!caseId) return;
 
     setIsSaving(true);
+    setSaveError(null);
     try {
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -125,7 +112,7 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
         body: JSON.stringify({
           caseId,
           field: "charges",
-          value: charges,
+          value: nextCharges && nextCharges.length > 0 ? nextCharges : null,
         }),
       });
 
@@ -136,17 +123,54 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
       }
 
       dispatchCaseUpdated();
+      lastSavedChargesRef.current = JSON.stringify(
+        nextCharges && nextCharges.length > 0 ? nextCharges : null
+      );
 
       // Notify parent that charges have been saved (complete if any charges exist)
-      if (onCompletionChange && (charges || []).length > 0) {
-        onCompletionChange(true);
+      if (onCompletionChange) {
+        onCompletionChange((nextCharges || []).length > 0);
       }
     } catch (error) {
       console.error("Failed to save charges:", error);
+      setSaveError(error instanceof Error ? error.message : "Failed to save charges");
     } finally {
       setIsSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (!caseId || !hasInitializedRef.current) return;
+
+    const serializedCurrentCharges = JSON.stringify(
+      charges && charges.length > 0 ? charges : null
+    );
+    if (serializedCurrentCharges === lastSavedChargesRef.current) {
+      return;
+    }
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      saveChargesToDb(charges && charges.length > 0 ? charges : null);
+    }, 800);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [caseId, charges]);
+
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, []);
 
   const isCriminal = caseType?.toLowerCase() === "criminal";
   // Used for dynamic labels that are simple words, but we prefer full translation keys
@@ -313,30 +337,20 @@ export default function ChargesSection({ caseId, onCompletionChange }: ChargesSe
         </div>
       </div>
 
-      {/* Save Changes Button */}
+      {/* Autosave Status */}
       {caseId && (
-        <div className="flex justify-start">
-          <button
-            onClick={handleSaveCharges}
-            disabled={isSaving}
-            className="px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-          >
-            {isSaving ? (
-              <>
-                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                {t("saving")}
-              </>
-            ) : (
-              <>
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                {t("saveChanges")}
-              </>
-            )}
-          </button>
+        <div className="flex items-center gap-2 text-sm">
+          {isSaving ? (
+            <span className="inline-flex items-center gap-2 text-primary-600 font-medium">
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {t("saving")}
+            </span>
+          ) : (
+            <span className="text-ink-500 font-medium">Auto-save enabled</span>
+          )}
+          {saveError && <span className="text-critical-600 font-medium">{saveError}</span>}
         </div>
       )}
     </div>

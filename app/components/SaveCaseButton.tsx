@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 
@@ -24,8 +24,37 @@ export default function SaveCaseButton({
     const t = useTranslations("caseAnalysis.saveButton");
     const [isSaving, setIsSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const initializedRef = useRef(false);
+    const lastSavedValueRef = useRef<string>("");
+    const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const messageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    const handleSave = async () => {
+    const serializeValue = (nextValue: any) => {
+        try {
+            return JSON.stringify(nextValue);
+        } catch {
+            return String(nextValue);
+        }
+    };
+
+    const hasMeaningfulValue = (nextValue: any): boolean => {
+        if (nextValue === null || nextValue === undefined) return false;
+        if (typeof nextValue === "string") return nextValue.trim().length > 0;
+        if (Array.isArray(nextValue)) return nextValue.length > 0;
+        if (typeof nextValue === "object") {
+            const objectValues = Object.values(nextValue);
+            if (objectValues.length === 0) return false;
+            return objectValues.some((item) => {
+                if (item === null || item === undefined) return false;
+                if (typeof item === "string") return item.trim().length > 0;
+                if (Array.isArray(item)) return item.length > 0;
+                return true;
+            });
+        }
+        return true;
+    };
+
+    const saveNow = async (serializedValue: string) => {
         if (!caseId) {
             setMessage({ type: "error", text: t("caseIdRequired") });
             return;
@@ -48,11 +77,15 @@ export default function SaveCaseButton({
             }
 
             setMessage({ type: "success", text: t("savedSuccessfully") });
+            lastSavedValueRef.current = serializedValue;
             dispatchCaseUpdated();
             if (onSave) onSave();
 
             // Clear success message after 2 seconds
-            setTimeout(() => setMessage(null), 2000);
+            if (messageTimerRef.current) {
+                clearTimeout(messageTimerRef.current);
+            }
+            messageTimerRef.current = setTimeout(() => setMessage(null), 2000);
         } catch (e) {
             setMessage({
                 type: "error",
@@ -63,30 +96,62 @@ export default function SaveCaseButton({
         }
     };
 
-    return (
-        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border-200">
-            <button
-                onClick={handleSave}
-                disabled={isSaving || !caseId}
-                className="px-6 py-3 bg-primary-500 text-white rounded-lg font-semibold shadow-sm hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-                {isSaving ? (
-                    <>
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        {t("saving")}
-                    </>
-                ) : (
-                    <>
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        {children || t("saveChanges")}
-                    </>
-                )}
-            </button>
+    useEffect(() => {
+        const serialized = serializeValue(value);
 
+        if (!initializedRef.current) {
+            initializedRef.current = true;
+            lastSavedValueRef.current = serialized;
+            return;
+        }
+
+        if (!caseId || !hasMeaningfulValue(value) || serialized === lastSavedValueRef.current) {
+            return;
+        }
+
+        if (saveTimerRef.current) {
+            clearTimeout(saveTimerRef.current);
+        }
+
+        saveTimerRef.current = setTimeout(() => {
+            saveNow(serialized);
+        }, 800);
+
+        return () => {
+            if (saveTimerRef.current) {
+                clearTimeout(saveTimerRef.current);
+            }
+        };
+    }, [caseId, field, value]);
+
+    useEffect(() => {
+        return () => {
+            if (saveTimerRef.current) {
+                clearTimeout(saveTimerRef.current);
+            }
+            if (messageTimerRef.current) {
+                clearTimeout(messageTimerRef.current);
+            }
+        };
+    }, []);
+
+    return (
+        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border-200 text-sm">
+            {isSaving ? (
+                <span className="inline-flex items-center gap-2 text-primary-600 font-medium">
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    {t("saving")}
+                </span>
+            ) : (
+                <span className="inline-flex items-center gap-2 text-ink-500 font-medium">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Auto-save enabled
+                </span>
+            )}
             {message && (
                 <span className={`text-sm font-medium ${message.type === "success" ? "text-success-600" : "text-critical-600"}`}>
                     {message.text}

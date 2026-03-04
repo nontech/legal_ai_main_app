@@ -132,6 +132,14 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
     fetchCaseCompletion();
   }, [caseId, fetchCaseCompletion]);
 
+  useEffect(() => {
+    const handleCaseUpdated = () => {
+      fetchCaseCompletion();
+    };
+    window.addEventListener("case-updated", handleCaseUpdated);
+    return () => window.removeEventListener("case-updated", handleCaseUpdated);
+  }, [fetchCaseCompletion]);
+
   const steps = [
     {
       id: "jurisdiction",

@@ -31,6 +31,10 @@ interface SectionData {
   [key: string]: any;
 }
 
+type CaseDetailsData = Record<string, SectionData | number | undefined> & {
+  _completion_status?: number;
+};
+
 // Map database keys to UI section IDs
 const DB_TO_UI_MAP: Record<string, string> = {
   "case_information": "case-info",
@@ -65,6 +69,33 @@ const SECTION_KEYS: string[] = [
   "police_report",
   "potential_challenges_and_weaknesses",
 ];
+
+const getSectionContentSignals = (sectionKey: string, sectionData: SectionData) => {
+  const files = Array.isArray(sectionData.files) ? sectionData.files : [];
+  const hasFiles = files.length > 0;
+  const hasSummary = typeof sectionData.summary === "string" && sectionData.summary.trim().length > 0;
+
+  if (sectionKey === "case_information") {
+    const hasDescription =
+      typeof sectionData.caseDescription === "string" && sectionData.caseDescription.trim().length > 0;
+    const hasCaseName = typeof sectionData.caseName === "string" && sectionData.caseName.trim().length > 0;
+    return hasFiles || hasSummary || hasDescription || hasCaseName;
+  }
+
+  return hasFiles || hasSummary;
+};
+
+const calculateCaseDetailsCompletion = (details: CaseDetailsData): number => {
+  const completedSections = SECTION_KEYS.filter((sectionKey) => {
+    const sectionData =
+      typeof details[sectionKey] === "object" && details[sectionKey] !== null
+        ? (details[sectionKey] as SectionData)
+        : {};
+    return getSectionContentSignals(sectionKey, sectionData);
+  }).length;
+
+  return Math.round((completedSections / SECTION_KEYS.length) * 100);
+};
 
 const DB_KEY_TO_TRANS_KEY: Record<string, string> = {
   "case_information": "caseInformation",
@@ -109,15 +140,22 @@ export default function CaseDetailsSection({
   const [editedDescription, setEditedDescription] = useState<string>("");
   const [editedSummary, setEditedSummary] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [showNavigationGuardDialog, setShowNavigationGuardDialog] = useState(false);
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [showAllDocuments, setShowAllDocuments] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Store all case details keyed by database keys
-  const [caseDetails, setCaseDetails] = useState<Record<string, SectionData>>({});
+  const [caseDetails, setCaseDetails] = useState<CaseDetailsData>({});
+  const caseDetailsRef = useRef<CaseDetailsData>({});
+  const lastSavedSummaryRef = useRef<Record<string, string>>({});
+  const uploadAbortControllerRef = useRef<AbortController | null>(null);
+  const summaryAbortControllerRef = useRef<AbortController | null>(null);
+  const navigationGuardResolverRef = useRef<((value: boolean) => void) | null>(null);
 
   // Fetch case details from database
   const fetchCaseDetails = useCallback(async () => {
@@ -134,6 +172,17 @@ export default function CaseDetailsSection({
       if (json.ok && json.data?.case_details) {
         const details = json.data.case_details;
         setCaseDetails(details);
+        caseDetailsRef.current = details;
+
+        const savedSummaryMap: Record<string, string> = {};
+        for (const sectionKey of SECTION_KEYS) {
+          if (sectionKey === "case_information") {
+            savedSummaryMap[sectionKey] = details.case_information?.caseDescription || "";
+          } else {
+            savedSummaryMap[sectionKey] = details[sectionKey]?.summary || "";
+          }
+        }
+        lastSavedSummaryRef.current = savedSummaryMap;
 
         // Extract case description from case_information
         if (details.case_information?.caseDescription) {
@@ -155,6 +204,10 @@ export default function CaseDetailsSection({
 
   // Update edited summary when section changes
   useEffect(() => {
+    caseDetailsRef.current = caseDetails;
+  }, [caseDetails]);
+
+  useEffect(() => {
     const sectionData = getSectionData(selectedSection);
     if (selectedSection === "case_information") {
       setEditedSummary(sectionData.caseDescription || "");
@@ -167,7 +220,11 @@ export default function CaseDetailsSection({
 
   // Get section data by database key
   const getSectionData = (dbKey: string): SectionData => {
-    return caseDetails[dbKey] || {};
+    const data = caseDetails[dbKey];
+    if (typeof data === "object" && data !== null) {
+      return data as SectionData;
+    }
+    return {};
   };
 
   // Get item count for display
@@ -205,35 +262,38 @@ export default function CaseDetailsSection({
     }));
   };
 
-  const handleSaveSection = async () => {
+  const persistSectionSummary = useCallback(async (sectionKey: string, summaryText: string) => {
     if (!caseId) return;
 
     setIsSaving(true);
+    setSaveError(null);
     try {
-      const existingSection = caseDetails[selectedSection] || {};
-      const existingCaseInfo = caseDetails["case_information"] || {};
+      const currentCaseDetails = caseDetailsRef.current;
+      const existingSection = getSectionData(sectionKey);
+      const existingCaseInfo = getSectionData("case_information");
 
-      let updateData: Record<string, SectionData>;
+      let updateData: CaseDetailsData;
 
-      if (selectedSection === "case_information") {
+      if (sectionKey === "case_information") {
         updateData = {
-          ...caseDetails,
+          ...currentCaseDetails,
           case_information: {
             ...existingCaseInfo,
-            caseDescription: editedSummary,
+            caseDescription: summaryText,
           },
         };
-        setCaseDescription(editedSummary);
+        setCaseDescription(summaryText);
       } else {
         updateData = {
-          ...caseDetails,
-          [selectedSection]: {
+          ...currentCaseDetails,
+          [sectionKey]: {
             ...existingSection,
-            summary: editedSummary,
-            summaryGenerated: Boolean(editedSummary),
+            summary: summaryText,
+            summaryGenerated: Boolean(summaryText),
           },
         };
       }
+      updateData._completion_status = calculateCaseDetailsCompletion(updateData);
 
       const res = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -254,11 +314,92 @@ export default function CaseDetailsSection({
       dispatchCaseUpdated();
 
       setCaseDetails(updateData);
+      caseDetailsRef.current = updateData;
+      lastSavedSummaryRef.current[sectionKey] = summaryText;
+      onCompletionChange?.(updateData._completion_status || 0);
     } catch (error) {
       console.error("Failed to save section:", error);
+      setSaveError(error instanceof Error ? error.message : "Failed to save section");
     } finally {
       setIsSaving(false);
     }
+  }, [caseId, onCompletionChange]);
+
+  const handleSummaryBlur = () => {
+    if (!caseId || isLoading) return;
+    const currentSaved = lastSavedSummaryRef.current[selectedSection] || "";
+    if (editedSummary !== currentSaved) {
+      persistSectionSummary(selectedSection, editedSummary);
+    }
+  };
+
+  const abortActiveOperations = useCallback(() => {
+    uploadAbortControllerRef.current?.abort();
+    summaryAbortControllerRef.current?.abort();
+    uploadAbortControllerRef.current = null;
+    summaryAbortControllerRef.current = null;
+    setIsUploading(false);
+    setIsGeneratingSummary(false);
+  }, []);
+
+  const hasBlockingOperation = isUploading || isGeneratingSummary;
+
+  const requestNavigationPermission = useCallback(async () => {
+    if (!hasBlockingOperation) return true;
+    return new Promise<boolean>((resolve) => {
+      navigationGuardResolverRef.current = resolve;
+      setShowNavigationGuardDialog(true);
+    });
+  }, [hasBlockingOperation]);
+
+  useEffect(() => {
+    (window as any).__caseDetailsNavigationGuard = requestNavigationPermission;
+    return () => {
+      if ((window as any).__caseDetailsNavigationGuard === requestNavigationPermission) {
+        delete (window as any).__caseDetailsNavigationGuard;
+      }
+      navigationGuardResolverRef.current = null;
+    };
+  }, [requestNavigationPermission]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasBlockingOperation) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasBlockingOperation]);
+
+  const handleNavigationDialogStay = () => {
+    setShowNavigationGuardDialog(false);
+    if (navigationGuardResolverRef.current) {
+      navigationGuardResolverRef.current(false);
+      navigationGuardResolverRef.current = null;
+    }
+  };
+
+  const handleNavigationDialogAbortAndLeave = () => {
+    abortActiveOperations();
+    setShowNavigationGuardDialog(false);
+    if (navigationGuardResolverRef.current) {
+      navigationGuardResolverRef.current(true);
+      navigationGuardResolverRef.current = null;
+    }
+  };
+
+  const handleSectionSelect = async (nextSection: string) => {
+    if (nextSection === selectedSection) return;
+    const canNavigate = await requestNavigationPermission();
+    if (!canNavigate) return;
+
+    const currentSaved = lastSavedSummaryRef.current[selectedSection] || "";
+    if (editedSummary !== currentSaved && caseId) {
+      persistSectionSummary(selectedSection, editedSummary);
+    }
+
+    setSelectedSection(nextSection);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -267,6 +408,8 @@ export default function CaseDetailsSection({
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
+    const uploadController = new AbortController();
+    uploadAbortControllerRef.current = uploadController;
     setIsUploading(true);
 
     try {
@@ -283,6 +426,7 @@ export default function CaseDetailsSection({
         const response = await fetch("/api/documents/upload-section", {
           method: "POST",
           body: formData,
+          signal: uploadController.signal,
         });
 
         if (!response.ok) {
@@ -303,12 +447,38 @@ export default function CaseDetailsSection({
 
       // Refresh case details
       await fetchCaseDetails();
+      const refreshedCaseDetails = caseDetailsRef.current;
+      const refreshedCompletion = calculateCaseDetailsCompletion(refreshedCaseDetails);
+      if (refreshedCaseDetails._completion_status !== refreshedCompletion) {
+        const caseDetailsWithCompletion = {
+          ...refreshedCaseDetails,
+          _completion_status: refreshedCompletion,
+        };
+        const updateCompletionResponse = await fetch("/api/cases/update", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caseId,
+            field: "case_details",
+            value: caseDetailsWithCompletion,
+          }),
+        });
+        if (updateCompletionResponse.ok) {
+          setCaseDetails(caseDetailsWithCompletion);
+          caseDetailsRef.current = caseDetailsWithCompletion;
+          onCompletionChange?.(refreshedCompletion);
+          dispatchCaseUpdated();
+        }
+      } else {
+        onCompletionChange?.(refreshedCompletion);
+      }
       
       // Reset file input before extraction
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
+
+      // Upload phase is done; move into summary-generation phase
       setIsUploading(false);
       
       // Automatically extract information using the uploaded files directly
@@ -316,13 +486,18 @@ export default function CaseDetailsSection({
         await handleGenerateSummaryWithFiles(uploadedFiles);
       }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
       console.error("Failed to upload file:", error);
       alert(error instanceof Error ? error.message : "Failed to upload file");
-      setIsUploading(false);
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+    } finally {
+      setIsUploading(false);
+      uploadAbortControllerRef.current = null;
     }
   };
 
@@ -354,12 +529,30 @@ export default function CaseDetailsSection({
       const updatedCaseDetails = {
         ...caseDetails,
         [selectedSection]: {
-          ...(caseDetails[selectedSection] || {}),
+          ...getSectionData(selectedSection),
           files: json.data.updatedFiles,
         },
       };
+      const completionAfterDelete = calculateCaseDetailsCompletion(updatedCaseDetails);
+      const caseDetailsWithCompletion = {
+        ...updatedCaseDetails,
+        _completion_status: completionAfterDelete,
+      };
 
-      setCaseDetails(updatedCaseDetails);
+      await fetch("/api/cases/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseId,
+          field: "case_details",
+          value: caseDetailsWithCompletion,
+        }),
+      });
+
+      setCaseDetails(caseDetailsWithCompletion);
+      caseDetailsRef.current = caseDetailsWithCompletion;
+      onCompletionChange?.(completionAfterDelete);
+      dispatchCaseUpdated();
     } catch (error) {
       console.error("Failed to delete file:", error);
       alert(error instanceof Error ? error.message : "Failed to delete file");
@@ -383,12 +576,15 @@ export default function CaseDetailsSection({
   const handleGenerateSummaryWithFiles = async (files: Array<{ name: string; address: string }>) => {
     if (!caseId || files.length === 0) return;
 
+    const summaryController = new AbortController();
+    summaryAbortControllerRef.current = summaryController;
     setIsGeneratingSummary(true);
 
     try {
       const response = await fetch("/api/documents/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: summaryController.signal,
         body: JSON.stringify({
           file_addresses: files.map((f) => f.address),
           file_names: files.map((f) => f.name),
@@ -405,11 +601,16 @@ export default function CaseDetailsSection({
       const summary = data.summary || data.data?.summary || "";
 
       setEditedSummary(summary);
+      await persistSectionSummary(selectedSection, summary);
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
       console.error("Failed to generate summary:", error);
       alert(error instanceof Error ? error.message : "Failed to generate summary");
     } finally {
       setIsGeneratingSummary(false);
+      summaryAbortControllerRef.current = null;
     }
   };
 
@@ -473,7 +674,9 @@ export default function CaseDetailsSection({
                 return (
                   <button
                     key={dbKey}
-                    onClick={() => setSelectedSection(dbKey)}
+                    onClick={() => {
+                      void handleSectionSelect(dbKey);
+                    }}
                     className={`w-full text-left px-3 py-3 rounded-lg transition-all flex items-start gap-3 ${
                       isSelected
                         ? "bg-primary-100 text-primary-900 border-l-4 border-primary-500"
@@ -642,44 +845,28 @@ export default function CaseDetailsSection({
                         {isMarkdownPreview ? "Edit" : "Preview"}
                       </button>
                     )}
-                    <button
-                      onClick={handleSaveSection}
-                      disabled={isSaving || isUploading || isGeneratingSummary}
-                      className="px-4 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSaving ? (
-                        <>
-                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Saving...
-                        </>
-                      ) : isUploading ? (
-                        <>
-                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Uploading...
-                        </>
-                      ) : isGeneratingSummary ? (
-                        <>
-                          <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Extracting...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Save Changes
-                        </>
-                      )}
-                    </button>
+                    {isGeneratingSummary ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600">
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Generating summary...
+                      </span>
+                    ) : isSaving ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600">
+                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Saving...
+                      </span>
+                    ) : (
+                      <span className="text-xs text-ink-500 font-medium">Auto-save enabled</span>
+                    )}
+                    {saveError && (
+                      <span className="text-xs text-critical-600 font-medium">{saveError}</span>
+                    )}
                   </div>
                 </div>
 
@@ -691,6 +878,8 @@ export default function CaseDetailsSection({
                   <textarea
                     value={editedSummary}
                     onChange={(e) => setEditedSummary(e.target.value)}
+                    onBlur={handleSummaryBlur}
+                    disabled={isGeneratingSummary}
                     className="w-full h-[300px] p-4 border border-border-300 rounded-lg resize-y text-sm text-ink-900 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     placeholder={
                       selectedSection === "case_information"
@@ -703,6 +892,57 @@ export default function CaseDetailsSection({
             </div>
         </div>
       </div>
+      {showNavigationGuardDialog && (
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20">
+            <div className="fixed inset-0 bg-primary-950/80 transition-opacity" />
+            <div className="relative inline-block w-full max-w-md my-8 overflow-hidden text-left align-middle transition-all transform bg-surface-050 shadow-2xl rounded-2xl border border-border-200">
+              <div className="bg-gradient-to-r from-primary-700 to-primary-600 px-6 py-4 sticky top-0 z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg
+                      className="w-5 h-5 text-primary-100"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Operation In Progress</h2>
+                    <p className="text-primary-100 text-sm">Upload or summary generation is still running</p>
+                  </div>
+                </div>
+              </div>
+              <div className="px-6 py-6">
+                <p className="text-ink-700 text-base leading-relaxed mb-6">
+                  Leaving this section now will abort the current upload or summary generation. Do you want to continue?
+                </p>
+                <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
+                  <button
+                    onClick={handleNavigationDialogStay}
+                    className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-primary-600 to-primary-500 px-5 py-2.5 text-sm font-semibold text-white hover:from-primary-500 hover:to-primary-400"
+                  >
+                    Stay Here
+                  </button>
+                  <button
+                    onClick={handleNavigationDialogAbortAndLeave}
+                    className="inline-flex items-center justify-center rounded-xl border border-border-200 bg-surface-000 px-5 py-2.5 text-sm font-medium text-ink-700 hover:bg-surface-100"
+                  >
+                    Abort And Leave
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

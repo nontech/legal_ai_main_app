@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -13,9 +13,13 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
   const [caseInfo, setCaseInfo] = useState<any>(null);
   const [verdicts, setVerdicts] = useState<Record<string, string>>({});
   const [isSavingVerdicts, setIsSavingVerdicts] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedFacts, setExpandedFacts] = useState<Set<string>>(new Set());
+  const hasInitializedVerdictsRef = useRef(false);
+  const lastSavedVerdictsRef = useRef<string>("{}");
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const fetchCaseData = async () => {
@@ -40,6 +44,7 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
         // Initialize verdicts from database or from charges
         if (data.data.verdict && typeof data.data.verdict === "object") {
           setVerdicts(data.data.verdict);
+          lastSavedVerdictsRef.current = JSON.stringify(data.data.verdict);
         } else if (data.data.charges && Array.isArray(data.data.charges)) {
           // Initialize with pending status for all charges
           const initialVerdicts: Record<string, string> = {};
@@ -47,6 +52,7 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
             initialVerdicts[charge.id] = "pending";
           });
           setVerdicts(initialVerdicts);
+          lastSavedVerdictsRef.current = JSON.stringify(initialVerdicts);
         }
 
         setError(null);
@@ -54,6 +60,7 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
         console.error("Failed to fetch case data:", err);
         setError("Failed to load case data");
       } finally {
+        hasInitializedVerdictsRef.current = true;
         setLoading(false);
       }
     };
@@ -68,10 +75,11 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
     }));
   };
 
-  const handleSaveVerdicts = async () => {
+  const saveVerdicts = async (nextVerdicts: Record<string, string>) => {
     if (!effectiveCaseId) return;
 
     setIsSavingVerdicts(true);
+    setSaveError(null);
     try {
       const response = await fetch("/api/cases/update", {
         method: "PATCH",
@@ -79,7 +87,7 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
         body: JSON.stringify({
           caseId: effectiveCaseId,
           field: "verdict",
-          value: verdicts,
+          value: nextVerdicts,
         }),
       });
 
@@ -87,15 +95,47 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
       if (!response.ok || !data.ok) {
         throw new Error(data.error || "Failed to save verdicts");
       }
-
-      alert(t("saved"));
+      lastSavedVerdictsRef.current = JSON.stringify(nextVerdicts);
     } catch (error) {
       console.error("Failed to save verdicts:", error);
-      alert(t("failed"));
+      setSaveError(error instanceof Error ? error.message : "Failed to save verdicts");
     } finally {
       setIsSavingVerdicts(false);
     }
   };
+
+  useEffect(() => {
+    if (!effectiveCaseId || !hasInitializedVerdictsRef.current || loading) {
+      return;
+    }
+
+    const serializedVerdicts = JSON.stringify(verdicts);
+    if (serializedVerdicts === lastSavedVerdictsRef.current) {
+      return;
+    }
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(() => {
+      saveVerdicts(verdicts);
+    }, 800);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [effectiveCaseId, loading, verdicts]);
+
+  useEffect(() => {
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, []);
 
   const isCriminalCase = caseInfo?.case_type === "criminal";
 
@@ -535,39 +575,16 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
         })}
       </div>
 
-      {/* Save Button */}
+      {/* Autosave Status */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "32px" }}>
-        <button
-          onClick={handleSaveVerdicts}
-          disabled={isSavingVerdicts}
-          style={{
-            background: isSavingVerdicts ? "#ccc" : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            color: "white",
-            border: "none",
-            padding: "14px 40px",
-            borderRadius: "10px",
-            fontSize: "15px",
-            fontWeight: "600",
-            cursor: isSavingVerdicts ? "not-allowed" : "pointer",
-            boxShadow: isSavingVerdicts ? "none" : "0 4px 14px rgba(102, 126, 234, 0.4)",
-            transition: "all 0.3s ease",
-            opacity: isSavingVerdicts ? 0.7 : 1,
-          }}
-          onMouseOver={(e) => {
-            if (!isSavingVerdicts) {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 6px 20px rgba(102, 126, 234, 0.5)";
-            }
-          }}
-          onMouseOut={(e) => {
-            if (!isSavingVerdicts) {
-              (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-              (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 14px rgba(102, 126, 234, 0.4)";
-            }
-          }}
-        >
-          {isSavingVerdicts ? t("saving") : t("saveButton")}
-        </button>
+        {isSavingVerdicts ? (
+          <span style={{ color: "#667eea", fontWeight: 600 }}>{t("saving")}</span>
+        ) : (
+          <span style={{ color: "#6b7280", fontWeight: 600 }}>Auto-save enabled</span>
+        )}
+        {saveError && (
+          <span style={{ color: "#dc2626", fontWeight: 600, marginLeft: "12px" }}>{saveError}</span>
+        )}
       </div>
     </div>
   );
