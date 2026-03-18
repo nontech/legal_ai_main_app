@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
+import AnalyticsScripts from "@/app/components/AnalyticsScripts";
 
 export const metadata: Metadata = {
 	title:
@@ -21,22 +21,9 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<head>
-				<Script
-					src={`https://www.googletagmanager.com/gtag/js?id=AW-17430668981`}
-					strategy="afterInteractive"
-				/>
-				<Script id="gtag-init" strategy="afterInteractive">
-					{`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17430668981');
-          `}
-				</Script>
-			</head>
 			<body className="antialiased" suppressHydrationWarning>
 				{children}
+				<AnalyticsScripts />
 			</body>
 		</html>
 	);

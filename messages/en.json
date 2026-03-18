@@ -586,6 +586,14 @@
     "changesToPolicy": "Changes to This Policy",
     "changesDesc": "We may update this Cookie Policy from time to time. Changes will be posted on this page with the updated \"Last updated\" date."
   },
+  "consentBanner": {
+    "title": "We use cookies",
+    "description": "We use cookies to improve your experience and measure performance. You can accept or reject non-essential cookies.",
+    "policyLink": "Cookie Policy",
+    "settings": "Cookie settings",
+    "decline": "Reject non-essential",
+    "accept": "Accept all"
+  },
   "aboutUs": {
     "title": "About Us",
     "description": "Learn more about our mission and vision",

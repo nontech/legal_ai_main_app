@@ -6,6 +6,7 @@ import { COUNTRIES } from "@/i18n/routing";
 import Navbar from "@/app/components/Navbar";
 import ConditionalFooter from "@/app/components/ConditionalFooter";
 import { Toaster } from "@/app/components/ui/toaster";
+import ConsentBanner from "@/app/components/ConsentBanner";
 
 const validCountries = COUNTRIES.map((c) => c.code);
 const validLocales = ["en", "de"];
@@ -52,6 +53,7 @@ export default async function LocaleLayout({
       {children}
       <ConditionalFooter />
       <Toaster />
+      <ConsentBanner />
     </NextIntlClientProvider>
   );
 }

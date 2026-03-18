@@ -586,6 +586,14 @@
     "changesToPolicy": "Änderungen dieser Richtlinie",
     "changesDesc": "Wir können diese Cookie-Richtlinie von Zeit zu Zeit aktualisieren. Änderungen werden auf dieser Seite mit dem aktualisierten Datum \"Zuletzt aktualisiert\" veröffentlicht."
   },
+  "consentBanner": {
+    "title": "Wir verwenden Cookies",
+    "description": "Wir verwenden Cookies, um Ihr Erlebnis zu verbessern und die Leistung zu messen. Sie können nicht notwendige Cookies akzeptieren oder ablehnen.",
+    "policyLink": "Cookie-Richtlinie",
+    "settings": "Cookie-Einstellungen",
+    "decline": "Nicht notwendige ablehnen",
+    "accept": "Alle akzeptieren"
+  },
   "aboutUs": {
     "title": "Über uns",
     "description": "Erfahren Sie mehr über unsere Mission und Vision",
