@@ -27,7 +27,7 @@ export default function Footer() {
   const locale = params.locale as string;
 
   return (
-    <footer className="bg-gradient-to-br from-primary-950 to-primary-700 text-white">
+    <footer className="relative z-30 bg-gradient-to-br from-primary-950 to-primary-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Country Selector Row - First Row, Extreme Right */}
         <div className="flex justify-end mb-12 pb-8 border-b border-white/10">

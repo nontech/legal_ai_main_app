@@ -10,228 +10,232 @@ import CaseTitleHeader from "@/app/components/CaseTitleHeader";
 import { CaseHeaderActionsProvider } from "@/app/components/CaseHeaderActionsContext";
 import RegenerateHeaderButton from "@/app/components/RegenerateHeaderButton";
 interface LayoutProps {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }
 
 export default function CaseAnalysisLayout({ children }: LayoutProps) {
-  const t = useTranslations("caseAnalysis");
-  const params = useParams();
-  const pathname = usePathname();
-  const caseId = params["case-id"] as string;
-  
-  const [countryId, setCountryId] = useState<string>("");
-  const [jurisdictionId, setJurisdictionId] = useState<string>("");
-  const [caseType, setCaseType] = useState<string>("");
-  const [caseTitle, setCaseTitle] = useState<string>("");
-  const [isOwner, setIsOwner] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [ownershipLoading, setOwnershipLoading] = useState(true);
-  const [hasResult, setHasResult] = useState(false);
+	const t = useTranslations("caseAnalysis");
+	const params = useParams();
+	const pathname = usePathname();
+	const caseId = params["case-id"] as string;
 
-  // Track completion data for each step (percentage) - 6 steps: jurisdiction, tenancy, role, case-details, results, game-plan
-  const [completionData, setCompletionData] = useState<{
-    [key: number]: number;
-  }>({
-    0: 0, // Jurisdiction
-    1: 0, // Tenancy status
-    2: 0, // Role
-    3: 0, // Case Details
-    4: 0, // Results
-    5: 0, // Game Plan
-  });
+	const [countryId, setCountryId] = useState<string>("");
+	const [jurisdictionId, setJurisdictionId] = useState<string>("");
+	const [caseType, setCaseType] = useState<string>("");
+	const [caseTitle, setCaseTitle] = useState<string>("");
+	const [isOwner, setIsOwner] = useState(false);
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const [ownershipLoading, setOwnershipLoading] = useState(true);
+	const [hasResult, setHasResult] = useState(false);
 
-  // Fetch case data and calculate completion percentages
-  const fetchCaseCompletion = useCallback(async () => {
-    if (!caseId) return;
+	// Track completion data for each step (percentage) - 6 steps: jurisdiction, tenancy, role, case-details, results, game-plan
+	const [completionData, setCompletionData] = useState<{
+		[key: number]: number;
+	}>({
+		0: 0, // Jurisdiction
+		1: 0, // Tenancy status
+		2: 0, // Role
+		3: 0, // Case Details
+		4: 0, // Results
+		5: 0, // Game Plan
+	});
 
-    try {
-      const res = await fetch(`/api/cases/${caseId}`);
-      const json = await res.json();
+	// Fetch case data and calculate completion percentages
+	const fetchCaseCompletion = useCallback(async () => {
+		if (!caseId) return;
 
-      if (json.ok && json.data) {
-        const data = json.data;
+		try {
+			const res = await fetch(`/api/cases/${caseId}`);
+			const json = await res.json();
 
-        // Extract case title from case_details.case_information.caseName
-        const title =
-          data.case_details?.case_information?.caseName || "";
-        setCaseTitle(title);
+			if (json.ok && json.data) {
+				const data = json.data;
 
-        // Check ownership and authentication
-        const ownershipRes = await fetch(
-          `/api/cases/${caseId}/ownership`
-        );
-        if (ownershipRes.ok) {
-          const ownershipData = await ownershipRes.json();
-          setIsOwner(ownershipData.isOwner || false);
-          setIsAuthenticated(true);
-        } else if (ownershipRes.status === 401) {
-          setIsAuthenticated(false);
-          setIsOwner(false);
-        }
-        setOwnershipLoading(false);
-        
-        const newCompletionData: { [key: number]: number } = {
-          0: 0,
-          1: 0,
-          2: 0,
-          3: 0,
-          4: 0,
-          5: 0,
-        };
+				// Extract case title from case_details.case_information.caseName
+				const title = data.case_details?.case_information?.caseName || "";
+				setCaseTitle(title);
 
-        // Check jurisdiction (step 0) - court not required (hidden in UI)
-        if (
-          data.jurisdiction &&
-          data.jurisdiction.country &&
-          data.jurisdiction.jurisdiction
-        ) {
-          newCompletionData[0] = 100;
-        }
+				// Check ownership and authentication
+				const ownershipRes = await fetch(`/api/cases/${caseId}/ownership`);
+				if (ownershipRes.ok) {
+					const ownershipData = await ownershipRes.json();
+					setIsOwner(ownershipData.isOwner || false);
+					setIsAuthenticated(true);
+				} else if (ownershipRes.status === 401) {
+					setIsAuthenticated(false);
+					setIsOwner(false);
+				}
+				setOwnershipLoading(false);
 
-        // Case type hidden - not shown in sidebar (still set for charges/claims label)
-        if (data.case_type) setCaseType(data.case_type);
+				const newCompletionData: { [key: number]: number } = {
+					0: 0,
+					1: 0,
+					2: 0,
+					3: 0,
+					4: 0,
+					5: 0,
+				};
 
-        // Check tenancy status (step 1)
-        if (data.tenancy_status) {
-          newCompletionData[1] = 100;
-        }
+				// Check jurisdiction (step 0) - court not required (hidden in UI)
+				if (
+					data.jurisdiction &&
+					data.jurisdiction.country &&
+					data.jurisdiction.jurisdiction
+				) {
+					newCompletionData[0] = 100;
+				}
 
-        // Check role (step 2)
-        if (data.role) {
-          newCompletionData[2] = 100;
-        }
+				// Case type hidden - not shown in sidebar (still set for charges/claims label)
+				if (data.case_type) setCaseType(data.case_type);
 
-        // Charges/claims and verdict hidden from sidebar - skip
+				// Check tenancy status (step 1)
+				if (data.tenancy_status) {
+					newCompletionData[1] = 100;
+				}
 
-        // Check case details (step 3)
-        if (data.case_details?._completion_status !== undefined) {
-          newCompletionData[3] = data.case_details._completion_status;
-        }
+				// Check role (step 2)
+				if (data.role) {
+					newCompletionData[2] = 100;
+				}
 
-        // Check results (step 4)
-        if (data.result) {
-          newCompletionData[4] = 100;
-          setHasResult(true);
-        } else {
-          setHasResult(false);
-        }
+				// Charges/claims and verdict hidden from sidebar - skip
 
-        // Check game plan (step 5)
-        if (data.game_plan) {
-          newCompletionData[5] = 100;
-        }
+				// Check case details (step 3)
+				if (data.case_details?._completion_status !== undefined) {
+					newCompletionData[3] = data.case_details._completion_status;
+				}
 
-        setCompletionData(newCompletionData);
-      }
-    } catch (error) {
-      console.error("Failed to fetch case completion data:", error);
-    }
-  }, [caseId]);
+				// Check results (step 4)
+				if (data.result) {
+					newCompletionData[4] = 100;
+					setHasResult(true);
+				} else {
+					setHasResult(false);
+				}
 
-  useEffect(() => {
-    fetchCaseCompletion();
-  }, [caseId, fetchCaseCompletion]);
+				// Check game plan (step 5)
+				if (data.game_plan) {
+					newCompletionData[5] = 100;
+				}
 
-  useEffect(() => {
-    const handleCaseUpdated = () => {
-      fetchCaseCompletion();
-    };
-    window.addEventListener("case-updated", handleCaseUpdated);
-    return () => window.removeEventListener("case-updated", handleCaseUpdated);
-  }, [fetchCaseCompletion]);
+				setCompletionData(newCompletionData);
+			}
+		} catch (error) {
+			console.error("Failed to fetch case completion data:", error);
+		}
+	}, [caseId]);
 
-  const steps = [
-    {
-      id: "jurisdiction",
-      label: t("steps.jurisdiction"),
-      icon: null,
-    },
-    { id: "tenancy", label: t("steps.tenancyStatus"), icon: null },
-    { id: "role", label: t("steps.role"), icon: null },
-    { id: "case-details", label: t("steps.caseDetails"), icon: null },
-    { id: "results", label: t("steps.results"), icon: null },
-    { id: "game-plan", label: t("steps.gamePlan"), icon: null },
-  ];
+	useEffect(() => {
+		fetchCaseCompletion();
+	}, [caseId, fetchCaseCompletion]);
 
-  // Determine current step from pathname (map hidden routes to nearest visible step)
-  const getCurrentStep = () => {
-    const pathSegments = pathname.split("/");
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    if (lastSegment === "case-type") return 2; // Map to role
-    if (lastSegment === "charges") return 3; // Map to case-details
-    if (lastSegment === "verdict") return 5; // Map to game-plan
-    const stepIndex = steps.findIndex(step => step.id === lastSegment);
-    return stepIndex >= 0 ? stepIndex : 0;
-  };
+	useEffect(() => {
+		const handleCaseUpdated = () => {
+			fetchCaseCompletion();
+		};
+		window.addEventListener("case-updated", handleCaseUpdated);
+		return () => window.removeEventListener("case-updated", handleCaseUpdated);
+	}, [fetchCaseCompletion]);
 
-  const currentStep = getCurrentStep();
+	const steps = [
+		{
+			id: "jurisdiction",
+			label: t("steps.jurisdiction"),
+			icon: null,
+		},
+		{ id: "tenancy", label: t("steps.tenancyStatus"), icon: null },
+		{ id: "role", label: t("steps.role"), icon: null },
+		{ id: "case-details", label: t("steps.caseDetails"), icon: null },
+		{ id: "results", label: t("steps.results"), icon: null },
+		{ id: "game-plan", label: t("steps.gamePlan"), icon: null },
+	];
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, [pathname]);
+	// Determine current step from pathname (map hidden routes to nearest visible step)
+	const getCurrentStep = () => {
+		const pathSegments = pathname.split("/");
+		const lastSegment = pathSegments[pathSegments.length - 1];
+		if (lastSegment === "case-type") return 2; // Map to role
+		if (lastSegment === "charges") return 3; // Map to case-details
+		if (lastSegment === "verdict") return 5; // Map to game-plan
+		const stepIndex = steps.findIndex((step) => step.id === lastSegment);
+		return stepIndex >= 0 ? stepIndex : 0;
+	};
 
-  return (
-    <CaseHeaderActionsProvider>
-    <div className="min-h-screen bg-gray-50">
-      {caseId && isAuthenticated && isOwner && (
-        <RegenerateHeaderButton
-          caseId={caseId}
-          hasResult={hasResult}
-          isOwner={isOwner}
-          isAuthenticated={isAuthenticated}
-          onRegenerateComplete={fetchCaseCompletion}
-        />
-      )}
-      <Navbar />
+	const currentStep = getCurrentStep();
 
-      {/* Case Title Header - Show only if caseId exists */}
-      {caseId && (
-        <CaseTitleHeader
-          caseId={caseId}
-          initialTitle={caseTitle}
-          isOwner={isOwner}
-          hideSidebar={ownershipLoading || (isAuthenticated && !isOwner)}
-          onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
-          isAuthenticated={isAuthenticated}
-        />
-      )}
+	useEffect(() => {
+		window.scrollTo({ top: 0, behavior: "auto" });
+	}, [pathname]);
 
-      {/* Mobile Progress Bar - Shown on mobile only */}
-      <MobileProgressBar
-        currentStep={currentStep}
-        steps={steps}
-        onStepChange={() => {}} // Will be handled by router navigation
-        completionData={completionData}
-      />
+	return (
+		<CaseHeaderActionsProvider>
+			<div className="min-h-screen bg-gray-50">
+				{caseId && isAuthenticated && isOwner && (
+					<RegenerateHeaderButton
+						caseId={caseId}
+						hasResult={hasResult}
+						isOwner={isOwner}
+						isAuthenticated={isAuthenticated}
+						onRegenerateComplete={fetchCaseCompletion}
+					/>
+				)}
+				<Navbar />
 
-      {/* Main content area */}
-      <main className="pb-32 pt-6 px-3 sm:px-4 lg:px-8">
-        <div className={`flex ${!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? 'gap-6' : 'justify-center'}`}>
-          {/* Main Content */}
-          <div className={!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? "flex-1 min-w-0" : "w-full"}>
-            <div className="max-w-4xl mx-auto w-full">
-              {children}
-            </div>
-          </div>
+				{/* Case Title Header - Show only if caseId exists */}
+				{caseId && (
+					<CaseTitleHeader
+						caseId={caseId}
+						initialTitle={caseTitle}
+						isOwner={isOwner}
+						hideSidebar={ownershipLoading || (isAuthenticated && !isOwner)}
+						onTitleUpdate={(newTitle) => setCaseTitle(newTitle)}
+						isAuthenticated={isAuthenticated}
+					/>
+				)}
 
-          {/* Sidebar - Hidden on mobile, visible on md+, hidden for authenticated non-owners */}
-          {!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) && (
-            <div className="hidden md:block w-64 flex-shrink-0">
-              <div className="sticky top-20">
-                <ProgressStepper
-                  currentStep={currentStep}
-                  onStepChange={() => {}} // Will be handled by router navigation
-                  completionData={completionData}
-                  caseId={caseId || undefined}
-                  caseType={caseType}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+				{/* Mobile Progress Bar - Shown on mobile only */}
+				<MobileProgressBar
+					currentStep={currentStep}
+					steps={steps}
+					onStepChange={() => {}} // Will be handled by router navigation
+					completionData={completionData}
+				/>
 
-    </div>
-    </CaseHeaderActionsProvider>
-  );
+				{/* Main content area */}
+				<main className="pb-32 pt-6 px-3 sm:px-4 lg:px-8">
+					<div
+						className={`flex ${!(caseId && ownershipLoading) && !(isAuthenticated && caseId && !isOwner) ? "gap-6" : "justify-center"}`}
+					>
+						{/* Main Content */}
+						<div
+							className={
+								!(caseId && ownershipLoading) &&
+								!(isAuthenticated && caseId && !isOwner)
+									? "flex-1 min-w-0"
+									: "w-full"
+							}
+						>
+							<div className="max-w-4xl mx-auto w-full">{children}</div>
+						</div>
+
+						{/* Sidebar - Hidden on mobile, visible on md+, hidden for authenticated non-owners */}
+						{!(caseId && ownershipLoading) &&
+							!(isAuthenticated && caseId && !isOwner) && (
+								<div className="hidden md:block w-64 flex-shrink-0">
+									<div className="sticky top-20">
+										<ProgressStepper
+											currentStep={currentStep}
+											onStepChange={() => {}} // Will be handled by router navigation
+											completionData={completionData}
+											caseId={caseId || undefined}
+											caseType={caseType}
+										/>
+									</div>
+								</div>
+							)}
+					</div>
+				</main>
+			</div>
+		</CaseHeaderActionsProvider>
+	);
 }

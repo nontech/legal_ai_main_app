@@ -11,6 +11,7 @@ import HorizontalStepper from "@/app/components/quick-analysis/HorizontalStepper
 import DocumentUploadStep from "@/app/components/quick-analysis/DocumentUploadStep";
 import QuickAnalysisForm from "@/app/components/quick-analysis/QuickAnalysisForm";
 import VerdictStep from "@/app/components/VerdictStep";
+import HowItWorks from "@/app/components/dashboard/HowItWorks";
 
 type Step = "upload" | "form" | "verdict";
 
@@ -141,6 +142,8 @@ function CaseAnalysisContent() {
           </section>
         </div>
       </main>
+
+      <HowItWorks />
     </div>
     </CreditLimitGuard>
   );
