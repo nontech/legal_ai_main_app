@@ -5,10 +5,8 @@ import HowItWorks from "@/app/components/dashboard/HowItWorks";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-ink-900">
-      <div className="pt-24">
-        <HeroSectionV2 />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#faf8f5] via-[#f7f4ef] to-[#f2f7fb]/80 text-ink-900">
+      <HeroSectionV2 />
 
       <WhatWeDo />
       <HowItWorks />
