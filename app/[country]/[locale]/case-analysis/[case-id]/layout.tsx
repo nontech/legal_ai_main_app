@@ -169,7 +169,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
 
 	return (
 		<CaseHeaderActionsProvider>
-			<div className="min-h-screen bg-gray-50">
+			<div className="min-h-screen bg-[#faf8f5]">
 				{caseId && isAuthenticated && isOwner && (
 					<RegenerateHeaderButton
 						caseId={caseId}

@@ -155,13 +155,13 @@ function ResetPasswordContent() {
     // Loading state while checking session
     if (isValidSession === null) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
                 <div className="w-full max-w-md">
-                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                         <div className="flex items-center justify-center">
-                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+                            <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary-200 border-t-primary-600"></div>
                         </div>
-                        <p className="text-center text-gray-600 mt-4">Verifying reset link...</p>
+                        <p className="text-center text-ink-600 mt-4">Verifying reset link...</p>
                     </div>
                 </div>
             </div>
@@ -171,14 +171,14 @@ function ResetPasswordContent() {
     // Invalid session
     if (!isValidSession) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
                 <div className="w-full max-w-md">
-                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                         <div className="text-center">
                             <div className="flex items-center justify-center mb-6">
-                                <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
+                                <div className="w-20 h-20 bg-critical-100 rounded-full flex items-center justify-center">
                                     <svg
-                                        className="w-10 h-10 text-red-600"
+                                        className="w-10 h-10 text-critical-600"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                         stroke="currentColor"
@@ -193,16 +193,16 @@ function ResetPasswordContent() {
                                 </div>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                Link Expired
+                            <h2 className="font-display text-2xl font-medium text-ink-900 mb-2 tracking-tight">
+                                Link expired
                             </h2>
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-ink-600 mb-6">
                                 {error || "This password reset link is invalid or has expired."}
                             </p>
 
                             <Link
                                 href={`/${country}/${locale}/auth/forgot-password`}
-                                className="inline-block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all text-center"
+                                className="inline-block w-full px-4 py-3 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors text-center"
                             >
                                 Request New Reset Link
                             </Link>
@@ -212,7 +212,7 @@ function ResetPasswordContent() {
                     <div className="mt-6 text-center">
                         <Link
                             href={`/${country}/${locale}/auth/signin`}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                            className="text-sm text-ink-600 hover:text-ink-900 font-medium"
                         >
                             ← Back to Sign In
                         </Link>
@@ -225,16 +225,16 @@ function ResetPasswordContent() {
     // Success state
     if (success) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
                 <div className="w-full max-w-md">
-                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                         <div className="text-center">
                             <div className="flex items-center justify-center mb-6">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-green-200 rounded-full opacity-25 animate-ping"></div>
-                                    <div className="relative w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+                                    <div className="relative w-20 h-20 bg-success-100 rounded-full flex items-center justify-center">
                                         <svg
-                                            className="w-10 h-10 text-green-600"
+                                            className="w-10 h-10 text-success-600"
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
@@ -250,22 +250,22 @@ function ResetPasswordContent() {
                                 </div>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                                Password Updated!
+                            <h2 className="font-display text-2xl font-medium text-ink-900 mb-2 tracking-tight">
+                                Password updated
                             </h2>
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-ink-600 mb-6">
                                 Your password has been successfully reset. You can now sign in with your new password.
                             </p>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <p className="text-sm text-blue-800">
+                            <div className="bg-primary-50/80 border border-primary-100 rounded-lg p-4 mb-6">
+                                <p className="text-sm text-primary-900">
                                     Redirecting to sign in page...
                                 </p>
                             </div>
 
                             <Link
                                 href={`/${country}/${locale}/auth/signin`}
-                                className="inline-block w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all text-center"
+                                className="inline-block w-full px-4 py-3 bg-accent-500 text-primary-950 rounded-lg font-semibold hover:bg-accent-400 transition-colors text-center"
                             >
                                 Sign In Now
                             </Link>
@@ -277,11 +277,10 @@ function ResetPasswordContent() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
             <div className="w-full max-w-md">
-                {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 bg-primary-800 rounded-lg mx-auto mb-4 shadow-sm">
                         <svg
                             className="w-6 h-6 text-white"
                             fill="none"
@@ -296,16 +295,15 @@ function ResetPasswordContent() {
                             />
                         </svg>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Set new password</h1>
-                    <p className="text-gray-600">Create a strong password for your account</p>
+                    <h1 className="font-display text-3xl font-medium text-ink-900 mb-2 tracking-tight">Set new password</h1>
+                    <p className="text-ink-600">Create a strong password for your account</p>
                 </div>
 
-                {/* Card */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* New Password */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-ink-700 mb-2">
                                 New Password
                             </label>
                             <input
@@ -315,14 +313,14 @@ function ResetPasswordContent() {
                                 placeholder="••••••••"
                                 required
                                 minLength={8}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+                                className="w-full px-4 py-3 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-ink-900 bg-surface-000"
                             />
-                            <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+                            <p className="mt-1 text-xs text-ink-500">Must be at least 8 characters</p>
                         </div>
 
                         {/* Confirm Password */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-ink-700 mb-2">
                                 Confirm Password
                             </label>
                             <input
@@ -331,22 +329,21 @@ function ResetPasswordContent() {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="••••••••"
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+                                className="w-full px-4 py-3 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-ink-900 bg-surface-000"
                             />
                         </div>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-sm text-red-800">{error}</p>
+                            <div className="p-4 bg-critical-100 border border-critical-500/20 rounded-lg">
+                                <p className="text-sm text-critical-600">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="cursor-pointer w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="cursor-pointer w-full px-4 py-3 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Updating..." : "Reset Password"}
                         </button>
@@ -357,7 +354,7 @@ function ResetPasswordContent() {
                 <div className="mt-6 text-center">
                     <Link
                         href={`/${country}/${locale}/auth/signin`}
-                        className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                        className="text-sm text-ink-600 hover:text-ink-900 font-medium"
                     >
                         ← Back to Sign In
                     </Link>
@@ -369,7 +366,7 @@ function ResetPasswordContent() {
 
 function SuspenseFallback() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
             <div className="flex flex-col items-center justify-center">
                 <div className="relative">
                     <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>

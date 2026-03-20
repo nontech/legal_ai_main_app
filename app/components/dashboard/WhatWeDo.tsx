@@ -35,46 +35,42 @@ export default function WhatWeDo() {
   ];
 
   return (
-    <section className="py-14 md:py-16 bg-white">
+    <section className="py-16 md:py-24 bg-surface-000 border-t border-border-200/70">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          {/* Heading */}
-          <div className="text-center mb-8 md:mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-ink-900 mb-4">
+          <div className="text-center mb-12 md:mb-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-800 mb-4">
+              {t("intro")}
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl lg:text-[2.75rem] font-medium text-ink-900 mb-5 tracking-tight">
               {t("heading")}
             </h2>
-            <p className="text-lg md:text-xl text-ink-700 leading-relaxed max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-ink-600 leading-relaxed max-w-3xl mx-auto">
               {t.rich("lead", {
                 bold: (chunks) => (
-                  <span className="font-semibold text-primary-700">{chunks}</span>
+                  <span className="font-semibold text-ink-900">{chunks}</span>
                 ),
               })}
             </p>
           </div>
 
-          {/* Label */}
-          <p className="text-sm font-semibold tracking-wide text-primary-700 mb-4 text-left">
-            {t("intro")}
-          </p>
-
-          {/* Capability grid — 4 individual blocks with illustrations */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
             {items.map(({ titleKey, descKey, Illustration }) => (
               <div
                 key={titleKey}
-                className="flex flex-col h-full rounded-xl bg-white border border-border-200 p-4 md:p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+                className="group flex flex-col h-full rounded-2xl border border-border-200/90 bg-[#faf8f5] p-6 md:p-8 transition-all duration-300 hover:border-primary-800/25 hover:shadow-[0_20px_50px_-24px_rgba(15,23,42,0.18)]"
               >
-                <div className="flex-shrink-0 w-24 h-20 md:w-28 md:h-24 mx-auto flex items-center justify-center">
+                <div className="flex-shrink-0 w-28 h-24 md:w-32 md:h-28 mx-auto flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.03]">
                   <Illustration />
                 </div>
-                <h3 className="mt-4 text-base md:text-lg font-semibold text-ink-900">
+                <h3 className="mt-5 font-display text-lg md:text-xl font-medium text-ink-900">
                   {t.rich(titleKey, {
                     bold: (chunks) => (
-                      <span className="font-bold text-primary-700">{chunks}</span>
+                      <span className="text-primary-800 not-italic">{chunks}</span>
                     ),
                   })}
                 </h3>
-                <p className="mt-2 text-sm md:text-base text-ink-600 leading-relaxed">
+                <p className="mt-3 text-sm md:text-base text-ink-600 leading-relaxed">
                   {t(descKey)}
                 </p>
               </div>

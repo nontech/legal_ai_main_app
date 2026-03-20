@@ -10,21 +10,20 @@ export default function ConfidentialByDesign() {
   const country = (params?.country as string) || "us";
   const locale = (params?.locale as string) || "en";
   return (
-    <section className="py-20 bg-gradient-to-br from-surface-050 via-surface-100 to-primary-50">
+    <section className="py-20 md:py-28 bg-[#f3f0ea] border-t border-border-200/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-            <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-accent-600 bg-clip-text text-transparent">
-              {t("headingPrimary")} {t("headingAccent")}
-            </span>
+          <h2 className="font-display text-3xl md:text-4xl lg:text-[2.75rem] font-medium mb-6 text-center text-ink-900 tracking-tight">
+            {t("headingPrimary")}{" "}
+            <span className="text-primary-800">{t("headingAccent")}</span>
           </h2>
-          <p className="text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
+          <p className="text-lg md:text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
             {t("subheading")}
           </p>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             {/* Data Privacy */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <div className="p-6 md:p-7 bg-surface-000 rounded-2xl border border-border-200/90 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
                   <svg
@@ -60,7 +59,7 @@ export default function ConfidentialByDesign() {
             </div>
 
             {/* Encryption */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <div className="p-6 md:p-7 bg-surface-000 rounded-2xl border border-border-200/90 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-success-100 rounded-xl flex items-center justify-center">
                   <svg
@@ -96,7 +95,7 @@ export default function ConfidentialByDesign() {
             </div>
 
             {/* Access Control */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <div className="p-6 md:p-7 bg-surface-000 rounded-2xl border border-border-200/90 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center">
                   <svg
@@ -132,7 +131,7 @@ export default function ConfidentialByDesign() {
             </div>
 
             {/* Compliance */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <div className="p-6 md:p-7 bg-surface-000 rounded-2xl border border-border-200/90 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 w-12 h-12 bg-info-100 rounded-xl flex items-center justify-center">
                   <svg
@@ -168,10 +167,10 @@ export default function ConfidentialByDesign() {
             </div>
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-14 text-center">
             <Link
               href={`/${country}/${locale}/security`}
-              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-primary-800 hover:text-primary-950 font-semibold transition-colors text-sm uppercase tracking-wide"
             >
               {t("cta")}
               <svg

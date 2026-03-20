@@ -2,6 +2,10 @@
   "navigation": {
     "home": "Startseite",
     "pretrialProcess": "Vorverfahren",
+    "caseAnalysis": "Fallanalyse",
+    "pricing": "Preise",
+    "documentation": "Dokumentation",
+    "contact": "Kontakt",
     "signIn": "Anmelden",
     "signUp": "Registrieren",
     "signOut": "Abmelden",
@@ -50,12 +54,13 @@
     "feature3Item3": "Klärungsfragen für Mandanten"
   },
   "heroV2": {
-    "headline": "KI-gestützte Analyse für Mietstreitigkeiten",
+    "headline": "KI-gestützte Analyse für <accent>Mietstreitigkeiten</accent>",
     "subheadline": "Verstehen Sie Ihre mietrechtliche Situation – wo Sie stehen, was zu tun ist und was Sie erwartet – ohne die <bold>500 € Beratungsgebühr</bold>",
     "cta": "Kostenlos starten",
+    "ctaSecondary": "Preise ansehen",
     "whoItsForTitle": "Für wen ist es geeignet",
     "whoItsForList1": "Mieter, die ihre Rechte verstehen wollen",
-    "whoItsForList2": "Vermieter, die rechtliche Risiken einschätzen wollen",
+    "whoItsForList2": "Mieter mit Fragen zu Kaution, Mietstreit oder Kündigung",
     "whoItsForList3": "<bold>Jeden</bold>, der bei einem Mietstreit schnell Klarheit braucht"
   },
   "whatWeDo": {
@@ -229,25 +234,25 @@
     "support": {
       "title": "Support",
       "description": "Für technischen Support, Kontoprobleme oder Fragen zur Plattformnutzung.",
-      "email": "support@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Antwortzeit: 24-48 Stunden"
     },
     "generalInquiries": {
       "title": "Allgemeine Anfragen",
       "description": "Für geschäftliche Anfragen, Partnerschaften oder allgemeine Fragen.",
-      "email": "contact@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Antwortzeit: 2-3 Geschäftstage"
     },
     "security": {
       "title": "Sicherheit",
       "description": "Melden Sie Sicherheitslücken oder Sicherheitsvorfälle.",
-      "email": "security@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Für verantwortungsvolle Offenlegung von Sicherheitsproblemen"
     },
     "legal": {
       "title": "Recht & Datenschutz",
       "description": "Für rechtliche Fragen, Datenschutzanfragen oder Compliance-Anfragen.",
-      "email": "legal@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Für GDPR-Anfragen, Datenverarbeitungsvereinbarungen, etc."
     },
     "officeHours": "Bürozeiten",
@@ -690,7 +695,7 @@
       "signInForMore": "Anmelden für mehr",
       "dailyLimitTitle": "Tageslimit erreicht",
       "dailyLimitMessage": "Sie haben Ihr Tageslimit für die Fallerstellung erreicht. Bitte versuchen Sie es später erneut oder melden Sie sich an, um weitere Analysen durchzuführen.",
-      "goToDashboard": "Zur Übersicht",
+      "goToHome": "Zur Startseite",
       "analysisLimitTitle": "Analyse-Limit erreicht",
       "gamePlanLimitTitle": "Spielplan-Limit erreicht",
       "analysisLimitMessage": "Sie haben Ihr tägliches Analyse-Limit erreicht. Ihre Credits werden um Mitternacht UTC zurückgesetzt.",

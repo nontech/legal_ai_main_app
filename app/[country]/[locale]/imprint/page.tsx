@@ -79,7 +79,7 @@ export default async function Imprint({
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("contactInformation")}</h2>
               <p>
-                <strong>Email:</strong> <a href="mailto:contact@info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a><br />
+                <strong>Email:</strong> <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a><br />
                 <strong>{t("support")}</strong> <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a><br />
                 <strong>{t("phone")}</strong> {t("phoneValue")}
               </p>

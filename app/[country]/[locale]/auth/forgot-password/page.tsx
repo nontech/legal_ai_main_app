@@ -43,10 +43,9 @@ export default function ForgotPasswordPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
                 <div className="w-full max-w-md">
-                    {/* Success Card */}
-                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                         <div className="text-center">
                             {/* Email Icon */}
                             <div className="flex items-center justify-center mb-6">
@@ -70,16 +69,16 @@ export default function ForgotPasswordPage() {
                                 </div>
                             </div>
 
-                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            <h2 className="font-display text-2xl font-medium text-ink-900 mb-2 tracking-tight">
                                 Check your email
                             </h2>
-                            <p className="text-gray-600 mb-6">
-                                We've sent a password reset link to{" "}
-                                <span className="font-semibold text-gray-900">{email}</span>
+                            <p className="text-ink-600 mb-6">
+                                We&apos;ve sent a password reset link to{" "}
+                                <span className="font-semibold text-ink-900">{email}</span>
                             </p>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-left">
-                                <p className="text-sm text-blue-800">
+                            <div className="bg-primary-50/80 border border-primary-100 rounded-lg p-4 mb-6 text-left">
+                                <p className="text-sm text-primary-900">
                                     <span className="font-semibold">Note:</span> The link will expire in 1 hour. 
                                     If you don't see the email, check your spam folder.
                                 </p>
@@ -87,7 +86,7 @@ export default function ForgotPasswordPage() {
 
                             <Link
                                 href={`/${country}/${locale}/auth/signin`}
-                                className="inline-block w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all text-center"
+                                className="inline-block w-full px-4 py-3 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors text-center"
                             >
                                 Back to Sign In
                             </Link>
@@ -97,8 +96,9 @@ export default function ForgotPasswordPage() {
                     {/* Resend Link */}
                     <div className="mt-6 text-center">
                         <button
+                            type="button"
                             onClick={() => setSuccess(false)}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+                            className="text-sm text-ink-600 hover:text-ink-900 font-medium"
                         >
                             Didn't receive the email? Try again
                         </button>
@@ -109,11 +109,10 @@ export default function ForgotPasswordPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+        <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
             <div className="w-full max-w-md">
-                {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="flex items-center justify-center w-12 h-12 bg-blue-600 rounded-lg mx-auto mb-4">
+                    <div className="flex items-center justify-center w-12 h-12 bg-primary-800 rounded-lg mx-auto mb-4 shadow-sm">
                         <svg
                             className="w-6 h-6 text-white"
                             fill="none"
@@ -128,16 +127,15 @@ export default function ForgotPasswordPage() {
                             />
                         </svg>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Forgot password?</h1>
-                    <p className="text-gray-600">No worries, we'll send you reset instructions</p>
+                    <h1 className="font-display text-3xl font-medium text-ink-900 mb-2 tracking-tight">Forgot password?</h1>
+                    <p className="text-ink-600">No worries — we&apos;ll send you reset instructions</p>
                 </div>
 
-                {/* Card */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div className="bg-surface-000 rounded-2xl border border-border-200/90 shadow-[0_24px_64px_-24px_rgba(15,23,42,0.12)] p-8">
                     <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            <label className="block text-sm font-semibold text-ink-700 mb-2">
                                 Email Address
                             </label>
                             <input
@@ -146,22 +144,21 @@ export default function ForgotPasswordPage() {
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
                                 required
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+                                className="w-full px-4 py-3 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 transition-all text-ink-900 bg-surface-000"
                             />
                         </div>
 
                         {/* Error Message */}
                         {error && (
-                            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <p className="text-sm text-red-800">{error}</p>
+                            <div className="p-4 bg-critical-100 border border-critical-500/20 rounded-lg">
+                                <p className="text-sm text-critical-600">{error}</p>
                             </div>
                         )}
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="cursor-pointer w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="cursor-pointer w-full px-4 py-3 bg-primary-800 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Sending..." : "Send Reset Link"}
                         </button>
@@ -171,7 +168,7 @@ export default function ForgotPasswordPage() {
                     <div className="mt-6 text-center">
                         <Link
                             href={`/${country}/${locale}/auth/signin`}
-                            className="text-sm text-gray-600 hover:text-gray-900 font-medium inline-flex items-center gap-1"
+                            className="text-sm text-ink-600 hover:text-ink-900 font-medium inline-flex items-center gap-1"
                         >
                             <svg
                                 className="w-4 h-4"

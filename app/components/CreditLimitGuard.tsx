@@ -95,7 +95,7 @@ export default function CreditLimitGuard({
                     subtitle={t("subtitle")}
                     message={t("dailyLimitMessage")}
                     onClose={handleGoBack}
-                    primaryButtonLabel={t("goToDashboard")}
+                    primaryButtonLabel={t("goToHome")}
                     showSignIn={isAnonymous}
                     onSignIn={handleSignIn}
                 />

@@ -100,14 +100,14 @@ function CaseAnalysisContent() {
 
   return (
     <CreditLimitGuard requireCases={true}>
-      <div className="min-h-screen bg-surface-100">
+      <div className="min-h-screen bg-[#faf8f5]">
         <Navbar />
 
         <main className="pt-20 sm:pt-24 pb-16 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 flex flex-col gap-3 sm:gap-4">
-          <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-4">
+          <section className="bg-surface-000 rounded-xl border border-border-200/90 shadow-sm p-4 sm:p-5">
             <div className="text-center">
-              <h3 className="text-lg sm:text-xl font-semibold text-ink-900">
+              <h3 className="font-display text-lg sm:text-xl font-medium text-ink-900 tracking-tight">
                 {t("title")}
               </h3>
             </div>
@@ -120,7 +120,7 @@ function CaseAnalysisContent() {
             </div>
           </section>
 
-          <section className="bg-surface-000 rounded-lg sm:rounded-xl shadow-sm border border-border-200 p-3 sm:p-6">
+          <section className="bg-surface-000 rounded-xl border border-border-200/90 shadow-sm p-4 sm:p-7">
             {currentStep === "upload" && (
               <DocumentUploadStep
                 onContinue={handleDocumentsUploaded}
@@ -150,7 +150,7 @@ function CaseAnalysisContent() {
 }
 function SuspenseFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface-100">
+    <div className="min-h-screen flex items-center justify-center bg-[#faf8f5]">
       <div className="flex flex-col items-center gap-4">
         <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full"></div>
         <p className="text-ink-600">Loading...</p>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, memo, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSelector } from "./LanguageSelector";
 
@@ -15,8 +15,50 @@ function LanguageSelectorWrapper() {
   );
 }
 
+function ProductNavLinks({
+  country,
+  locale,
+  className,
+  linkClassName,
+  onNavigate,
+}: {
+  country: string;
+  locale: string;
+  className?: string;
+  linkClassName?: string;
+  onNavigate?: () => void;
+}) {
+  const t = useTranslations("navigation");
+  const linkCls =
+    linkClassName ??
+    "text-sm font-medium text-ink-600 hover:text-primary-800 transition-colors";
+  return (
+    <div className={className}>
+      <Link
+        href={`/${country}/${locale}/case-analysis`}
+        className={linkCls}
+        onClick={onNavigate}
+      >
+        {t("caseAnalysis")}
+      </Link>
+      <Link href={`/${country}/${locale}/pricing`} className={linkCls} onClick={onNavigate}>
+        {t("pricing")}
+      </Link>
+      <Link
+        href={`/${country}/${locale}/documentation`}
+        className={linkCls}
+        onClick={onNavigate}
+      >
+        {t("documentation")}
+      </Link>
+      <Link href={`/${country}/${locale}/contact`} className={linkCls} onClick={onNavigate}>
+        {t("contact")}
+      </Link>
+    </div>
+  );
+}
+
 export default function Navbar() {
-  const router = useRouter();
   const params = useParams();
   const country = params.country as string;
   const locale = params.locale as string;
@@ -91,14 +133,14 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="bg-surface-000/90 backdrop-blur-md border-b border-border-200 shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav className="bg-surface-000/80 backdrop-blur-xl border-b border-border-200/80 fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+        <div className="flex justify-between items-center h-16 sm:h-[4.25rem]">
           {/* Logo Section */}
           <Link href={`/${country}/${locale}`} className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
             <div className="flex items-center justify-center transition-all duration-300 group-hover:scale-105">
               <svg
-                className="w-8 h-8 sm:w-9 sm:h-9 text-ink-900"
+                className="w-8 h-8 sm:w-9 sm:h-9 text-primary-800"
                 fill="currentColor"
                 viewBox="0 0 24 24"
               >
@@ -106,15 +148,20 @@ export default function Navbar() {
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="text-md sm:text-lg lg:text-xl font-bold text-ink-900 leading-tight">
+              <span className="font-display text-md sm:text-lg lg:text-xl font-semibold text-ink-900 leading-tight tracking-tight">
                 TheLawThing
               </span>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-1">
-            <div className="px-3">
+          <div className="hidden md:flex items-center gap-1 lg:gap-2">
+            <ProductNavLinks
+              country={country}
+              locale={locale}
+              className="hidden lg:flex items-center gap-7 mr-2"
+            />
+            <div className="px-2 lg:px-3">
               <LanguageSelectorWrapper />
             </div>
 
@@ -126,8 +173,8 @@ export default function Navbar() {
               // Authenticated User - Dashboard link + User Menu
               <>
                 <Link
-                  href={`/${country}/${locale}`}
-                  className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group flex items-center gap-1.5"
+                  href={`/${country}/${locale}/dashboard`}
+                  className="relative px-3 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group flex items-center gap-1.5"
                 >
                   <svg
                     className="w-4 h-4"
@@ -150,7 +197,7 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-3 px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 rounded-lg hover:bg-surface-100 cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 rounded-lg hover:bg-surface-100 cursor-pointer"
                   >
                     <div className="flex items-center justify-center w-8 h-8 bg-primary-100 rounded-full">
                       <svg
@@ -202,7 +249,7 @@ export default function Navbar() {
               <>
                 <Link
                   href={`/${country}/${locale}/auth/signin`}
-                  className="relative px-4 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
+                  className="relative px-3 py-2.5 text-ink-600 hover:text-ink-900 font-medium transition-all duration-200 group"
                 >
                   <span className="relative z-10 cursor-pointer">{t("signIn")}</span>
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-500 group-hover:w-full transition-all duration-300"></span>
@@ -211,7 +258,7 @@ export default function Navbar() {
                 <div className="ml-2 pl-2 border-l border-border-200">
                   <Link
                     href={`/${country}/${locale}/auth/signup`}
-                    className="px-6 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105 inline-block"
+                    className="px-5 py-2.5 bg-primary-800 text-white hover:bg-primary-700 rounded-md font-semibold text-sm transition-colors shadow-sm hover:shadow inline-block"
                   >
                     {t("signUp")}
                   </Link>
@@ -249,11 +296,19 @@ export default function Navbar() {
               <LanguageSelectorWrapper />
             </div>
 
+            <ProductNavLinks
+              country={country}
+              locale={locale}
+              className="flex flex-col px-2 py-1"
+              linkClassName="text-sm font-medium text-ink-700 hover:text-primary-800 transition-colors px-4 py-2.5 rounded-lg hover:bg-surface-100"
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+
             {!isLoading && isAuthenticated ? (
               <>
                 {/* Dashboard Link - Mobile */}
                 <Link
-                  href={`/${country}/${locale}`}
+                  href={`/${country}/${locale}/dashboard`}
                   className="flex items-center gap-2 px-4 py-2.5 text-ink-600 hover:text-ink-900 hover:bg-surface-100 rounded-lg transition-colors font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -316,7 +371,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href={`/${country}/${locale}/auth/signup`}
-                  className="block px-4 py-2.5 bg-gradient-to-r from-accent-600 to-accent-500 text-white hover:from-accent-500 hover:to-accent-400 rounded-lg font-semibold transition-all duration-200 text-center"
+                  className="block px-4 py-2.5 bg-primary-800 text-white hover:bg-primary-700 rounded-md font-semibold transition-colors text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {t("signUp")}

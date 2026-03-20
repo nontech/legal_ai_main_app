@@ -1,6 +1,19 @@
 import type { Metadata } from "next";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AnalyticsScripts from "@/app/components/AnalyticsScripts";
+
+const fontDisplay = Newsreader({
+	subsets: ["latin"],
+	variable: "--font-ui-serif",
+	display: "swap",
+});
+
+const fontSans = Plus_Jakarta_Sans({
+	subsets: ["latin"],
+	variable: "--font-ui-sans",
+	display: "swap",
+});
 
 export const metadata: Metadata = {
 	title:
@@ -21,7 +34,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
-			<body className="antialiased" suppressHydrationWarning>
+			<body
+				className={`${fontDisplay.variable} ${fontSans.variable} font-sans antialiased`}
+				suppressHydrationWarning
+			>
 				{children}
 				<AnalyticsScripts />
 			</body>

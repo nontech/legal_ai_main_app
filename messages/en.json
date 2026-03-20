@@ -2,6 +2,10 @@
   "navigation": {
     "home": "Home",
     "pretrialProcess": "Pretrial Process",
+    "caseAnalysis": "Case analysis",
+    "pricing": "Pricing",
+    "documentation": "Documentation",
+    "contact": "Contact",
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
@@ -50,12 +54,13 @@
     "feature3Item3": "Client clarification questions"
   },
   "heroV2": {
-    "headline": "AI-powered analysis for tenant–landlord disputes",
+    "headline": "AI-powered analysis for <accent>tenant–landlord disputes</accent>",
     "subheadline": "Understand your rental law situation - where you stand, what to do next, and what to expect - without the <bold>€500 consultation fee</bold>",
     "cta": "Start for free",
+    "ctaSecondary": "View pricing",
     "whoItsForTitle": "Who it’s for",
     "whoItsForList1": "Tenants who want to understand their rights",
-    "whoItsForList2": "Landlords who want to assess legal risks",
+    "whoItsForList2": "Tenants dealing with deposits, rent disputes, or termination notices",
     "whoItsForList3": "<bold>Anyone</bold> dealing with a rental dispute who needs clarity fast"
   },
   "whatWeDo": {
@@ -229,25 +234,25 @@
     "support": {
       "title": "Support",
       "description": "For technical support, account issues, or questions about using the platform.",
-      "email": "support@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Response time: 24-48 hours"
     },
     "generalInquiries": {
       "title": "General Inquiries",
       "description": "For business inquiries, partnerships, or general questions.",
-      "email": "contact@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "Response time: 2-3 business days"
     },
     "security": {
       "title": "Security",
       "description": "Report security vulnerabilities or incidents.",
-      "email": "security@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "For responsible disclosure of security issues"
     },
     "legal": {
       "title": "Legal & Privacy",
       "description": "For legal questions, privacy requests, or compliance inquiries.",
-      "email": "legal@TheLawThing.dev",
+      "email": "info@thelawthing.com",
       "responseTime": "For GDPR requests, data processing agreements, etc."
     },
     "officeHours": "Office Hours",
@@ -690,7 +695,7 @@
       "signInForMore": "Sign in for more",
       "dailyLimitTitle": "Daily Limit Reached",
       "dailyLimitMessage": "You have reached your daily case creation limit. Please try again later or sign in for more.",
-      "goToDashboard": "Go to Dashboard",
+      "goToHome": "Go to Home",
       "analysisLimitTitle": "Analysis Limit Reached",
       "gamePlanLimitTitle": "Game Plan Limit Reached",
       "analysisLimitMessage": "You have reached your daily analysis limit. Your credits reset at midnight UTC.",
