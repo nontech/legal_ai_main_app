@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Navbar from "@/app/components/Navbar";
 import CreditLimitGuard from "@/app/components/CreditLimitGuard";
 
 export const dynamic = "force-dynamic";
@@ -101,8 +100,6 @@ function CaseAnalysisContent() {
   return (
     <CreditLimitGuard requireCases={true}>
       <div className="min-h-screen bg-[#faf8f5]">
-        <Navbar />
-
         <main className="pt-20 sm:pt-24 pb-16 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
         <div className="max-w-5xl mx-auto px-3 sm:px-4 flex flex-col gap-3 sm:gap-4">
           <section className="bg-surface-000 rounded-xl border border-border-200/90 shadow-sm p-4 sm:p-5">

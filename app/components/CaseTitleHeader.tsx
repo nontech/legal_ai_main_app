@@ -79,7 +79,7 @@ export default function CaseTitleHeader({
     : title || "Untitled Case";
 
   return (
-    <div className="w-full mt-16 sm:mt-20">
+    <div className="w-full">
       <div className="px-3 sm:px-4 lg:px-8">
         <div className="flex gap-6">
           {/* Match the main content container structure */}

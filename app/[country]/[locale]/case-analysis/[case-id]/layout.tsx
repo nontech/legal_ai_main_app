@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Navbar from "@/app/components/Navbar";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
 import CaseTitleHeader from "@/app/components/CaseTitleHeader";
@@ -179,8 +178,8 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
 						onRegenerateComplete={fetchCaseCompletion}
 					/>
 				)}
-				<Navbar />
-
+				{/* Navbar is provided by [locale]/layout.tsx; pad below fixed nav so body dark mode never shows through margin collapse */}
+				<div className="w-full bg-[#faf8f5] pt-16 sm:pt-20">
 				{/* Case Title Header - Show only if caseId exists */}
 				{caseId && (
 					<CaseTitleHeader
@@ -235,6 +234,7 @@ export default function CaseAnalysisLayout({ children }: LayoutProps) {
 							)}
 					</div>
 				</main>
+				</div>
 			</div>
 		</CaseHeaderActionsProvider>
 	);

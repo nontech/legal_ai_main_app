@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Navbar from "@/app/components/Navbar";
 import CreditLimitGuard from "@/app/components/CreditLimitGuard";
 import ProgressStepper from "@/app/components/ProgressStepper";
 import MobileProgressBar from "@/app/components/MobileProgressBar";
@@ -235,8 +234,7 @@ function NewCaseAnalysisContent() {
 	return (
 		<CreditLimitGuard requireCases={!caseId}>
 			<div className="min-h-screen bg-[#faf8f5]">
-				<Navbar />
-
+				<div className="w-full bg-[#faf8f5] pt-16 sm:pt-20">
 				{caseId && (
 					<CaseTitleHeader
 						caseId={caseId}
@@ -287,6 +285,7 @@ function NewCaseAnalysisContent() {
 							)}
 					</div>
 				</main>
+				</div>
 			</div>
 		</CreditLimitGuard>
 	);
