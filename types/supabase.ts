@@ -44,6 +44,7 @@ export type Database = {
           case_type: string | null
           charges: Json | null
           created_at: string
+          entity_relationship: Json | null
           game_plan: Json | null
           id: string
           judge: string | null
@@ -61,6 +62,7 @@ export type Database = {
           case_type?: string | null
           charges?: Json | null
           created_at?: string
+          entity_relationship?: Json | null
           game_plan?: Json | null
           id?: string
           judge?: string | null
@@ -78,6 +80,7 @@ export type Database = {
           case_type?: string | null
           charges?: Json | null
           created_at?: string
+          entity_relationship?: Json | null
           game_plan?: Json | null
           id?: string
           judge?: string | null

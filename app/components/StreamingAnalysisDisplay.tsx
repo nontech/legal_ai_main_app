@@ -198,6 +198,12 @@ interface StreamingAnalysisDisplayProps {
 
 // Map of step variants to their base step for grouping
 const stepGrouping: Record<string, string> = {
+    // Backend often sends these for the warm-up phase; normalize to `status` so sort order stays first
+    Initialization: "status",
+    initialization: "status",
+    initializing: "status",
+    entity_relationships: "entity_relationships",
+    entity_relationships_complete: "entity_relationships",
     charges_analysis: "charges_analysis",
     rag_retrieval: "precedent_retrieval",
     precedent_extraction: "precedent_retrieval",
@@ -216,6 +222,7 @@ const stepGrouping: Record<string, string> = {
 
 const stepIcons: Record<string, string> = {
     status: "⚙️",
+    entity_relationships: "🕸️",
     charges_analysis: "📋",
     precedent_retrieval: "🤖",
     outcome_prediction: "📊",
@@ -228,6 +235,7 @@ const stepIcons: Record<string, string> = {
 
 const stepLabels: Record<string, string> = {
     status: "Initializing",
+    entity_relationships: "Entities & relationships",
     charges_analysis: "Analyzing Charges",
     precedent_retrieval: "Finding Precedent Cases",
     outcome_prediction: "Predicting Outcomes",
@@ -237,6 +245,30 @@ const stepLabels: Record<string, string> = {
     executive_summary: "Executive Summary",
     finalization: "Finalizing Results",
 };
+
+/**
+ * Canonical pipeline order (matches backend): entity graph runs before precedent lookup,
+ * outcome, key factors, legal assessment, strategy, and executive summary.
+ */
+const ANALYSIS_PIPELINE_STEP_ORDER = [
+    "status",
+    "entity_relationships",
+    "charges_analysis",
+    "precedent_retrieval",
+    "outcome_prediction",
+    "factors_analysis",
+    "legal_assessment",
+    "strategic_recommendations",
+    "executive_summary",
+    "finalization",
+] as const;
+
+function pipelineStepRank(baseStep: string): number {
+    const i = (ANALYSIS_PIPELINE_STEP_ORDER as readonly string[]).indexOf(
+        baseStep
+    );
+    return i === -1 ? 999 : i;
+}
 
 export default function StreamingAnalysisDisplay({
     isOpen,
@@ -263,9 +295,6 @@ export default function StreamingAnalysisDisplay({
     const lastActivityRef = useRef<number>(Date.now());
     const viewResultsButtonRef = useRef<HTMLButtonElement>(null);
     const isProgrammaticScrollRef = useRef<boolean>(false);
-
-    // Track order of steps for consistent display
-    const stepOrderRef = useRef<string[]>([]);
 
     // Keep onCompleteRef up to date
     useEffect(() => {
@@ -395,7 +424,6 @@ export default function StreamingAnalysisDisplay({
             setCreditLimitReached(null);
             setProgress(0);
             setIsComplete(false);
-            stepOrderRef.current = [];
             return;
         }
 
@@ -446,16 +474,10 @@ export default function StreamingAnalysisDisplay({
 
                 const decoder = new TextDecoder();
                 let buffer = "";
-                const stepsList = [
-                    "status",
-                    "charges_analysis",
-                    "precedent_retrieval",
-                    "outcome_prediction",
-                    "factors_analysis",
-                    "legal_assessment",
-                    "strategic_recommendations",
-                    "executive_summary",
-                ];
+                /** Steps that drive the progress bar (excludes `finalization` retry UI). */
+                const stepsList = ANALYSIS_PIPELINE_STEP_ORDER.filter(
+                    (s) => s !== "finalization"
+                );
                 const totalSteps = stepsList.length;
                 let lastResult: any = null;
                 let completionHandled = false;
@@ -481,25 +503,30 @@ export default function StreamingAnalysisDisplay({
 
                                     // Group events by base step
                                     if (event.type === "reasoning" || event.type === "status") {
-                                        const step = (event.step || event.type) as string;
-                                        const baseStep = stepGrouping[step] || step;
+                                        // Prefer explicit step; avoid using raw "reasoning" as the bucket key (unknown → sorts last)
+                                        const step = (event.step ??
+                                            (event.type === "status" ? "status" : "")) as string;
+                                        const baseStep =
+                                            stepGrouping[step] ||
+                                            (step ? step : "status");
                                         const isComplete = typeof step === "string" && step.includes("_complete");
+
+                                        const displayMessage =
+                                            event.message?.trim() ||
+                                            (event.step === "entity_relationships"
+                                                ? t("steps.entity_relationships_progress")
+                                                : event.message);
 
                                         setGroupedSteps((prev) => {
                                             const updated = new Map(prev);
                                             const existing = updated.get(baseStep);
 
                                             if (!existing) {
-                                                // Track order for first appearance
-                                                if (!stepOrderRef.current.includes(baseStep)) {
-                                                    stepOrderRef.current = [...stepOrderRef.current, baseStep];
-                                                }
-
                                                 updated.set(baseStep, {
                                                     baseStep,
                                                     status: isComplete ? "completed" : "in_progress",
                                                     messages: [],
-                                                    pendingMessages: [event.message],
+                                                    pendingMessages: [displayMessage],
                                                     currentMessageIndex: 0,
                                                     data: event.data,
                                                     icon: stepIcons[baseStep] || "📌",
@@ -509,8 +536,8 @@ export default function StreamingAnalysisDisplay({
                                                 // Add message to pending if it's different from existing ones (avoid duplicates)
                                                 const allMessages = [...existing.messages, ...existing.pendingMessages];
                                                 const lastMessage = allMessages[allMessages.length - 1];
-                                                if (lastMessage !== event.message && event.message.trim()) {
-                                                    existing.pendingMessages.push(event.message);
+                                                if (lastMessage !== displayMessage && displayMessage.trim()) {
+                                                    existing.pendingMessages.push(displayMessage);
                                                 }
                                                 // Update data if available
                                                 if (event.data) {
@@ -526,7 +553,9 @@ export default function StreamingAnalysisDisplay({
 
                                         // Update progress - cap at 99% until completion
                                         if (!isComplete) {
-                                            const stepIndex = stepsList.indexOf(baseStep);
+                                            const stepIndex = (
+                                                stepsList as readonly string[]
+                                            ).indexOf(baseStep);
                                             if (stepIndex !== -1) {
                                                 const progressPercent = Math.round(((stepIndex + 1) / totalSteps) * 100);
                                                 // Cap progress at 99% until we get the complete event
@@ -649,7 +678,7 @@ export default function StreamingAnalysisDisplay({
         };
 
         startStreaming();
-    }, [isOpen, caseId]);
+    }, [isOpen, caseId, t]);
 
     // Auto-scroll to latest event
     useEffect(() => {
@@ -687,22 +716,32 @@ export default function StreamingAnalysisDisplay({
         );
     }
 
-    // Convert map to array in the order steps were encountered
+    // Timeline order follows the canonical pipeline (not arrival order), so entities
+    // always appear before precedent/outcome/key factors even if SSE events reorder briefly.
     const stepsArray = Array.from(groupedSteps.values()).sort(
-        (a, b) => stepOrderRef.current.indexOf(a.baseStep) - stepOrderRef.current.indexOf(b.baseStep)
+        (a, b) => pipelineStepRank(a.baseStep) - pipelineStepRank(b.baseStep)
     );
 
     return (
         <div className="fixed inset-0 z-[9999] overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen px-3 sm:px-4 pt-4 pb-20">
-                {/* Background overlay - allow close when complete or on error */}
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-                    onClick={isComplete || error ? onClose : undefined}
-                ></div>
+                {/* Background overlay - dismissible only when complete or on error (use button for a11y) */}
+                {isComplete || error ? (
+                    <button
+                        type="button"
+                        className="fixed inset-0 z-0 cursor-pointer border-0 bg-black bg-opacity-50 p-0 transition-opacity"
+                        onClick={onClose}
+                        aria-label={t("closeBackdrop")}
+                    />
+                ) : (
+                    <div
+                        className="pointer-events-none fixed inset-0 z-0 bg-black bg-opacity-50"
+                        aria-hidden
+                    />
+                )}
 
                 {/* Modal panel */}
-                <div className="relative inline-block w-full max-w-2xl my-8 overflow-hidden text-left transition-all transform bg-surface-000 shadow-2xl rounded-2xl sm:rounded-3xl border border-border-200">
+                <div className="relative z-10 inline-block w-full max-w-2xl my-8 overflow-hidden text-left transition-all transform bg-surface-000 shadow-2xl rounded-2xl sm:rounded-3xl border border-border-200">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-primary-600 to-primary-700 px-4 sm:px-8 py-4 sm:py-6 sticky top-0 z-10">
                         <div className="flex items-center justify-between">
@@ -714,7 +753,9 @@ export default function StreamingAnalysisDisplay({
                                             fill="none"
                                             viewBox="0 0 24 24"
                                             stroke="currentColor"
+                                            aria-hidden
                                         >
+                                            <title>{t("completeTitle")}</title>
                                             <path
                                                 strokeLinecap="round"
                                                 strokeLinejoin="round"
@@ -727,7 +768,9 @@ export default function StreamingAnalysisDisplay({
                                             className="w-6 h-6 text-primary-100 animate-spin"
                                             fill="none"
                                             viewBox="0 0 24 24"
+                                            aria-hidden
                                         >
+                                            <title>{t("analyzingTitle")}</title>
                                             <circle
                                                 className="opacity-25"
                                                 cx="12"
@@ -880,7 +923,16 @@ export default function StreamingAnalysisDisplay({
                             <div className="flex items-center justify-between gap-4">
                                 {autoClickCountdown !== null && autoClickCountdown > 0 && (
                                     <div className="flex items-center gap-2 text-sm text-ink-600">
-                                        <svg className="w-4 h-4 text-primary-600 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg
+                                            className="w-4 h-4 text-primary-600 animate-pulse"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            aria-hidden
+                                        >
+                                            <title>
+                                                {t("autoOpening", { count: autoClickCountdown })}
+                                            </title>
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <span>{t("autoOpening", { count: autoClickCountdown })}</span>
@@ -888,6 +940,7 @@ export default function StreamingAnalysisDisplay({
                                 )}
                                 {(!autoClickCountdown || autoClickCountdown === 0) && <div></div>}
                                 <button
+                                    type="button"
                                     ref={viewResultsButtonRef}
                                     onClick={() => {
                                         // Clear timers when manually clicked

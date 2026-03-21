@@ -8,6 +8,8 @@ import remarkGfm from "remark-gfm";
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  /** Tighter spacing and smaller type for callouts (e.g. dispute banner). */
+  compact?: boolean;
 }
 
 type CodeProps = ComponentPropsWithoutRef<"code"> &
@@ -28,6 +30,19 @@ const CodeRenderer: FC<CodeProps> = ({ inline, node: _node, ...props }) =>
     />
   );
 
+const CodeRendererCompact: FC<CodeProps> = ({ inline, node: _node, ...props }) =>
+  inline ? (
+    <code
+      className="rounded bg-amber-100/80 px-1 py-0.5 font-mono text-[11px] text-amber-950"
+      {...props}
+    />
+  ) : (
+    <code
+      className="mb-2 block overflow-x-auto rounded-lg bg-slate-900 p-2 font-mono text-xs text-slate-100"
+      {...props}
+    />
+  );
+
 /**
  * MarkdownRenderer - Renders markdown content with proper styling
  * Supports GitHub Flavored Markdown (tables, strikethrough, etc.)
@@ -35,6 +50,7 @@ const CodeRenderer: FC<CodeProps> = ({ inline, node: _node, ...props }) =>
 export default function MarkdownRenderer({
   content,
   className = "",
+  compact = false,
 }: MarkdownRendererProps) {
   const markdownComponents: Components = {
     h1: ({ node: _node, ...props }) => (
@@ -120,12 +136,104 @@ export default function MarkdownRenderer({
     ),
   };
 
+  const compactComponents: Components = {
+    h1: ({ node: _node, ...props }) => (
+      <h1
+        className="mt-2 mb-1 text-base font-semibold leading-snug text-slate-900 first:mt-0"
+        {...props}
+      />
+    ),
+    h2: ({ node: _node, ...props }) => (
+      <h2
+        className="mt-2 mb-1 text-sm font-semibold leading-snug text-slate-900 first:mt-0"
+        {...props}
+      />
+    ),
+    h3: ({ node: _node, ...props }) => (
+      <h3
+        className="mt-1.5 mb-1 text-sm font-semibold text-slate-900 first:mt-0"
+        {...props}
+      />
+    ),
+    h4: ({ node: _node, ...props }) => (
+      <h4 className="mt-1.5 mb-0.5 text-sm font-semibold text-slate-900" {...props} />
+    ),
+    h5: ({ node: _node, ...props }) => (
+      <h5 className="mt-1 mb-0.5 text-xs font-semibold text-slate-800" {...props} />
+    ),
+    h6: ({ node: _node, ...props }) => (
+      <h6 className="mt-1 mb-0.5 text-xs font-semibold text-slate-700" {...props} />
+    ),
+    p: ({ node: _node, ...props }) => (
+      <p className="mb-1.5 text-sm leading-relaxed text-slate-900 last:mb-0" {...props} />
+    ),
+    a: ({ node: _node, ...props }) => (
+      <a
+        className="break-words text-primary-700 underline hover:text-primary-800"
+        target="_blank"
+        rel="noopener noreferrer"
+        {...props}
+      />
+    ),
+    strong: ({ node: _node, ...props }) => (
+      <strong className="font-semibold text-slate-900" {...props} />
+    ),
+    em: ({ node: _node, ...props }) => (
+      <em className="italic text-slate-800" {...props} />
+    ),
+    code: CodeRendererCompact,
+    pre: ({ node: _node, ...props }) => (
+      <pre
+        className="mb-2 overflow-x-auto rounded-lg bg-slate-900 p-2 font-mono text-xs text-slate-100"
+        {...props}
+      />
+    ),
+    blockquote: ({ node: _node, ...props }) => (
+      <blockquote
+        className="my-2 border-l-4 border-amber-400 bg-amber-100/40 py-1 pl-3 text-sm italic text-slate-800"
+        {...props}
+      />
+    ),
+    ul: ({ node: _node, ...props }) => (
+      <ul className="mb-1.5 ml-3 list-disc text-sm text-slate-800 last:mb-0" {...props} />
+    ),
+    ol: ({ node: _node, ...props }) => (
+      <ol className="mb-1.5 ml-3 list-decimal text-sm text-slate-800 last:mb-0" {...props} />
+    ),
+    li: ({ node: _node, ...props }) => (
+      <li className="mb-0.5 text-slate-800" {...props} />
+    ),
+    table: ({ node: _node, ...props }) => (
+      <div className="mb-2 overflow-x-auto">
+        <table
+          className="w-full border-collapse border border-slate-300 text-xs text-slate-800"
+          {...props}
+        />
+      </div>
+    ),
+    thead: ({ node: _node, ...props }) => (
+      <thead className="border-b border-slate-300 bg-slate-100" {...props} />
+    ),
+    tbody: ({ node: _node, ...props }) => <tbody {...props} />,
+    tr: ({ node: _node, ...props }) => (
+      <tr className="border-b border-slate-200" {...props} />
+    ),
+    td: ({ node: _node, ...props }) => (
+      <td className="border border-slate-200 px-2 py-1" {...props} />
+    ),
+    th: ({ node: _node, ...props }) => (
+      <th className="border border-slate-200 px-2 py-1 text-left font-semibold" {...props} />
+    ),
+    hr: ({ node: _node, ...props }) => (
+      <hr className="my-2 border-t border-amber-200/80" {...props} />
+    ),
+  };
+
+  const components = compact ? compactComponents : markdownComponents;
+
   return (
     <div className={`markdown-content ${className}`}>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={markdownComponents}
-      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {content}
       </ReactMarkdown>
     </div>

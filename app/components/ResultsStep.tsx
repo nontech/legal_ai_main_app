@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import CaseEntityRelationshipsDialog from "./CaseEntityRelationshipsDialog";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
 import GamePlanDisplay from "./GamePlanDisplay";
@@ -64,6 +65,8 @@ export default function ResultsStep({
   const [showOutcomeReasoning, setShowOutcomeReasoning] =
     useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isEntityRelationshipsDialogOpen, setIsEntityRelationshipsDialogOpen] =
+    useState(false);
   const setHeaderActions = useSetHeaderActions();
   const tResults = useTranslations("caseAnalysis.results");
 
@@ -391,6 +394,12 @@ export default function ResultsStep({
         }}
       />
 
+      <CaseEntityRelationshipsDialog
+        isOpen={isEntityRelationshipsDialogOpen}
+        onClose={() => setIsEntityRelationshipsDialogOpen(false)}
+        caseRow={caseInfo}
+      />
+
       <StreamingGamePlanDisplay
         isOpen={isGamePlanStreamingOpen}
         caseId={effectiveCaseId || ""}
@@ -580,6 +589,19 @@ export default function ResultsStep({
             </div>
           </div>
           <div className="flex gap-2 flex-wrap justify-start lg:justify-end">
+            {!(isAuthenticated && isOwner) && (
+              <button
+                type="button"
+                onClick={() => setIsEntityRelationshipsDialogOpen(true)}
+                className="flex items-center gap-1 rounded p-2 text-xs transition-colors hover:bg-gray-200 sm:text-sm"
+                title={tResults("entityRelationships.openPage")}
+              >
+                <span aria-hidden>🕸️</span>
+                <span className="hidden font-medium sm:inline">
+                  {tResults("entityRelationships.openPage")}
+                </span>
+              </button>
+            )}
             {isAuthenticated && isOwner && !setHeaderActions && (
               <button
                 onClick={handleRegenerate}

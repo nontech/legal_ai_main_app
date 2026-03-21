@@ -152,6 +152,6 @@ Base URL: `https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcent
 | `/api/v1/documents/summarize` | Summarize uploaded documents |
 | `/api/v1/documents/delete-file` | Delete uploaded files |
 | `/api/v1/documents/upload-to-section` | Upload to specific section |
-| `/api/v1/prediction/analyze-case-streaming` | AI case analysis (SSE) |
+| `/api/v1/prediction/analyze-case-streaming` | AI case analysis (SSE). The pipeline defines the entity graph before precedent lookup, outcome, key factors, and later steps. The Next.js route may send `case_data.case_entity_relationships` from the `entity_relationship` JSONB column when non-empty, and persists `result.case_entity_relationships` back after a successful run. |
 | `/api/v1/prediction/generate-game-plan-streaming` | Game plan generation (SSE) |
 

@@ -3,6 +3,8 @@ import type { NextRequest } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
+import type { Json } from "@/types/supabase";
+import { isSubstantiveCaseEntityRelationships } from "@/lib/types/caseEntityRelationships";
 
 export async function POST(
     request: NextRequest
@@ -69,6 +71,13 @@ export async function POST(
         };
 
         const caseInformation = caseDetails.case_information ?? {};
+        const caseInfoRecord = caseInformation as Record<string, unknown>;
+        const partiesHint = Array.isArray(caseInfoRecord.parties)
+            ? (caseInfoRecord.parties as Record<string, unknown>[])
+            : undefined;
+        const entitiesHint = Array.isArray(caseInfoRecord.entities)
+            ? (caseInfoRecord.entities as Record<string, unknown>[])
+            : undefined;
         const contractsSummary =
             caseDetails.contracts?.summary ?? null;
         const evidenceSummary =
@@ -84,6 +93,12 @@ export async function POST(
         const weaknessesSummary =
             caseDetails.potential_challenges_and_weaknesses?.summary ||
             null;
+
+        const storedGraph = caseData.entity_relationship;
+        const caseEntityRelationshipsPayload =
+            isSubstantiveCaseEntityRelationships(storedGraph)
+                ? { case_entity_relationships: storedGraph as Json }
+                : {};
 
         const analyzePayload = {
             case_data: {
@@ -106,6 +121,9 @@ export async function POST(
                 weaknesses_summary: weaknessesSummary || null,
                 contracts_summary: contractsSummary || null,
                 case_id: caseId,
+                ...(partiesHint?.length ? { parties: partiesHint } : {}),
+                ...(entitiesHint?.length ? { entities: entitiesHint } : {}),
+                ...caseEntityRelationshipsPayload,
             },
             language_code,
         };
@@ -241,11 +259,27 @@ export async function POST(
                         console.log("Result keys:", Object.keys(lastResult));
 
                         try {
+                            const updateRow: {
+                                result: typeof lastResult;
+                                entity_relationship?: Json;
+                            } = { result: lastResult };
+                            if (
+                                lastResult &&
+                                typeof lastResult === "object" &&
+                                "case_entity_relationships" in lastResult
+                            ) {
+                                const raw = (
+                                    lastResult as {
+                                        case_entity_relationships?: Json;
+                                    }
+                                ).case_entity_relationships;
+                                updateRow.entity_relationship =
+                                    raw === undefined ? null : raw;
+                            }
+
                             const { data: updateData, error: updateError } = await streamSupabase
                                 .from("cases")
-                                .update({
-                                    result: lastResult,
-                                })
+                                .update(updateRow)
                                 .eq("id", caseId)
                                 .select();
 
