@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AnalyticsScripts from "@/app/components/AnalyticsScripts";
+import PostHogProvider from "@/app/components/PostHogProvider";
 
 const fontDisplay = Newsreader({
 	subsets: ["latin"],
@@ -38,7 +39,9 @@ export default function RootLayout({
 				className={`${fontDisplay.variable} ${fontSans.variable} font-sans antialiased`}
 				suppressHydrationWarning
 			>
-				{children}
+				<PostHogProvider>
+					{children}
+				</PostHogProvider>
 				<AnalyticsScripts />
 			</body>
 		</html>
