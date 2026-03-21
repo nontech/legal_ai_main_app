@@ -256,10 +256,19 @@ export default function ProgressStepper({
 
   if (isLoading) {
     return (
-      <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 z-20 shadow-lg">
-        <div className="px-5 py-6 pt-10 flex flex-col items-center justify-center h-full">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-600 font-medium">Loading</p>
+      <div className="fixed right-0 top-16 z-20 flex h-[calc(100vh-4rem)] w-64 flex-col border-l border-border-200 bg-gradient-to-b from-surface-050 to-surface-100 shadow-[inset_1px_0_0_rgba(36,85,136,0.06),-8px_0_32px_-12px_rgba(18,24,38,0.12)]">
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 top-0 w-px bg-gradient-to-b from-primary-400/50 via-primary-500/30 to-primary-700/20"
+            aria-hidden
+          />
+          <div className="flex flex-1 flex-col items-center justify-center px-5 py-8">
+            <div
+              className="h-11 w-11 rounded-full border-[3px] border-primary-200 border-t-primary-600 animate-spin"
+              aria-hidden
+            />
+            <p className="mt-4 text-sm font-medium text-ink-600">{t("loading")}</p>
+          </div>
         </div>
       </div>
     );
@@ -269,11 +278,18 @@ export default function ProgressStepper({
   if (!isAuthenticated || (isAuthenticated && caseId && !isCaseOwner)) {
     return (
       <>
-        <div className="fixed right-0 top-16 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-20 shadow-lg flex flex-col">
-          <div ref={scrollContainerRef} className="px-5 py-6 pt-10 flex flex-col flex-1 overflow-y-auto relative">
-            <h2 className="text-lg font-bold text-gray-900 mb-3">
-              Overview
-            </h2>
+        <div className="fixed right-0 top-16 z-20 flex h-[calc(100vh-4rem)] w-64 flex-col border-l border-border-200 bg-gradient-to-b from-surface-050 to-surface-100 shadow-[inset_1px_0_0_rgba(36,85,136,0.06),-8px_0_32px_-12px_rgba(18,24,38,0.12)]">
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            <div
+              className="pointer-events-none absolute bottom-0 left-0 top-0 w-px bg-gradient-to-b from-primary-400/50 via-primary-500/30 to-primary-700/20"
+              aria-hidden
+            />
+            <div ref={scrollContainerRef} className="relative flex flex-1 flex-col overflow-y-auto px-4 pb-6 pt-8">
+            <div className="mb-4 border-b border-border-200/90 pb-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-primary-600">
+                {t("results.overview")}
+              </h2>
+            </div>
 
             {/* Steps */}
             <div className="flex flex-col flex-1">
@@ -292,27 +308,27 @@ export default function ProgressStepper({
                           setShowAuthModal(true);
                         }
                       }}
-                      className={`w-full flex items-center py-3 px-3 rounded-lg group transition-all duration-200 ${isResultsStep
-                        ? "cursor-pointer hover:bg-gray-50 border-2 border-transparent"
-                        : "cursor-pointer hover:bg-gray-100 border-2 border-transparent opacity-70"
+                      className={`group flex w-full items-center rounded-xl border-2 px-2.5 py-2.5 transition-all duration-200 ${isResultsStep
+                        ? "cursor-pointer border-transparent hover:bg-surface-100/90"
+                        : "cursor-pointer border-transparent opacity-75 hover:bg-surface-100/80"
                         }`}
                     >
                       {/* Step Icon - current filled, previous outlined, future gray */}
                       <div className="relative flex-shrink-0">
                         <div
-                          className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
                             index === currentStep
-                              ? "bg-blue-600 text-white shadow-md scale-110"
+                              ? "scale-105 bg-primary-600 text-white shadow-md ring-2 ring-primary-500/25"
                               : index < currentStep
-                                ? "border-2 border-blue-500 bg-white text-blue-600"
-                                : "bg-gray-200 text-gray-500"
+                                ? "border-2 border-primary-500 bg-surface-000 text-primary-600"
+                                : "bg-surface-200 text-ink-400"
                           }`}
                         >
                           {step.icon}
                         </div>
                         {!isResultsStep && (
-                          <div className="absolute -top-1 -right-1 bg-gray-400 rounded-full p-1">
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <div className="absolute -right-1 -top-1 rounded-full bg-ink-400 p-1 ring-2 ring-surface-050">
+                            <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
                           </div>
@@ -323,17 +339,17 @@ export default function ProgressStepper({
                       <div className="ml-3 flex-1 text-left">
                         <div
                           className={`text-sm font-semibold transition-colors ${
-                            index <= currentStep ? "text-blue-600" : "text-gray-500"
+                            index <= currentStep ? "text-primary-700" : "text-ink-400"
                           }`}
                         >
                           {getStepLabel(step.id)}
                         </div>
                         {!isResultsStep && (
                           <div className="flex items-center gap-1 mt-0.5">
-                            <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="h-3 w-3 text-ink-400" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
-                            <span className="text-xs text-gray-400 font-medium">{t("common.locked")}</span>
+                            <span className="text-xs font-medium text-ink-400">{t("common.locked")}</span>
                           </div>
                         )}
                       </div>
@@ -343,8 +359,8 @@ export default function ProgressStepper({
                     {index < steps.length - 1 && (
                       <div className="flex justify-start ml-8 py-1">
                         <div
-                          className={`w-0.5 h-4 transition-colors ${
-                            index < currentStep ? "bg-blue-500" : "bg-gray-300"
+                          className={`h-4 w-0.5 rounded-full transition-colors ${
+                            index < currentStep ? "bg-primary-400" : "bg-border-200"
                           }`}
                         />
                       </div>
@@ -355,32 +371,33 @@ export default function ProgressStepper({
             </div>
           </div>
 
-          {/* Scroll Indicators */}
-          {canScrollUp && (
-            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-white via-white to-transparent pointer-events-none flex items-center justify-center py-2">
-              <svg className="w-6 h-6 text-blue-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-              </svg>
-            </div>
-          )}
+            {/* Scroll Indicators */}
+            {canScrollUp && (
+              <div className="pointer-events-none absolute left-0 right-0 top-0 flex items-center justify-center bg-gradient-to-b from-surface-050 via-surface-050/95 to-transparent py-2">
+                <svg className="h-5 w-5 animate-bounce text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+              </div>
+            )}
 
-          {canScrollDown && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pointer-events-none flex items-center justify-center py-2">
-              <svg className="w-6 h-6 text-blue-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </div>
-          )}
+            {canScrollDown && (
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex items-center justify-center bg-gradient-to-t from-surface-050 via-surface-050/95 to-transparent py-2">
+                <svg className="h-5 w-5 animate-bounce text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Auth Modal */}
         {showAuthModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-              <div className="text-center mb-6">
-                <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4">
+          <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]">
+            <div className="w-full max-w-sm rounded-xl border border-border-200 bg-surface-000 p-6 shadow-[0_24px_48px_-12px_rgba(18,24,38,0.2)]">
+              <div className="mb-6 text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
                   <svg
-                    className="w-6 h-6 text-blue-600"
+                    className="h-6 w-6 text-primary-600"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -393,10 +410,10 @@ export default function ProgressStepper({
                     />
                   </svg>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                <h3 className="mb-2 text-lg font-bold text-ink-900">
                   Sign in to access full analysis
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-ink-600">
                   Create an account to unlock all features, save your cases, and get detailed analysis
                 </p>
               </div>
@@ -404,13 +421,13 @@ export default function ProgressStepper({
               <div className="space-y-3">
                 <button
                   onClick={() => router.push(`/auth/signin?caseId=${caseId}`)}
-                  className="cursor-pointer w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all"
+                  className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-primary-700 to-primary-800 px-4 py-2.5 font-semibold text-white shadow-md ring-1 ring-white/10 transition hover:from-primary-800 hover:to-primary-900"
                 >
                   Sign In
                 </button>
                 <button
                   onClick={() => router.push(`/auth/signup?caseId=${caseId}`)}
-                  className="cursor-pointer w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                  className="w-full cursor-pointer rounded-lg border border-border-300 bg-surface-050 px-4 py-2.5 font-semibold text-ink-700 transition hover:bg-surface-100"
                 >
                   Create Account
                 </button>
@@ -418,7 +435,7 @@ export default function ProgressStepper({
 
               <button
                 onClick={() => setShowAuthModal(false)}
-                className="w-full mt-4 px-4 py-2 text-gray-600 hover:text-gray-900 font-medium text-sm transition-colors"
+                className="mt-4 w-full px-4 py-2 text-sm font-medium text-ink-500 transition hover:text-ink-800"
               >
                 Cancel
               </button>
@@ -430,14 +447,21 @@ export default function ProgressStepper({
   }
 
   return (
-    <div className="fixed right-0 top-18 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-20 shadow-lg flex flex-col">
-      <div ref={scrollContainerRef} className="px-5 py-6 pt-10 flex flex-col flex-1 overflow-y-auto relative">
-        <h2 className="text-lg font-bold text-gray-900 mb-3">
-          Overview
-        </h2>
+    <div className="fixed right-0 top-16 z-20 flex h-[calc(100vh-4rem)] w-64 flex-col border-l border-border-200 bg-gradient-to-b from-surface-050 to-surface-100 shadow-[inset_1px_0_0_rgba(36,85,136,0.06),-8px_0_32px_-12px_rgba(18,24,38,0.12)]">
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <div
+          className="pointer-events-none absolute bottom-0 left-0 top-0 w-px bg-gradient-to-b from-primary-400/50 via-primary-500/30 to-primary-700/20"
+          aria-hidden
+        />
+        <div ref={scrollContainerRef} className="relative flex flex-1 flex-col overflow-y-auto px-4 pb-6 pt-8">
+        <div className="mb-4 border-b border-border-200/90 pb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-primary-600">
+            {t("results.overview")}
+          </h2>
+        </div>
 
         {/* Steps */}
-        <div className="flex flex-col flex-1">
+        <div className="flex flex-1 flex-col">
           {steps.map((step, index) => {
             const completion = getCompletion(index);
             const isComplete = completion === 100;
@@ -449,20 +473,21 @@ export default function ProgressStepper({
                   onClick={() => {
                     void handleStepNavigation(index);
                   }}
-                  className={`w-full flex items-center py-3 px-3 rounded-lg cursor-pointer group transition-all duration-200 ${index === currentStep
-                    ? "bg-blue-50 border-2 border-blue-500 shadow-sm"
-                    : "hover:bg-gray-50 border-2 border-transparent"
-                    }`}
+                  className={`group flex w-full cursor-pointer items-center rounded-xl border-2 px-2.5 py-2.5 transition-all duration-200 ${
+                    index === currentStep
+                      ? "border-primary-500/35 bg-primary-100/60 shadow-sm ring-1 ring-primary-500/15"
+                      : "border-transparent hover:bg-surface-100/90"
+                  }`}
                 >
                   {/* Step Icon - current filled, previous outlined, future gray */}
                   <div className="relative flex-shrink-0">
                     <div
-                      className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 ${
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all duration-200 ${
                         index === currentStep
-                          ? "bg-blue-600 text-white shadow-md scale-110"
+                          ? "scale-105 bg-primary-600 text-white shadow-md ring-2 ring-primary-500/25"
                           : index < currentStep
-                            ? "border-2 border-blue-500 bg-white text-blue-600"
-                            : "bg-gray-100 border-2 border-gray-300 text-gray-400 group-hover:border-gray-400"
+                            ? "border-2 border-primary-500 bg-surface-000 text-primary-600"
+                            : "border-2 border-border-300 bg-surface-100 text-ink-400 group-hover:border-border-300"
                       }`}
                     >
                       {step.icon}
@@ -473,17 +498,19 @@ export default function ProgressStepper({
                   <div className="ml-3 flex-1 text-left">
                     <div
                       className={`text-sm font-semibold transition-colors ${
-                        index === currentStep ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700"
+                        index === currentStep
+                          ? "text-ink-900"
+                          : "text-ink-500 group-hover:text-ink-700"
                       }`}
                     >
                       {getStepLabel(step.id)}
                     </div>
                     {!isComplete && completion < 100 && step.id !== "results" && step.id !== "game-plan" && step.id !== "case-details" && (
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <svg className="h-4 w-4 text-warning-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-xs text-amber-600 font-medium">{t("common.incomplete")}</span>
+                        <span className="text-xs font-medium text-warning-600">{t("common.incomplete")}</span>
                       </div>
                     )}
                   </div>
@@ -493,9 +520,9 @@ export default function ProgressStepper({
                     <div className="flex-shrink-0">
                       {step.id === "case-details" ? (
                         /* For Case Details: Show percentage circle */
-                        <div className="relative w-8 h-8">
+                        <div className="relative h-8 w-8">
                           {/* Background circle */}
-                          <svg className="w-8 h-8 transform -rotate-90">
+                          <svg className="h-8 w-8 -rotate-90 transform">
                             <circle
                               cx="16"
                               cy="16"
@@ -503,7 +530,7 @@ export default function ProgressStepper({
                               stroke="currentColor"
                               strokeWidth="3"
                               fill="none"
-                              className="text-gray-200"
+                              className="text-surface-200"
                             />
                             {/* Progress circle */}
                             <circle
@@ -520,10 +547,10 @@ export default function ProgressStepper({
                                 (1 - completion / 100)
                                 }`}
                               className={`transition-all duration-300 ${completion === 100
-                                ? "text-green-500"
+                                ? "text-success-500"
                                 : completion > 0
-                                  ? "text-blue-500"
-                                  : "text-gray-200"
+                                  ? "text-primary-500"
+                                  : "text-surface-200"
                                 }`}
                               strokeLinecap="round"
                             />
@@ -532,10 +559,10 @@ export default function ProgressStepper({
                           <div className="absolute inset-0 flex items-center justify-center">
                             <span
                               className={`text-[10px] font-bold ${completion === 100
-                                ? "text-green-600"
+                                ? "text-success-600"
                                 : completion > 0
-                                  ? "text-blue-600"
-                                  : "text-gray-400"
+                                  ? "text-primary-600"
+                                  : "text-ink-400"
                                 }`}
                             >
                               {completion > 0 ? completion + "%" : ""}
@@ -544,15 +571,15 @@ export default function ProgressStepper({
                         </div>
                       ) : (
                         /* For other steps: Show checkbox or incomplete symbol */
-                        <div className="flex items-center justify-center w-8 h-8">
+                        <div className="flex h-8 w-8 items-center justify-center">
                           {isComplete ? (
                             /* Checkmark for complete */
-                            <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                            <svg className="h-6 w-6 text-success-600" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
                           ) : (
                             /* Incomplete circle for incomplete */
-                            <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="h-6 w-6 text-ink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <circle cx="12" cy="12" r="10" strokeWidth="2" />
                             </svg>
                           )}
@@ -564,10 +591,10 @@ export default function ProgressStepper({
 
                 {/* Vertical Connector Line - highlighted up to current step */}
                 {index < steps.length - 1 && (
-                  <div className="flex justify-start ml-8 py-1">
+                  <div className="ml-8 flex justify-start py-1">
                     <div
-                      className={`w-0.5 h-4 transition-colors ${
-                        index < currentStep ? "bg-blue-500" : "bg-gray-300"
+                      className={`h-4 w-0.5 rounded-full transition-colors ${
+                        index < currentStep ? "bg-primary-400" : "bg-border-200"
                       }`}
                     />
                   </div>
@@ -578,22 +605,23 @@ export default function ProgressStepper({
         </div>
       </div>
 
-      {/* Scroll Indicators */}
-      {canScrollUp && (
-        <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-white via-white to-transparent pointer-events-none flex items-center justify-center py-2">
-          <svg className="w-6 h-6 text-blue-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
-          </svg>
-        </div>
-      )}
+        {/* Scroll Indicators */}
+        {canScrollUp && (
+          <div className="pointer-events-none absolute left-0 right-0 top-0 flex items-center justify-center bg-gradient-to-b from-surface-050 via-surface-050/95 to-transparent py-2">
+            <svg className="h-5 w-5 animate-bounce text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </div>
+        )}
 
-      {canScrollDown && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pointer-events-none flex items-center justify-center py-2">
-          <svg className="w-6 h-6 text-blue-600 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-          </svg>
-        </div>
-      )}
+        {canScrollDown && (
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 flex items-center justify-center bg-gradient-to-t from-surface-050 via-surface-050/95 to-transparent py-2">
+            <svg className="h-5 w-5 animate-bounce text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

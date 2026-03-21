@@ -31,8 +31,16 @@ export default function ResultsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="flex min-h-[min(70vh,520px)] items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-5 rounded-2xl border border-border-200/80 bg-surface-000 px-10 py-12 shadow-[0_20px_50px_-24px_rgba(18,24,38,0.18)]">
+          <div
+            className="h-12 w-12 rounded-full border-[3px] border-primary-200 border-t-primary-600 animate-spin"
+            aria-hidden
+          />
+          <p className="text-sm font-medium text-ink-600">
+            Preparing your analysis…
+          </p>
+        </div>
       </div>
     );
   }
