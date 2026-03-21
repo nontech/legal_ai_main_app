@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import AnalyticsScripts from "@/app/components/AnalyticsScripts";
+import PostHogProvider from "@/app/components/PostHogProvider";
 
 export const metadata: Metadata = {
 	title:
@@ -22,7 +23,9 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className="antialiased" suppressHydrationWarning>
-				{children}
+				<PostHogProvider>
+					{children}
+				</PostHogProvider>
 				<AnalyticsScripts />
 			</body>
 		</html>
