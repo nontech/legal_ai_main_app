@@ -28,13 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, AlertCircle } from "lucide-react";
+import LogoLoader from "../LogoLoader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -321,7 +316,7 @@ const JudgesManager = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <LogoLoader size="sm" />
       </div>
     );
   }
@@ -474,7 +469,7 @@ const JudgesManager = () => {
                     disabled={submitting || !!jsonError}
                   >
                     {submitting && (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <LogoLoader size="xs" className="mr-2" />
                     )}
                     {editingJudge ? "Update" : "Create"}
                   </Button>

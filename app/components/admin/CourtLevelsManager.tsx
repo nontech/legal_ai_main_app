@@ -31,11 +31,11 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Loader2,
   Filter,
   Upload,
   AlertCircle,
 } from "lucide-react";
+import LogoLoader from "../LogoLoader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -398,7 +398,7 @@ const CourtLevelsManager = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <LogoLoader size="sm" />
       </div>
     );
   }
@@ -549,7 +549,7 @@ const CourtLevelsManager = () => {
                     disabled={submitting || !formData.country_id}
                   >
                     {submitting && (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <LogoLoader size="xs" className="mr-2" />
                     )}
                     {editingCourtLevel ? "Update" : "Create"}
                   </Button>
@@ -728,7 +728,7 @@ const CourtLevelsManager = () => {
                 }
               >
                 {submitting && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <LogoLoader size="xs" className="mr-2" />
                 )}
                 <Upload className="w-4 h-4 mr-2" />
                 Import Court Levels

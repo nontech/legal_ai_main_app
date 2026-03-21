@@ -37,12 +37,12 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Loader2,
   Filter,
   Upload,
   AlertCircle,
   Search,
 } from "lucide-react";
+import LogoLoader from "../LogoLoader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -757,7 +757,7 @@ const CourtsManager = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <LogoLoader size="sm" />
       </div>
     );
   }
@@ -1027,7 +1027,7 @@ const CourtsManager = () => {
                   disabled={submitting || !formData.country_id}
                 >
                   {submitting && (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <LogoLoader size="xs" className="mr-2" />
                   )}
                   {editingCourt ? "Update" : "Create"}
                 </Button>
@@ -1256,7 +1256,7 @@ const CourtsManager = () => {
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <LogoLoader size="xs" className="mr-2" />
                   Deleting...
                 </>
               ) : (
@@ -1355,7 +1355,7 @@ const CourtsManager = () => {
                 }
               >
                 {submitting && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <LogoLoader size="xs" className="mr-2" />
                 )}
                 <Upload className="w-4 h-4 mr-2" />
                 Import Courts

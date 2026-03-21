@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { COUNTRIES } from "@/i18n/routing";
 import { Globe, ChevronDown } from "lucide-react";
 import { useState, useTransition } from "react";
+import LogoLoader from "./LogoLoader";
 
 export function CountrySelector() {
   const params = useParams();
@@ -89,7 +90,9 @@ export function CountrySelector() {
       )}
 
       {isPending && (
-        <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-white/70 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <LogoLoader size="xxs" variant="onDark" />
+        </div>
       )}
     </div>
   );

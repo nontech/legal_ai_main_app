@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
+import LogoLoader from "./LogoLoader";
 
 interface UploadedFile {
   id: string;
@@ -583,10 +584,7 @@ export default function FileUploadModal({
                             </h3>
                             {selectedFiles.length > 0 && (
                               <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">
-                                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                                <LogoLoader size="xxs" />
                                 Uploading {selectedFiles.length}
                               </span>
                             )}
@@ -706,14 +704,7 @@ export default function FileUploadModal({
                                 >
                                   <div className="flex items-start gap-2">
                                     <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
-                                      <svg
-                                        className="w-4 h-4 text-primary-600 animate-spin"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                      >
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
+                                      <LogoLoader size="xs" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium text-ink-900 truncate">
@@ -969,7 +960,7 @@ export default function FileUploadModal({
                   <div className="flex-1 flex flex-col overflow-hidden">
                     {isGenerating ? (
                       <div className="flex flex-col items-center justify-center flex-1 min-h-0">
-                        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+                        <LogoLoader size="lg" className="mb-4" />
                         <p className="text-lg font-semibold text-ink-900 mb-2">
                           Extracting information from documents...
                         </p>
@@ -1137,9 +1128,7 @@ export default function FileUploadModal({
                                   >
                                     {isGenerating ? (
                                       <>
-                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
+                                        <LogoLoader size="xs" />
                                         Generating...
                                       </>
                                     ) : editedDescription ? (
@@ -1174,9 +1163,7 @@ export default function FileUploadModal({
                                   >
                                     {isGenerating ? (
                                       <>
-                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
+                                        <LogoLoader size="xs" />
                                         Generating...
                                       </>
                                     ) : aiSummary ? (
@@ -1582,9 +1569,7 @@ export default function FileUploadModal({
                 >
                   {isSaving ? (
                     <>
-                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
+                      <LogoLoader size="compact" variant="onDark" />
                       Saving...
                     </>
                   ) : (
@@ -1605,9 +1590,7 @@ export default function FileUploadModal({
                   >
                     {isSaving ? (
                       <>
-                        <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                        <LogoLoader size="compact" variant="onDark" />
                         Saving...
                       </>
                     ) : (

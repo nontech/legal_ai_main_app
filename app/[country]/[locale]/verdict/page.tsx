@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import VerdictStep from "@/app/components/VerdictStep";
+import LogoLoader from "@/app/components/LogoLoader";
 
 export default function VerdictPage() {
   return (
@@ -9,7 +10,7 @@ export default function VerdictPage() {
       <div className="max-w-4xl mx-auto">
         <Suspense fallback={
           <div className="flex flex-col items-center gap-4 py-12">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <LogoLoader size="md" />
             <p className="text-gray-600">Loading verdict page...</p>
           </div>
         }>

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
+import LogoLoader from "./LogoLoader";
 
 interface SaveCaseButtonProps {
     caseId?: string;
@@ -139,9 +140,7 @@ export default function SaveCaseButton({
         <div className="flex items-center gap-3 mt-8 pt-6 border-t border-border-200 text-sm">
             {isSaving ? (
                 <span className="inline-flex items-center gap-2 text-primary-600 font-medium">
-                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
+                    <LogoLoader size="xs" />
                     {t("saving")}
                 </span>
             ) : (

@@ -14,6 +14,7 @@ import ChargesSection from "@/app/components/ChargesSection";
 import CaseDetailsSection from "@/app/components/CaseDetailsSection";
 import ResultsStep from "@/app/components/ResultsStep";
 import VerdictStep from "@/app/components/VerdictStep";
+import LogoLoader from "@/app/components/LogoLoader";
 
 function NewCaseAnalysisContent() {
 	const t = useTranslations("caseAnalysis");
@@ -297,7 +298,7 @@ export default function NewCaseAnalysis() {
 		<Suspense
 			fallback={
 				<div className="flex flex-col items-center justify-center min-h-screen bg-[#faf8f5]">
-					<div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
+					<LogoLoader size="lg" />
 					<p className="mt-4 text-ink-600 font-medium text-lg">
 						{t("loading")}
 					</p>

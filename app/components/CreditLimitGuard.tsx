@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import CreditLimitDialog from "./CreditLimitDialog";
+import LogoLoader from "./LogoLoader";
 
 interface CreditLimitGuardProps {
     children: React.ReactNode;
@@ -80,7 +81,7 @@ export default function CreditLimitGuard({
         return (
             <div className="min-h-screen flex items-center justify-center bg-surface-100">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full" />
+                    <LogoLoader size="md" aria-label={tCommon("loading")} />
                     <p className="text-ink-600">{tCommon("loading")}</p>
                 </div>
             </div>

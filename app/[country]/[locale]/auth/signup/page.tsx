@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
+import LogoLoader from "@/app/components/LogoLoader";
 
 function SignUpContent() {
     const searchParams = useSearchParams();
@@ -263,18 +264,7 @@ function SuspenseFallback() {
     return (
         <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
             <div className="flex flex-col items-center justify-center">
-                <div className="relative">
-                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                            className="w-6 h-6 text-primary-600"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
-                        </svg>
-                    </div>
-                </div>
+                <LogoLoader size="lg" />
                 <p className="mt-4 text-ink-500 font-medium">Loading...</p>
             </div>
         </div>

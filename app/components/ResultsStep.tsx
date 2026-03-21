@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import CaseEntityRelationshipsDialog from "./CaseEntityRelationshipsDialog";
+import LogoLoader from "./LogoLoader";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
 import GamePlanDisplay from "./GamePlanDisplay";
@@ -492,10 +493,7 @@ export default function ResultsStep({
     return (
       <div className="flex min-h-[min(60vh,480px)] items-center justify-center px-4 py-12">
         <div className="flex flex-col items-center gap-5 rounded-2xl border border-border-200/80 bg-surface-000 px-10 py-11 shadow-[0_20px_50px_-24px_rgba(18,24,38,0.15)]">
-          <div
-            className="h-12 w-12 rounded-full border-[3px] border-primary-200 border-t-primary-600 animate-spin"
-            aria-hidden
-          />
+          <LogoLoader size="md" />
           <p className="text-sm font-medium text-ink-600">
             Loading analysis results…
           </p>
@@ -678,27 +676,7 @@ export default function ResultsStep({
                 }
               >
                 {isRegenerating ? (
-                  <svg
-                    aria-hidden="true"
-                    className="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
+                  <LogoLoader size="xs" />
                 ) : (
                   <svg
                     aria-hidden="true"

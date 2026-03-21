@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import LogoLoader from "@/app/components/LogoLoader";
 import ResultsStep from "@/app/components/ResultsStep";
 
 export default function ResultsPage() {
@@ -33,10 +34,7 @@ export default function ResultsPage() {
     return (
       <div className="flex min-h-[min(70vh,520px)] items-center justify-center px-4">
         <div className="flex flex-col items-center gap-5 rounded-2xl border border-border-200/80 bg-surface-000 px-10 py-12 shadow-[0_20px_50px_-24px_rgba(18,24,38,0.18)]">
-          <div
-            className="h-12 w-12 rounded-full border-[3px] border-primary-200 border-t-primary-600 animate-spin"
-            aria-hidden
-          />
+          <LogoLoader size="md" aria-label="Loading" />
           <p className="text-sm font-medium text-ink-600">
             Preparing your analysis…
           </p>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import StreamingUploadDisplay from "../StreamingUploadDisplay";
+import LogoLoader from "../LogoLoader";
 import { toast } from "@/hooks/use-toast";
 
 type DocumentCategory =
@@ -826,7 +827,7 @@ export default function DocumentUploadStep({
     <div className="max-w-4xl mx-auto px-4">
       {isCreatingCase ? (
         <div className="flex flex-col items-center justify-center py-16">
-          <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full mb-4"></div>
+          <LogoLoader size="md" className="mb-4" />
           <p className="text-lg text-ink-600">
             Creating your case...
           </p>
@@ -1072,7 +1073,7 @@ export default function DocumentUploadStep({
             >
               {isUploading ? (
                 <>
-                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <LogoLoader size="xs" variant="onDark" />
                   <span>Uploading...</span>
                 </>
               ) : (

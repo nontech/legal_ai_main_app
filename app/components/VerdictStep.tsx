@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import LogoLoader from "./LogoLoader";
 
 export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
   const t = useTranslations("caseAnalysis.verdict");
@@ -143,7 +144,7 @@ export default function VerdictStep({ caseId }: { caseId?: string } = {}) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+          <LogoLoader size="md" aria-label={t("loading")} />
           <p className="text-gray-600">{t("loading")}</p>
         </div>
       </div>

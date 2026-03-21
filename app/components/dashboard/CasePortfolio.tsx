@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import LogoLoader from "../LogoLoader";
 
 interface DBCase {
   id: string;
@@ -234,7 +235,9 @@ export default function CasePortfolio() {
       {/* Loading State */}
       {isLoading && (
         <div className="p-8 text-center">
-          <div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full mx-auto"></div>
+          <div className="flex justify-center">
+            <LogoLoader size="sm" />
+          </div>
           <p className="text-ink-600 mt-4">{t("loading")}</p>
         </div>
       )}

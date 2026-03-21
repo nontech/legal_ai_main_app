@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
+import LogoLoader from "@/app/components/LogoLoader";
 
 function EmailConfirmedContent() {
     const searchParams = useSearchParams();
@@ -106,9 +107,7 @@ function EmailConfirmedContent() {
                         {isRedirecting && (
                             <div className="bg-primary-50/80 border border-primary-100 rounded-lg p-4 mb-6">
                                 <div className="flex items-center gap-2">
-                                    <svg className="w-5 h-5 text-primary-700 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                    </svg>
+                                    <LogoLoader size="compact" aria-label="Redirecting" />
                                     <span className="text-sm text-primary-900">Redirecting to your case...</span>
                                 </div>
                             </div>
@@ -184,18 +183,7 @@ function SuspenseFallback() {
     return (
         <div className="min-h-screen bg-[#faf8f5] flex items-center justify-center px-4 py-16">
             <div className="flex flex-col items-center justify-center">
-                <div className="relative">
-                    <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                            className="w-6 h-6 text-primary-600"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
-                        </svg>
-                    </div>
-                </div>
+                <LogoLoader size="lg" />
                 <p className="mt-4 text-ink-500 font-medium">Loading...</p>
             </div>
         </div>

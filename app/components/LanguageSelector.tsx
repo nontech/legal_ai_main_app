@@ -4,6 +4,7 @@ import { useParams, useRouter, usePathname, useSearchParams } from "next/navigat
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 import { useState, useTransition } from "react";
+import LogoLoader from "./LogoLoader";
 
 const LANGUAGES = [
   { code: "en", name: "English" },
@@ -87,7 +88,9 @@ export function LanguageSelector() {
       )}
 
       {isPending && (
-        <div className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+        <div className="absolute -right-6 top-1/2 -translate-y-1/2">
+          <LogoLoader size="xxs" />
+        </div>
       )}
     </div>
   );

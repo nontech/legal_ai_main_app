@@ -11,6 +11,7 @@ import DocumentUploadStep from "@/app/components/quick-analysis/DocumentUploadSt
 import QuickAnalysisForm from "@/app/components/quick-analysis/QuickAnalysisForm";
 import VerdictStep from "@/app/components/VerdictStep";
 import HowItWorks from "@/app/components/dashboard/HowItWorks";
+import LogoLoader from "@/app/components/LogoLoader";
 
 type Step = "upload" | "form" | "verdict";
 
@@ -149,7 +150,7 @@ function SuspenseFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#faf8f5]">
       <div className="flex flex-col items-center gap-4">
-        <div className="animate-spin h-12 w-12 border-4 border-primary-200 border-t-primary-600 rounded-full"></div>
+        <LogoLoader size="md" />
         <p className="text-ink-600">Loading...</p>
       </div>
     </div>

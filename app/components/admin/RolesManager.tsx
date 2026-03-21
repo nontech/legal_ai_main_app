@@ -26,13 +26,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import {
-  Plus,
-  Pencil,
-  Loader2,
-  Save,
-  AlertCircle,
-} from "lucide-react";
+import { Plus, Pencil, Save, AlertCircle } from "lucide-react";
+import LogoLoader from "../LogoLoader";
 import { Alert, AlertDescription } from "../ui/alert";
 
 interface Country {
@@ -242,7 +237,7 @@ const RolesManager = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <LogoLoader size="sm" />
       </div>
     );
   }
@@ -350,7 +345,7 @@ const RolesManager = () => {
                     }
                   >
                     {submitting && (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <LogoLoader size="xs" className="mr-2" />
                     )}
                     <Save className="w-4 h-4 mr-2" />
                     {editingData ? "Update" : "Create"}

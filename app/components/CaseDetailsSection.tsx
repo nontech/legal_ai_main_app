@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
+import LogoLoader from "./LogoLoader";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -664,9 +665,7 @@ export default function CaseDetailsSection({
     return (
       <div className="bg-surface-000 rounded-lg shadow-sm border border-border-200 p-6 flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-2">
-          <svg className="w-8 h-8 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          <LogoLoader size="sm" />
           <p className="text-ink-600 font-medium">{t("loading", { defaultMessage: "Loading case details..." })}</p>
         </div>
       </div>
@@ -754,10 +753,7 @@ export default function CaseDetailsSection({
                   >
                     {isUploading ? (
                       <>
-                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                        <LogoLoader size="xxs" variant="onDark" />
                         Uploading...
                       </>
                     ) : (
@@ -775,10 +771,7 @@ export default function CaseDetailsSection({
                 {isUploading && (
                   <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-3 flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-primary-600 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
+                      <LogoLoader size="compact" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-primary-900">Uploading documents...</p>
@@ -865,18 +858,12 @@ export default function CaseDetailsSection({
                     )}
                     {isGeneratingSummary ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600">
-                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                        <LogoLoader size="xxs" />
                         Generating summary...
                       </span>
                     ) : isSaving ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-600">
-                        <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
+                        <LogoLoader size="xxs" />
                         Saving...
                       </span>
                     ) : justSaved ? (

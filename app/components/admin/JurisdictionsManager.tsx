@@ -31,11 +31,11 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Loader2,
   Filter,
   Upload,
   AlertCircle,
 } from "lucide-react";
+import LogoLoader from "../LogoLoader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -395,7 +395,7 @@ const JurisdictionsManager = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <LogoLoader size="sm" />
       </div>
     );
   }
@@ -531,7 +531,7 @@ const JurisdictionsManager = () => {
                   </Button>
                   <Button type="submit" disabled={submitting}>
                     {submitting && (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <LogoLoader size="xs" className="mr-2" />
                     )}
                     {editingJurisdiction ? "Update" : "Create"}
                   </Button>
@@ -715,7 +715,7 @@ const JurisdictionsManager = () => {
                 }
               >
                 {submitting && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <LogoLoader size="xs" className="mr-2" />
                 )}
                 <Upload className="w-4 h-4 mr-2" />
                 Import Jurisdictions

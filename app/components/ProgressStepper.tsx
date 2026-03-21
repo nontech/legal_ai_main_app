@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import LogoLoader from "./LogoLoader";
 
 interface Step {
   id: string;
@@ -263,10 +264,7 @@ export default function ProgressStepper({
             aria-hidden
           />
           <div className="flex flex-1 flex-col items-center justify-center px-5 py-8">
-            <div
-              className="h-11 w-11 rounded-full border-[3px] border-primary-200 border-t-primary-600 animate-spin"
-              aria-hidden
-            />
+            <LogoLoader size="md" aria-label={t("loading")} />
             <p className="mt-4 text-sm font-medium text-ink-600">{t("loading")}</p>
           </div>
         </div>

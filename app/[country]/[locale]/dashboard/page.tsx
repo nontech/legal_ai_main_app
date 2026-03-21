@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import CasePortfolio from "@/app/components/dashboard/CasePortfolio";
 import HowItWorks from "@/app/components/dashboard/HowItWorks";
+import LogoLoader from "@/app/components/LogoLoader";
 
 export const dynamic = "force-dynamic";
 
@@ -43,18 +44,7 @@ export default function DashboardPage() {
         <div className="pt-24 pb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-center py-16">
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6 text-primary-600"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M1 21h12v2H1zM5.245 8.07l2.83-2.827 14.14 14.142-2.828 2.828zM12.317 1l5.657 5.656-2.828 2.83-5.657-5.66zM3.825 9.485l5.657 5.657-2.828 2.828-5.657-5.657z" />
-                  </svg>
-                </div>
-              </div>
+              <LogoLoader size="lg" />
               <p className="mt-4 text-ink-500 font-medium">Loading...</p>
             </div>
           </div>
