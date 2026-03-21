@@ -158,17 +158,22 @@ export default function CasePortfolio() {
     }
   };
 
+  const showSignInOverlay = !isLoading && !isAuthenticated;
+
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden ${!isAuthenticated ? "relative" : ""}`}>
-      {/* Blur overlay for unauthenticated users */}
-      {!isAuthenticated && (
-        <div className="absolute inset-0 bg-white bg-opacity-60 backdrop-blur-sm z-10 flex items-center justify-center">
-          <div className="text-center">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{t("signInViewCases")}</h3>
-            <p className="text-sm text-gray-600 mb-4">{t("signInViewCasesDesc")}</p>
+    <div
+      className={`bg-surface-000 rounded-2xl shadow-sm border border-border-200 overflow-hidden ${showSignInOverlay ? "relative" : ""}`}
+    >
+      {/* Blur overlay only after we know the user is not signed in */}
+      {showSignInOverlay && (
+        <div className="absolute inset-0 bg-surface-000/65 backdrop-blur-sm z-10 flex items-center justify-center">
+          <div className="text-center px-4">
+            <h3 className="text-lg font-semibold text-ink-900 mb-2">{t("signInViewCases")}</h3>
+            <p className="text-sm text-ink-600 mb-4">{t("signInViewCasesDesc")}</p>
             <button
+              type="button"
               onClick={() => router.push(`/${country}/${locale}/auth/signin`)}
-              className="cursor-pointer bg-gradient-to-r from-accent-400 to-accent-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-accent-500 hover:to-accent-400 transition-all"
+              className="cursor-pointer rounded-lg bg-primary-800 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-primary-700"
             >
               {tNav("signIn")}
             </button>
@@ -177,13 +182,13 @@ export default function CasePortfolio() {
       )}
 
       {/* Header */}
-      <div className="p-6 border-b border-gray-200">
+      <div className="p-6 border-b border-border-200">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="font-display text-2xl font-medium text-ink-900 mb-1 tracking-tight">
               {t("title")}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-ink-600">
               {t("description")}
             </p>
           </div>
@@ -197,7 +202,7 @@ export default function CasePortfolio() {
               placeholder={t("searchPlaceholder")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
+              className="w-full px-4 py-2 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 text-ink-900 bg-surface-000"
             />
           </div>
 
@@ -205,7 +210,7 @@ export default function CasePortfolio() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
+            className="px-4 py-2 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 text-ink-900 bg-surface-000"
           >
             <option>{t("allStatuses")}</option>
             <option>{t("active")}</option>
@@ -217,7 +222,7 @@ export default function CasePortfolio() {
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-black"
+            className="px-4 py-2 border border-border-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 text-ink-900 bg-surface-000"
           >
             <option>{t("allTypes")}</option>
             <option>{t("criminal")}</option>
@@ -229,8 +234,8 @@ export default function CasePortfolio() {
       {/* Loading State */}
       {isLoading && (
         <div className="p-8 text-center">
-          <div className="animate-spin h-8 w-8 border-b-2 border-amber-500 rounded-full mx-auto"></div>
-          <p className="text-gray-600 mt-4">{t("loading")}</p>
+          <div className="animate-spin h-8 w-8 border-b-2 border-primary-600 rounded-full mx-auto"></div>
+          <p className="text-ink-600 mt-4">{t("loading")}</p>
         </div>
       )}
 
@@ -244,7 +249,7 @@ export default function CasePortfolio() {
       {/* Empty State */}
       {!isLoading && !error && filteredCases.length === 0 && isAuthenticated && (
         <div className="p-8 text-center">
-          <p className="text-gray-600">{t("noCases")}</p>
+          <p className="text-ink-600">{t("noCases")}</p>
         </div>
       )}
 
@@ -252,45 +257,45 @@ export default function CasePortfolio() {
       {!isLoading && !error && filteredCases.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-surface-100 border-b border-border-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("caseId")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("caseTitle")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("type")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("status")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("yourRole")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("lastUpdated")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-ink-500 uppercase tracking-wider">
                   {t("actions")}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-surface-000 divide-y divide-border-200">
               {filteredCases.map((case_) => (
                 <tr
                   key={case_.id}
-                  className="hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="hover:bg-surface-100 transition-colors cursor-pointer"
                   onClick={() => router.push(`/${country}/${locale}/case-analysis/${case_.id}/results`)}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-ink-900">
                     {case_.id.substring(0, 8)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-ink-900">
                     {case_.title}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-ink-600">
                     {case_.type}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -305,14 +310,15 @@ export default function CasePortfolio() {
                       {case_.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-ink-600">
                     {case_.yourRole}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-ink-600">
                     {case_.lastUpdated}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-ink-600">
                     <button
+                      type="button"
                       onClick={(e) => handleDelete(case_.id, e)}
                       className="text-red-600 hover:text-red-900 cursor-pointer"
                     >

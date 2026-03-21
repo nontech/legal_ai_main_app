@@ -7,53 +7,55 @@ import Navbar from "@/app/components/Navbar";
 import ConditionalFooter from "@/app/components/ConditionalFooter";
 import { Toaster } from "@/app/components/ui/toaster";
 import ConsentBanner from "@/app/components/ConsentBanner";
+import { Analytics } from "@vercel/analytics/react";
 
 const validCountries = COUNTRIES.map((c) => c.code);
 const validLocales = ["en", "de"];
 
 // Generate static params for all country/locale combinations
 export function generateStaticParams() {
-  return COUNTRIES.flatMap((country) =>
-    country.locales.map((locale) => ({
-      country: country.code,
-      locale: locale,
-    }))
-  );
+	return COUNTRIES.flatMap((country) =>
+		country.locales.map((locale) => ({
+			country: country.code,
+			locale: locale,
+		})),
+	);
 }
 
 export default async function LocaleLayout({
-  children,
-  params,
+	children,
+	params,
 }: {
-  children: React.ReactNode;
-  params: Promise<{ country: string; locale: string }>;
+	children: React.ReactNode;
+	params: Promise<{ country: string; locale: string }>;
 }) {
-  const { country, locale } = await params;
+	const { country, locale } = await params;
 
-  // Validate country and locale
-  if (
-    !validCountries.includes(country as any) ||
-    !validLocales.includes(locale as any)
-  ) {
-    notFound();
-  }
+	// Validate country and locale
+	if (
+		!validCountries.includes(country as any) ||
+		!validLocales.includes(locale as any)
+	) {
+		notFound();
+	}
 
-  // Enable static rendering by setting the locale for this request
-  setRequestLocale(locale);
+	// Enable static rendering by setting the locale for this request
+	setRequestLocale(locale);
 
-  // Providing all messages to the client side is the easiest way to get started
-  const messages = await getMessages({ locale });
+	// Providing all messages to the client side is the easiest way to get started
+	const messages = await getMessages({ locale });
 
-  // Note: html and body tags are removed here because they are already provided by root layout
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <Suspense fallback={<div className="h-20" />}>
-        <Navbar />
-      </Suspense>
-      {children}
-      <ConditionalFooter />
-      <Toaster />
-      <ConsentBanner />
-    </NextIntlClientProvider>
-  );
+	// Note: html and body tags are removed here because they are already provided by root layout
+	return (
+		<NextIntlClientProvider locale={locale} messages={messages}>
+			<Suspense fallback={<div className="h-20" />}>
+				<Navbar />
+			</Suspense>
+			{children}
+			<ConditionalFooter />
+			<Toaster />
+			<ConsentBanner />
+			<Analytics />
+		</NextIntlClientProvider>
+	);
 }

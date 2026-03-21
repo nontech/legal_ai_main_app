@@ -126,7 +126,7 @@ export default async function Security({
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("vulnerabilityReporting")}</h2>
               <p>
-                {t("vulnerabilityText")} <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:underline">security@TheLawThing.dev</a>.
+                {t("vulnerabilityText")} <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a>.
               </p>
               <p className="mt-4">
                 {t("reportInclude")}
@@ -151,7 +151,7 @@ export default async function Security({
             <section>
               <h2 className="text-2xl font-bold text-ink-900 mt-8 mb-4">{t("contact")}</h2>
               <p>
-                {t("contactText")} <a href="mailto:security@TheLawThing.dev" className="text-primary-600 hover:underline">security@TheLawThing.dev</a>.
+                {t("contactText")} <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a>.
               </p>
             </section>
           </div>

@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import AnalyticsScripts from "@/app/components/AnalyticsScripts";
 import PostHogProvider from "@/app/components/PostHogProvider";
+
+const fontDisplay = Newsreader({
+	subsets: ["latin"],
+	variable: "--font-ui-serif",
+	display: "swap",
+});
+
+const fontSans = Plus_Jakarta_Sans({
+	subsets: ["latin"],
+	variable: "--font-ui-sans",
+	display: "swap",
+});
 
 export const metadata: Metadata = {
 	title:
@@ -22,10 +35,18 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" suppressHydrationWarning>
+<<<<<<< HEAD
 			<body className="antialiased" suppressHydrationWarning>
 				<PostHogProvider>
 					{children}
 				</PostHogProvider>
+=======
+			<body
+				className={`${fontDisplay.variable} ${fontSans.variable} font-sans antialiased`}
+				suppressHydrationWarning
+			>
+				{children}
+>>>>>>> 5be28cc35f30ce488d79b0cedba6b7c177c66cb8
 				<AnalyticsScripts />
 			</body>
 		</html>

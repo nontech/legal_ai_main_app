@@ -23,13 +23,14 @@ export default function HorizontalStepper({
         <div key={step.number} className="flex items-center">
           {/* Step Circle and Label */}
           <button
+            type="button"
             onClick={() => onStepClick && onStepClick(step.number)}
             className="flex flex-col items-center cursor-pointer group"
             disabled={!onStepClick}
           >
             <div
-              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border transition-all ${currentStep >= step.number
-                ? "bg-primary-500 border-primary-500 text-white group-hover:bg-primary-600"
+              className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 transition-all ${currentStep >= step.number
+                ? "bg-primary-800 border-primary-800 text-white group-hover:bg-primary-700"
                 : "bg-surface-000 border-border-200 text-ink-400 group-hover:border-border-300"
                 }`}
             >
@@ -55,7 +56,7 @@ export default function HorizontalStepper({
             </div>
             <span
               className={`mt-2 text-xs sm:text-sm font-medium whitespace-nowrap ${currentStep >= step.number
-                ? "text-primary-600 group-hover:text-primary-700"
+                ? "text-primary-800 group-hover:text-primary-950"
                 : "text-ink-500 group-hover:text-ink-600"
                 }`}
             >
@@ -68,7 +69,7 @@ export default function HorizontalStepper({
             <div className="w-12 sm:w-20 h-0.5 mx-1 sm:mx-3 mb-4">
               <div
                 className={`h-full transition-all ${currentStep > step.number
-                  ? "bg-primary-500"
+                  ? "bg-primary-800"
                   : "bg-surface-200"
                   }`}
               ></div>

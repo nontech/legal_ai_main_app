@@ -127,10 +127,10 @@ export default async function AcceptableUse({
               <p>
                 {t("reportingText")}{" "}
                 <a
-                  href="mailto:abuse@TheLawThing.dev"
+                  href="mailto:info@thelawthing.com"
                   className="text-primary-600 hover:underline"
                 >
-                  abuse@TheLawThing.dev
+                  info@thelawthing.com
                 </a>
                 .
               </p>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
+import ScrollReveal from "@/app/components/ScrollReveal";
 
 export default function ConfidentialByDesign() {
   const t = useTranslations("confidentialByDesign");
@@ -10,23 +11,40 @@ export default function ConfidentialByDesign() {
   const country = (params?.country as string) || "us";
   const locale = (params?.locale as string) || "en";
   return (
-    <section className="py-20 bg-gradient-to-br from-surface-050 via-surface-100 to-primary-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden py-20 md:py-28 border-t border-border-200/50">
+      <div
+        className="absolute inset-0 bg-gradient-to-b from-[#f8f2e8] via-[#f0ebe3] to-[#e8f4f2]/60"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-70 landing-mesh-drift-slow"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 60% 45% at 0% 30%, rgba(59,119,180,0.12), transparent 50%), radial-gradient(ellipse 55% 40% at 100% 70%, rgba(243,174,61,0.15), transparent 50%)",
+        }}
+        aria-hidden
+      />
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-            <span className="bg-gradient-to-r from-primary-700 via-primary-600 to-accent-600 bg-clip-text text-transparent">
-              {t("headingPrimary")} {t("headingAccent")}
-            </span>
-          </h2>
-          <p className="text-xl text-ink-600 mb-12 text-center leading-relaxed max-w-3xl mx-auto">
-            {t("subheading")}
-          </p>
+          <ScrollReveal className="mb-6">
+            <h2 className="font-display text-3xl md:text-4xl lg:text-[2.75rem] font-medium text-center text-ink-900 tracking-tight">
+              {t("headingPrimary")}{" "}
+              <span className="bg-gradient-to-r from-primary-800 via-primary-600 to-highlight-600 bg-clip-text text-transparent">
+                {t("headingAccent")}
+              </span>
+            </h2>
+          </ScrollReveal>
+          <ScrollReveal className="mb-12" delayMs={100}>
+            <p className="text-lg md:text-xl text-ink-600 text-center leading-relaxed max-w-3xl mx-auto">
+              {t("subheading")}
+            </p>
+          </ScrollReveal>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
             {/* Data Privacy */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <ScrollReveal delayMs={80} className="p-6 md:p-7 bg-white/90 rounded-2xl border border-white/80 shadow-md shadow-primary-900/5 ring-1 ring-primary-100/80 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary-100 to-info-100/60 rounded-xl flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-primary-600"
                     fill="none"
@@ -57,12 +75,12 @@ export default function ConfidentialByDesign() {
                   </ul>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Encryption */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <ScrollReveal delayMs={160} className="p-6 md:p-7 bg-white/90 rounded-2xl border border-white/80 shadow-md shadow-primary-900/5 ring-1 ring-success-500/15 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-success-100 rounded-xl flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-success-100 to-highlight-200/50 rounded-xl flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-success-600"
                     fill="none"
@@ -93,12 +111,12 @@ export default function ConfidentialByDesign() {
                   </ul>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Access Control */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <ScrollReveal delayMs={240} className="p-6 md:p-7 bg-white/90 rounded-2xl border border-white/80 shadow-md shadow-primary-900/5 ring-1 ring-accent-500/20 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-accent-100 rounded-xl flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-accent-100 to-amber-100/80 rounded-xl flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-accent-600"
                     fill="none"
@@ -129,12 +147,12 @@ export default function ConfidentialByDesign() {
                   </ul>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
 
             {/* Compliance */}
-            <div className="p-6 bg-white rounded-2xl shadow-sm border border-border-200">
+            <ScrollReveal delayMs={320} className="p-6 md:p-7 bg-white/90 rounded-2xl border border-white/80 shadow-md shadow-primary-900/5 ring-1 ring-info-500/20 backdrop-blur-sm transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-lg">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-info-100 rounded-xl flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-info-100 to-primary-100 rounded-xl flex items-center justify-center">
                   <svg
                     className="w-6 h-6 text-info-600"
                     fill="none"
@@ -165,13 +183,13 @@ export default function ConfidentialByDesign() {
                   </ul>
                 </div>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
 
-          <div className="mt-12 text-center">
+          <ScrollReveal className="mt-14 text-center" delayMs={120}>
             <Link
               href={`/${country}/${locale}/security`}
-              className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold transition-colors"
+              className="inline-flex items-center gap-2 text-primary-800 hover:text-primary-950 font-semibold transition-colors text-sm uppercase tracking-wide"
             >
               {t("cta")}
               <svg
@@ -188,7 +206,7 @@ export default function ConfidentialByDesign() {
                 />
               </svg>
             </Link>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </section>

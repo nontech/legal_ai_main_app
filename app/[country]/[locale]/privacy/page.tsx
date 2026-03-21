@@ -113,7 +113,7 @@ export default async function PrivacyPolicy({
                 <li>{t("withdrawConsent")}</li>
               </ul>
               <p className="mt-4">
-                {t("exerciseRights")} <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>.
+                {t("exerciseRights")} <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a>.
               </p>
             </section>
 
@@ -151,7 +151,7 @@ export default async function PrivacyPolicy({
                 {t("contactUsText")}
               </p>
               <p className="mt-2">
-                <strong>Email:</strong> <a href="mailto:privacy@TheLawThing.dev" className="text-primary-600 hover:underline">privacy@TheLawThing.dev</a>
+                <strong>Email:</strong> <a href="mailto:info@thelawthing.com" className="text-primary-600 hover:underline">info@thelawthing.com</a>
               </p>
             </section>
           </div>

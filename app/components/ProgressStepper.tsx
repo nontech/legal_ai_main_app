@@ -256,7 +256,7 @@ export default function ProgressStepper({
 
   if (isLoading) {
     return (
-      <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 z-30 shadow-lg">
+      <div className="fixed right-0 top-16 bottom-20 w-64 bg-white border-l border-gray-200 z-20 shadow-lg">
         <div className="px-5 py-6 pt-10 flex flex-col items-center justify-center h-full">
           <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
           <p className="mt-4 text-gray-600 font-medium">Loading</p>
@@ -269,7 +269,7 @@ export default function ProgressStepper({
   if (!isAuthenticated || (isAuthenticated && caseId && !isCaseOwner)) {
     return (
       <>
-        <div className="fixed right-0 top-16 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-30 shadow-lg flex flex-col">
+        <div className="fixed right-0 top-16 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-20 shadow-lg flex flex-col">
           <div ref={scrollContainerRef} className="px-5 py-6 pt-10 flex flex-col flex-1 overflow-y-auto relative">
             <h2 className="text-lg font-bold text-gray-900 mb-3">
               Overview
@@ -430,7 +430,7 @@ export default function ProgressStepper({
   }
 
   return (
-    <div className="fixed right-0 top-18 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-30 shadow-lg flex flex-col">
+    <div className="fixed right-0 top-18 h-[calc(100vh-72px)] w-64 bg-white border-l border-gray-200 z-20 shadow-lg flex flex-col">
       <div ref={scrollContainerRef} className="px-5 py-6 pt-10 flex flex-col flex-1 overflow-y-auto relative">
         <h2 className="text-lg font-bold text-gray-900 mb-3">
           Overview
