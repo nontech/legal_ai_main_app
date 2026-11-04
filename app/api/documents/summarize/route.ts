@@ -1,3 +1,5 @@
+import { backendPaths, backendUrl } from "@/lib/backend";
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();
@@ -31,9 +33,9 @@ export async function POST(request: Request) {
             );
         }
 
-        console.log("Sending to Azure API:", { file_addresses, file_names, file_category });
+        console.log("Sending to analysis API:", { file_addresses, file_names, file_category });
 
-        // Create FormData for external API (Azure API expects FormData, not JSON)
+        // The analysis API expects multipart form fields, not JSON.
         const externalFormData = new FormData();
         file_addresses.forEach((address) => externalFormData.append("file_addresses", address));
         file_names.forEach((name) => externalFormData.append("file_names", name));
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
 
         // Call the external summarization API
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/summarize`,
+            backendUrl(backendPaths.summarize),
             {
                 method: "POST",
                 body: externalFormData,

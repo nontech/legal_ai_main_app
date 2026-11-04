@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import StreamingUploadDisplay from "../StreamingUploadDisplay";
 import LogoLoader from "../LogoLoader";
 import { toast } from "@/hooks/use-toast";
+import { extractUploadedFiles } from "@/lib/documentFiles";
 
 type DocumentCategory =
   | "case_information"
@@ -205,21 +206,8 @@ export default function DocumentUploadStep({
 
       result.category_results.forEach((categoryResult: any) => {
         const categories = getCategoriesFromResult(categoryResult);
-        const fileNames =
-          categoryResult.file_names || categoryResult.fileNames;
-        const fileAddresses =
-          categoryResult.file_addresses || categoryResult.fileAddresses;
-        if (
-          categories.length > 0 &&
-          fileNames &&
-          fileAddresses
-        ) {
-          const newFiles = fileNames.map(
-            (name: string, index: number) => ({
-              name,
-              address: fileAddresses[index] || "",
-            })
-          );
+        const newFiles = extractUploadedFiles(categoryResult);
+        if (categories.length > 0 && newFiles.length > 0) {
           categories.forEach((category) => {
             if (!documentsByCategory[category]) {
               documentsByCategory[category] = { files: [], summary: categoryResult.summary };
@@ -626,20 +614,9 @@ export default function DocumentUploadStep({
 
                   categoryResults.forEach((categoryResult: any) => {
                     const categories = getCategoriesFromResult(categoryResult);
-                    const fileNames =
-                      categoryResult.file_names ||
-                      categoryResult.fileNames;
-                    const fileAddresses =
-                      categoryResult.file_addresses ||
-                      categoryResult.fileAddresses;
+                    const newFiles = extractUploadedFiles(categoryResult);
 
-                    if (categories.length > 0 && fileNames && fileAddresses) {
-                      const newFiles = fileNames.map(
-                        (name: string, index: number) => ({
-                          name,
-                          address: fileAddresses[index] || "",
-                        })
-                      );
+                    if (categories.length > 0 && newFiles.length > 0) {
                       categories.forEach((category) => {
                         if (!documentsByCategory[category]) {
                           documentsByCategory[category] = { files: [], summary: categoryResult.summary };
@@ -682,25 +659,9 @@ export default function DocumentUploadStep({
                       categoryResults.forEach(
                         (categoryResult: any) => {
                           const categories = getCategoriesFromResult(categoryResult);
-                          const fileNames =
-                            categoryResult.file_names ||
-                            categoryResult.fileNames;
-                          const fileAddresses =
-                            categoryResult.file_addresses ||
-                            categoryResult.fileAddresses;
+                          const newFiles = extractUploadedFiles(categoryResult);
 
-                          if (
-                            categories.length > 0 &&
-                            fileNames &&
-                            fileAddresses
-                          ) {
-                            const newFiles = fileNames.map(
-                              (name: string, index: number) => ({
-                                name,
-                                address: fileAddresses[index] || "",
-                              })
-                            );
-
+                          if (categories.length > 0 && newFiles.length > 0) {
                             categories.forEach((category) => {
                               const existing = caseDetailsUpdate[category];
                               const existingFiles = existing?.files || [];

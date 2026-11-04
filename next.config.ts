@@ -5,6 +5,15 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@xyflow/react"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        pathname: "/**",
+      },
+    ],
+  },
 };
 
 export default withNextIntl(nextConfig);

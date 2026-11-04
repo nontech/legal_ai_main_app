@@ -1,3 +1,4 @@
+import { backendPaths, backendUrl } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 // Helper: Fetch existing case details
@@ -75,14 +76,10 @@ export async function DELETE(request: Request) {
         const externalFormData = new FormData();
         externalFormData.append("file_address", fileAddress);
         console.log("External Form Data:", externalFormData);
-        // Call external delete API
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/delete-file`,
-            {
-                method: "DELETE",
-                body: externalFormData,
-            }
-        );
+        const response = await fetch(backendUrl(backendPaths.deleteFile), {
+            method: "DELETE",
+            body: externalFormData,
+        });
 
         if (!response.ok) {
             console.error("Delete API error:", response.statusText);
