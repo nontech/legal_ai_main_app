@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { backendPaths, backendUrl } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
@@ -55,9 +56,8 @@ export async function POST(request: NextRequest): Promise<Response> {
             language_code,
         };
 
-        // Call the external API
         const response = await fetch(
-            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/prediction/generate-game-plan-streaming`,
+            backendUrl(backendPaths.generateGamePlanStreaming),
             {
                 method: "POST",
                 headers: {

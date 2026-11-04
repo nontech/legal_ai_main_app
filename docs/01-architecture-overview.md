@@ -104,14 +104,14 @@ RootLayout (app/layout.tsx)
 
 ```
 1. User uploads documents
-   └── POST /api/documents/upload → Azure API
+   └── POST /api/documents/upload → analysis API (GCS + Document AI)
    
 2. User fills quick analysis form
    └── Creates/updates case via POST/PATCH /api/cases
 
 3. User clicks "Calculate Results"
    └── POST /api/cases/analyze-streaming
-       └── Calls Azure AI API (streaming)
+       └── Calls analysis API (streaming, Vertex AI Gemini)
        └── Saves result to Main Supabase
 
 4. User views results
@@ -119,7 +119,7 @@ RootLayout (app/layout.tsx)
 
 5. User generates game plan
    └── POST /api/game-plan/generate
-       └── Calls Azure AI API (streaming)
+       └── Calls analysis API (streaming)
        └── Saves to Main Supabase
 ```
 
@@ -143,8 +143,10 @@ Main App Form Fields
 
 ## External Dependencies
 
-### Azure AI API
-Base URL: `https://legal-case-analysis-main-api-efbsdwd2bsdxced6.germanywestcentral-01.azurewebsites.net`
+### Analysis API (FastAPI on Google Cloud)
+Base URL: `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`). The Cloud Run URL in `europe-west3` is not assigned yet.
+
+Document bytes live in the GCS bucket `thelawthing-legal-docs` (`europe-west3`). Upload responses return signed `https://storage.googleapis.com/...` URLs (or a `gs://` URI). The app stores that string and sends it back on summarize and delete. OCR uses Document AI. Case analysis uses Vertex AI Gemini. Precedent search is moving from Cognitive Search to Postgres/pgvector; that change is inside the API and does not add a new frontend route.
 
 | Endpoint | Purpose |
 |----------|---------|

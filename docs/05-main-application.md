@@ -138,7 +138,7 @@ Manages 6 document categories:
 6. Potential Challenges & Weaknesses
 
 Each category can have:
-- Uploaded files (stored in Azure)
+- Uploaded files (stored in GCS bucket `thelawthing-legal-docs`)
 - AI-generated summaries
 
 ### `StreamingAnalysisDisplay`

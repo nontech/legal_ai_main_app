@@ -13,16 +13,16 @@ All API routes are located in `app/api/`. There are **20 API endpoints** organiz
 | 3 | `/api/cases` | DELETE | Delete a case | Main |
 | 4 | `/api/cases/[id]` | GET | Get single case by ID | Main |
 | 5 | `/api/cases/update` | PATCH | Update case fields | Main |
-| 6 | `/api/cases/analyze-streaming` | POST | Run AI analysis (SSE) | Main + Azure |
+| 6 | `/api/cases/analyze-streaming` | POST | Run AI analysis (SSE) | Main + analysis API |
 | 7 | `/api/auth/signin` | POST | Sign in user | Main |
 | 8 | `/api/auth/signup` | POST | Register new user | Main |
 | 9 | `/api/auth/signout` | POST | Sign out user | Main |
 | 10 | `/api/auth/forgot-password` | POST | Send reset email | Main |
-| 11 | `/api/documents/upload` | POST | Upload & classify docs | Main + Azure |
-| 12 | `/api/documents/summarize` | POST | Summarize documents | Azure |
-| 13 | `/api/documents/delete` | DELETE | Delete uploaded file | Main + Azure |
-| 14 | `/api/documents/upload-section` | POST | Upload to case section | Main + Azure |
-| 15 | `/api/game-plan/generate` | POST | Generate game plan (SSE) | Main + Azure |
+| 11 | `/api/documents/upload` | POST | Upload & classify docs | Analysis API |
+| 12 | `/api/documents/summarize` | POST | Summarize documents | Analysis API |
+| 13 | `/api/documents/delete` | DELETE | Delete uploaded file | Main + analysis API |
+| 14 | `/api/documents/upload-section` | POST | Upload to case section | Main + analysis API |
+| 15 | `/api/game-plan/generate` | POST | Generate game plan (SSE) | Main + analysis API |
 | 16 | `/api/admin/countries` | GET | List active countries | CMS |
 | 17 | `/api/admin/jurisdictions` | GET | List jurisdictions | CMS |
 | 18 | `/api/admin/case-types` | GET | Get case types | CMS |
@@ -220,7 +220,7 @@ Generate summary for documents.
 **Request Body:**
 ```json
 {
-  "file_addresses": ["addr1", "addr2"],
+  "file_addresses": ["https://storage.googleapis.com/thelawthing-legal-docs/..."],
   "file_names": ["file1.pdf", "file2.pdf"],
   "file_category": "evidence_and_supporting_materials"
 }
@@ -232,12 +232,12 @@ Generate summary for documents.
 
 ### DELETE `/api/documents/delete`
 
-Delete a file from Azure and update case.
+Delete a file from GCS and update the case. `fileAddress` is the value returned at upload time (a `storage.googleapis.com` signed URL or a `gs://` URI). Keep the query string.
 
 **Request Body:**
 ```json
 {
-  "fileAddress": "azure-blob-address",
+  "fileAddress": "https://storage.googleapis.com/thelawthing-legal-docs/...",
   "section": "evidence_and_supporting_materials",
   "caseId": "uuid"
 }

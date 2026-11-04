@@ -1,3 +1,4 @@
+import { backendPaths, backendUrl } from "@/lib/backend";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 
 // Helper: Extract jurisdiction data from metadata
@@ -98,14 +99,10 @@ export async function POST(request: Request) {
     externalFormData.append("tenant_id", tenantId);
     externalFormData.append("language_code", languageCode);
 
-    // Call external upload API
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/upload`,
-      {
-        method: "POST",
-        body: externalFormData,
-      }
-    );
+    const response = await fetch(backendUrl(backendPaths.upload), {
+      method: "POST",
+      body: externalFormData,
+    });
 
     if (!response.ok) {
       console.error("Upload API error:", response.statusText);

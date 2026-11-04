@@ -26,12 +26,27 @@ interface StreamingUploadDisplayProps {
   onClose: () => void;
 }
 
+function canonicalUploadStep(step?: string): string | undefined {
+  switch (step) {
+    case "blob_upload":
+    case "gcs_upload":
+    case "storage_upload":
+      return "storage_upload";
+    case "blob_upload_complete":
+    case "gcs_upload_complete":
+    case "storage_upload_complete":
+      return "storage_upload_complete";
+    default:
+      return step;
+  }
+}
+
 const stepIcons: Record<string, string> = {
   initialization: "⚙️",
   file_processing: "📋",
   reading_file: "📂",
-  blob_upload: "☁️",
-  blob_upload_complete: "✅",
+  storage_upload: "☁️",
+  storage_upload_complete: "✅",
   text_extraction: "📄",
   text_extraction_complete: "📝",
   classification: "🏷️",
@@ -52,8 +67,8 @@ const stepLabels: Record<string, string> = {
   initialization: "Initializing Upload",
   file_processing: "Processing File",
   reading_file: "Reading File",
-  blob_upload: "Uploading to Storage",
-  blob_upload_complete: "Storage Upload Complete",
+  storage_upload: "Uploading to Storage",
+  storage_upload_complete: "Storage Upload Complete",
   text_extraction: "Extracting Text",
   text_extraction_complete: "Text Extracted",
   classification: "Classifying Document",
@@ -156,6 +171,7 @@ export default function StreamingUploadDisplay({
               const dataStr = line.slice(6);
               try {
                 const event: UploadEvent = JSON.parse(dataStr);
+                const step = canonicalUploadStep(event.step);
 
                 // Add event to display stream
                 setEvents((prev) => [...prev, event]);
@@ -172,7 +188,7 @@ export default function StreamingUploadDisplay({
                     grouping: 75,
                     grouping_complete: 80,
                     category_processing: 85,
-                    blob_upload: 90,
+                    storage_upload: 90,
                     file_complete: 95,
                   };
 
@@ -184,7 +200,7 @@ export default function StreamingUploadDisplay({
                   const completedFilesProgress = currentFileIndex * progressPerFile;
 
                   // Progress within current file
-                  const currentStepProgress = stepProgressMap[event.step || ""] || 0;
+                  const currentStepProgress = stepProgressMap[step || ""] || 0;
                   const currentFileProgressContribution = (currentStepProgress / 100) * progressPerFile;
 
                   const totalProgress = completedFilesProgress + currentFileProgressContribution;
@@ -237,7 +253,7 @@ export default function StreamingUploadDisplay({
           ...prev,
           {
             type: "error",
-            message: "Upload stream ended unexpectedly. The backend may have timed out or encountered an error. Try again or check that your Azure backend is running.",
+            message: "Upload stream ended unexpectedly. The backend may have timed out or encountered an error. Try again or check that the analysis API is running.",
           },
         ]);
         setAllComplete(true);
@@ -363,7 +379,9 @@ export default function StreamingUploadDisplay({
               </div>
             )}
 
-            {events.map((event, index) => (
+            {events.map((event, index) => {
+              const stepKey = canonicalUploadStep(event.step) || event.type;
+              return (
               <div
                 key={index}
                 className={`p-3 rounded border transition-all ${event.type === "error"
@@ -377,7 +395,7 @@ export default function StreamingUploadDisplay({
               >
                 <div className="flex items-start gap-3">
                   <span className="text-lg flex-shrink-0 mt-0.5">
-                    {stepIcons[event.step || event.type] || "📌"}
+                    {stepIcons[stepKey] || "📌"}
                   </span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -389,7 +407,7 @@ export default function StreamingUploadDisplay({
                             ? "text-green-700"
                             : "text-ink-900"
                         }`}>
-                        {stepLabels[event.step || event.type] || event.message}
+                        {stepLabels[stepKey] || event.message}
                       </h4>
                       {event.file_index && event.total_files && (
                         <span className="text-xs text-ink-500">
@@ -408,7 +426,7 @@ export default function StreamingUploadDisplay({
                         {event.confidence && ` (${(event.confidence * 100).toFixed(0)}% confidence)`}
                       </p>
                     )}
-                    {event.message && event.message !== (stepLabels[event.step || event.type] || event.message) && (
+                    {event.message && event.message !== (stepLabels[stepKey] || event.message) && (
                       <p className="text-sm text-ink-600">
                         {event.message}
                       </p>
@@ -421,7 +439,8 @@ export default function StreamingUploadDisplay({
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Footer with Close button on error */}

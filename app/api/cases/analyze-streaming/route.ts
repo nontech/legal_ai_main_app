@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { backendPaths, backendUrl } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
@@ -129,7 +130,7 @@ export async function POST(
         };
 
         console.log(
-            "Sending to Azure streaming API:",
+            "Sending to analysis API:",
             JSON.stringify(analyzePayload, null, 2)
         );
 
@@ -142,8 +143,8 @@ export async function POST(
                 const streamSupabase = await getSupabaseServerClient();
 
                 try {
-                    const azureResponse = await fetch(
-                        `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/prediction/analyze-case-streaming`,
+                    const analysisResponse = await fetch(
+                        backendUrl(backendPaths.analyzeCaseStreaming),
                         {
                             method: "POST",
                             headers: {
@@ -153,14 +154,14 @@ export async function POST(
                         }
                     );
 
-                    if (!azureResponse.ok) {
-                        const errorData = await azureResponse.text();
-                        console.error("Azure streaming API error:", errorData);
+                    if (!analysisResponse.ok) {
+                        const errorData = await analysisResponse.text();
+                        console.error("Analysis API error:", errorData);
                         controller.enqueue(
                             encoder.encode(
                                 `data: ${JSON.stringify({
                                     type: "error",
-                                    message: `Azure API error: ${azureResponse.status}`,
+                                    message: `Analysis API error: ${analysisResponse.status}`,
                                 })}\n\n`
                             )
                         );
@@ -168,12 +169,12 @@ export async function POST(
                         return;
                     }
 
-                    if (!azureResponse.body) {
+                    if (!analysisResponse.body) {
                         controller.enqueue(
                             encoder.encode(
                                 `data: ${JSON.stringify({
                                     type: "error",
-                                    message: "No response body from Azure API",
+                                    message: "No response body from analysis API",
                                 })}\n\n`
                             )
                         );
@@ -181,7 +182,7 @@ export async function POST(
                         return;
                     }
 
-                    const reader = azureResponse.body.getReader();
+                    const reader = analysisResponse.body.getReader();
                     let lastResult: any = null;
                     let buffer = ""; // Buffer to accumulate incomplete data lines
 

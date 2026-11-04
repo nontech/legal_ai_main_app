@@ -1,3 +1,5 @@
+import { backendPaths, backendUrl } from "@/lib/backend";
+import { extractUploadedFiles } from "@/lib/documentFiles";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 // Helper: Fetch existing case details
@@ -86,14 +88,10 @@ export async function POST(request: Request) {
         externalFormData.append("case_id", caseId);
         externalFormData.append("language_code", language);
 
-        // Call external upload API
-        const response = await fetch(
-            `${process.env.NEXT_PUBLIC_AZURE_BACKEND_URL}/api/v1/documents/upload-to-section`,
-            {
-                method: "POST",
-                body: externalFormData,
-            }
-        );
+        const response = await fetch(backendUrl(backendPaths.uploadToSection), {
+            method: "POST",
+            body: externalFormData,
+        });
 
         if (!response.ok) {
             console.error("Upload API error:", response.statusText);
@@ -117,11 +115,9 @@ export async function POST(request: Request) {
             ? existingSectionData.files
             : [];
 
-        // Transform API response to files array format
-        const newFiles = (result.file_names || []).map((name: string, index: number) => ({
-            name,
-            address: (result.file_addresses || [])[index],
-        }));
+        // file_addresses are GCS signed URLs or gs:// URIs. Also accept
+        // signed_url / files[] when the parallel arrays are absent.
+        const newFiles = extractUploadedFiles(result);
 
         // Append new files to existing ones
         const updatedFiles = [...existingFiles, ...newFiles];
