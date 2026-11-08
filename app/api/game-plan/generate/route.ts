@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
@@ -56,16 +56,14 @@ export async function POST(request: NextRequest): Promise<Response> {
             language_code,
         };
 
-        const response = await fetch(
-            backendUrl(backendPaths.generateGamePlanStreaming),
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(gamePlanPayload),
-            }
-        );
+        const response = await backendFetch(backendPaths.generateGamePlanStreaming, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(gamePlanPayload),
+            incomingAuthorization: request.headers.get("authorization"),
+        });
 
         if (!response.ok) {
             throw new Error(`External API error! status: ${response.status}`);

@@ -68,7 +68,7 @@ npm run gen:types
                 ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │     Analysis API (FastAPI, Cloud Run europe-west3)              │
-│     NEXT_PUBLIC_API_URL  ·  GCS thelawthing-legal-docs          │
+│  BACKEND_URL (server-only) · private Cloud Run IAM · GCS        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -111,9 +111,9 @@ npm run gen:types
 ## Environment Variables Required
 
 ```env
-# Analysis API. Defaults to http://localhost:8000 when unset.
-# Replace with the Cloud Run URL (europe-west3) once it exists.
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Server-only. Defaults to http://localhost:8000 when unset.
+# Set the private Cloud Run origin here once it exists.
+BACKEND_URL=
 
 # Main Supabase (User Cases & Auth)
 NEXT_PUBLIC_SUPABASE_URL=

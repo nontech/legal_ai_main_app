@@ -1,4 +1,4 @@
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 
 export async function POST(request: Request) {
     try {
@@ -42,13 +42,11 @@ export async function POST(request: Request) {
         externalFormData.append("file_category", file_category);
 
         // Call the external summarization API
-        const response = await fetch(
-            backendUrl(backendPaths.summarize),
-            {
-                method: "POST",
-                body: externalFormData,
-            }
-        );
+        const response = await backendFetch(backendPaths.summarize, {
+            method: "POST",
+            body: externalFormData,
+            incomingAuthorization: request.headers.get("authorization"),
+        });
 
         if (!response.ok) {
             console.error("Summarize API error:", response.statusText);

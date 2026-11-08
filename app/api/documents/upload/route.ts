@@ -1,4 +1,4 @@
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 
 // Helper: Extract jurisdiction data from metadata
@@ -99,9 +99,10 @@ export async function POST(request: Request) {
     externalFormData.append("tenant_id", tenantId);
     externalFormData.append("language_code", languageCode);
 
-    const response = await fetch(backendUrl(backendPaths.upload), {
+    const response = await backendFetch(backendPaths.upload, {
       method: "POST",
       body: externalFormData,
+      incomingAuthorization: request.headers.get("authorization"),
     });
 
     if (!response.ok) {

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test lib/backendAuthCore.test.ts lib/backendServerOnly.test.ts",
     "gen:types": "supabase gen types typescript --project-id fvutxxpdjymctdkujtwg --schema public > types/supabase.ts"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.76.1",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/oidc": "^4.0.7",
     "@xyflow/react": "^12.10.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -35,6 +37,7 @@
     "react-dom": "19.1.2",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

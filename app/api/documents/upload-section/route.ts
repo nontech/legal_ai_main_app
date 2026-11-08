@@ -1,4 +1,4 @@
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 import { extractUploadedFiles } from "@/lib/documentFiles";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
@@ -88,9 +88,10 @@ export async function POST(request: Request) {
         externalFormData.append("case_id", caseId);
         externalFormData.append("language_code", language);
 
-        const response = await fetch(backendUrl(backendPaths.uploadToSection), {
+        const response = await backendFetch(backendPaths.uploadToSection, {
             method: "POST",
             body: externalFormData,
+            incomingAuthorization: request.headers.get("authorization"),
         });
 
         if (!response.ok) {
