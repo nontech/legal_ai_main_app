@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
@@ -143,14 +143,15 @@ export async function POST(
                 const streamSupabase = await getSupabaseServerClient();
 
                 try {
-                    const analysisResponse = await fetch(
-                        backendUrl(backendPaths.analyzeCaseStreaming),
+                    const analysisResponse = await backendFetch(
+                        backendPaths.analyzeCaseStreaming,
                         {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
                             },
                             body: JSON.stringify(analyzePayload),
+                            incomingAuthorization: request.headers.get("authorization"),
                         }
                     );
 

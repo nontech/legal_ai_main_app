@@ -144,7 +144,9 @@ Main App Form Fields
 ## External Dependencies
 
 ### Analysis API (FastAPI on Google Cloud)
-Base URL: `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`). The Cloud Run URL in `europe-west3` is not assigned yet.
+Server-only base URL: `BACKEND_URL` (default `http://localhost:8000`). The private Cloud Run URL in `europe-west3` is not assigned yet.
+
+Server routes call that origin with `backendFetch`. Loopback skips IAM. A non-local origin must be https. The route then exchanges the Vercel OIDC token through Workload Identity Federation and sends the Google identity token in `X-Serverless-Authorization`. An incoming `Authorization` JWT is forwarded unchanged. No service-account JSON key is used, and the Google token is not sent to the browser.
 
 Document bytes live in the GCS bucket `thelawthing-legal-docs` (`europe-west3`). Upload responses return signed `https://storage.googleapis.com/...` URLs (or a `gs://` URI). The app stores that string and sends it back on summarize and delete. OCR uses Document AI. Case analysis uses Vertex AI Gemini. Precedent search is moving from Cognitive Search to Postgres/pgvector; that change is inside the API and does not add a new frontend route.
 

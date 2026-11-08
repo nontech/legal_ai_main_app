@@ -1,4 +1,4 @@
-import { backendPaths, backendUrl } from "@/lib/backend";
+import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 
 // Helper: Fetch existing case details
@@ -76,9 +76,10 @@ export async function DELETE(request: Request) {
         const externalFormData = new FormData();
         externalFormData.append("file_address", fileAddress);
         console.log("External Form Data:", externalFormData);
-        const response = await fetch(backendUrl(backendPaths.deleteFile), {
+        const response = await backendFetch(backendPaths.deleteFile, {
             method: "DELETE",
             body: externalFormData,
+            incomingAuthorization: request.headers.get("authorization"),
         });
 
         if (!response.ok) {
