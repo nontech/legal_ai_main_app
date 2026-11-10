@@ -1,68 +1,14 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { COUNTRIES, DEFAULT_COUNTRY } from './i18n/routing';
-
-const countries = COUNTRIES.map(c => c.code);
-const locales = ['en', 'de'];
-
-// Country-specific default locales
-const countryDefaults: Record<string, string> = {
-    de: 'de',  // Germany defaults to German
-    uk: 'en',
-    us: 'en',
-    ca: 'en',
-};
+import { localeRedirectPath } from './lib/localeMiddleware.ts';
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-
-    // Skip API routes, static files, and Next.js internals
-    if (
-        pathname.startsWith('/api') ||
-        pathname.startsWith('/_next') ||
-        pathname.startsWith('/_vercel') ||
-        pathname.includes('.')
-    ) {
+    const nextPath = localeRedirectPath(request.nextUrl.pathname);
+    if (nextPath === null) {
         return NextResponse.next();
     }
 
-    // Skip admin routes (they don't need localization)
-    if (pathname.startsWith('/admin')) {
-        return NextResponse.next();
-    }
-
-    // Check if pathname already has country/locale pattern
-    const pathnameHasCountryLocale = countries.some(
-        (country) => locales.some(
-            (locale) =>
-                pathname.startsWith(`/${country}/${locale}/`) ||
-                pathname === `/${country}/${locale}`
-        )
-    );
-
-    if (pathnameHasCountryLocale) {
-        return NextResponse.next();
-    }
-
-    // Redirect root path to default country/locale
-    if (pathname === '/') {
-        const defaultLocale = (countryDefaults as Record<string, string>)[DEFAULT_COUNTRY] || 'en';
-        request.nextUrl.pathname = `/${DEFAULT_COUNTRY}/${defaultLocale}`;
-        return NextResponse.redirect(request.nextUrl);
-    }
-
-    // If only country is specified (e.g., /de), add default locale for that country
-    const countryMatch = pathname.match(/^\/([a-z]{2})$/);
-    if (countryMatch && countries.includes(countryMatch[1] as any)) {
-        const country = countryMatch[1];
-        const locale = (countryDefaults as Record<string, string>)[country] || 'en';
-        request.nextUrl.pathname = `/${country}/${locale}`;
-        return NextResponse.redirect(request.nextUrl);
-    }
-
-    // Redirect all other routes to include default country/locale prefix
-    const defaultLocale = (countryDefaults as Record<string, string>)[DEFAULT_COUNTRY] || 'en';
-    request.nextUrl.pathname = `/${DEFAULT_COUNTRY}/${defaultLocale}${pathname}`;
+    request.nextUrl.pathname = nextPath;
     return NextResponse.redirect(request.nextUrl);
 }
 
@@ -70,9 +16,10 @@ export const config = {
     matcher: [
         // Match all pathnames except for
         // - API routes
+        // - PostHog reverse proxy (/ingest)
         // - _next (Next.js internals)
         // - _vercel (Vercel internals)
         // - Files with extensions (e.g. favicon.ico)
-        '/((?!api|_next|_vercel|.*\\..*).*)',
+        '/((?!api|ingest|_next|_vercel|.*\\..*).*)',
     ],
 };

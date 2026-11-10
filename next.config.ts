@@ -7,16 +7,20 @@ const nextConfig: NextConfig = {
   skipTrailingSlashRedirect: true,
   transpilePackages: ["@xyflow/react"],
   async rewrites() {
-    return [
-      {
-        source: "/ingest/static/:path*",
-        destination: "https://eu-assets.i.posthog.com/static/:path*",
-      },
-      {
-        source: "/ingest/:path*",
-        destination: "https://eu.i.posthog.com/:path*",
-      },
-    ];
+    // beforeFiles runs before filesystem routes, including the locale pages.
+    // Middleware must also skip /ingest; otherwise it redirects first.
+    return {
+      beforeFiles: [
+        {
+          source: "/ingest/static/:path*",
+          destination: "https://eu-assets.i.posthog.com/static/:path*",
+        },
+        {
+          source: "/ingest/:path*",
+          destination: "https://eu.i.posthog.com/:path*",
+        },
+      ],
+    };
   },
   images: {
     remotePatterns: [
