@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import CasePortfolio from "@/app/components/dashboard/CasePortfolio";
 import HowItWorks from "@/app/components/dashboard/HowItWorks";
 import LogoLoader from "@/app/components/LogoLoader";
+import { trackClientEvent } from "@/lib/analytics/client";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,13 @@ export default function DashboardPage() {
                 </div>
                 <a
                   href={`/${country}/${locale}/case-analysis`}
+                  data-ph-capture=""
+                  onClick={() =>
+                    trackClientEvent("cta_clicked", {
+                      cta: "start_analysis",
+                      location: "dashboard",
+                    })
+                  }
                   className="cursor-pointer self-start sm:self-auto rounded-lg bg-accent-500 px-6 py-3 font-semibold text-primary-950 shadow-lg transition-colors hover:bg-accent-400 flex items-center gap-2"
                 >
                   <svg

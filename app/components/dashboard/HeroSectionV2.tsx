@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import ScrollReveal from "@/app/components/ScrollReveal";
 import HeroIllustration from "./HeroIllustration";
+import { trackClientEvent } from "@/lib/analytics/client";
 
 export default function HeroSectionV2() {
   const t = useTranslations("heroV2");
@@ -100,6 +101,13 @@ export default function HeroSectionV2() {
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 w-full">
                 <Link
                   href={`/${country}/${locale}/case-analysis`}
+                  data-ph-capture=""
+                  onClick={() =>
+                    trackClientEvent("cta_clicked", {
+                      cta: "start_analysis",
+                      location: "hero",
+                    })
+                  }
                   className="inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-accent-400 via-accent-500 to-accent-600 px-7 py-3.5 text-base font-semibold text-primary-950 shadow-lg shadow-amber-900/25 transition-transform duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-900/30 hover:brightness-105"
                   aria-label={`${t("ctaLeadPlain")} ${t("cta")}`}
                 >
@@ -122,6 +130,10 @@ export default function HeroSectionV2() {
                 </Link>
                 <Link
                   href={`/${country}/${locale}/pricing`}
+                  data-ph-capture=""
+                  onClick={() =>
+                    trackClientEvent("cta_clicked", { cta: "pricing", location: "hero" })
+                  }
                   className="inline-flex items-center justify-center rounded-md border border-white/30 bg-white/10 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-accent-400/50 hover:bg-white/15 hover:shadow-[0_0_24px_-4px_rgba(249,196,105,0.35)]"
                 >
                   {t("ctaSecondary")}
@@ -187,6 +199,13 @@ export default function HeroSectionV2() {
                   </div>
                   <Link
                     href={`/${country}/${locale}/case-analysis`}
+                    data-ph-capture=""
+                    onClick={() =>
+                      trackClientEvent("cta_clicked", {
+                        cta: "start_analysis",
+                        location: "hero",
+                      })
+                    }
                     className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-md border border-transparent bg-gradient-to-r from-primary-800 to-primary-700 px-7 py-3.5 text-base font-semibold text-white shadow-lg shadow-primary-900/25 transition-all duration-300 hover:from-primary-700 hover:to-primary-600 hover:scale-[1.02] hover:shadow-xl self-start"
                     aria-label={`${t("ctaLeadPlain")} ${t("cta")}`}
                   >

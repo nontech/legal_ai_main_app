@@ -64,6 +64,12 @@ Vercel and Google settings that have to match:
 
 For local calls to the private service, `vercel link` then `vercel env pull` writes a development OIDC token. Leave `BACKEND_URL` unset to keep using `http://localhost:8000` with no Google call.
 
+## Product analytics
+
+PostHog runs on the EU cloud. The browser SDK uses `api_host: "/ingest"` and `ui_host: https://eu.posthog.com`. `next.config.ts` proxies `/ingest` to `https://eu.i.posthog.com` and `/ingest/static` to `https://eu-assets.i.posthog.com`. API routes use `posthog-node` against `https://eu.i.posthog.com` and flush before the function returns.
+
+Capturing stays off until the cookie banner is accepted. Session replay masks every input and every text node, and it does not record console logs. Autocapture is limited to elements marked `data-ph-capture`. Event names live in `lib/analytics/events.ts`. Properties are ids, counts, sizes, enums, durations, and status codes. Document text, file names, prompts, and full email addresses are not sent. `posthog.identify` receives the Supabase user id and, when present, the email domain only. Logout calls `posthog.reset()`.
+
 ## Scripts
 
 ```bash

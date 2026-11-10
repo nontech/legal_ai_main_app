@@ -5,6 +5,7 @@ import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import LogoLoader from "@/app/components/LogoLoader";
+import { identifyUser } from "@/lib/analytics/client";
 
 function SignInContent() {
     const searchParams = useSearchParams();
@@ -39,6 +40,9 @@ function SignInContent() {
             // Store email in sessionStorage
             if (json.email) {
                 sessionStorage.setItem("userEmail", json.email);
+            }
+            if (json.user?.id) {
+                identifyUser({ id: json.user.id, email: json.email });
             }
 
             // Small delay to ensure sessionStorage write completes

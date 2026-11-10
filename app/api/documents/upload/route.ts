@@ -1,5 +1,7 @@
 import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { captureDocumentUploads } from "@/lib/analytics/server";
 
 // Helper: Extract jurisdiction data from metadata
 const extractJurisdiction = (metadata: any) => ({
@@ -105,8 +107,27 @@ export async function POST(request: Request) {
       incomingAuthorization: request.headers.get("authorization"),
     });
 
+    let analyticsUserId: string | null = null;
+    try {
+      const supabase = await getSupabaseServerClient();
+      const { data: userRes } = await supabase.auth.getUser();
+      analyticsUserId = userRes?.user?.id ?? null;
+    } catch {
+      analyticsUserId = null;
+    }
+    const uploadedFiles = files.map((file) => ({ size: file.size, type: file.type }));
+
     if (!response.ok) {
       console.error("Upload API error:", response.statusText);
+      await captureDocumentUploads({
+        request,
+        userId: analyticsUserId,
+        files: uploadedFiles,
+        fileCategory: "unclassified",
+        success: false,
+        route: "/api/documents/upload",
+        status: response.status,
+      });
       return new Response(
         JSON.stringify({
           type: "error",
@@ -120,6 +141,14 @@ export async function POST(request: Request) {
         }
       );
     }
+
+    await captureDocumentUploads({
+      request,
+      userId: analyticsUserId,
+      files: uploadedFiles,
+      fileCategory: "unclassified",
+      success: true,
+    });
 
     // Stream the response through to the client
     if (response.body) {

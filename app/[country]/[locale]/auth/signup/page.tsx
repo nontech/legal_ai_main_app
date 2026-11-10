@@ -5,6 +5,7 @@ import { useSearchParams, useParams } from "next/navigation";
 import { Suspense } from "react";
 import Link from "next/link";
 import LogoLoader from "@/app/components/LogoLoader";
+import { identifyUser } from "@/lib/analytics/client";
 
 function SignUpContent() {
     const searchParams = useSearchParams();
@@ -54,6 +55,9 @@ function SignUpContent() {
             if (json.email) {
                 sessionStorage.setItem("userEmail", json.email);
                 sessionStorage.setItem("pendingCaseId", caseId || "");
+            }
+            if (json.user?.id) {
+                identifyUser({ id: json.user.id, email: json.email });
             }
 
             // Show email confirmation screen

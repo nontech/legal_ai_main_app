@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { trackClientEvent } from "@/lib/analytics/client";
 
 export default function ActionSection() {
   const params = useParams();
@@ -22,6 +23,13 @@ export default function ActionSection() {
         <div className="flex gap-3 flex-shrink-0">
           <Link
             href={`/${country}/${locale}/case-analysis`}
+            data-ph-capture=""
+            onClick={() =>
+              trackClientEvent("cta_clicked", {
+                cta: "start_analysis",
+                location: "dashboard",
+              })
+            }
             className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-500 hover:to-amber-600 transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <svg

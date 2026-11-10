@@ -1,6 +1,7 @@
 import { backendFetch, backendPaths } from "@/lib/backend";
 import { extractUploadedFiles } from "@/lib/documentFiles";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { captureDocumentUploads } from "@/lib/analytics/server";
 
 // Helper: Fetch existing case details
 const getExistingCaseDetails = async (supabase: any, caseId: string) => {
@@ -94,10 +95,21 @@ export async function POST(request: Request) {
             incomingAuthorization: request.headers.get("authorization"),
         });
 
+        const uploadedFiles = files.map((file) => ({ size: file.size, type: file.type }));
+
         if (!response.ok) {
             console.error("Upload API error:", response.statusText);
             const errorText = await response.text();
             console.error("Error details:", errorText);
+            await captureDocumentUploads({
+                request,
+                userId: userRes.user.id,
+                files: uploadedFiles,
+                fileCategory: section,
+                success: false,
+                route: "/api/documents/upload-section",
+                status: response.status,
+            });
             return Response.json(
                 { ok: false, error: "Upload failed", details: errorText },
                 { status: response.status }
@@ -141,11 +153,26 @@ export async function POST(request: Request) {
 
         if (updateError) {
             console.error("Failed to update case:", updateError);
+            await captureDocumentUploads({
+                request,
+                userId: userRes.user.id,
+                files: uploadedFiles,
+                fileCategory: section,
+                success: false,
+            });
             return Response.json(
                 { ok: false, error: "Failed to update case", details: updateError.message },
                 { status: 500 }
             );
         }
+
+        await captureDocumentUploads({
+            request,
+            userId: userRes.user.id,
+            files: uploadedFiles,
+            fileCategory: section,
+            success: true,
+        });
 
         return Response.json({
             ok: true,
