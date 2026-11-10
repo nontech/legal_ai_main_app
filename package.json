@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test lib/backendAuthCore.test.ts lib/backendServerOnly.test.ts lib/analytics/privacy.test.ts",
+    "test": "node --experimental-strip-types --test lib/backendAuthCore.test.ts lib/backendServerOnly.test.ts lib/analytics/privacy.test.ts middleware.test.ts",
     "gen:types": "supabase gen types typescript --project-id fvutxxpdjymctdkujtwg --schema public > types/supabase.ts"
   },
   "dependencies": {
