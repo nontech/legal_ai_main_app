@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { captureServerEvent } from "@/lib/analytics/server";
 
 export async function POST(request: Request) {
     try {
         const supabase = await getSupabaseServerClient();
+        const { data: userRes } = await supabase.auth.getUser();
+        const userId = userRes?.user?.id;
 
         // Sign out user
         const { error } = await supabase.auth.signOut();
+        if (userId) {
+            await captureServerEvent(userId, "logged_out", {});
+        }
 
         if (error) {
             console.error("Sign out error:", error);

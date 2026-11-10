@@ -2,100 +2,41 @@
 
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
-import { useEffect, Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, Suspense, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { CONSENT_EVENT, readConsentFromStorage } from "@/lib/consent";
 import PostHogDevTestButton from "@/app/components/PostHogDevTestButton";
+import { wizardStepFromPath } from "@/lib/analytics/events";
+import { flushPendingIdentity, trackClientEvent } from "@/lib/analytics/client";
+import {
+  EU_UI_HOST,
+  readPosthogProjectToken,
+  redactBrowserCapture,
+} from "@/lib/analytics/privacy";
 
-/** Tutorial / template values — never use these as the resolved API key. */
-function looksLikePosthogPlaceholder(value: string): boolean {
-  const v = value.trim().toLowerCase();
-  return (
-    v === "phc_" ||
-    v === "phc_..." ||
-    v.includes("your_key_here") ||
-    v.includes("<your") ||
-    v.includes("paste_your") ||
-    v === "placeholder" ||
-    v.startsWith("phc_your_")
-  );
+function startRecording() {
+  if (typeof posthog.startSessionRecording === "function") {
+    posthog.startSessionRecording();
+  }
 }
 
-/**
- * Project API key for the browser SDK.
- * Prefers `NEXT_PUBLIC_POSTHOG_TOKEN` (PostHog Next.js docs), then `NEXT_PUBLIC_POSTHOG_KEY`.
- * Ignores obvious KEY placeholders so a leftover `phc_YOUR_KEY_HERE` cannot override a real TOKEN.
- * @see https://posthog.com/docs/libraries/next-js
- */
-function getPosthogProjectApiKey(): string | undefined {
-  const token = process.env.NEXT_PUBLIC_POSTHOG_TOKEN?.trim() || undefined;
-  const keyVar = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim() || undefined;
-
-  if (token && !looksLikePosthogPlaceholder(token)) {
-    return token;
+function stopRecording() {
+  if (typeof posthog.stopSessionRecording === "function") {
+    posthog.stopSessionRecording();
   }
-  if (keyVar && !looksLikePosthogPlaceholder(keyVar)) {
-    return keyVar;
-  }
-  // Do not fall back to token/key if they failed placeholder checks — that used to
-  // return phc_YOUR_KEY_HERE and block init with a confusing "placeholder" warning.
-  return undefined;
-}
-
-/**
- * Browser SDK must use the **Project API key** (`phc_…`), not a Personal API key (`phx_…`).
- * Wrong type → 401 "invalid or has expired" and broken remote config (404-style failures).
- */
-function isPersonalApiKey(apiKey: string): boolean {
-  return apiKey.startsWith("phx_");
-}
-
-/**
- * PostHog Cloud **ingestion** host must be `*.i.posthog.com`, not the dashboard
- * URL (`eu.posthog.com` / `us.posthog.com`). Wrong host → 404 "not_found" from the SDK.
- * @see https://posthog.com/docs/libraries/next-js
- */
-function getPosthogApiHost(): string {
-  const raw = process.env.NEXT_PUBLIC_POSTHOG_HOST?.trim().replace(/\/$/, "");
-  if (!raw) {
-    if (process.env.NODE_ENV === "development") {
-      console.info(
-        "[PostHog] NEXT_PUBLIC_POSTHOG_HOST unset — using US ingestion (https://us.i.posthog.com). EU projects must set https://eu.i.posthog.com or you may see 404.",
-      );
-    }
-    return "https://us.i.posthog.com";
-  }
-  // Common misconfiguration: UI / account domain instead of ingestion API
-  if (raw === "https://eu.posthog.com" || raw === "http://eu.posthog.com") {
-    return "https://eu.i.posthog.com";
-  }
-  if (raw === "https://us.posthog.com" || raw === "http://us.posthog.com") {
-    return "https://us.i.posthog.com";
-  }
-  if (raw === "https://app.posthog.com" || raw === "http://app.posthog.com") {
-    if (process.env.NODE_ENV === "development") {
-      console.warn(
-        "[PostHog] NEXT_PUBLIC_POSTHOG_HOST is set to app.posthog.com — use https://us.i.posthog.com or https://eu.i.posthog.com instead.",
-      );
-    }
-    return "https://us.i.posthog.com";
-  }
-  return raw;
 }
 
 function PostHogPageView() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const lastPath = useRef<string | null>(null);
 
   useEffect(() => {
-    if (pathname && posthog.__loaded) {
-      const url =
-        window.location.origin +
-        pathname +
-        (searchParams?.toString() ? `?${searchParams.toString()}` : "");
-      posthog.capture("$pageview", { $current_url: url });
-    }
-  }, [pathname, searchParams]);
+    if (!pathname || lastPath.current === pathname) return;
+    const step = wizardStepFromPath(pathname);
+    if (!step) return;
+    lastPath.current = pathname;
+    trackClientEvent("wizard_step_viewed", { step });
+  }, [pathname]);
 
   return null;
 }
@@ -107,52 +48,60 @@ export default function PostHogProvider({
 }) {
   useEffect(() => {
     const init = () => {
-      const apiKey = getPosthogProjectApiKey();
+      const apiKey = readPosthogProjectToken();
       if (!apiKey) {
         if (process.env.NODE_ENV === "development") {
           console.warn(
-            "[PostHog] No usable project token — set NEXT_PUBLIC_POSTHOG_TOKEN=phc_… in .env or .env.local, remove any placeholder NEXT_PUBLIC_POSTHOG_KEY, restart `pnpm dev`, then accept cookies again.",
+            "[PostHog] No usable project token. Set NEXT_PUBLIC_POSTHOG_TOKEN=phc_… and restart the dev server.",
           );
         }
         return;
       }
 
-      if (isPersonalApiKey(apiKey)) {
-        console.error(
-          "[PostHog] You are using a Personal API key (phx_…). The browser SDK requires the Project API key (phc_…): PostHog → Project settings → Project API key. Personal keys cause 401 and remote config errors.",
-        );
-        return;
-      }
-
-      if (
-        process.env.NODE_ENV === "development" &&
-        !apiKey.startsWith("phc_")
-      ) {
+      if (!apiKey.startsWith("phc_") && process.env.NODE_ENV === "development") {
         console.warn(
-          "[PostHog] Project API keys usually start with phc_. If you see 401, copy the key again from PostHog → Project settings (and match EU vs US host).",
+          "[PostHog] Project API keys usually start with phc_. Copy the project token from PostHog project settings.",
         );
       }
 
       if (!posthog.__loaded) {
-        const apiHost = getPosthogApiHost();
-        if (process.env.NODE_ENV === "development") {
-          console.info("[PostHog] api_host:", apiHost);
-        }
         posthog.init(apiKey, {
-          api_host: apiHost,
+          api_host: "/ingest",
+          ui_host: EU_UI_HOST,
           defaults: "2026-01-30",
-          capture_pageview: false,
           person_profiles: "identified_only",
+          capture_pageview: "history_change",
+          capture_pageleave: true,
+          opt_out_capturing_by_default: true,
           disable_session_recording: false,
+          enable_recording_console_log: false,
+          capture_exceptions: {
+            capture_unhandled_errors: true,
+            capture_unhandled_rejections: true,
+            capture_console_errors: false,
+          },
+          mask_all_text: true,
+          mask_all_element_attributes: true,
+          autocapture: {
+            dom_event_allowlist: ["click"],
+            element_allowlist: ["a", "button"],
+            css_selector_allowlist: ["[data-ph-capture]"],
+            capture_copied_text: false,
+          },
+          session_recording: {
+            maskAllInputs: true,
+            maskTextSelector: "*",
+            maskTextFn: () => "*",
+            recordBody: false,
+            recordHeaders: false,
+          },
+          before_send: (event) => redactBrowserCapture(event),
           debug: process.env.NODE_ENV === "development",
-          // Session replay loads recorder.js asynchronously; starting capture here avoids
-          // racing init() + immediate startSessionRecording() (see PostHog replay troubleshooting).
           loaded: (ph) => {
             if (readConsentFromStorage() !== "accepted") return;
             ph.opt_in_capturing();
-            if (typeof ph.startSessionRecording === "function") {
-              ph.startSessionRecording();
-            }
+            startRecording();
+            flushPendingIdentity();
           },
         });
       }
@@ -164,11 +113,12 @@ export default function PostHogProvider({
         init();
         if (!posthog.__loaded) return;
         posthog.opt_in_capturing();
-        if (typeof posthog.startSessionRecording === "function") {
-          posthog.startSessionRecording();
-        }
+        startRecording();
+        flushPendingIdentity();
       } else if (consent === "declined") {
-        if (posthog.__loaded) posthog.opt_out_capturing();
+        if (!posthog.__loaded) return;
+        stopRecording();
+        posthog.opt_out_capturing();
       }
     };
 

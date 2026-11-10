@@ -3,6 +3,7 @@ import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
+import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
 
 export async function POST(request: NextRequest): Promise<Response> {
     try {
@@ -43,12 +44,23 @@ export async function POST(request: NextRequest): Promise<Response> {
                 adminClient
             );
             if (!creditResult.allowed) {
+                await captureServerEvent(
+                    distinctIdFromRequest(request, userRes.user.id),
+                    "rate_limit_hit",
+                    { limit: "user_game_plan" }
+                );
                 return new Response(
                     JSON.stringify({ ok: false, error: creditResult.error }),
                     { status: 402, headers: { "Content-Type": "application/json" } }
                 );
             }
         }
+
+        const analyticsDistinctId = distinctIdFromRequest(
+            request,
+            userRes?.user?.id ?? null
+        );
+        const gamePlanStartedAt = Date.now();
 
         const gamePlanPayload = {
             case_analysis,
@@ -66,11 +78,23 @@ export async function POST(request: NextRequest): Promise<Response> {
         });
 
         if (!response.ok) {
+            await captureServerEvent(analyticsDistinctId, "backend_error", {
+                route: "/api/game-plan/generate",
+                status: response.status,
+            });
+            await captureServerEvent(analyticsDistinctId, "game_plan_failed", {
+                duration_ms: Date.now() - gamePlanStartedAt,
+                error_code: `http_${response.status}`,
+            });
             throw new Error(`External API error! status: ${response.status}`);
         }
 
         const reader = response.body?.getReader();
         if (!reader) {
+            await captureServerEvent(analyticsDistinctId, "game_plan_failed", {
+                duration_ms: Date.now() - gamePlanStartedAt,
+                error_code: "no_body",
+            });
             throw new Error("No response body from external API");
         }
 
@@ -80,6 +104,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                 const decoder = new TextDecoder();
                 let gamePlanResult: any = null;
                 let buffer = "";
+                let gamePlanReported = false;
 
                 try {
                     while (true) {
@@ -134,9 +159,36 @@ export async function POST(request: NextRequest): Promise<Response> {
                         }
                     }
 
+                    gamePlanReported = true;
+                    if (gamePlanResult) {
+                        await captureServerEvent(
+                            analyticsDistinctId,
+                            "game_plan_generated",
+                            { duration_ms: Date.now() - gamePlanStartedAt }
+                        );
+                    } else {
+                        await captureServerEvent(
+                            analyticsDistinctId,
+                            "game_plan_failed",
+                            {
+                                duration_ms: Date.now() - gamePlanStartedAt,
+                                error_code: "no_result",
+                            }
+                        );
+                    }
                     controller.close();
                 } catch (error) {
                     console.error("Streaming error:", error);
+                    if (!gamePlanReported) {
+                        await captureServerEvent(
+                            analyticsDistinctId,
+                            "game_plan_failed",
+                            {
+                                duration_ms: Date.now() - gamePlanStartedAt,
+                                error_code: "stream_error",
+                            }
+                        );
+                    }
                     controller.error(error);
                 } finally {
                     reader.releaseLock();

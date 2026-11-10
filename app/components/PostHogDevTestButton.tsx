@@ -14,7 +14,7 @@ export default function PostHogDevTestButton() {
   const ping = useCallback(() => {
     if (!posthog.__loaded) {
       const msg =
-        "PostHog not loaded — set phc_ key + *.i.posthog.com host, restart dev, accept cookies.";
+        "PostHog not loaded — set the phc_ project token, restart dev, and accept cookies. The browser sends through /ingest.";
       console.warn("[PostHog test]", msg);
       setLast(msg);
       return;

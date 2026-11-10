@@ -1,4 +1,7 @@
 import { backendFetch, backendPaths } from "@/lib/backend";
+import { getSupabaseServerClient } from "@/lib/supabaseServer";
+import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
+import { normalizeFileCategory } from "@/lib/analytics/privacy";
 
 export async function POST(request: Request) {
     try {
@@ -48,10 +51,29 @@ export async function POST(request: Request) {
             incomingAuthorization: request.headers.get("authorization"),
         });
 
+        let analyticsUserId: string | null = null;
+        try {
+            const supabase = await getSupabaseServerClient();
+            const { data: userRes } = await supabase.auth.getUser();
+            analyticsUserId = userRes?.user?.id ?? null;
+        } catch {
+            analyticsUserId = null;
+        }
+        const distinctId = distinctIdFromRequest(request, analyticsUserId);
+
         if (!response.ok) {
             console.error("Summarize API error:", response.statusText);
             const errorText = await response.text();
             console.error("Error details:", errorText);
+            await captureServerEvent(distinctId, "document_summarized", {
+                file_category: normalizeFileCategory(file_category),
+                file_count: file_addresses.length,
+                success: false,
+            });
+            await captureServerEvent(distinctId, "backend_error", {
+                route: "/api/documents/summarize",
+                status: response.status,
+            });
             return Response.json(
                 { ok: false, error: "Failed to generate summary", details: errorText },
                 { status: response.status }
@@ -60,6 +82,12 @@ export async function POST(request: Request) {
 
         const result = await response.json();
         console.log("Summarize result:", result);
+
+        await captureServerEvent(distinctId, "document_summarized", {
+            file_category: normalizeFileCategory(file_category),
+            file_count: file_addresses.length,
+            success: true,
+        });
 
         return Response.json({
             ok: true,

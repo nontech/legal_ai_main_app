@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test lib/backendAuthCore.test.ts lib/backendServerOnly.test.ts",
+    "test": "node --experimental-strip-types --test lib/backendAuthCore.test.ts lib/backendServerOnly.test.ts lib/analytics/privacy.test.ts",
     "gen:types": "supabase gen types typescript --project-id fvutxxpdjymctdkujtwg --schema public > types/supabase.ts"
   },
   "dependencies": {
@@ -32,6 +32,7 @@
     "next": "15.5.9",
     "next-intl": "^4.7.0",
     "posthog-js": "^1.362.0",
+    "posthog-node": "^5.67.0",
     "puppeteer": "^24.35.0",
     "react": "19.1.2",
     "react-dom": "19.1.2",

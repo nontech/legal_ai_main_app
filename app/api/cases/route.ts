@@ -7,6 +7,7 @@ import {
     incrementAnonymousCaseCount,
     checkAndConsumeUserCredits,
 } from "@/lib/rateLimit";
+import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
 
 export async function GET(request: Request) {
     try {
@@ -64,6 +65,11 @@ export async function POST(request: Request) {
                     adminClient
                 );
                 if (!creditResult.allowed) {
+                    await captureServerEvent(
+                        distinctIdFromRequest(request, userRes.user.id),
+                        "rate_limit_hit",
+                        { limit: "user_case" }
+                    );
                     return NextResponse.json(
                         { ok: false, error: creditResult.error },
                         { status: 402 }
@@ -80,6 +86,11 @@ export async function POST(request: Request) {
                 }
                 const underLimit = await checkAnonymousCaseLimit(ip, adminClient);
                 if (!underLimit) {
+                    await captureServerEvent(
+                        distinctIdFromRequest(request, null),
+                        "rate_limit_hit",
+                        { limit: "anonymous_case" }
+                    );
                     return NextResponse.json(
                         {
                             ok: false,
@@ -117,6 +128,12 @@ export async function POST(request: Request) {
                 const ip = getClientIp(request);
                 if (ip) await incrementAnonymousCaseCount(ip, adminClient);
             }
+
+            await captureServerEvent(
+                distinctIdFromRequest(request, ownerId),
+                "case_created",
+                { actor: isAuthed ? "user" : "anonymous", source: "quick_analysis" }
+            );
 
             return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
         }
@@ -161,6 +178,11 @@ export async function POST(request: Request) {
                 adminClient
             );
             if (!creditResult.allowed) {
+                await captureServerEvent(
+                    distinctIdFromRequest(request, userRes.user.id),
+                    "rate_limit_hit",
+                    { limit: "user_case" }
+                );
                 return NextResponse.json(
                     { ok: false, error: creditResult.error },
                     { status: 402 }
@@ -177,6 +199,11 @@ export async function POST(request: Request) {
             }
             const underLimit = await checkAnonymousCaseLimit(ip, adminClient);
             if (!underLimit) {
+                await captureServerEvent(
+                    distinctIdFromRequest(request, null),
+                    "rate_limit_hit",
+                    { limit: "anonymous_case" }
+                );
                 return NextResponse.json(
                     {
                         ok: false,
@@ -233,6 +260,12 @@ export async function POST(request: Request) {
             const ip = getClientIp(request);
             if (ip) await incrementAnonymousCaseCount(ip, adminClient);
         }
+
+        await captureServerEvent(
+            distinctIdFromRequest(request, ownerId),
+            "case_created",
+            { actor: isAuthed ? "user" : "anonymous", source: "detailed" }
+        );
 
         return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
     } catch (e: unknown) {

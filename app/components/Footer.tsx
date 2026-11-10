@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { CountrySelector } from "./CountrySelector";
+import { trackClientEvent } from "@/lib/analytics/client";
 
 // Suspense wrapper for CountrySelector (uses useSearchParams)
 function CountrySelectorWrapper() {
@@ -93,6 +94,10 @@ export default function Footer() {
               <li>
                 <Link
                   href={`/${country}/${locale}/pricing`}
+                  data-ph-capture=""
+                  onClick={() =>
+                    trackClientEvent("cta_clicked", { cta: "pricing", location: "footer" })
+                  }
                   className="text-sm text-white/70 hover:text-accent-400 transition-colors"
                 >
                   {t("pricing")}

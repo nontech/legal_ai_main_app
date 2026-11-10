@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { LanguageSelector } from "./LanguageSelector";
+import { identifyUser, resetAnalyticsUser, trackClientEvent } from "@/lib/analytics/client";
 
 function LanguageSelectorWrapper() {
   return (
@@ -101,7 +102,22 @@ function ProductNavLinks({
             key={href}
             href={href}
             className={linkClasses(active)}
-            onClick={onNavigate}
+            data-ph-capture={
+              href.endsWith("/pricing") || href.endsWith("/case-analysis")
+                ? ""
+                : undefined
+            }
+            onClick={() => {
+              if (href.endsWith("/pricing")) {
+                trackClientEvent("cta_clicked", { cta: "pricing", location: "nav" });
+              } else if (href.endsWith("/case-analysis")) {
+                trackClientEvent("cta_clicked", {
+                  cta: "start_analysis",
+                  location: "nav",
+                });
+              }
+              onNavigate?.();
+            }}
             aria-current={active ? "page" : undefined}
           >
             {label}
@@ -140,6 +156,9 @@ export default function Navbar() {
           const userRes = await fetch("/api/auth/user");
           if (userRes.ok) {
             const userData = await userRes.json();
+            if (userData.id) {
+              identifyUser({ id: userData.id, email: userData.email });
+            }
             if (userData.email) {
               setUserEmail(userData.email);
               sessionStorage.setItem("userEmail", userData.email);
@@ -198,6 +217,7 @@ export default function Navbar() {
         headers: { "Content-Type": "application/json" },
       });
 
+      resetAnalyticsUser();
       sessionStorage.removeItem("userEmail");
       sessionStorage.clear();
       localStorage.clear();

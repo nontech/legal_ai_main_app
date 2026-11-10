@@ -4,6 +4,7 @@ import { backendFetch, backendPaths } from "@/lib/backend";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
+import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
 import type { Json } from "@/types/supabase";
 import { isSubstantiveCaseEntityRelationships } from "@/lib/types/caseEntityRelationships";
 
@@ -46,6 +47,11 @@ export async function POST(
                 adminClient
             );
             if (!creditResult.allowed) {
+                await captureServerEvent(
+                    distinctIdFromRequest(request, userRes.user.id),
+                    "rate_limit_hit",
+                    { limit: "user_analysis" }
+                );
                 return NextResponse.json(
                     { ok: false, error: creditResult.error },
                     { status: 402 }
@@ -134,6 +140,12 @@ export async function POST(
             JSON.stringify(analyzePayload, null, 2)
         );
 
+        const analyticsDistinctId = distinctIdFromRequest(
+            request,
+            userRes?.user?.id ?? null
+        );
+        const analysisStartedAt = Date.now();
+
         // Create a transform stream to handle the streaming response
         const encoder = new TextEncoder();
 
@@ -141,8 +153,34 @@ export async function POST(
             async start(controller) {
                 // Get a fresh Supabase client for this stream context
                 const streamSupabase = await getSupabaseServerClient();
+                let analysisSettled = false;
+                const finishAnalysis = async (
+                    outcome: "completed" | "failed",
+                    errorCode?: string
+                ) => {
+                    if (analysisSettled) return;
+                    analysisSettled = true;
+                    const duration_ms = Date.now() - analysisStartedAt;
+                    if (outcome === "completed") {
+                        await captureServerEvent(
+                            analyticsDistinctId,
+                            "analysis_completed",
+                            { duration_ms }
+                        );
+                        return;
+                    }
+                    await captureServerEvent(analyticsDistinctId, "analysis_failed", {
+                        duration_ms,
+                        error_code: errorCode ?? "unknown",
+                    });
+                };
 
                 try {
+                    await captureServerEvent(
+                        analyticsDistinctId,
+                        "analysis_started",
+                        {}
+                    );
                     const analysisResponse = await backendFetch(
                         backendPaths.analyzeCaseStreaming,
                         {
@@ -158,6 +196,15 @@ export async function POST(
                     if (!analysisResponse.ok) {
                         const errorData = await analysisResponse.text();
                         console.error("Analysis API error:", errorData);
+                        await captureServerEvent(
+                            analyticsDistinctId,
+                            "backend_error",
+                            {
+                                route: "/api/cases/analyze-streaming",
+                                status: analysisResponse.status,
+                            }
+                        );
+                        await finishAnalysis("failed", `http_${analysisResponse.status}`);
                         controller.enqueue(
                             encoder.encode(
                                 `data: ${JSON.stringify({
@@ -171,6 +218,7 @@ export async function POST(
                     }
 
                     if (!analysisResponse.body) {
+                        await finishAnalysis("failed", "no_body");
                         controller.enqueue(
                             encoder.encode(
                                 `data: ${JSON.stringify({
@@ -322,12 +370,15 @@ export async function POST(
                         }
                     } else {
                         console.warn("No lastResult to save to database");
+                        await finishAnalysis("failed", "no_result");
                     }
 
+                    await finishAnalysis("completed");
                     console.log("Closing stream controller");
                     controller.close();
                 } catch (error) {
                     console.error("Streaming error:", error);
+                    await finishAnalysis("failed", "stream_error");
                     const errorMessage =
                         error instanceof Error ? error.message : "Unknown error";
                     controller.enqueue(

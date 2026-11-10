@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
+import { captureServerEvent, identifyServerUser } from "@/lib/analytics/server";
+import { emailDomain } from "@/lib/analytics/privacy";
 
 export async function POST(request: Request) {
   try {
@@ -55,6 +57,14 @@ export async function POST(request: Request) {
         console.error("Admin client error:", e);
       }
     }
+
+    const domain = emailDomain(signInData.user?.email);
+    await identifyServerUser(userId, signInData.user?.email);
+    await captureServerEvent(userId, "logged_in", {
+      method: "password",
+      linked_case: Boolean(caseId),
+      ...(domain ? { email_domain: domain } : {}),
+    });
 
     return NextResponse.json(
       {
