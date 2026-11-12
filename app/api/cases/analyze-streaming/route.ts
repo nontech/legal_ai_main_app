@@ -8,6 +8,10 @@ import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/serve
 import type { Json } from "@/types/supabase";
 import { isSubstantiveCaseEntityRelationships } from "@/lib/types/caseEntityRelationships";
 
+// Hobby + Fluid compute allows 300s, matching Cloud Run. See lib/proxyDuration.ts.
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 export async function POST(
     request: NextRequest
 ): Promise<NextResponse> {

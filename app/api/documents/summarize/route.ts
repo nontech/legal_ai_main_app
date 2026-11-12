@@ -3,6 +3,10 @@ import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
 import { normalizeFileCategory } from "@/lib/analytics/privacy";
 
+// Hobby + Fluid compute allows 300s, matching Cloud Run. See lib/proxyDuration.ts.
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
     try {
         const body = await request.json();

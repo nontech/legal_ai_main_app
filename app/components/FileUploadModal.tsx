@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
 import LogoLoader from "./LogoLoader";
+import { postFormData } from "@/lib/postFormData";
+import { mapWithConcurrency, UPLOAD_CONCURRENCY } from "@/lib/uploadPool";
 
 interface UploadedFile {
   id: string;
@@ -50,6 +52,9 @@ type DocumentCategory =
 interface ClassifiedUploadedFile extends UploadedFile {
   category?: DocumentCategory;
   isClassifying?: boolean;
+  uploadStatus?: "processing" | "error";
+  uploadProgress?: number;
+  uploadError?: string;
 }
 
 export default function FileUploadModal({
@@ -97,12 +102,18 @@ export default function FileUploadModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const summaryRef = useRef<HTMLTextAreaElement>(null);
 
-  const [uploadingFileIds, setUploadingFileIds] = useState<Set<string>>(new Set());
   const fileObjectsMap = useRef<Map<string, File>>(new Map());
+  const uploadingIdsRef = useRef<Set<string>>(new Set());
+  const uploadInFlightRef = useRef(false);
+  const summaryInFlightRef = useRef(false);
+  const uploadedFilesRef = useRef<ClassifiedUploadedFile[]>([]);
   const locale = useLocale();
 
-  // Update local state when initialFiles or summaryText changes
+  // Update local state when initialFiles or summaryText changes.
+  // Skip while a batch is in flight so a parent refresh cannot drop files
+  // that have not been written back yet.
   useEffect(() => {
+    if (uploadInFlightRef.current) return;
     const normalizedFiles: ClassifiedUploadedFile[] = (initialFiles ?? []).map((file, index) => {
       const fallbackId = `${sectionName ?? "section"}-file-${index}`;
       const uploadedAtValue = file.uploadedAt;
@@ -125,6 +136,7 @@ export default function FileUploadModal({
       };
     });
 
+    uploadedFilesRef.current = normalizedFiles;
     setUploadedFiles(normalizedFiles);
     if (summaryText) {
       setAiSummary(summaryText);
@@ -163,40 +175,151 @@ export default function FileUploadModal({
   ) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
+      e.target.value = "";
       handleFiles(files);
     }
   };
 
+  const rememberUploadedFile = (uploadedFile: ClassifiedUploadedFile, order?: Map<string, number>) => {
+    setSelectedFiles((prev) => prev.filter((item) => item.id !== uploadedFile.id));
+    const current = uploadedFilesRef.current.filter((item) => item.id !== uploadedFile.id);
+    const prior = order ? current.filter((item) => !order.has(item.id)) : current;
+    const batch = order ? current.filter((item) => order.has(item.id)) : [];
+    batch.push(uploadedFile);
+    if (order) {
+      batch.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+    }
+    const next = [...prior, ...batch];
+    uploadedFilesRef.current = next;
+    setUploadedFiles(next);
+    onFilesUpdate?.(next);
+  };
+
+  const uploadOneFile = async (
+    file: ClassifiedUploadedFile,
+    order?: Map<string, number>,
+  ): Promise<boolean> => {
+    if (!caseId || !sectionName) return false;
+    if (uploadingIdsRef.current.has(file.id)) return false;
+    uploadingIdsRef.current.add(file.id);
+    setSelectedFiles((prev) =>
+      prev.map((item) =>
+        item.id === file.id
+          ? { ...item, uploadStatus: "processing", uploadProgress: item.uploadProgress ?? 0, uploadError: undefined }
+          : item,
+      ),
+    );
+
+    try {
+      const actualFile = fileObjectsMap.current.get(file.id);
+      if (!actualFile) {
+        throw new Error("File not found");
+      }
+
+      const formData = new FormData();
+      formData.append("section", sectionName);
+      formData.append("case_id", caseId);
+      formData.append("files", actualFile);
+      formData.append("language_code", locale);
+
+      const response = await postFormData("/api/documents/upload-section", formData, {
+        onProgress: (percent) => {
+          setSelectedFiles((prev) =>
+            prev.map((item) =>
+              item.id === file.id
+                ? { ...item, uploadStatus: "processing", uploadProgress: percent }
+                : item,
+            ),
+          );
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = response.json as { error?: string };
+        throw new Error(errorData.error || "Upload failed");
+      }
+
+      const responseData = response.json as {
+        data?: { files?: Array<{ address?: string }>; file_addresses?: string[] };
+      };
+      const address =
+        responseData.data?.files?.[0]?.address ?? responseData.data?.file_addresses?.[0];
+
+      rememberUploadedFile(
+        { ...file, address, uploadStatus: undefined, uploadProgress: undefined, uploadError: undefined },
+        order,
+      );
+      fileObjectsMap.current.delete(file.id);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to upload file";
+      console.error("Failed to upload file:", error);
+      setSelectedFiles((prev) =>
+        prev.map((item) =>
+          item.id === file.id ? { ...item, uploadStatus: "error", uploadError: message } : item,
+        ),
+      );
+      return false;
+    } finally {
+      uploadingIdsRef.current.delete(file.id);
+    }
+  };
+
   const handleFiles = async (files: File[]) => {
+    if (files.length === 0 || uploadInFlightRef.current) return;
+
     const newFiles: ClassifiedUploadedFile[] = files.map((file) => ({
-      id: Date.now().toString() + Math.random().toString(36),
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       name: file.name,
       size: file.size,
       type: file.type,
       uploadedAt: new Date(),
       category: sectionName as DocumentCategory,
       isClassifying: false,
+      uploadStatus: "processing",
+      uploadProgress: 0,
     }));
 
-    // Store actual File objects
     newFiles.forEach((fileObj, index) => {
-      const actualFile = files[index];
-      fileObjectsMap.current.set(fileObj.id, actualFile);
+      fileObjectsMap.current.set(fileObj.id, files[index]);
     });
 
-    // Directly upload files instead of adding to selected files
-    if (caseId && sectionName) {
-      // First add files to selectedFiles to show loading indicator
-      setSelectedFiles((prev) => [...prev, ...newFiles]);
-      
-      // Then upload each file
-      for (const file of newFiles) {
-        await handleUploadFile(file);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
+
+    if (!caseId || !sectionName) return;
+
+    uploadInFlightRef.current = true;
+    const order = new Map(newFiles.map((file, index) => [file.id, index]));
+    try {
+      const outcomes = await mapWithConcurrency(newFiles, UPLOAD_CONCURRENCY, (file) =>
+        uploadOneFile(file, order),
+      );
+      uploadInFlightRef.current = false;
+      if (outcomes.some(Boolean)) {
+        onFileUploadSuccess?.();
       }
-    } else {
-      // Fallback: add to selected files if no caseId/sectionName
-      setSelectedFiles((prev) => [...prev, ...newFiles]);
+    } finally {
+      uploadInFlightRef.current = false;
     }
+  };
+
+  const retryUpload = (file: ClassifiedUploadedFile) => {
+    if (uploadInFlightRef.current || !caseId || !sectionName) return;
+    uploadInFlightRef.current = true;
+    setSelectedFiles((prev) =>
+      prev.map((item) =>
+        item.id === file.id
+          ? { ...item, uploadStatus: "processing", uploadProgress: 0, uploadError: undefined }
+          : item,
+      ),
+    );
+    void uploadOneFile({ ...file, uploadStatus: "processing", uploadProgress: 0, uploadError: undefined })
+      .then((ok) => {
+        if (ok) onFileUploadSuccess?.();
+      })
+      .finally(() => {
+        uploadInFlightRef.current = false;
+      });
   };
 
   const handleRemoveFile = (id: string, fromSelected: boolean = false) => {
@@ -255,6 +378,8 @@ export default function FileUploadModal({
   };
 
   const handleGenerateSummary = async () => {
+    if (summaryInFlightRef.current) return;
+    summaryInFlightRef.current = true;
     setIsGenerating(true);
 
     try {
@@ -347,6 +472,7 @@ export default function FileUploadModal({
           : "Failed to generate summary. Please try again."
       );
     } finally {
+      summaryInFlightRef.current = false;
       setIsGenerating(false);
     }
   };
@@ -432,70 +558,7 @@ export default function FileUploadModal({
     }
   };
 
-  const handleUploadFile = async (file: ClassifiedUploadedFile) => {
-    if (!caseId || !sectionName) {
-      console.error("Case ID or section ID is missing");
-      return;
-    }
-
-    setUploadingFileIds((prev) => new Set(prev).add(file.id));
-
-    try {
-      // Get the actual File object from the map
-      const actualFile = fileObjectsMap.current.get(file.id);
-      if (!actualFile) {
-        throw new Error("File not found in file objects map");
-      }
-
-      // Create FormData with actual file
-      const formData = new FormData();
-      formData.append("section", sectionName);
-      formData.append("case_id", caseId);
-      formData.append("files", actualFile);
-      formData.append("language_code", locale);
-
-      const response = await fetch("/api/documents/upload-section", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Upload failed");
-      }
-
-      const responseData = await response.json();
-
-      // Get the address from the response (first address corresponds to this file)
-      // Support both new format (data.files[0].address) and legacy format (data.file_addresses[0])
-      const address = responseData.data?.files?.[0]?.address 
-        ?? responseData.data?.file_addresses?.[0];
-
-      // Move file from selected to uploaded with the address from the server
-      setSelectedFiles((prev) => prev.filter((f) => f.id !== file.id));
-      const uploadedFile = { ...file, address };
-      setUploadedFiles((prev) => [...prev, uploadedFile]);
-
-      // Update parent component
-      if (onFilesUpdate) {
-        onFilesUpdate([...uploadedFiles, uploadedFile]);
-      }
-
-      // Refetch case details to show updated data
-      if (onFileUploadSuccess) {
-        onFileUploadSuccess();
-      }
-    } catch (error) {
-      console.error("Failed to upload file:", error);
-      alert(error instanceof Error ? error.message : "Failed to upload file");
-    } finally {
-      setUploadingFileIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(file.id);
-        return newSet;
-      });
-    }
-  };
+  const processingCount = selectedFiles.filter((file) => file.uploadStatus !== "error").length;
 
   if (!isOpen) return null;
 
@@ -582,19 +645,19 @@ export default function FileUploadModal({
                             <h3 className="font-semibold text-ink-900 text-sm sm:text-base truncate">
                               Documents
                             </h3>
-                            {selectedFiles.length > 0 && (
+                            {processingCount > 0 && (
                               <span className="flex items-center gap-1 px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">
                                 <LogoLoader size="xxs" />
-                                Uploading {selectedFiles.length}
+                                Processing {processingCount}
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-1 sm:gap-2">
                             <button
                               onClick={() => fileInputRef.current?.click()}
-                              disabled={selectedFiles.length > 0}
+                              disabled={processingCount > 0}
                               className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-surface-000 text-ink-700 border border-border-300 rounded-lg hover:bg-surface-100 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
-                              title={selectedFiles.length > 0 ? "Wait for upload to complete" : "Upload documents"}
+                              title={processingCount > 0 ? "Wait for upload to complete" : "Upload documents"}
                             >
                               <svg
                                 className="w-4 h-4 sm:w-5 sm:h-5"
@@ -697,26 +760,56 @@ export default function FileUploadModal({
                                   Uploading ({selectedFiles.length})
                                 </h4>
                               </div>
-                              {selectedFiles.map((file) => (
+                              {selectedFiles.map((file) => {
+                                const failed = file.uploadStatus === "error";
+                                return (
                                 <div
                                   key={file.id}
-                                  className="bg-primary-50 border border-primary-200 rounded-lg p-3"
+                                  className={`rounded-lg p-3 border ${failed ? "bg-red-50 border-red-200" : "bg-primary-50 border-primary-200"}`}
                                 >
                                   <div className="flex items-start gap-2">
-                                    <div className="flex-shrink-0 w-8 h-8 bg-primary-100 rounded flex items-center justify-center mt-0.5">
-                                      <LogoLoader size="xs" />
+                                    <div className={`flex-shrink-0 w-8 h-8 rounded flex items-center justify-center mt-0.5 ${failed ? "bg-red-100" : "bg-primary-100"}`}>
+                                      {failed ? (
+                                        <svg className="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z" />
+                                        </svg>
+                                      ) : (
+                                        <LogoLoader size="xs" />
+                                      )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-sm font-medium text-ink-900 truncate">
                                         {file.name}
                                       </p>
-                                      <p className="text-xs text-primary-600">
-                                        Uploading...
+                                      <p className={`text-xs ${failed ? "text-red-700" : "text-primary-600"}`}>
+                                        {failed
+                                          ? file.uploadError || "Upload failed"
+                                          : file.uploadProgress
+                                            ? `Uploading ${file.uploadProgress}%`
+                                            : "Processing"}
                                       </p>
+                                      {!failed && (
+                                        <div className="mt-2 h-1.5 rounded-full bg-primary-100 overflow-hidden">
+                                          <div
+                                            className="h-full bg-primary-500 transition-all"
+                                            style={{ width: `${file.uploadProgress ?? 0}%` }}
+                                          />
+                                        </div>
+                                      )}
+                                      {failed && (
+                                        <button
+                                          type="button"
+                                          onClick={() => retryUpload(file)}
+                                          className="mt-2 text-xs font-medium text-red-700 underline"
+                                        >
+                                          Retry
+                                        </button>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           )}
 
