@@ -5,6 +5,8 @@ import { useTranslations, useLocale } from "next-intl";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { dispatchCaseUpdated } from "./RegenerateHeaderButton";
 import LogoLoader from "./LogoLoader";
+import { postFormData } from "@/lib/postFormData";
+import { mapWithConcurrency, UPLOAD_CONCURRENCY } from "@/lib/uploadPool";
 
 interface CaseDetailsSectionProps {
   onModalChange?: (isOpen: boolean) => void;
@@ -146,6 +148,9 @@ export default function CaseDetailsSection({
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState<
+    Array<{ id: string; name: string; progress: number; status: "processing" | "error"; error?: string }>
+  >([]);
   const [showNavigationGuardDialog, setShowNavigationGuardDialog] = useState(false);
   const [isMarkdownPreview, setIsMarkdownPreview] = useState(false);
   const [showAllDocuments, setShowAllDocuments] = useState(false);
@@ -158,6 +163,8 @@ export default function CaseDetailsSection({
   const savedIndicatorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const uploadAbortControllerRef = useRef<AbortController | null>(null);
   const summaryAbortControllerRef = useRef<AbortController | null>(null);
+  const uploadInFlightRef = useRef(false);
+  const summaryInFlightRef = useRef(false);
   const navigationGuardResolverRef = useRef<((value: boolean) => void) | null>(null);
 
   // Fetch case details from database
@@ -425,46 +432,92 @@ export default function CaseDetailsSection({
     if (!e.target.files || !caseId) return;
 
     const files = Array.from(e.target.files);
-    if (files.length === 0) return;
+    e.target.value = "";
+    if (files.length === 0 || uploadInFlightRef.current) return;
 
+    uploadInFlightRef.current = true;
     const uploadController = new AbortController();
     uploadAbortControllerRef.current = uploadController;
     setIsUploading(true);
 
+    const pending = files.map((file, index) => ({
+      id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2)}`,
+      name: file.name,
+      progress: 0,
+      status: "processing" as const,
+    }));
+    setPendingUploads((prev) => [...prev, ...pending]);
+
     try {
-      // Collect uploaded file info from responses
-      const uploadedFiles: Array<{ name: string; address: string }> = [];
-      
-      for (const file of files) {
-        const formData = new FormData();
-        formData.append("section", selectedSection);
-        formData.append("case_id", caseId);
-        formData.append("files", file);
-        formData.append("language_code", locale);
+      const outcomes = await mapWithConcurrency(pending, UPLOAD_CONCURRENCY, async (item, index) => {
+        const file = files[index];
+        try {
+          const formData = new FormData();
+          formData.append("section", selectedSection);
+          formData.append("case_id", caseId);
+          formData.append("files", file);
+          formData.append("language_code", locale);
 
-        const response = await fetch("/api/documents/upload-section", {
-          method: "POST",
-          body: formData,
-          signal: uploadController.signal,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Upload failed");
-        }
-        
-        // Collect file info from response
-        const responseData = await response.json();
-        if (responseData.data?.files) {
-          uploadedFiles.push(...responseData.data.files);
-        } else if (responseData.data?.file_names && responseData.data?.file_addresses) {
-          responseData.data.file_names.forEach((name: string, idx: number) => {
-            uploadedFiles.push({ name, address: responseData.data.file_addresses[idx] });
+          const response = await postFormData("/api/documents/upload-section", formData, {
+            signal: uploadController.signal,
+            onProgress: (percent) => {
+              setPendingUploads((prev) =>
+                prev.map((row) =>
+                  row.id === item.id ? { ...row, progress: percent, status: "processing" } : row,
+                ),
+              );
+            },
           });
+
+          if (!response.ok) {
+            const errorData = response.json as { error?: string };
+            throw new Error(errorData.error || "Upload failed");
+          }
+
+          const responseData = response.json as {
+            data?: {
+              files?: Array<{ name: string; address: string }>;
+              file_names?: string[];
+              file_addresses?: string[];
+            };
+          };
+          const uploaded: Array<{ name: string; address: string }> = [];
+          if (responseData.data?.files) {
+            uploaded.push(...responseData.data.files);
+          } else if (responseData.data?.file_names && responseData.data?.file_addresses) {
+            responseData.data.file_names.forEach((name, idx) => {
+              uploaded.push({
+                name,
+                address: responseData.data?.file_addresses?.[idx] || "",
+              });
+            });
+          }
+          setPendingUploads((prev) => prev.filter((row) => row.id !== item.id));
+          return { ok: true as const, files: uploaded };
+        } catch (error) {
+          if (
+            uploadController.signal.aborted ||
+            (error instanceof DOMException && error.name === "AbortError")
+          ) {
+            return { ok: false as const, aborted: true as const };
+          }
+          const message = error instanceof Error ? error.message : "Failed to upload file";
+          console.error("Failed to upload file:", error);
+          setPendingUploads((prev) =>
+            prev.map((row) => (row.id === item.id ? { ...row, status: "error", error: message } : row)),
+          );
+          return { ok: false as const, aborted: false as const };
         }
+      });
+
+      if (uploadController.signal.aborted) {
+        setPendingUploads((prev) => prev.filter((row) => row.status === "error"));
+        return;
       }
 
-      // Refresh case details
+      const uploadedFiles = outcomes.flatMap((outcome) => (outcome.ok ? outcome.files : []));
+      if (uploadedFiles.length === 0) return;
+
       await fetchCaseDetails();
       const refreshedCaseDetails = caseDetailsRef.current;
       const refreshedCompletion = calculateCaseDetailsCompletion(refreshedCaseDetails);
@@ -491,30 +544,11 @@ export default function CaseDetailsSection({
       } else {
         onCompletionChange?.(refreshedCompletion);
       }
-      
-      // Reset file input before extraction
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
 
-      // Upload phase is done; move into summary-generation phase
       setIsUploading(false);
-      
-      // Automatically extract information using the uploaded files directly
-      if (uploadedFiles.length > 0) {
-        await handleGenerateSummaryWithFiles(uploadedFiles);
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") {
-        return;
-      }
-      console.error("Failed to upload file:", error);
-      alert(error instanceof Error ? error.message : "Failed to upload file");
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      await handleGenerateSummaryWithFiles(uploadedFiles);
     } finally {
+      uploadInFlightRef.current = false;
       setIsUploading(false);
       uploadAbortControllerRef.current = null;
     }
@@ -580,7 +614,7 @@ export default function CaseDetailsSection({
 
   // Generate summary using files from state
   const handleGenerateSummary = async () => {
-    if (!caseId) return;
+    if (!caseId || uploadInFlightRef.current || summaryInFlightRef.current) return;
 
     const files = getFilesForSection(selectedSection);
     if (files.length === 0) {
@@ -593,8 +627,9 @@ export default function CaseDetailsSection({
 
   // Generate summary using provided files (used after upload when state hasn't updated yet)
   const handleGenerateSummaryWithFiles = async (files: Array<{ name: string; address: string }>) => {
-    if (!caseId || files.length === 0) return;
+    if (!caseId || files.length === 0 || summaryInFlightRef.current) return;
 
+    summaryInFlightRef.current = true;
     const summaryController = new AbortController();
     summaryAbortControllerRef.current = summaryController;
     setIsGeneratingSummary(true);
@@ -628,6 +663,7 @@ export default function CaseDetailsSection({
       console.error("Failed to generate summary:", error);
       alert(error instanceof Error ? error.message : "Failed to generate summary");
     } finally {
+      summaryInFlightRef.current = false;
       setIsGeneratingSummary(false);
       summaryAbortControllerRef.current = null;
     }
@@ -780,7 +816,34 @@ export default function CaseDetailsSection({
                   </div>
                 )}
 
-                {currentFiles.length === 0 && !isUploading && (
+                {pendingUploads.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {pendingUploads.map((file) => {
+                      const failed = file.status === "error";
+                      return (
+                        <div
+                          key={file.id}
+                          className={`rounded-lg p-3 border ${failed ? "bg-red-50 border-red-200" : "bg-primary-50 border-primary-200"}`}
+                        >
+                          <p className="text-sm font-medium text-ink-900 truncate">{file.name}</p>
+                          <p className={`text-xs mt-0.5 ${failed ? "text-red-700" : "text-primary-600"}`}>
+                            {failed ? file.error || "Upload failed" : file.progress ? `Uploading ${file.progress}%` : "Processing"}
+                          </p>
+                          {!failed && (
+                            <div className="mt-2 h-1.5 rounded-full bg-primary-100 overflow-hidden">
+                              <div
+                                className="h-full bg-primary-500 transition-all"
+                                style={{ width: `${file.progress}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {currentFiles.length === 0 && !isUploading && pendingUploads.length === 0 && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}

@@ -3,6 +3,13 @@ import { getSupabaseAdminClient } from "@/lib/supabaseAdmin";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { captureDocumentUploads } from "@/lib/analytics/server";
 
+// Hobby + Fluid compute allows 300s, matching Cloud Run. See lib/proxyDuration.ts.
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
+// Body stays buffered so indexed `file_N` fields can be rebuilt and measured
+// before the backend call. See lib/proxyDuration.ts.
+
 // Helper: Extract jurisdiction data from metadata
 const extractJurisdiction = (metadata: any) => ({
   country: metadata.country || "",

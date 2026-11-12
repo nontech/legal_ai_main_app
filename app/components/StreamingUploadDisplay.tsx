@@ -98,6 +98,7 @@ export default function StreamingUploadDisplay({
   const [allComplete, setAllComplete] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const streamStartedRef = useRef(false);
+  const completionSentRef = useRef(false);
   const lastResultRef = useRef<any>(null);
   const categoryResultsRef = useRef<Record<string, any>>({}); // Store results by category
   const locale = useLocale();
@@ -108,6 +109,7 @@ export default function StreamingUploadDisplay({
       setProgress(0);
       setAllComplete(false);
       streamStartedRef.current = false;
+      completionSentRef.current = false;
       categoryResultsRef.current = {}; // Reset category results
       return;
     }
@@ -287,6 +289,8 @@ export default function StreamingUploadDisplay({
     if (allComplete && lastResultRef.current) {
       // Wait a short moment for user to see completion
       const timer = setTimeout(() => {
+        if (completionSentRef.current) return;
+        completionSentRef.current = true;
         const finalResult = lastResultRef.current;
         console.log("Final upload result with all categories:", finalResult);
         onComplete(finalResult);

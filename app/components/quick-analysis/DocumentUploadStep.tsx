@@ -185,6 +185,7 @@ export default function DocumentUploadStep({
   >([]);
   const uploadCompleteRef = useRef(false);
   const uploadResultRef = useRef<any>(null);
+  const continueInFlightRef = useRef(false);
 
   const handleUploadComplete = (result: any) => {
     console.log("Upload completed:", result);
@@ -463,11 +464,13 @@ export default function DocumentUploadStep({
   };
 
   const handleContinue = async () => {
+    if (continueInFlightRef.current) return;
     if (classifiedFiles.length === 0) {
       onContinue([], {}, [], caseId || "test-case");
       return;
     }
 
+    continueInFlightRef.current = true;
     setIsUploading(true);
 
     try {
@@ -780,6 +783,7 @@ export default function DocumentUploadStep({
         finalUploadedDocuments
       );
     } finally {
+      continueInFlightRef.current = false;
       setIsUploading(false);
     }
   };

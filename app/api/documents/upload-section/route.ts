@@ -3,6 +3,13 @@ import { extractUploadedFiles } from "@/lib/documentFiles";
 import { getSupabaseServerClient } from "@/lib/supabaseServer";
 import { captureDocumentUploads } from "@/lib/analytics/server";
 
+// Hobby + Fluid compute allows 300s, matching Cloud Run. See lib/proxyDuration.ts.
+export const runtime = "nodejs";
+export const maxDuration = 300;
+
+// Body stays buffered: ownership check, field rewrite, and the case_details
+// merge all need the parsed files. See lib/proxyDuration.ts.
+
 // Helper: Fetch existing case details
 const getExistingCaseDetails = async (supabase: any, caseId: string) => {
     const { data, error } = await supabase
