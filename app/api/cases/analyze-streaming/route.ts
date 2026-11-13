@@ -7,6 +7,14 @@ import { checkAndConsumeUserCredits } from "@/lib/rateLimit";
 import { captureServerEvent, distinctIdFromRequest } from "@/lib/analytics/server";
 import type { Json } from "@/types/supabase";
 import { isSubstantiveCaseEntityRelationships } from "@/lib/types/caseEntityRelationships";
+import {
+    ANALYSIS_TOO_LONG_MESSAGE,
+    analysisDurationExceeded,
+    analysisErrorFrame,
+    analysisProxyDeadlineMs,
+    interpretSseBlock,
+    takeCompleteSseEvents,
+} from "@/lib/analysisStream";
 
 // Hobby + Fluid compute allows 300s, matching Cloud Run. See lib/proxyDuration.ts.
 export const runtime = "nodejs";
@@ -139,10 +147,7 @@ export async function POST(
             language_code,
         };
 
-        console.log(
-            "Sending to analysis API:",
-            JSON.stringify(analyzePayload, null, 2)
-        );
+        console.log("Sending analysis request for case", caseId);
 
         const analyticsDistinctId = distinctIdFromRequest(
             request,
@@ -198,8 +203,8 @@ export async function POST(
                     );
 
                     if (!analysisResponse.ok) {
-                        const errorData = await analysisResponse.text();
-                        console.error("Analysis API error:", errorData);
+                        await analysisResponse.text().catch(() => "");
+                        console.error("Analysis API error status:", analysisResponse.status);
                         await captureServerEvent(
                             analyticsDistinctId,
                             "backend_error",
@@ -236,72 +241,94 @@ export async function POST(
                     }
 
                     const reader = analysisResponse.body.getReader();
+                    const decoder = new TextDecoder();
                     let lastResult: any = null;
-                    let buffer = ""; // Buffer to accumulate incomplete data lines
+                    let sawComplete = false;
+                    let buffer = "";
+                    const streamStartedAt = Date.now();
+
+                    const forwardBlock = (block: string) => {
+                        for (const action of interpretSseBlock(block)) {
+                            if (action.action === "ignore") continue;
+                            if (action.action === "event" && action.type === "complete") {
+                                sawComplete = true;
+                                if (action.result !== undefined) {
+                                    lastResult = action.result;
+                                    console.log("Captured complete analysis event");
+                                }
+                            }
+                            controller.enqueue(encoder.encode(action.frame));
+                        }
+                    };
+
+                    const readOrDeadline = () => {
+                        let timer: ReturnType<typeof setTimeout> | undefined;
+                        const readPromise = reader.read().then(
+                            (chunk) => ({ timedOut: false as const, chunk }),
+                            () => ({
+                                timedOut: false as const,
+                                chunk: { done: true as const, value: undefined },
+                            }),
+                        );
+                        const timeoutPromise = new Promise<{ timedOut: true }>((resolve) => {
+                            const waitMs = Math.max(
+                                0,
+                                streamStartedAt + analysisProxyDeadlineMs() - Date.now(),
+                            );
+                            timer = setTimeout(() => resolve({ timedOut: true }), waitMs);
+                        });
+                        return Promise.race([readPromise, timeoutPromise]).finally(() => {
+                            if (timer) clearTimeout(timer);
+                        });
+                    };
 
                     try {
                         while (true) {
-                            const { done, value } = await reader.read();
+                            if (analysisDurationExceeded(streamStartedAt, Date.now(), sawComplete)) {
+                                await reader.cancel().catch(() => undefined);
+                                controller.enqueue(
+                                    encoder.encode(analysisErrorFrame(ANALYSIS_TOO_LONG_MESSAGE)),
+                                );
+                                await finishAnalysis("failed", "timeout");
+                                controller.close();
+                                return;
+                            }
+
+                            const next = await readOrDeadline();
+                            if (next.timedOut || analysisDurationExceeded(streamStartedAt, Date.now(), sawComplete)) {
+                                await reader.cancel().catch(() => undefined);
+                                if (!sawComplete) {
+                                    controller.enqueue(
+                                        encoder.encode(analysisErrorFrame(ANALYSIS_TOO_LONG_MESSAGE)),
+                                    );
+                                    await finishAnalysis("failed", "timeout");
+                                    controller.close();
+                                    return;
+                                }
+                                break;
+                            }
+
+                            const { done, value } = next.chunk;
                             if (done) break;
 
-                            // Append new chunk to buffer
-                            buffer += new TextDecoder().decode(value, { stream: true });
-
-                            // Split by double newline (SSE event separator)
-                            const events = buffer.split("\n\n");
-
-                            // Keep the last incomplete event in the buffer
-                            buffer = events.pop() || "";
-
-                            for (const event of events) {
-                                const lines = event.split("\n");
-                                for (const line of lines) {
-                                    if (line.startsWith("data: ")) {
-                                        const data = line.slice(6);
-                                        if (data.trim()) {
-                                            try {
-                                                const parsed = JSON.parse(data);
-                                                // Store the last result for database update
-                                                if (parsed.type === "complete" && parsed.result) {
-                                                    lastResult = parsed.result;
-                                                    console.log("✅ Captured complete event with result");
-                                                }
-                                                // Forward all events to client
-                                                controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-                                            } catch (e) {
-                                                console.error("Failed to parse SSE data (length:", data.length, ")");
-                                                console.error("First 200 chars:", data.substring(0, 200));
-                                                console.error("Last 200 chars:", data.substring(data.length - 200));
-                                            }
-                                        }
-                                    }
-                                }
+                            buffer += decoder.decode(value, { stream: true });
+                            const split = takeCompleteSseEvents(buffer);
+                            buffer = split.rest;
+                            for (const event of split.events) {
+                                forwardBlock(event);
                             }
                         }
 
-                        // Process any remaining data in buffer
+                        buffer += decoder.decode();
                         if (buffer.trim()) {
-                            const lines = buffer.split("\n");
-                            for (const line of lines) {
-                                if (line.startsWith("data: ")) {
-                                    const data = line.slice(6);
-                                    if (data.trim()) {
-                                        try {
-                                            const parsed = JSON.parse(data);
-                                            if (parsed.type === "complete" && parsed.result) {
-                                                lastResult = parsed.result;
-                                                console.log("✅ Captured complete event with result (from buffer)");
-                                            }
-                                            controller.enqueue(encoder.encode(`data: ${data}\n\n`));
-                                        } catch (e) {
-                                            console.error("Failed to parse remaining buffer data");
-                                        }
-                                    }
-                                }
-                            }
+                            forwardBlock(buffer);
                         }
                     } finally {
-                        reader.releaseLock();
+                        try {
+                            reader.releaseLock();
+                        } catch {
+                            // cancel() already released the reader.
+                        }
                     }
 
                     console.log("Stream reading completed. lastResult exists:", !!lastResult);
@@ -401,7 +428,7 @@ export async function POST(
         return new NextResponse(customReadable, {
             headers: {
                 "Content-Type": "text/event-stream",
-                "Cache-Control": "no-cache",
+                "Cache-Control": "no-cache, no-transform",
                 Connection: "keep-alive",
                 "X-Accel-Buffering": "no",
             },
