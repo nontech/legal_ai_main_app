@@ -4,6 +4,12 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import CreditLimitDialog from "./CreditLimitDialog";
 import LogoLoader from "./LogoLoader";
+import {
+    ANALYSIS_IDLE_ABORT_MS,
+    ANALYSIS_IDLE_NOTE_MS,
+    ANALYSIS_PIPELINE_STEP_ORDER,
+    monotonicAnalysisProgress,
+} from "@/lib/analysisStream";
 
 // Hook for typing animation
 function useTypingAnimation(text: string, speed: number = 30) {
@@ -171,7 +177,7 @@ function SequentialTypingMessages({
 }
 
 interface StreamEvent {
-    type: "status" | "reasoning" | "complete" | "error";
+    type: "status" | "reasoning" | "complete" | "error" | "ping" | "warning";
     message: string;
     step?: string;
     details?: string;
@@ -248,22 +254,10 @@ const stepLabels: Record<string, string> = {
 };
 
 /**
- * Canonical pipeline order (matches backend): entity graph runs before precedent lookup,
- * outcome, key factors, legal assessment, strategy, and executive summary.
+ * Canonical pipeline order (matches backend): charges analysis, then the entity
+ * graph, then precedent lookup, outcome, key factors, legal assessment, strategy,
+ * and executive summary.
  */
-const ANALYSIS_PIPELINE_STEP_ORDER = [
-    "status",
-    "entity_relationships",
-    "charges_analysis",
-    "precedent_retrieval",
-    "outcome_prediction",
-    "factors_analysis",
-    "legal_assessment",
-    "strategic_recommendations",
-    "executive_summary",
-    "finalization",
-] as const;
-
 function pipelineStepRank(baseStep: string): number {
     const i = (ANALYSIS_PIPELINE_STEP_ORDER as readonly string[]).indexOf(
         baseStep
@@ -286,9 +280,14 @@ export default function StreamingAnalysisDisplay({
     const [creditLimitReached, setCreditLimitReached] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
     const [isComplete, setIsComplete] = useState(false);
+    const [stillWorking, setStillWorking] = useState(false);
+    const [canRetry, setCanRetry] = useState(false);
+    const [attempt, setAttempt] = useState(0);
     const [autoClickCountdown, setAutoClickCountdown] = useState<number | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const hasStartedRef = useRef(false);
+    const streamAbortRef = useRef<AbortController | null>(null);
+    const runIdRef = useRef(0);
     const lastResultRef = useRef<any>(null);
     const onCompleteRef = useRef(onComplete);
     const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -418,6 +417,9 @@ export default function StreamingAnalysisDisplay({
 
     useEffect(() => {
         if (!isOpen || !caseId) {
+            runIdRef.current += 1;
+            streamAbortRef.current?.abort();
+            streamAbortRef.current = null;
             hasStartedRef.current = false;
             setGroupedSteps(new Map());
             setIsLoading(false);
@@ -425,11 +427,15 @@ export default function StreamingAnalysisDisplay({
             setCreditLimitReached(null);
             setProgress(0);
             setIsComplete(false);
+            setStillWorking(false);
+            setCanRetry(false);
             return;
         }
 
         if (hasStartedRef.current) return;
         hasStartedRef.current = true;
+        const runId = runIdRef.current;
+        const stillCurrent = () => runIdRef.current === runId;
 
         const startStreaming = async () => {
             setIsLoading(true);
@@ -437,12 +443,43 @@ export default function StreamingAnalysisDisplay({
             setError(null);
             setCreditLimitReached(null);
             setProgress(0);
+            setStillWorking(false);
+            setCanRetry(false);
+
+            const abortController = new AbortController();
+            streamAbortRef.current = abortController;
+            let idleNoteTimer: ReturnType<typeof setTimeout> | null = null;
+            let idleAbortTimer: ReturnType<typeof setTimeout> | null = null;
+            let sawTerminalEvent = false;
+            const stopReason: { current: "idle" | "ended" | null } = { current: null };
+
+            const clearIdleTimers = () => {
+                if (idleNoteTimer) clearTimeout(idleNoteTimer);
+                if (idleAbortTimer) clearTimeout(idleAbortTimer);
+                idleNoteTimer = null;
+                idleAbortTimer = null;
+            };
+
+            const armIdleWatchdog = (reader: ReadableStreamDefaultReader<Uint8Array>) => {
+                clearIdleTimers();
+                idleNoteTimer = setTimeout(() => {
+                    if (!sawTerminalEvent) setStillWorking(true);
+                }, ANALYSIS_IDLE_NOTE_MS);
+                idleAbortTimer = setTimeout(() => {
+                    if (sawTerminalEvent) return;
+                    stopReason.current = "idle";
+                    setStillWorking(false);
+                    reader.cancel().catch(() => undefined);
+                    abortController.abort();
+                }, ANALYSIS_IDLE_ABORT_MS);
+            };
 
             try {
                 const response = await fetch("/api/cases/analyze-streaming", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ caseId, language_code: locale }),
+                    signal: abortController.signal,
                 });
 
                 if (!response.ok) {
@@ -482,14 +519,28 @@ export default function StreamingAnalysisDisplay({
                 const totalSteps = stepsList.length;
                 let lastResult: any = null;
                 let completionHandled = false;
+                armIdleWatchdog(reader);
 
                 try {
-                    while (true) {
-                        const { done, value } = await reader.read();
+                    while (stillCurrent()) {
+                        let done = false;
+                        let value: Uint8Array | undefined;
+                        try {
+                            const next = await reader.read();
+                            done = next.done;
+                            value = next.value;
+                        } catch (readError) {
+                            if (stopReason.current === "idle" || abortController.signal.aborted) break;
+                            throw readError;
+                        }
                         if (done) {
                             console.log("Stream ended, lastResult:", lastResult ? "exists" : "null");
+                            if (!completionHandled && !sawTerminalEvent) {
+                                stopReason.current = stopReason.current ?? "ended";
+                            }
                             break;
                         }
+                        if (!value) continue;
 
                         buffer += decoder.decode(value, { stream: true });
                         const lines = buffer.split("\n");
@@ -501,6 +552,12 @@ export default function StreamingAnalysisDisplay({
                                 const dataStr = line.slice(6);
                                 try {
                                     const event: StreamEvent = JSON.parse(dataStr);
+                                    armIdleWatchdog(reader);
+                                    setStillWorking(false);
+
+                                    if (event.type === "ping") {
+                                        continue;
+                                    }
 
                                     // Group events by base step
                                     if (event.type === "reasoning" || event.type === "status") {
@@ -558,9 +615,9 @@ export default function StreamingAnalysisDisplay({
                                                 stepsList as readonly string[]
                                             ).indexOf(baseStep);
                                             if (stepIndex !== -1) {
-                                                const progressPercent = Math.round(((stepIndex + 1) / totalSteps) * 100);
-                                                // Cap progress at 99% until we get the complete event
-                                                setProgress(Math.min(progressPercent, 99));
+                                                setProgress((current) =>
+                                                    monotonicAnalysisProgress(current, stepIndex, totalSteps),
+                                                );
                                             }
                                         }
                                     }
@@ -571,6 +628,8 @@ export default function StreamingAnalysisDisplay({
                                         lastResult = event.result;
                                         lastResultRef.current = event.result;
                                         completionHandled = true;
+                                        sawTerminalEvent = true;
+                                        clearIdleTimers();
                                         // Set progress to 100 only on completion
                                         setProgress(100);
                                         setIsComplete(true);
@@ -580,19 +639,32 @@ export default function StreamingAnalysisDisplay({
 
                                     // Handle errors - set state and break; don't throw (inner catch would swallow)
                                     if (event.type === "error") {
+                                        sawTerminalEvent = true;
+                                        clearIdleTimers();
+                                        setCanRetry(true);
                                         setError(event.message || "An error occurred");
                                         setIsLoading(false);
                                         return;
                                     }
-                                } catch (e) {
-                                    console.error("Failed to parse event:", dataStr, e);
+                                } catch {
+                                    console.error("Failed to parse analysis event");
                                 }
                             }
                         }
                     }
 
+                    if (!stillCurrent() || (abortController.signal.aborted && stopReason.current !== "idle")) {
+                        return;
+                    }
+
                     // If stream ended without handling completion, try to fetch result from database
                     if (!completionHandled) {
+                        if (stopReason.current === "idle") {
+                            setCanRetry(true);
+                            setStillWorking(false);
+                            setError(t("idleError"));
+                            setIsLoading(false);
+                        }
                         if (lastResult) {
                             console.log("Stream ended, forcing completion with lastResult");
                             setProgress(100);
@@ -621,7 +693,7 @@ export default function StreamingAnalysisDisplay({
                             let retryCount = 0;
                             let resultFetched = false;
 
-                            while (retryCount < maxRetries && !resultFetched) {
+                            while (stillCurrent() && retryCount < maxRetries && !resultFetched) {
                                 const waitTime = Math.min(1000 * Math.pow(1.5, retryCount), 5000);
                                 console.log(`Attempt ${retryCount + 1}/${maxRetries} - waiting ${waitTime}ms...`);
 
@@ -645,6 +717,8 @@ export default function StreamingAnalysisDisplay({
 
                                     if (data.ok && data.data?.result) {
                                         console.log(`Successfully fetched result from database on attempt ${retryCount + 1}`);
+                                        setError(null);
+                                        setCanRetry(false);
                                         setProgress(100);
                                         setIsComplete(true);
                                         setIsLoading(false);
@@ -663,14 +737,33 @@ export default function StreamingAnalysisDisplay({
 
                             if (!resultFetched) {
                                 console.error("Failed to fetch result after all retries");
-                                throw new Error("Analysis is taking longer than expected. Please refresh the page in a moment to see your results.");
+                                setCanRetry(true);
+                                setStillWorking(false);
+                                setError(stopReason.current === "idle" ? t("idleError") : t("endedError"));
+                                setIsLoading(false);
+                                return;
                             }
                         }
                     }
                 } finally {
-                    reader.releaseLock();
+                    clearIdleTimers();
+                    try {
+                        reader.releaseLock();
+                    } catch {
+                        // cancel() already released the reader.
+                    }
                 }
             } catch (err) {
+                if (!stillCurrent() || (abortController.signal.aborted && stopReason.current !== "idle")) {
+                    return;
+                }
+                if (stopReason.current === "idle") {
+                    setCanRetry(true);
+                    setStillWorking(false);
+                    setError(t("idleError"));
+                    setIsLoading(false);
+                    return;
+                }
                 const errorMessage =
                     err instanceof Error ? err.message : "Unknown error occurred";
                 setError(errorMessage);
@@ -679,7 +772,7 @@ export default function StreamingAnalysisDisplay({
         };
 
         startStreaming();
-    }, [isOpen, caseId, t]);
+    }, [isOpen, caseId, locale, attempt, t]);
 
     // Auto-scroll to latest event
     useEffect(() => {
@@ -695,13 +788,18 @@ export default function StreamingAnalysisDisplay({
         }
     }, [groupedSteps]);
 
-    // Gracefully exit modal on error: auto-close after showing error briefly
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => onClose(), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [error, onClose]);
+    const retryAnalysis = () => {
+        runIdRef.current += 1;
+        streamAbortRef.current?.abort();
+        hasStartedRef.current = false;
+        setError(null);
+        setCanRetry(false);
+        setStillWorking(false);
+        setIsComplete(false);
+        setProgress(0);
+        setGroupedSteps(new Map());
+        setAttempt((current) => current + 1);
+    };
 
     if (!isOpen) return null;
 
@@ -781,7 +879,9 @@ export default function StreamingAnalysisDisplay({
                                             ? autoClickCountdown !== null && autoClickCountdown > 0
                                                 ? t("autoOpening", { count: autoClickCountdown })
                                                 : t("clickToView")
-                                            : t("analyzingSubtitle")}
+                                            : stillWorking
+                                                ? t("stillWorking")
+                                                : t("analyzingSubtitle")}
                                     </p>
                                 </div>
                             </div>
@@ -813,13 +913,24 @@ export default function StreamingAnalysisDisplay({
                                             {t("errorTitle")}
                                         </h3>
                                         <p className="text-sm text-critical-700 mt-1">{error}</p>
-                                        <button
-                                            type="button"
-                                            onClick={onClose}
-                                            className="mt-3 py-2 px-4 rounded-lg bg-critical-600 hover:bg-critical-700 text-white font-medium text-sm transition-colors"
-                                        >
-                                            Close
-                                        </button>
+                                        <div className="mt-3 flex gap-2">
+                                            {canRetry && (
+                                                <button
+                                                    type="button"
+                                                    onClick={retryAnalysis}
+                                                    className="py-2 px-4 rounded-lg bg-critical-600 hover:bg-critical-700 text-white font-medium text-sm transition-colors"
+                                                >
+                                                    {t("retry")}
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                onClick={onClose}
+                                                className="py-2 px-4 rounded-lg border border-critical-300 text-critical-800 font-medium text-sm transition-colors"
+                                            >
+                                                {t("closeBackdrop")}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
