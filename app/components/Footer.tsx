@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { CountrySelector } from "./CountrySelector";
 import { trackClientEvent } from "@/lib/analytics/client";
+import { SEO_ROUTES } from "@/lib/seo/routes";
 
 // Suspense wrapper for CountrySelector (uses useSearchParams)
 function CountrySelectorWrapper() {
@@ -111,6 +112,17 @@ export default function Footer() {
                   {t("useCases")}
                 </Link>
               </li>
+              {country === "de" &&
+                SEO_ROUTES.filter((route) => route.locale === locale).map((route) => (
+                  <li key={route.publicPath}>
+                    <Link
+                      href={route.publicPath}
+                      className="text-sm text-white/70 hover:text-accent-400 transition-colors"
+                    >
+                      {route.navLabel}
+                    </Link>
+                  </li>
+                ))}
             </ul>
           </div>
 
