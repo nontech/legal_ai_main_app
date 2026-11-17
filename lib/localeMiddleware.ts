@@ -20,6 +20,8 @@ export function localeRedirectPath(pathname: string): string | null {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/_vercel") ||
     pathname.startsWith("/admin") ||
+    pathname === "/share" ||
+    pathname.startsWith("/share/") ||
     pathname.includes(".")
   ) {
     return null;

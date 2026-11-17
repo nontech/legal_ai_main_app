@@ -18,12 +18,13 @@ describe("locale middleware", () => {
     assert.equal(localeRedirectPath("/us/en/pricing"), null);
     assert.equal(localeRedirectPath("/api/auth/signin"), null);
     assert.equal(localeRedirectPath("/admin"), null);
+    assert.equal(localeRedirectPath("/share/3f1c2a90-7b34-4d2e-8a11-9c0b6e5d4a32"), null);
   });
 
   it("excludes /ingest from the middleware matcher", () => {
     const source = readFileSync(new URL("./middleware.ts", import.meta.url), "utf8");
     assert.match(source, /matcher:\s*\[[\s\S]*ingest/);
-    assert.match(source, /\(\?!api\|ingest\|_next\|_vercel/);
+    assert.match(source, /\(\?!api\|ingest\|share\|_next\|_vercel/);
   });
 });
 

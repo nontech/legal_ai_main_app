@@ -8,6 +8,8 @@ import LogoLoader from "./LogoLoader";
 import StreamingAnalysisDisplay from "./StreamingAnalysisDisplay";
 import StreamingGamePlanDisplay from "./StreamingGamePlanDisplay";
 import GamePlanDisplay from "./GamePlanDisplay";
+import ShareCaseButton from "./ShareCaseButton";
+import type { SharedCaseView } from "@/lib/caseShare";
 import { useSetHeaderActions } from "./CaseHeaderActionsContext";
 import { CASE_REGENERATED_EVENT } from "./RegenerateHeaderButton";
 
@@ -236,20 +238,37 @@ export default function ResultsStep({
   showGamePlanOnly = false,
   isOwner = false,
   caseId,
+  readOnly = false,
+  initialSnapshot,
 }: {
   showGamePlanOnly?: boolean;
   isOwner?: boolean;
   caseId?: string;
+  readOnly?: boolean;
+  initialSnapshot?: SharedCaseView;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   // Use prop caseId if provided, otherwise fall back to searchParams for backward compatibility
   const effectiveCaseId = caseId || searchParams.get("caseId");
 
-  const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<AnalysisResult | null>(
+    (initialSnapshot?.result as AnalysisResult | null) ?? null
+  );
+  const [loading, setLoading] = useState(!readOnly);
   const [error, setError] = useState<string | null>(null);
-  const [caseInfo, setCaseInfo] = useState<any>(null);
+  const [caseInfo, setCaseInfo] = useState<any>(
+    initialSnapshot
+      ? {
+          case_type: initialSnapshot.case_type,
+          role: initialSnapshot.role,
+          jurisdiction: initialSnapshot.jurisdiction,
+          case_details: {
+            case_information: { caseName: initialSnapshot.title },
+          },
+        }
+      : null
+  );
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isStreamingOpen, setIsStreamingOpen] = useState(false);
@@ -270,7 +289,8 @@ export default function ResultsStep({
     Record<string, string>
   >({});
   const [showAllFactors, setShowAllFactors] = useState(false);
-  const [gamePlan, setGamePlan] = useState<any>(null);
+  const [gamePlan, setGamePlan] = useState<any>(initialSnapshot?.game_plan ?? null);
+  const [shareToken, setShareToken] = useState<string | null>(null);
   const [isGamePlanStreamingOpen, setIsGamePlanStreamingOpen] =
     useState(false);
   const [isGeneratingGamePlan, setIsGeneratingGamePlan] = useState(false);
@@ -289,6 +309,7 @@ export default function ResultsStep({
   }, [effectiveCaseId]);
 
   useEffect(() => {
+    if (readOnly) return;
     // Check authentication status
     const checkAuth = async () => {
       try {
@@ -299,9 +320,10 @@ export default function ResultsStep({
       }
     };
     checkAuth();
-  }, []);
+  }, [readOnly]);
 
   const fetchResults = async (showLoading = true) => {
+    if (readOnly) return;
     if (showLoading) setLoading(true);
     try {
       const response = await fetch(`/api/cases/${effectiveCaseId}`);
@@ -316,6 +338,7 @@ export default function ResultsStep({
       setCaseInfo(data.data);
       setResult(data.data.result);
       setGamePlan(data.data.game_plan || null);
+      setShareToken(typeof data.data.share_token === "string" ? data.data.share_token : null);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch results:", err);
@@ -407,6 +430,7 @@ export default function ResultsStep({
   };
 
   useEffect(() => {
+    if (readOnly) return;
     if (!effectiveCaseId) {
       setError("No case ID provided");
       setLoading(false);
@@ -414,7 +438,7 @@ export default function ResultsStep({
     }
 
     fetchResults();
-  }, [effectiveCaseId]);
+  }, [effectiveCaseId, readOnly]);
 
   // If showing only game plan, render just that section
   if (showGamePlanOnly) {
@@ -447,6 +471,7 @@ export default function ResultsStep({
                   Game plan
                 </h3>
               </div>
+              {!readOnly && (
               <button
                 onClick={handleGenerateGamePlan}
                 disabled={loading || isGeneratingGamePlan}
@@ -466,6 +491,7 @@ export default function ResultsStep({
                     : "Generate"}{" "}
                 game plan
               </button>
+              )}
             </div>
 
             {gamePlan ? (
@@ -473,6 +499,11 @@ export default function ResultsStep({
                 gamePlan={gamePlan}
                 isAuthenticated={isAuthenticated}
                 onShowAuthModal={() => setShowAuthModal(true)}
+                caseId={effectiveCaseId || undefined}
+                isOwner={isOwner}
+                shareToken={shareToken}
+                onShareTokenChange={setShareToken}
+                readOnly={readOnly}
               />
             ) : (
               <div className="rounded-xl border border-dashed border-border-300 bg-surface-100/80 px-6 py-12 text-center">
@@ -650,7 +681,7 @@ export default function ResultsStep({
             </span>
           </div>
           <div className="flex flex-wrap gap-2 justify-start lg:justify-end">
-            {!(isAuthenticated && isOwner) && (
+            {!readOnly && !(isAuthenticated && isOwner) && (
               <button
                 type="button"
                 onClick={() => setIsEntityRelationshipsDialogOpen(true)}
@@ -663,7 +694,7 @@ export default function ResultsStep({
                 </span>
               </button>
             )}
-            {isAuthenticated && isOwner && !setHeaderActions && (
+            {!readOnly && isAuthenticated && isOwner && !setHeaderActions && (
               <button
                 type="button"
                 onClick={handleRegenerate}
@@ -707,24 +738,16 @@ export default function ResultsStep({
               <span aria-hidden>🖨️</span>
               <span className="hidden sm:inline">Print</span>
             </button>
-            <button
-              onClick={() => {
-                // Anonymous users must sign in to share
-                if (!isAuthenticated) {
-                  setShowAuthModal(true);
-                  return;
-                }
-                // Authenticated users can share
-                navigator.clipboard.writeText(window.location.href);
-                alert("Link copied to clipboard");
-              }}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-border-200 bg-surface-050 px-3 py-2 text-xs font-medium text-ink-700 transition-colors hover:bg-surface-100 sm:text-sm"
-              title="Share"
-              type="button"
-            >
-              <span aria-hidden>🔗</span>
-              <span className="hidden sm:inline">Share</span>
-            </button>
+            {!readOnly && (
+              <ShareCaseButton
+                caseId={effectiveCaseId || undefined}
+                isAuthenticated={isAuthenticated}
+                isOwner={isOwner}
+                shareToken={shareToken}
+                onShareTokenChange={setShareToken}
+                onRequireAuth={() => setShowAuthModal(true)}
+              />
+            )}
           </div>
         </div>
       )}
