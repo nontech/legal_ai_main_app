@@ -1,4 +1,5 @@
 import { COUNTRIES, DEFAULT_COUNTRY } from "../i18n/routing.ts";
+import { normalizePathname, seoPublicPath, seoRewritePath } from "./seo/routes.ts";
 
 const countries: string[] = COUNTRIES.map((country) => country.code);
 const locales = ["en", "de"];
@@ -13,16 +14,21 @@ const countryDefaults: Record<string, string> = Object.fromEntries(
  * `/ingest` is included so the PostHog rewrite in next.config can run.
  */
 export function localeRedirectPath(pathname: string): string | null {
+  const path = normalizePathname(pathname);
+  if (seoRewritePath(path)) return null;
+  const canonicalSeoPath = seoPublicPath(path);
+  if (canonicalSeoPath) return canonicalSeoPath;
+
   if (
-    pathname.startsWith("/api") ||
-    pathname === "/ingest" ||
-    pathname.startsWith("/ingest/") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/_vercel") ||
-    pathname.startsWith("/admin") ||
-    pathname === "/share" ||
-    pathname.startsWith("/share/") ||
-    pathname.includes(".")
+    path.startsWith("/api") ||
+    path === "/ingest" ||
+    path.startsWith("/ingest/") ||
+    path.startsWith("/_next") ||
+    path.startsWith("/_vercel") ||
+    path.startsWith("/admin") ||
+    path === "/share" ||
+    path.startsWith("/share/") ||
+    path.includes(".")
   ) {
     return null;
   }
@@ -30,18 +36,18 @@ export function localeRedirectPath(pathname: string): string | null {
   const pathnameHasCountryLocale = countries.some((country) =>
     locales.some(
       (locale) =>
-        pathname.startsWith(`/${country}/${locale}/`) ||
-        pathname === `/${country}/${locale}`,
+        path.startsWith(`/${country}/${locale}/`) ||
+        path === `/${country}/${locale}`,
     ),
   );
   if (pathnameHasCountryLocale) return null;
 
-  if (pathname === "/") {
+  if (path === "/") {
     const defaultLocale = countryDefaults[DEFAULT_COUNTRY] || "en";
     return `/${DEFAULT_COUNTRY}/${defaultLocale}`;
   }
 
-  const countryMatch = pathname.match(/^\/([a-z]{2})$/);
+  const countryMatch = path.match(/^\/([a-z]{2})$/);
   if (countryMatch && countries.includes(countryMatch[1])) {
     const country = countryMatch[1];
     const locale = countryDefaults[country] || "en";
@@ -49,5 +55,5 @@ export function localeRedirectPath(pathname: string): string | null {
   }
 
   const defaultLocale = countryDefaults[DEFAULT_COUNTRY] || "en";
-  return `/${DEFAULT_COUNTRY}/${defaultLocale}${pathname}`;
+  return `/${DEFAULT_COUNTRY}/${defaultLocale}${path}`;
 }
