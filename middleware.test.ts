@@ -19,6 +19,8 @@ describe("locale middleware", () => {
     assert.equal(localeRedirectPath("/api/auth/signin"), null);
     assert.equal(localeRedirectPath("/admin"), null);
     assert.equal(localeRedirectPath("/share/3f1c2a90-7b34-4d2e-8a11-9c0b6e5d4a32"), null);
+    assert.equal(localeRedirectPath("/de/eigenbedarfskuendigung"), null);
+    assert.equal(localeRedirectPath("/de/de/mietkaution"), "/de/mietkaution");
   });
 
   it("excludes /ingest from the middleware matcher", () => {
