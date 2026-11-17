@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Printer, Share2 } from "lucide-react";
+import { Printer } from "lucide-react";
 import { useTranslations } from "next-intl";
+import ShareCaseButton from "./ShareCaseButton";
 
-interface GamePlanData {
+export interface GamePlanData {
     closing?: any;
     opening?: any;
     witness?: any;
@@ -17,11 +18,21 @@ type TabType = "opening" | "evidence" | "witness" | "closing";
 export default function GamePlanDisplay({ 
     gamePlan, 
     isAuthenticated = true,
-    onShowAuthModal 
+    onShowAuthModal,
+    caseId,
+    isOwner = false,
+    shareToken = null,
+    onShareTokenChange,
+    readOnly = false,
 }: { 
     gamePlan: GamePlanData;
     isAuthenticated?: boolean;
     onShowAuthModal?: () => void;
+    caseId?: string;
+    isOwner?: boolean;
+    shareToken?: string | null;
+    onShareTokenChange?: (token: string | null) => void;
+    readOnly?: boolean;
 }) {
     const t = useTranslations("caseAnalysis.gamePlan");
     const [activeTab, setActiveTab] = useState<TabType>("opening");
@@ -635,22 +646,18 @@ export default function GamePlanDisplay({
                             <Printer className="w-5 h-5" />
                             <span>{t("print")}</span>
                         </button>
-                        <button 
-                            onClick={() => {
-                                // Anonymous users must sign in to share
-                                if (!isAuthenticated && onShowAuthModal) {
-                                    onShowAuthModal();
-                                    return;
-                                }
-                                // Authenticated users can share
-                                navigator.clipboard.writeText(window.location.href);
-                                alert("Link copied to clipboard");
-                            }}
-                            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-                        >
-                            <Share2 className="w-5 h-5" />
-                            <span>{t("share")}</span>
-                        </button>
+                        {!readOnly && (
+                            <ShareCaseButton
+                                caseId={caseId}
+                                isAuthenticated={isAuthenticated}
+                                isOwner={isOwner}
+                                shareToken={shareToken}
+                                onShareTokenChange={onShareTokenChange}
+                                onRequireAuth={onShowAuthModal}
+                                label={t("share")}
+                                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
+                            />
+                        )}
                     </div>
                 </div>
 

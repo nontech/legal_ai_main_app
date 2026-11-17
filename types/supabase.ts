@@ -53,6 +53,7 @@ export type Database = {
           owner_id: string | null
           result: Json | null
           role: string | null
+          share_token: string | null
           status: string | null
           tenancy_status: string | null
           verdict: Json | null
@@ -71,6 +72,7 @@ export type Database = {
           owner_id?: string | null
           result?: Json | null
           role?: string | null
+          share_token?: string | null
           status?: string | null
           tenancy_status?: string | null
           verdict?: Json | null
@@ -89,6 +91,7 @@ export type Database = {
           owner_id?: string | null
           result?: Json | null
           role?: string | null
+          share_token?: string | null
           status?: string | null
           tenancy_status?: string | null
           verdict?: Json | null
